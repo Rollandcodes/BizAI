@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState, type FormEvent } from 'react';
+import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import {
@@ -17,6 +17,8 @@ import {
   LogOut,
   MessageSquare,
   Plus,
+  Printer,
+  QrCode,
   Settings,
   ShieldAlert,
   ShieldCheck,
@@ -38,6 +40,7 @@ import {
   usePayPalScriptReducer,
 } from '@paypal/react-paypal-js';
 
+import QRCode from 'react-qr-code';
 import ChatWidget from '@/components/ChatWidget';
 import { PLANS } from '@/lib/plans';
 
@@ -442,6 +445,9 @@ export default function DashboardPage() {
   const [reportData, setReportData] = useState<AuditReport | null>(null);
   const [markingReviewed, setMarkingReviewed] = useState<Set<string>>(new Set());
 
+  // ── QR Code state ────────────────────────────────────────────────────────
+  const qrRef = useRef<HTMLDivElement>(null);
+
   const business = dashboard.business;
   const stats = dashboard.stats;
   const conversations = dashboard.conversations;
@@ -604,6 +610,38 @@ export default function DashboardPage() {
 
     await navigator.clipboard.writeText(widgetCode);
     setToast({ message: 'Copied to clipboard!', tone: 'success' });
+  }
+
+  async function handleDownloadQR() {
+    if (!qrRef.current || !business) return;
+    const { default: html2canvas } = await import('html2canvas');
+    const canvas = await html2canvas(qrRef.current, { backgroundColor: '#ffffff', scale: 3 });
+    const link = document.createElement('a');
+    link.download = `bizai-qr-${business.business_name.replace(/\s+/g, '-').toLowerCase()}.png`;
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+  }
+
+  function handlePrintQR() {
+    if (!qrRef.current || !business) return;
+    const svgEl = qrRef.current.querySelector('svg');
+    const svgData = svgEl ? new XMLSerializer().serializeToString(svgEl) : '';
+    const win = window.open('', '_blank', 'width=480,height=600');
+    if (!win) return;
+    win.document.write(`<!DOCTYPE html><html><head><title>QR Code – ${business.business_name}</title><style>
+      body{margin:0;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;font-family:sans-serif;background:#fff;padding:32px;box-sizing:border-box}
+      svg{width:200px;height:200px}
+      h2{margin:16px 0 4px;font-size:18px;color:#0f172a}
+      p{margin:0;font-size:13px;color:#64748b}
+      @media print{button{display:none}}
+      button{margin-top:20px;padding:8px 20px;background:#2563eb;color:#fff;border:none;border-radius:8px;font-size:14px;cursor:pointer}
+    </style></head><body>
+      ${svgData}
+      <h2>${business.business_name}</h2>
+      <p>Scan to chat with our AI assistant</p>
+      <button onclick="window.print()">Print</button>
+    </body></html>`);
+    win.document.close();
   }
 
   async function handleLeadContacted(leadId: string, nextValue: boolean) {
@@ -978,6 +1016,57 @@ export default function DashboardPage() {
                       <pre className="mt-6 overflow-x-auto rounded-2xl bg-slate-100 p-4 text-xs leading-6 text-slate-800">
                         <code>{widgetCode}</code>
                       </pre>
+                    </div>
+                  </div>
+
+                  {/* QR Code */}
+                  <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+                    <div className="flex items-center gap-2">
+                      <QrCode className="h-5 w-5 text-blue-600" />
+                      <h2 className="text-lg font-bold text-slate-900">Your Business QR Code</h2>
+                    </div>
+                    <p className="mt-1 text-sm text-slate-500">
+                      Print this and place it on your desk, door, or receipts. Customers scan it to instantly chat with your AI.
+                    </p>
+
+                    <div className="mt-6 flex flex-col gap-6 sm:flex-row sm:items-start">
+                      <div ref={qrRef} className="flex shrink-0 flex-col items-center gap-3 rounded-2xl border-2 border-slate-200 bg-white p-5">
+                        <QRCode
+                          value={`https://biz-ai-u4n3.vercel.app/chat/${business.id}`}
+                          size={160}
+                          fgColor="#0f172a"
+                        />
+                        <p className="text-center text-xs font-semibold text-slate-600">{business.business_name}</p>
+                      </div>
+
+                      <div className="flex flex-col justify-center gap-3">
+                        <div>
+                          <p className="font-semibold text-slate-900">{business.business_name}</p>
+                          <p className="text-sm text-slate-500">Scan to chat with our AI assistant</p>
+                        </div>
+                        <div className="flex flex-col gap-2">
+                          <button
+                            type="button"
+                            onClick={() => void handleDownloadQR()}
+                            className="inline-flex items-center justify-center gap-2 rounded-full bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700"
+                          >
+                            <Download className="h-4 w-4" />
+                            Download QR Code (PNG)
+                          </button>
+                          <button
+                            type="button"
+                            onClick={handlePrintQR}
+                            className="inline-flex items-center justify-center gap-2 rounded-full border border-slate-200 px-5 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+                          >
+                            <Printer className="h-4 w-4" />
+                            Print QR Code
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="mt-5 rounded-2xl bg-blue-50 px-4 py-3 text-sm text-blue-700">
+                      💡 <strong>Tip:</strong> Print and laminate this QR code. Place it on your front desk, car windows, and receipts to get more leads.
                     </div>
                   </div>
                 </section>
