@@ -18,6 +18,9 @@ CREATE TABLE IF NOT EXISTS public.businesses (
   owner_email TEXT NOT NULL,
   business_name TEXT NOT NULL,
   business_type TEXT,
+  owner_name TEXT,
+  whatsapp TEXT,
+  website TEXT,
   system_prompt TEXT,
   widget_color TEXT DEFAULT '#2563eb',
   plan TEXT DEFAULT 'trial' CHECK (plan IN ('trial', 'basic', 'pro', 'business')),
@@ -26,6 +29,11 @@ CREATE TABLE IF NOT EXISTS public.businesses (
   created_at TIMESTAMPTZ DEFAULT now(),
   CONSTRAINT valid_email CHECK (owner_email ~* '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}$')
 );
+
+-- Migration: add columns introduced in v2 signup flow (safe to run multiple times)
+ALTER TABLE public.businesses ADD COLUMN IF NOT EXISTS owner_name TEXT;
+ALTER TABLE public.businesses ADD COLUMN IF NOT EXISTS whatsapp TEXT;
+ALTER TABLE public.businesses ADD COLUMN IF NOT EXISTS website TEXT;
 
 -- Create index for faster lookups
 CREATE INDEX IF NOT EXISTS idx_businesses_owner_email ON public.businesses(owner_email);

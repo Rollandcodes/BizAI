@@ -1,196 +1,86 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { PLANS, isValidPlanId } from '@/lib/plans';
+﻿import { NextRequest, NextResponse } from 'next/server';
 
-// ============================================================================
-// Types
-// ============================================================================
+const PAYPAL_BASE =
+  process.env.PAYPAL_MODE === 'live'
+    ? 'https://api-m.paypal.com'
+    : 'https://api-m.sandbox.paypal.com';
 
-interface CreateOrderRequest {
-  planId: string;
-  customerEmail: string;
-}
+const PLANS = {
+  basic:    { price: '29.00',  name: 'BizAI Basic Plan' },
+  pro:      { price: '79.00',  name: 'BizAI Pro Plan' },
+  business: { price: '149.00', name: 'BizAI Business Plan' },
+} as const;
 
-interface PayPalTokenResponse {
-  access_token: string;
-  token_type: string;
-  expires_in: number;
-}
+type PlanKey = keyof typeof PLANS;
 
-interface PayPalOrderResponse {
-  id: string;
-  status: string;
-  links?: Array<{
-    rel: string;
-    href: string;
-  }>;
-}
-
-interface CreateOrderResponse {
-  id: string;
-  orderID: string;
-}
-
-// ============================================================================
-// Environment Setup
-// ============================================================================
-
-const PAYPAL_CLIENT_ID = process.env.PAYPAL_CLIENT_ID;
-const PAYPAL_CLIENT_SECRET = process.env.PAYPAL_CLIENT_SECRET;
-const PAYPAL_BASE_URL =
-  process.env.PAYPAL_BASE_URL ?? 'https://api-m.sandbox.paypal.com';
-
-// ============================================================================
-// Helper Functions
-// ============================================================================
-
-/**
- * Get PayPal access token using Client Credentials flow
- */
-async function getPayPalAccessToken(): Promise<string> {
-  if (!PAYPAL_CLIENT_ID || !PAYPAL_CLIENT_SECRET) {
+async function getAccessToken(): Promise<string> {
+  const clientId     = process.env.PAYPAL_CLIENT_ID;
+  const clientSecret = process.env.PAYPAL_CLIENT_SECRET;
+  if (!clientId || !clientSecret) {
     throw new Error('Missing PAYPAL_CLIENT_ID or PAYPAL_CLIENT_SECRET');
   }
-
-  const auth = Buffer.from(`${PAYPAL_CLIENT_ID}:${PAYPAL_CLIENT_SECRET}`).toString('base64');
-
-  try {
-    const response = await fetch(`${PAYPAL_BASE_URL}/v1/oauth2/token`, {
-      method: 'POST',
-      headers: {
-        Authorization: `Basic ${auth}`,
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      body: 'grant_type=client_credentials',
-    });
-
-    if (!response.ok) {
-      const error = await response.text();
-      throw new Error(`PayPal auth failed: ${response.status} ${error}`);
-    }
-
-    const data = (await response.json()) as PayPalTokenResponse;
-    return data.access_token;
-  } catch (error) {
-    console.error('PayPal token error:', error);
-    throw error;
-  }
+  const auth = Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
+  const res = await fetch(`${PAYPAL_BASE}/v1/oauth2/token`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Basic ${auth}`,
+      'Content-Type': 'application/x-www-form-urlencoded',
+    },
+    body: 'grant_type=client_credentials',
+  });
+  if (!res.ok) throw new Error(`PayPal auth failed: ${res.status}`);
+  const data = (await res.json()) as { access_token: string };
+  return data.access_token;
 }
 
-/**
- * Create PayPal order
- */
-async function createPayPalOrder(
-  planPrice: string,
-  planName: string,
-  accessToken: string
-): Promise<string> {
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
-
+export async function POST(req: NextRequest): Promise<NextResponse> {
   try {
-    const response = await fetch(`${PAYPAL_BASE_URL}/v2/checkout/orders`, {
+    const body = (await req.json()) as { planId?: string; customerEmail?: string };
+    const { planId, customerEmail } = body;
+
+    if (!planId || !(planId in PLANS)) {
+      return NextResponse.json({ error: 'Invalid plan' }, { status: 400 });
+    }
+    if (!customerEmail) {
+      return NextResponse.json({ error: 'Missing customerEmail' }, { status: 400 });
+    }
+
+    const plan = PLANS[planId as PlanKey];
+    const accessToken = await getAccessToken();
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? '';
+
+    const res = await fetch(`${PAYPAL_BASE}/v2/checkout/orders`, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
         Authorization: `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
       },
       body: JSON.stringify({
         intent: 'CAPTURE',
         purchase_units: [
           {
-            amount: {
-              currency_code: 'USD',
-              value: planPrice,
-            },
-            description: planName,
+            amount: { currency_code: 'USD', value: plan.price },
+            description: plan.name,
+            custom_id: customerEmail,
           },
         ],
         application_context: {
+          brand_name: 'BizAI Cyprus',
           return_url: `${appUrl}/success`,
-          cancel_url: `${appUrl}/#pricing`,
+          cancel_url: `${appUrl}/payment?plan=${planId}`,
         },
       }),
     });
 
-    if (!response.ok) {
-      const error = await response.text();
-      throw new Error(
-        `Failed to create PayPal order: ${response.status} ${error}`
-      );
+    if (!res.ok) {
+      const err = await res.text();
+      throw new Error(`PayPal create-order failed: ${res.status} ${err}`);
     }
 
-    const data = (await response.json()) as PayPalOrderResponse;
-    return data.id;
+    const orderData = (await res.json()) as { id: string };
+    return NextResponse.json({ id: orderData.id });
   } catch (error) {
-    console.error('PayPal order creation error:', error);
-    throw error;
-  }
-}
-
-// ============================================================================
-// POST Handler
-// ============================================================================
-
-export async function POST(request: NextRequest): Promise<NextResponse> {
-  try {
-    const body = await request.json();
-    const {
-      planId,
-      customerEmail,
-      businessEmail,
-    } = body as CreateOrderRequest & { businessEmail?: string };
-
-    const email = customerEmail || businessEmail;
-
-    // ========================================================================
-    // Validate request
-    // ========================================================================
-    if (!planId || !email) {
-      return NextResponse.json(
-        { error: 'Missing required fields: planId, customerEmail' },
-        { status: 400 }
-      );
-    }
-
-    if (!isValidPlanId(planId)) {
-      return NextResponse.json(
-        { error: `Invalid plan ID: ${planId}` },
-        { status: 400 }
-      );
-    }
-
-    // ========================================================================
-    // Get plan details
-    // ========================================================================
-    const plan = PLANS[planId];
-    if (!plan) {
-      return NextResponse.json(
-        { error: 'Plan not found' },
-        { status: 404 }
-      );
-    }
-
-    // ========================================================================
-    // Get PayPal access token
-    // ========================================================================
-    const accessToken = await getPayPalAccessToken();
-
-    // ========================================================================
-    // Create PayPal order
-    // ========================================================================
-    const orderID = await createPayPalOrder(plan.price, plan.name, accessToken);
-
-    return NextResponse.json({
-      id: orderID,
-      orderID,
-    } as CreateOrderResponse);
-  } catch (error) {
-    console.error('Create order API error:', error);
-    const errorMessage =
-      error instanceof Error ? error.message : 'Unknown error';
-
-    return NextResponse.json(
-      { error: 'Failed to create order', details: errorMessage },
-      { status: 500 }
-    );
+    console.error('PayPal create-order error:', error);
+    return NextResponse.json({ error: 'Failed to create order' }, { status: 500 });
   }
 }

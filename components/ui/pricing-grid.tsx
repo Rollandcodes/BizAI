@@ -165,8 +165,7 @@ export function PricingGrid({ dictionary }: Props) {
                   aria-label={`Start ${plan.title} plan`}
                   onClick={() => {
                     trackEvent('pricing_plan_click', { plan: plan.id, billing });
-                    trackEvent('pricing_checkout_open', { plan: plan.id, billing });
-                    openCheckoutModal(plan);
+                    router.push(`/signup?plan=${plan.id}`);
                   }}
                   className={`mt-6 w-full rounded-xl px-4 py-3 text-sm font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0F6B66] ${highlighted ? 'bg-[#0F6B66] text-white hover:bg-[#0b5450]' : 'border border-slate-300 text-slate-800 hover:bg-slate-50'}`}
                 >
