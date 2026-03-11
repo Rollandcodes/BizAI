@@ -2,11 +2,11 @@ export function FloatingWhatsAppButton() {
   return (
     <div className="fixed bottom-5 left-4 z-50 sm:bottom-6 sm:left-6">
       <a
-        href="https://wa.me/90548XXXXXXX?text=Hi%2C%20I%27m%20interested%20in%20BizAI"
+        href="https://wa.me/905338425559?text=Hi%2C%20I%27m%20interested%20in%20BizAI"
         target="_blank"
         rel="noreferrer"
         aria-label="Chat with us on WhatsApp"
-        className="group relative flex h-12 w-12 items-center justify-center rounded-full bg-[#25D366] text-white shadow-lg transition-transform hover:scale-105 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#25D366] sm:h-14 sm:w-14 [animation:whatsapp-bounce_3s_ease-in-out_infinite]"
+        className="group relative flex h-12 w-12 items-center justify-center rounded-full bg-[#25D366] text-white shadow-lg transition-transform hover:scale-105 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#25D366] sm:h-14 sm:w-14 [animation:whatsapp-bounce_3s_ease-in-out_infinite] before:absolute before:inset-0 before:rounded-full before:border-4 before:border-[#25D366] before:animate-ping before:opacity-50"
       >
         <svg
           viewBox="0 0 24 24"
