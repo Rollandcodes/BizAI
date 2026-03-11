@@ -7,7 +7,7 @@ import { PLANS, isValidPlanId } from '@/lib/plans';
 
 interface CreateOrderRequest {
   planId: string;
-  businessEmail: string;
+  customerEmail: string;
 }
 
 interface PayPalTokenResponse {
@@ -26,6 +26,7 @@ interface PayPalOrderResponse {
 }
 
 interface CreateOrderResponse {
+  id: string;
   orderID: string;
 }
 
@@ -35,8 +36,8 @@ interface CreateOrderResponse {
 
 const PAYPAL_CLIENT_ID = process.env.PAYPAL_CLIENT_ID;
 const PAYPAL_CLIENT_SECRET = process.env.PAYPAL_CLIENT_SECRET;
-// Sandbox: https://api-m.sandbox.paypal.com  |  Live: https://api-m.paypal.com
-const PAYPAL_BASE_URL = process.env.PAYPAL_BASE_URL ?? 'https://api-m.sandbox.paypal.com';
+const PAYPAL_BASE_URL =
+  process.env.PAYPAL_BASE_URL ?? 'https://api-m.sandbox.paypal.com';
 
 // ============================================================================
 // Helper Functions
@@ -46,6 +47,10 @@ const PAYPAL_BASE_URL = process.env.PAYPAL_BASE_URL ?? 'https://api-m.sandbox.pa
  * Get PayPal access token using Client Credentials flow
  */
 async function getPayPalAccessToken(): Promise<string> {
+  if (!PAYPAL_CLIENT_ID || !PAYPAL_CLIENT_SECRET) {
+    throw new Error('Missing PAYPAL_CLIENT_ID or PAYPAL_CLIENT_SECRET');
+  }
+
   const auth = Buffer.from(`${PAYPAL_CLIENT_ID}:${PAYPAL_CLIENT_SECRET}`).toString('base64');
 
   try {
@@ -75,11 +80,11 @@ async function getPayPalAccessToken(): Promise<string> {
  * Create PayPal order
  */
 async function createPayPalOrder(
-  amount: string,
-  planId: string,
+  planPrice: string,
+  planName: string,
   accessToken: string
 ): Promise<string> {
-  const plan = PLANS[planId];
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
 
   try {
     const response = await fetch(`${PAYPAL_BASE_URL}/v2/checkout/orders`, {
@@ -94,19 +99,14 @@ async function createPayPalOrder(
           {
             amount: {
               currency_code: 'USD',
-              value: amount,
+              value: planPrice,
             },
-            description: plan.description,
+            description: planName,
           },
         ],
-        payment_source: {
-          paypal: {
-            experience_context: {
-              return_url: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/dashboard?payment=success`,
-              cancel_url: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/dashboard?payment=cancelled`,
-              user_action: 'PAY_NOW',
-            },
-          },
+        application_context: {
+          return_url: `${appUrl}/success`,
+          cancel_url: `${appUrl}/#pricing`,
         },
       }),
     });
@@ -133,14 +133,20 @@ async function createPayPalOrder(
 export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
     const body = await request.json();
-    const { planId, businessEmail } = body as CreateOrderRequest;
+    const {
+      planId,
+      customerEmail,
+      businessEmail,
+    } = body as CreateOrderRequest & { businessEmail?: string };
+
+    const email = customerEmail || businessEmail;
 
     // ========================================================================
     // Validate request
     // ========================================================================
-    if (!planId || !businessEmail) {
+    if (!planId || !email) {
       return NextResponse.json(
-        { error: 'Missing required fields: planId, businessEmail' },
+        { error: 'Missing required fields: planId, customerEmail' },
         { status: 400 }
       );
     }
@@ -171,9 +177,10 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     // ========================================================================
     // Create PayPal order
     // ========================================================================
-    const orderID = await createPayPalOrder(plan.price, planId, accessToken);
+    const orderID = await createPayPalOrder(plan.price, plan.name, accessToken);
 
     return NextResponse.json({
+      id: orderID,
       orderID,
     } as CreateOrderResponse);
   } catch (error) {

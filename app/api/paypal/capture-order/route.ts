@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { assertSupabaseConfig, createServerClient } from '@/lib/supabase';
-import { isValidPlanId, PLANS } from '@/lib/plans';
+import { isValidPlanId } from '@/lib/plans';
 
 const supabase = createServerClient();
 
@@ -11,7 +11,7 @@ const supabase = createServerClient();
 interface CaptureOrderRequest {
   orderID: string;
   planId: string;
-  businessEmail: string;
+  customerEmail: string;
 }
 
 interface PayPalCaptureResponse {
@@ -29,8 +29,9 @@ interface PayPalCaptureResponse {
 
 interface CaptureOrderResponse {
   success: boolean;
-  plan: string;
+  businessId?: string;
   message: string;
+  error?: string;
 }
 
 // ============================================================================
@@ -39,8 +40,8 @@ interface CaptureOrderResponse {
 
 const PAYPAL_CLIENT_ID = process.env.PAYPAL_CLIENT_ID;
 const PAYPAL_CLIENT_SECRET = process.env.PAYPAL_CLIENT_SECRET;
-// Sandbox: https://api-m.sandbox.paypal.com  |  Live: https://api-m.paypal.com
-const PAYPAL_BASE_URL = process.env.PAYPAL_BASE_URL ?? 'https://api-m.sandbox.paypal.com';
+const PAYPAL_BASE_URL =
+  process.env.PAYPAL_BASE_URL ?? 'https://api-m.sandbox.paypal.com';
 
 // ============================================================================
 // Helper Functions
@@ -50,6 +51,10 @@ const PAYPAL_BASE_URL = process.env.PAYPAL_BASE_URL ?? 'https://api-m.sandbox.pa
  * Get PayPal access token using Client Credentials flow
  */
 async function getPayPalAccessToken(): Promise<string> {
+  if (!PAYPAL_CLIENT_ID || !PAYPAL_CLIENT_SECRET) {
+    throw new Error('Missing PAYPAL_CLIENT_ID or PAYPAL_CLIENT_SECRET');
+  }
+
   const auth = Buffer.from(`${PAYPAL_CLIENT_ID}:${PAYPAL_CLIENT_SECRET}`).toString('base64');
 
   try {
@@ -127,15 +132,23 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     assertSupabaseConfig();
 
     const body = await request.json();
-    const { orderID, planId, businessEmail } = body as CaptureOrderRequest;
+    const {
+      orderID,
+      planId,
+      customerEmail,
+      businessEmail,
+    } = body as CaptureOrderRequest & { businessEmail?: string };
+
+    const email = customerEmail || businessEmail;
 
     // ========================================================================
     // Validate request
     // ========================================================================
-    if (!orderID || !planId || !businessEmail) {
+    if (!orderID || !planId || !email) {
       return NextResponse.json(
         {
-          error: 'Missing required fields: orderID, planId, businessEmail',
+          success: false,
+          error: 'Missing required fields: orderID, planId, customerEmail',
         },
         { status: 400 }
       );
@@ -143,7 +156,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
     if (!isValidPlanId(planId)) {
       return NextResponse.json(
-        { error: `Invalid plan ID: ${planId}` },
+        { success: false, error: `Invalid plan ID: ${planId}` },
         { status: 400 }
       );
     }
@@ -165,7 +178,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     ) {
       console.error('PayPal capture not completed:', captureResult);
       return NextResponse.json(
-        { error: 'Payment was not completed' },
+        { success: false, error: 'Payment failed' },
         { status: 400 }
       );
     }
@@ -175,32 +188,55 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     // ========================================================================
     const planExpiresAt = calculatePlanExpiration();
 
-    const { data: updatedBusiness, error: updateError } = await supabase
+    const { data: existingBusiness, error: existingBusinessError } = await supabase
       .from('businesses')
-      .update({
-        plan: planId,
-        plan_expires_at: planExpiresAt,
-        paypal_subscription_id: orderID,
-      })
-      .eq('owner_email', businessEmail)
-      .select()
-      .single();
+      .select('id')
+      .eq('owner_email', email)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
 
-    if (updateError) {
-      console.error('Supabase update error:', updateError);
+    if (existingBusinessError) {
+      console.error('Supabase lookup error:', existingBusinessError);
       return NextResponse.json(
         {
-          error: 'Failed to update business record',
-          details: updateError.message,
+          success: false,
+          error: 'Failed to save business record',
         },
         { status: 500 }
       );
     }
 
-    if (!updatedBusiness) {
+    const businessPayload = {
+      owner_email: email,
+      plan: planId,
+      plan_expires_at: planExpiresAt,
+      paypal_subscription_id: orderID,
+    };
+
+    const saveQuery = existingBusiness?.id
+      ? supabase
+          .from('businesses')
+          .update(businessPayload)
+          .eq('id', existingBusiness.id)
+      : supabase.from('businesses').insert({
+          ...businessPayload,
+          business_name: email.split('@')[0] || 'New Business',
+          widget_color: '#0F6B66',
+        });
+
+    const { data: savedBusiness, error: saveError } = await saveQuery
+      .select('id')
+      .single();
+
+    if (saveError || !savedBusiness) {
+      console.error('Supabase save error:', saveError);
       return NextResponse.json(
-        { error: 'Business not found for email: ' + businessEmail },
-        { status: 404 }
+        {
+          success: false,
+          error: 'Failed to save business record',
+        },
+        { status: 500 }
       );
     }
 
@@ -209,8 +245,8 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     // ========================================================================
     return NextResponse.json({
       success: true,
-      plan: planId,
-      message: `Payment successful! Your ${PLANS[planId].name} plan is now active and expires on ${new Date(planExpiresAt).toLocaleDateString()}.`,
+      businessId: savedBusiness.id,
+      message: 'Payment successful!',
     } as CaptureOrderResponse);
   } catch (error) {
     console.error('Capture order API error:', error);
@@ -218,7 +254,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       error instanceof Error ? error.message : 'Unknown error';
 
     return NextResponse.json(
-      { error: 'Failed to capture order', details: errorMessage },
+      { success: false, error: 'Payment failed', details: errorMessage },
       { status: 500 }
     );
   }

@@ -17,6 +17,14 @@ interface ChatRequest {
   conversationHistory: Array<{ role: string; content: string }>;
 }
 
+interface DemoChatRequest {
+  businessName: string;
+  businessType: string;
+  systemPrompt: string;
+  userMessage: string;
+  conversationHistory: Array<{ role: string; content: string }>;
+}
+
 interface ChatResponse {
   reply: string;
   sessionId: string;
@@ -119,11 +127,41 @@ async function updateConversation(
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
-    assertSupabaseConfig();
     const openai = getOpenAIClient();
 
     // Parse request body
-    const body = await request.json();
+    const body = await request.json() as ChatRequest & DemoChatRequest;
+
+    // ------------------------------------------------------------------------
+    // Demo mode (used by homepage LiveDemo)
+    // ------------------------------------------------------------------------
+    if (
+      body.businessName &&
+      body.businessType &&
+      body.systemPrompt &&
+      body.userMessage &&
+      Array.isArray(body.conversationHistory)
+    ) {
+      const demoMessages: Array<{ role: string; content: string }> = [
+        { role: 'system', content: body.systemPrompt },
+        ...body.conversationHistory.map((msg) => ({ role: msg.role, content: msg.content })),
+        { role: 'user', content: body.userMessage },
+      ];
+
+      const completion = await openai.chat.completions.create({
+        model: 'gpt-4o-mini',
+        messages: demoMessages as OpenAI.Chat.ChatCompletionMessageParam[],
+        max_tokens: 300,
+        temperature: 0.7,
+      });
+
+      return NextResponse.json({
+        reply: completion.choices[0]?.message?.content || 'Unable to generate response',
+        sessionId: 'demo-session',
+      } as ChatResponse);
+    }
+
+    assertSupabaseConfig();
     const { businessId, sessionId, message, conversationHistory } =
       body as ChatRequest;
 

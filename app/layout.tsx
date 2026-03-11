@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
+import { FloatingWhatsAppButton } from '@/components/ui/floating-whatsapp-button';
 
 import { AppProviders } from './providers';
 import './globals.css';
@@ -31,6 +32,7 @@ export default function RootLayout({
       </head>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <AppProviders>{children}</AppProviders>
+        <FloatingWhatsAppButton />
       </body>
     </html>
   );

@@ -107,6 +107,26 @@ body {
   to { height: 0; }
 }
 
+@keyframes whatsapp-bounce {
+  0%, 88%, 100% { transform: translateY(0); }
+  92% { transform: translateY(-5px); }
+  96% { transform: translateY(0); }
+}
+
+@keyframes confetti-fall {
+  0% {
+    transform: translateY(-10vh) rotate(0deg);
+    opacity: 0;
+  }
+  12% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(110vh) rotate(540deg);
+    opacity: 0;
+  }
+}
+
 .pricing-blob-ellipse {
   border: 200px solid #3131f5;
   filter: blur(92px);
