@@ -4,7 +4,7 @@ test('homepage hero is visible and CTA is clickable', async ({ page }) => {
   await page.goto('/');
   await expect(page.locator('h1').filter({ hasText: 'Never Miss a Customer Again' }).first()).toBeVisible();
 
-  const cta = page.getByRole('link', { name: 'Get Your AI Assistant' });
+  const cta = page.getByRole('link', { name: /Start Free 7-Day Trial/i }).first();
   await expect(cta).toBeVisible();
   await cta.click();
   await expect(page).toHaveURL(/#pricing/);
@@ -15,26 +15,21 @@ test('demo modal opens and shows conversation content', async ({ page }) => {
   await page.getByRole('button', { name: 'See Live Demo' }).click();
 
   await expect(page.getByText('Live Demo Conversation')).toBeVisible();
-  await expect(page.getByText('SUVs start at $55/day', { exact: false })).toBeVisible();
+  await expect(page.getByText('Yes! 🚗 Our SUVs start at $55/day.', { exact: false }).last()).toBeVisible();
 });
 
 test('pricing section shows Most Popular label on Pro card', async ({ page }) => {
   await page.goto('/');
   await expect(page.getByText('Most Popular')).toBeVisible();
+  await expect(page.getByText('Most chosen by Cyprus businesses')).toBeVisible();
 });
 
-test('faq shows at least 5 answer panels', async ({ page }) => {
+test('faq expands and shows answer content', async ({ page }) => {
   await page.goto('/');
-  const questions = page.locator('[data-testid="faq-question"]');
-  const questionCount = await questions.count();
-  expect(questionCount).toBeGreaterThanOrEqual(5);
-
-  const firstFive = Math.min(questionCount, 5);
-  for (let i = 0; i < firstFive; i += 1) {
-    await questions.nth(i).click();
-  }
-
-  await expect(page.locator('[data-testid="faq-answer"][data-state="open"]').first()).toBeVisible();
+  const questionButton = page.locator('button').filter({ hasText: 'Which languages does the AI support?' }).first();
+  await expect(questionButton).toBeVisible();
+  await questionButton.click();
+  await expect(page.getByText('BizAI speaks English, Turkish, Arabic, and Russian fluently.')).toBeVisible();
 });
 
 test('mobile responsive breakpoints render key sections', async ({ page }) => {

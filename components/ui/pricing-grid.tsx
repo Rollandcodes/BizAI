@@ -23,6 +23,12 @@ type Props = {
   dictionary: Dictionary;
 };
 
+const yearlySavings: Record<Plan['id'], number> = {
+  basic: 58,
+  pro: 158,
+  business: 298,
+};
+
 export function PricingGrid({ dictionary }: Props) {
   const router = useRouter();
   const [billing, setBilling] = useState<'monthly' | 'yearly'>('monthly');
@@ -56,11 +62,13 @@ export function PricingGrid({ dictionary }: Props) {
     },
   ];
 
-  function getPrice(monthly: number): number {
+  function getDisplayedPrice(plan: Plan): string {
     if (billing === 'yearly') {
-      return Math.round((monthly * 10) / 12);
+      const annualTotal = plan.monthly * 12 - yearlySavings[plan.id];
+      return (annualTotal / 12).toFixed(2);
     }
-    return monthly;
+
+    return String(plan.monthly);
   }
 
   function openCheckoutModal(plan: Plan) {
@@ -82,6 +90,10 @@ export function PricingGrid({ dictionary }: Props) {
         <div className="mb-8 text-center">
           <h2 className="text-3xl font-extrabold text-slate-900 md:text-4xl">{dictionary.pricingTitle}</h2>
           <p className="mt-2 text-slate-600">{dictionary.pricingSubtitle}</p>
+
+          <div className="mx-auto mt-6 max-w-3xl rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-900 shadow-sm">
+            ⚡ Limited Offer: Free setup (worth $99) included with any plan this month
+          </div>
 
           <div className="mt-6 inline-flex rounded-full border border-slate-200 bg-slate-50 p-1">
             <button
@@ -118,10 +130,26 @@ export function PricingGrid({ dictionary }: Props) {
                 ) : null}
                 <h3 className="text-xl font-bold text-slate-900">{plan.title}</h3>
                 <p className="mt-1 text-sm text-slate-600">{plan.description}</p>
-                <p className="mt-4 text-4xl font-extrabold text-slate-900">
-                  ${getPrice(plan.monthly)}
+                {billing === 'yearly' ? (
+                  <p className="mt-4 text-sm font-semibold text-slate-400 line-through">
+                    ${plan.monthly}/mo
+                  </p>
+                ) : null}
+                <p className="mt-2 text-4xl font-extrabold text-slate-900">
+                  ${getDisplayedPrice(plan)}
                   <span className="text-base font-medium text-slate-500">/mo</span>
                 </p>
+                {plan.id === 'pro' ? (
+                  <p className="mt-2 text-sm font-semibold text-orange-600">🔥 Most chosen by Cyprus businesses</p>
+                ) : null}
+                {billing === 'yearly' ? (
+                  <div className="mt-3 flex flex-wrap items-center gap-2">
+                    <span className="inline-flex rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700 ring-1 ring-inset ring-emerald-200">
+                      Save ${yearlySavings[plan.id]}/year
+                    </span>
+                    <span className="text-xs font-medium text-slate-500">Billed annually</span>
+                  </div>
+                ) : null}
 
                 <ul className="mt-4 space-y-2 text-sm text-slate-700">
                   {plan.features.map((feature) => (
@@ -147,6 +175,12 @@ export function PricingGrid({ dictionary }: Props) {
               </article>
             );
           })}
+        </div>
+
+        <div className="mt-8 grid gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-center text-sm font-semibold text-slate-700 shadow-sm md:grid-cols-3">
+          <div>🔒 Secure PayPal Payments</div>
+          <div>↩️ 7-Day Money Back Guarantee</div>
+          <div>🇨🇾 Local Cyprus Support</div>
         </div>
 
         <div className="mt-10 overflow-hidden rounded-2xl border border-slate-200">

@@ -10,7 +10,7 @@ export default defineConfig({
     trace: 'on-first-retry',
   },
   webServer: {
-    command: 'npm run dev -- --port 4173 --hostname localhost',
+    command: 'npm run build -- --webpack && npm run start -- --port 4173 --hostname localhost',
     url: 'http://localhost:4173',
     reuseExistingServer: true,
     timeout: 120000,

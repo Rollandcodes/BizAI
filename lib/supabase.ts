@@ -71,6 +71,7 @@ export interface Conversation {
   session_id: string;
   messages: ConversationMessage[];
   lead_captured: boolean;
+  lead_contacted?: boolean;
   customer_name?: string;
   customer_phone?: string;
   created_at: string;

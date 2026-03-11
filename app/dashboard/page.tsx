@@ -1,637 +1,1307 @@
-﻿'use client';
+'use client';
 
-// ╔══════════════════════════════════════════════════════════╗
-// ║  BizAI — Business Dashboard                              ║
-// ╚══════════════════════════════════════════════════════════╝
-
-import { useEffect, useMemo, useState } from 'react';
-import { PayPalButtons, usePayPalScriptReducer } from '@paypal/react-paypal-js';
-import {
-  Bot, CheckCircle2, Copy, CreditCard, Download,
-  LayoutDashboard, Loader2, LogOut, MessageCircle,
-  Settings2, Users,
-} from 'lucide-react';
+import { useEffect, useMemo, useState, type FormEvent } from 'react';
 import Link from 'next/link';
+import { useRouter, useSearchParams } from 'next/navigation';
+import {
+  Bot,
+  Check,
+  ChevronRight,
+  Copy,
+  CreditCard,
+  Download,
+  LayoutDashboard,
+  LogOut,
+  MessageSquare,
+  Plus,
+  Settings,
+  Users,
+  X,
+  type LucideIcon,
+} from 'lucide-react';
+import {
+  PayPalButtons,
+  PayPalScriptProvider,
+  usePayPalScriptReducer,
+} from '@paypal/react-paypal-js';
 
 import ChatWidget from '@/components/ChatWidget';
 import { PLANS } from '@/lib/plans';
 
-// ── Types ─────────────────────────────────────────────────────────────────────
-type Business = {
+type CustomFaq = {
+  question: string;
+  answer: string;
+};
+
+type ConversationMessage = {
+  role: 'user' | 'assistant';
+  content: string;
+};
+
+type ConversationRecord = {
+  id: string;
+  created_at: string;
+  customer_name: string | null;
+  customer_phone: string | null;
+  lead_captured: boolean;
+  lead_contacted?: boolean | null;
+  messages: ConversationMessage[] | null;
+};
+
+type BusinessRecord = {
   id: string;
   owner_email: string;
   business_name: string;
-  business_type?: string;
-  system_prompt?: string;
-  widget_color: string;
-  plan: string;
-  plan_expires_at?: string;
+  business_type?: string | null;
+  widget_color?: string | null;
+  plan: 'trial' | 'basic' | 'pro' | 'business';
+  plan_expires_at?: string | null;
+  customInstructions?: string;
+  customFaqs?: CustomFaq[];
 };
 
-type LeadRow = {
-  id: string;
-  created_at: string;
-  customer_name?: string;
-  customer_phone?: string;
-  messages?: Array<{ role: string; content: string }>;
+type DashboardStats = {
+  totalConversations: number;
+  leadsCaptured: number;
+  monthlyConversations: number;
+  monthlyMessages: number;
 };
 
 type DashboardPayload = {
-  business: Business | null;
-  stats: { monthlyConversations: number; leadsCaptured: number } | null;
-  leads: LeadRow[];
+  business: BusinessRecord | null;
+  stats: DashboardStats | null;
+  conversations: ConversationRecord[];
+  leads: ConversationRecord[];
 };
 
-const tabs = ['overview', 'conversations', 'leads', 'settings', 'upgrade'] as const;
-type TabKey = (typeof tabs)[number];
+type TabKey = 'overview' | 'conversations' | 'leads' | 'settings' | 'subscription';
 
-const tabMeta: Record<TabKey, { label: string; Icon: React.ElementType }> = {
-  overview:      { label: 'Overview',      Icon: LayoutDashboard },
-  conversations: { label: 'Conversations', Icon: MessageCircle },
-  leads:         { label: 'Leads',         Icon: Users },
-  settings:      { label: 'Settings',      Icon: Settings2 },
-  upgrade:       { label: 'Subscription',  Icon: CreditCard },
+type ToastState = {
+  message: string;
+  tone: 'success' | 'error';
 };
 
-// ── CSV export helper ─────────────────────────────────────────────────────────
-function exportLeadsCSV(leads: LeadRow[]) {
-  const rows = leads.map(l => [
-    l.customer_name || 'Unknown',
-    l.customer_phone || '',
-    new Date(l.created_at).toLocaleDateString(),
-    (l.messages?.[0]?.content || '').replace(/,/g, ' '),
-  ].join(','));
-  const csv = ['Name,Phone,Date,First Message', ...rows].join('\n');
-  const blob = new Blob([csv], { type: 'text/csv' });
+type SettingsFormState = {
+  businessName: string;
+  businessType: string;
+  primaryColor: string;
+  aiInstructions: string;
+  customFaqs: CustomFaq[];
+};
+
+const DASHBOARD_STORAGE_KEY = 'bizai-dashboard-email';
+const businessTypeOptions = [
+  { value: 'car_rental', label: 'Car Rental' },
+  { value: 'barbershop', label: 'Barbershop' },
+  { value: 'accommodation', label: 'Accommodation' },
+  { value: 'restaurant', label: 'Restaurant' },
+  { value: 'clinic', label: 'Clinic' },
+  { value: 'gym', label: 'Gym' },
+  { value: 'other', label: 'Other' },
+];
+
+const tabItems: Array<{ key: TabKey; label: string; Icon: LucideIcon }> = [
+  { key: 'overview', label: 'Overview', Icon: LayoutDashboard },
+  { key: 'conversations', label: 'Conversations', Icon: MessageSquare },
+  { key: 'leads', label: 'Leads', Icon: Users },
+  { key: 'settings', label: 'Settings', Icon: Settings },
+  { key: 'subscription', label: 'Subscription', Icon: CreditCard },
+];
+
+const messageLimits: Record<BusinessRecord['plan'], number | null> = {
+  trial: 100,
+  basic: 500,
+  pro: null,
+  business: null,
+};
+
+function emptyPayload(): DashboardPayload {
+  return {
+    business: null,
+    stats: null,
+    conversations: [],
+    leads: [],
+  };
+}
+
+function getPlanBadgeClasses(plan: BusinessRecord['plan']) {
+  const styles: Record<BusinessRecord['plan'], string> = {
+    trial: 'bg-slate-100 text-slate-700',
+    basic: 'bg-blue-100 text-blue-700',
+    pro: 'bg-violet-100 text-violet-700',
+    business: 'bg-amber-100 text-amber-700',
+  };
+
+  return styles[plan] || styles.trial;
+}
+
+function getPlanDisplayName(plan: BusinessRecord['plan']) {
+  const names: Record<BusinessRecord['plan'], string> = {
+    trial: 'Trial',
+    basic: 'Basic',
+    pro: 'Pro',
+    business: 'Business',
+  };
+
+  return names[plan] || 'Trial';
+}
+
+function formatDate(value?: string | null) {
+  if (!value) {
+    return 'Not set';
+  }
+
+  return new Intl.DateTimeFormat('en-GB', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+  }).format(new Date(value));
+}
+
+function getConversationPreview(conversation: ConversationRecord) {
+  const firstUserMessage = conversation.messages?.find((message) => message.role === 'user');
+  return firstUserMessage?.content || conversation.messages?.[0]?.content || 'No messages yet';
+}
+
+function escapeCsv(value: string) {
+  return `"${value.replace(/"/g, '""')}"`;
+}
+
+function exportLeadsCsv(leads: ConversationRecord[]) {
+  const rows = leads.map((lead) => [
+    formatDate(lead.created_at),
+    lead.customer_name || 'Unknown',
+    lead.customer_phone || '',
+    getConversationPreview(lead),
+  ]);
+  const csv = [
+    ['Date', 'Customer Name', 'Phone', 'First Message'].map(escapeCsv).join(','),
+    ...rows.map((row) => row.map((value) => escapeCsv(String(value))).join(',')),
+  ].join('\n');
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url; a.download = 'bizai-leads.csv'; a.click();
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = 'bizai-leads.csv';
+  link.click();
   URL.revokeObjectURL(url);
 }
 
-// ── Login screen ──────────────────────────────────────────────────────────────
-function LoginScreen({ onLogin }: { onLogin: (email: string) => void }) {
-  const [input, setInput] = useState('');
-  const [err, setErr] = useState('');
+function SkeletonBlock({ className = '' }: { className?: string }) {
+  return <div className={`animate-pulse rounded-2xl bg-slate-200/80 ${className}`} />;
+}
 
-  function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    const v = input.trim().toLowerCase();
-    if (!v) { setErr('Enter your business email to continue.'); return; }
-    window.localStorage.setItem('bizai-dashboard-email', v);
-    onLogin(v);
-  }
-
+function DashboardSkeleton() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[#0f172a] px-4">
-      <div className="w-full max-w-md">
-        <div className="mb-8 flex items-center justify-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600">
-            <Bot className="h-5 w-5 text-white" />
+    <div className="space-y-6">
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        {Array.from({ length: 4 }).map((_, index) => (
+          <div key={index} className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+            <SkeletonBlock className="h-5 w-24" />
+            <SkeletonBlock className="mt-4 h-9 w-20" />
           </div>
-          <span className="text-2xl font-extrabold text-white">BizAI</span>
+        ))}
+      </div>
+      <div className="grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
+        <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+          <SkeletonBlock className="h-5 w-32" />
+          <div className="mt-6 space-y-3">
+            {Array.from({ length: 5 }).map((_, index) => (
+              <SkeletonBlock key={index} className="h-14 w-full" />
+            ))}
+          </div>
         </div>
-        <div className="rounded-2xl border border-white/10 bg-white/5 p-8 backdrop-blur-sm">
-          <h1 className="mb-1 text-xl font-bold text-white">Welcome back</h1>
-          <p className="mb-6 text-sm text-slate-400">Enter your business email to access your dashboard.</p>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label htmlFor="login-email" className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-slate-400">Business Email</label>
-              <input id="login-email" type="email" value={input} onChange={e => setInput(e.target.value)} placeholder="owner@business.com" className="w-full rounded-xl border border-white/10 bg-slate-900 px-4 py-3 text-white placeholder:text-slate-500 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20" />
-            </div>
-            {err && <p className="text-sm text-red-400">{err}</p>}
-            <button type="submit" className="w-full rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 py-3 text-sm font-semibold text-white shadow-lg shadow-blue-900/30 transition-all hover:scale-[1.02]">
-              Open Dashboard
-            </button>
-          </form>
-          <p className="mt-5 text-center text-xs text-slate-500">
-            {"Don't have an account? "}
-            <Link href="/#pricing" className="text-blue-400 hover:underline">Get started</Link>
-          </p>
+        <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+          <SkeletonBlock className="h-5 w-28" />
+          <SkeletonBlock className="mt-6 h-40 w-full" />
         </div>
       </div>
     </div>
   );
 }
 
-// ── Dashboard ─────────────────────────────────────────────────────────────────
-export default function DashboardPage() {
-  const [email,                setEmail]                = useState('');
-  const [activeTab,            setActiveTab]            = useState<TabKey>('overview');
-  const [loading,              setLoading]              = useState(false);
-  const [error,                setError]                = useState('');
-  const [copySuccess,          setCopySuccess]          = useState(false);
-  const [selectedPlan,         setSelectedPlan]         = useState<string>('pro');
-  const [paymentError,         setPaymentError]         = useState('');
-  const [paymentSuccess,       setPaymentSuccess]       = useState('');
-  const [dashboardData,        setDashboardData]        = useState<DashboardPayload>({ business: null, stats: null, leads: [] });
-  const [settingsForm,         setSettingsForm]         = useState({ businessName: '', widgetColor: '#2563eb', customInstructions: '' });
-  const [selectedConversation, setSelectedConversation] = useState<string | null>(null);
-  const [contactedLeads,       setContactedLeads]       = useState<Set<string>>(new Set());
+function AccessGate({
+  email,
+  onEmailChange,
+  onSubmit,
+  loading,
+  error,
+}: {
+  email: string;
+  onEmailChange: (value: string) => void;
+  onSubmit: () => void;
+  loading: boolean;
+  error: string;
+}) {
+  return (
+    <div
+      className="flex min-h-screen items-center justify-center bg-[radial-gradient(circle_at_top,rgba(37,99,235,0.12),transparent_40%),#e2e8f0] px-4"
+      data-testid="dashboard-access-gate"
+    >
+      <div className="w-full max-w-md rounded-3xl border border-slate-200 bg-white p-8 shadow-[0_24px_80px_rgba(15,23,42,0.12)]">
+        <div className="mb-8 flex items-center gap-3">
+          <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-900 text-white">
+            <Bot className="h-6 w-6" />
+          </div>
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-blue-600">BizAI Dashboard</p>
+            <h1 className="text-2xl font-extrabold text-slate-900">Enter your business email to access dashboard</h1>
+          </div>
+        </div>
+
+        <div className="space-y-4">
+          <input
+            type="email"
+            value={email}
+            onChange={(event) => onEmailChange(event.target.value)}
+            placeholder="owner@business.com"
+            className="h-12 w-full rounded-2xl border border-slate-300 px-4 text-sm text-slate-900 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
+            onKeyDown={(event) => {
+              if (event.key === 'Enter') {
+                event.preventDefault();
+                onSubmit();
+              }
+            }}
+          />
+          <button
+            type="button"
+            onClick={onSubmit}
+            disabled={loading}
+            className="inline-flex h-12 w-full items-center justify-center rounded-2xl bg-slate-900 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {loading ? 'Checking account...' : 'Access Dashboard'}
+          </button>
+        </div>
+
+        {error ? (
+          <div className="mt-5 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+            <p>No account found. Sign up first.</p>
+            <Link href="/#pricing" className="mt-2 inline-flex font-semibold text-blue-700 hover:underline">
+              View pricing
+            </Link>
+          </div>
+        ) : null}
+      </div>
+    </div>
+  );
+}
+
+function Toast({ toast }: { toast: ToastState }) {
+  return (
+    <div
+      className={`fixed right-4 top-4 z-[90] rounded-2xl px-4 py-3 text-sm font-semibold shadow-lg ${
+        toast.tone === 'success' ? 'bg-emerald-600 text-white' : 'bg-red-600 text-white'
+      }`}
+    >
+      {toast.message}
+    </div>
+  );
+}
+
+function UpgradeCheckoutButtons({
+  planId,
+  email,
+  onSuccess,
+  onError,
+}: {
+  planId: 'basic' | 'pro' | 'business';
+  email: string;
+  onSuccess: () => Promise<void>;
+  onError: (message: string) => void;
+}) {
   const [{ isPending }] = usePayPalScriptReducer();
 
-  const business    = dashboardData.business;
-  const currentPlan = business?.plan || 'trial';
+  if (isPending) {
+    return <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">Loading PayPal checkout...</div>;
+  }
 
-  const embedCode = useMemo(() => {
-    if (!business) return '';
-    return `<script>\n  window.BizAIConfig = { businessId: "${business.id}", primaryColor: "${business.widget_color || '#2563eb'}" };\n</script>\n<script src="${typeof window !== 'undefined' ? window.location.origin : 'https://yourdomain.com'}/widget.js" defer></script>`;
+  return (
+    <PayPalButtons
+      style={{ layout: 'vertical', color: 'gold', shape: 'rect', label: 'pay' }}
+      forceReRender={[planId, email]}
+      createOrder={async () => {
+        const response = await fetch('/api/paypal/create-order', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ planId, businessEmail: email }),
+        });
+        const data = (await response.json()) as { id?: string; error?: string };
+
+        if (!response.ok || !data.id) {
+          const message = data.error || 'Unable to create PayPal order.';
+          onError(message);
+          throw new Error(message);
+        }
+
+        return data.id;
+      }}
+      onApprove={async (data) => {
+        const response = await fetch('/api/paypal/capture-order', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            orderID: data.orderID,
+            planId,
+            businessEmail: email,
+          }),
+        });
+        const result = (await response.json()) as { success?: boolean; error?: string };
+
+        if (!response.ok || !result.success) {
+          onError(result.error || 'Payment failed.');
+          return;
+        }
+
+        await onSuccess();
+      }}
+      onError={() => {
+        onError('Payment failed. Please try again.');
+      }}
+    />
+  );
+}
+
+export default function DashboardPage() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const [lookupEmail, setLookupEmail] = useState('');
+  const [businessId, setBusinessId] = useState('');
+  const [activeTab, setActiveTab] = useState<TabKey>('overview');
+  const [dashboard, setDashboard] = useState<DashboardPayload>(emptyPayload);
+  const [loading, setLoading] = useState(false);
+  const [authLoading, setAuthLoading] = useState(false);
+  const [accessError, setAccessError] = useState('');
+  const [saveLoading, setSaveLoading] = useState(false);
+  const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null);
+  const [updatingLeadIds, setUpdatingLeadIds] = useState<Set<string>>(new Set());
+  const [toast, setToast] = useState<ToastState | null>(null);
+  const [selectedUpgradePlan, setSelectedUpgradePlan] = useState<'basic' | 'pro' | 'business'>('pro');
+  const [paymentError, setPaymentError] = useState('');
+  const [settingsForm, setSettingsForm] = useState<SettingsFormState>({
+    businessName: '',
+    businessType: 'other',
+    primaryColor: '#2563eb',
+    aiInstructions: '',
+    customFaqs: [{ question: '', answer: '' }],
+  });
+
+  const business = dashboard.business;
+  const stats = dashboard.stats;
+  const conversations = dashboard.conversations;
+  const leads = dashboard.leads;
+  const currentConversation = conversations.find((item) => item.id === selectedConversationId) || null;
+  const planLimit = business ? messageLimits[business.plan] : null;
+  const currentPlanName = business ? getPlanDisplayName(business.plan) : 'Trial';
+  const currentPlanPrice = business && business.plan !== 'trial' ? PLANS[business.plan]?.price || '0.00' : '0.00';
+  const widgetCode = useMemo(() => {
+    if (!business) {
+      return '';
+    }
+
+    return `<script>\n  window.BizAIConfig = { businessId: "${business.id}" }\n</script>\n<script src="https://bizai.vercel.app/widget.js"></script>`;
   }, [business]);
 
   useEffect(() => {
-    const stored = window.localStorage.getItem('bizai-dashboard-email') || '';
-    if (stored) setEmail(stored);
-  }, []);
+    if (!toast) {
+      return undefined;
+    }
+
+    const timeout = window.setTimeout(() => setToast(null), 2400);
+    return () => window.clearTimeout(timeout);
+  }, [toast]);
 
   useEffect(() => {
-    if (!email) return;
-    void loadDashboard(email);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [email]);
+    const queryEmail = searchParams.get('email');
+    const storedEmail = window.localStorage.getItem(DASHBOARD_STORAGE_KEY) || '';
+    const initialEmail = (queryEmail || storedEmail).trim().toLowerCase();
+
+    if (!initialEmail) {
+      return;
+    }
+
+    setLookupEmail(initialEmail);
+    void handleAccess(initialEmail, { updateUrl: false });
+  }, [searchParams]);
 
   useEffect(() => {
-    if (!business) return;
+    if (!business) {
+      return;
+    }
+
     setSettingsForm({
-      businessName:       business.business_name,
-      widgetColor:        business.widget_color || '#2563eb',
-      customInstructions: business.system_prompt || '',
+      businessName: business.business_name || '',
+      businessType: business.business_type || 'other',
+      primaryColor: business.widget_color || '#2563eb',
+      aiInstructions: business.customInstructions || '',
+      customFaqs: business.customFaqs && business.customFaqs.length > 0 ? business.customFaqs : [{ question: '', answer: '' }],
     });
-    setSelectedPlan(currentPlan === 'trial' ? 'pro' : currentPlan);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [business, currentPlan]);
 
-  // ── API helpers ─────────────────────────────────────────────────────────────
-  async function loadDashboard(nextEmail: string) {
-    setLoading(true); setError('');
+    const eligiblePlan = business.plan === 'trial' ? 'basic' : business.plan;
+    setSelectedUpgradePlan((eligiblePlan as 'basic' | 'pro' | 'business') || 'pro');
+  }, [business]);
+
+  useEffect(() => {
+    if (!selectedConversationId && conversations.length > 0) {
+      setSelectedConversationId(conversations[0].id);
+    }
+  }, [conversations, selectedConversationId]);
+
+  async function loadDashboard(params: { email?: string; businessId?: string }, isAuthLookup = false) {
+    if (isAuthLookup) {
+      setAuthLoading(true);
+    } else {
+      setLoading(true);
+    }
+
+    setAccessError('');
+
     try {
-      const res  = await fetch(`/api/business?email=${encodeURIComponent(nextEmail)}`);
-      const data = await res.json() as { business?: Business; stats?: DashboardPayload['stats']; leads?: LeadRow[]; error?: string };
-      if (!res.ok) throw new Error(data.error || 'Failed to load dashboard');
-      setDashboardData({ business: data.business ?? null, stats: data.stats ?? null, leads: data.leads ?? [] });
-    } catch (loadErr) {
-      setError(loadErr instanceof Error ? loadErr.message : 'Failed to load dashboard');
-      setDashboardData({ business: null, stats: null, leads: [] });
+      const query = new URLSearchParams();
+      if (params.email) {
+        query.set('email', params.email);
+      }
+      if (params.businessId) {
+        query.set('businessId', params.businessId);
+      }
+
+      const response = await fetch(`/api/business?${query.toString()}`);
+      const data = (await response.json()) as DashboardPayload & { error?: string };
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to load dashboard');
+      }
+
+      if (!data.business) {
+        setDashboard(emptyPayload());
+        setBusinessId('');
+        setAccessError('No account found. Sign up first.');
+        return;
+      }
+
+      setDashboard({
+        business: data.business,
+        stats: data.stats,
+        conversations: data.conversations || [],
+        leads: data.leads || [],
+      });
+      setBusinessId(data.business.id);
+      setSelectedConversationId((data.conversations || [])[0]?.id || null);
+      setPaymentError('');
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to load dashboard';
+      setDashboard(emptyPayload());
+      setBusinessId('');
+      setAccessError(message);
     } finally {
+      setAuthLoading(false);
       setLoading(false);
     }
   }
 
-  function handleLookup(nextEmail: string) {
-    window.localStorage.setItem('bizai-dashboard-email', nextEmail);
-    setEmail(nextEmail);
+  async function handleAccess(
+    forcedEmail?: string,
+    options: { updateUrl?: boolean } = { updateUrl: true }
+  ) {
+    const normalizedEmail = (forcedEmail || lookupEmail).trim().toLowerCase();
+    if (!normalizedEmail) {
+      setAccessError('No account found. Sign up first.');
+      return;
+    }
+
+    window.localStorage.setItem(DASHBOARD_STORAGE_KEY, normalizedEmail);
+    if (options.updateUrl !== false) {
+      router.replace(`/dashboard?email=${encodeURIComponent(normalizedEmail)}`);
+    }
+    await loadDashboard({ email: normalizedEmail }, true);
   }
 
-  async function handleCopyEmbed() {
-    if (!embedCode) return;
-    await navigator.clipboard.writeText(embedCode);
-    setCopySuccess(true);
-    window.setTimeout(() => setCopySuccess(false), 1500);
-  }
+  async function refreshDashboard() {
+    if (businessId) {
+      await loadDashboard({ businessId });
+      return;
+    }
 
-  async function handleSaveSettings(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    if (!business) return;
-    setError('');
-    try {
-      const res  = await fetch('/api/business', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ businessId: business.id, businessName: settingsForm.businessName, widgetColor: settingsForm.widgetColor, customInstructions: settingsForm.customInstructions }),
-      });
-      const data = await res.json() as { error?: string };
-      if (!res.ok) throw new Error(data.error || 'Failed to save settings');
-      await loadDashboard(email);
-    } catch (saveErr) {
-      setError(saveErr instanceof Error ? saveErr.message : 'Failed to save settings');
+    if (lookupEmail) {
+      await loadDashboard({ email: lookupEmail });
     }
   }
 
-  const createOrder = async () => {
-    if (!business) throw new Error('Business not loaded');
-    const res  = await fetch('/api/paypal/create-order', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ planId: selectedPlan, businessEmail: business.owner_email }),
-    });
-    const data = await res.json() as { orderID?: string; error?: string };
-    if (!res.ok) throw new Error(data.error || 'Failed to create order');
-    return data.orderID!;
-  };
+  function handleLogout() {
+    window.localStorage.removeItem(DASHBOARD_STORAGE_KEY);
+    setDashboard(emptyPayload());
+    setLookupEmail('');
+    setBusinessId('');
+    router.push('/');
+  }
 
-  const handleApprove = async (data: { orderID: string }) => {
-    if (!business) return;
-    const res    = await fetch('/api/paypal/capture-order', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ orderID: data.orderID, planId: selectedPlan, businessEmail: business.owner_email }),
-    });
-    const result = await res.json() as { message?: string; error?: string };
-    if (!res.ok) throw new Error(result.error || 'Failed to capture order');
-    setPaymentSuccess(result.message || 'Plan upgraded successfully.');
-    setPaymentError('');
-    await loadDashboard(email);
-  };
+  async function handleCopyWidgetCode() {
+    if (!widgetCode) {
+      return;
+    }
 
-  // ── Login gate ──────────────────────────────────────────────────────────────
-  if (!email) return <LoginScreen onLogin={handleLookup} />;
+    await navigator.clipboard.writeText(widgetCode);
+    setToast({ message: 'Copied to clipboard!', tone: 'success' });
+  }
 
-  // ── Sidebar + main layout ───────────────────────────────────────────────────
+  async function handleLeadContacted(leadId: string, nextValue: boolean) {
+    if (!business) {
+      return;
+    }
+
+    setUpdatingLeadIds((current) => new Set(current).add(leadId));
+
+    const previousDashboard = dashboard;
+    setDashboard((current) => ({
+      ...current,
+      conversations: current.conversations.map((conversation) =>
+        conversation.id === leadId ? { ...conversation, lead_contacted: nextValue } : conversation
+      ),
+      leads: current.leads.map((lead) =>
+        lead.id === leadId ? { ...lead, lead_contacted: nextValue } : lead
+      ),
+    }));
+
+    try {
+      const response = await fetch(`/api/conversations/${leadId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          businessId: business.id,
+          leadContacted: nextValue,
+        }),
+      });
+      const data = (await response.json()) as { error?: string };
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to update lead');
+      }
+
+      setToast({
+        message: nextValue ? 'Lead marked as contacted.' : 'Lead marked as not contacted.',
+        tone: 'success',
+      });
+    } catch (error) {
+      setDashboard(previousDashboard);
+      setToast({
+        message: error instanceof Error ? error.message : 'Failed to update lead',
+        tone: 'error',
+      });
+    } finally {
+      setUpdatingLeadIds((current) => {
+        const next = new Set(current);
+        next.delete(leadId);
+        return next;
+      });
+    }
+  }
+
+  async function handleSaveSettings(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    if (!business) {
+      return;
+    }
+
+    setSaveLoading(true);
+
+    try {
+      const response = await fetch('/api/business', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          businessId: business.id,
+          businessName: settingsForm.businessName,
+          businessType: settingsForm.businessType,
+          widgetColor: settingsForm.primaryColor,
+          customInstructions: settingsForm.aiInstructions,
+          customFaqs: settingsForm.customFaqs.filter((faq) => faq.question.trim() || faq.answer.trim()),
+        }),
+      });
+      const data = (await response.json()) as { error?: string };
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to save settings');
+      }
+
+      await refreshDashboard();
+      setToast({ message: 'Settings saved successfully!', tone: 'success' });
+    } catch (error) {
+      setToast({
+        message: error instanceof Error ? error.message : 'Failed to save settings',
+        tone: 'error',
+      });
+    } finally {
+      setSaveLoading(false);
+    }
+  }
+
+  function updateFaq(index: number, field: keyof CustomFaq, value: string) {
+    setSettingsForm((current) => ({
+      ...current,
+      customFaqs: current.customFaqs.map((faq, faqIndex) =>
+        faqIndex === index ? { ...faq, [field]: value } : faq
+      ),
+    }));
+  }
+
+  function addFaq() {
+    setSettingsForm((current) => ({
+      ...current,
+      customFaqs: [...current.customFaqs, { question: '', answer: '' }],
+    }));
+  }
+
+  function removeFaq(index: number) {
+    setSettingsForm((current) => ({
+      ...current,
+      customFaqs:
+        current.customFaqs.length === 1
+          ? [{ question: '', answer: '' }]
+          : current.customFaqs.filter((_, faqIndex) => faqIndex !== index),
+    }));
+  }
+
+  if (!business) {
+    return (
+      <>
+        <AccessGate
+          email={lookupEmail}
+          onEmailChange={setLookupEmail}
+          onSubmit={() => {
+            void handleAccess();
+          }}
+          loading={authLoading}
+          error={accessError}
+        />
+        {toast ? <Toast toast={toast} /> : null}
+      </>
+    );
+  }
+
+  const usageValue = stats?.monthlyMessages ?? 0;
+  const usageWidth = planLimit ? Math.min(100, (usageValue / planLimit) * 100) : Math.min(100, usageValue / 10);
+
   return (
-    <div className="flex min-h-screen bg-slate-100">
+    <div className="min-h-screen bg-slate-100 text-slate-900 lg:flex">
+      {toast ? <Toast toast={toast} /> : null}
 
-      {/* SIDEBAR */}
-      <aside className="hidden w-64 shrink-0 flex-col bg-[#0f172a] text-white lg:flex">
-        <div className="flex h-16 items-center gap-2.5 border-b border-white/10 px-6">
-          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-blue-600 to-indigo-600">
-            <Bot className="h-3.5 w-3.5 text-white" />
-          </div>
-          <span className="text-base font-extrabold tracking-tight">BizAI</span>
-        </div>
+      <aside className="hidden w-60 shrink-0 flex-col bg-[#0f172a] text-white lg:flex">
+        <div className="flex h-20 items-center px-6 text-xl font-extrabold">BizAI</div>
 
-        <nav className="flex flex-1 flex-col gap-1 p-4">
-          {tabs.map(tab => {
-            const { label, Icon } = tabMeta[tab];
-            const active = activeTab === tab;
+        <nav className="flex-1 space-y-2 px-4 py-4">
+          {tabItems.map(({ key, label, Icon }) => {
+            const active = activeTab === key;
+
             return (
-              <button key={tab} onClick={() => setActiveTab(tab)}
-                className={`flex w-full items-center gap-3 rounded-xl px-4 py-2.5 text-sm font-medium transition-all ${active ? 'bg-white/10 text-white' : 'text-slate-400 hover:bg-white/5 hover:text-white'}`}>
-                <Icon className="h-4 w-4 shrink-0" />
+              <button
+                key={key}
+                type="button"
+                onClick={() => setActiveTab(key)}
+                data-testid={`dashboard-tab-${key}`}
+                className={`flex w-full items-center gap-3 rounded-full px-4 py-3 text-sm font-semibold transition ${
+                  active ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/20' : 'text-slate-300 hover:bg-white/5 hover:text-white'
+                }`}
+              >
+                <Icon className="h-4 w-4" />
                 {label}
               </button>
             );
           })}
         </nav>
 
-        <div className="border-t border-white/10 p-4">
-          <p className="truncate px-2 pb-2 text-xs text-slate-500">{email}</p>
+        <div className="mx-4 h-px bg-white/10" />
+
+        <div className="p-4">
           <button
-            onClick={() => { window.localStorage.removeItem('bizai-dashboard-email'); setEmail(''); setDashboardData({ business: null, stats: null, leads: [] }); }}
-            className="flex w-full items-center gap-3 rounded-xl px-4 py-2.5 text-sm font-medium text-slate-400 transition hover:bg-white/5 hover:text-white"
+            type="button"
+            onClick={handleLogout}
+            className="flex w-full items-center gap-3 rounded-full px-4 py-3 text-sm font-semibold text-slate-300 transition hover:bg-white/5 hover:text-white"
           >
-            <LogOut className="h-4 w-4" /> Sign out
+            <LogOut className="h-4 w-4" />
+            Logout
           </button>
         </div>
       </aside>
 
-      {/* MAIN */}
-      <main className="flex-1 overflow-auto">
-        {/* Mobile top bar */}
-        <div className="flex items-center justify-between border-b border-slate-200 bg-white px-4 py-3 lg:hidden">
-          <div className="flex items-center gap-2">
-            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-blue-600 to-indigo-600"><Bot className="h-3.5 w-3.5 text-white" /></div>
-            <span className="font-bold">BizAI</span>
-          </div>
-          <div className="flex gap-1">
-            {tabs.map(tab => {
-              const { Icon } = tabMeta[tab];
-              return (
-                <button key={tab} onClick={() => setActiveTab(tab)} className={`flex h-8 w-8 items-center justify-center rounded-lg transition ${activeTab === tab ? 'bg-slate-900 text-white' : 'text-slate-500 hover:bg-slate-100'}`}>
-                  <Icon className="h-4 w-4" />
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        <div className="p-6">
-          {loading && (
-            <div className="flex min-h-[60vh] items-center justify-center">
-              <Loader2 className="h-8 w-8 animate-spin text-slate-400" />
+      <div className="flex min-h-screen flex-1 flex-col">
+        <header className="border-b border-slate-200 bg-white px-4 py-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between gap-4">
+            <div>
+              <p className="text-sm font-medium text-slate-500">Business owner dashboard</p>
+              <h1 className="text-2xl font-extrabold text-slate-900">{business?.business_name || 'BizAI Dashboard'}</h1>
             </div>
-          )}
-
-          {!loading && !business && (
-            <div className="flex min-h-[60vh] flex-col items-center justify-center text-center">
-              <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-12 shadow-sm">
-                <h2 className="text-xl font-bold text-slate-900">No business found</h2>
-                <p className="mt-2 text-sm text-slate-500">We{"couldn't"} find a BizAI account for <strong>{email}</strong>.</p>
-                <a href="mailto:support@bizai.example.com" className="mt-5 inline-flex rounded-xl bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white hover:bg-slate-800">Contact Support</a>
-              </div>
+            <div className="flex items-center gap-3">
+              <span className="hidden rounded-full bg-slate-100 px-3 py-1.5 text-sm font-medium text-slate-600 sm:inline-flex">
+                {business?.owner_email}
+              </span>
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="inline-flex items-center gap-2 rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 lg:hidden"
+              >
+                <LogOut className="h-4 w-4" />
+                Logout
+              </button>
             </div>
-          )}
+          </div>
+        </header>
 
-          {!loading && business && (
-            <>
-              {error && <div className="mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{error}</div>}
+        <main className="flex-1 px-4 py-6 sm:px-6 lg:px-8 lg:pb-8">
+          {loading ? <DashboardSkeleton /> : null}
 
-              {/* ── OVERVIEW ───────────────────────────────────────────────── */}
-              {activeTab === 'overview' && (
-                <div className="space-y-6">
-                  <div>
-                    <h1 className="text-2xl font-extrabold text-slate-900">Good morning, {business.business_name} 👋</h1>
-                    <p className="mt-1 text-sm text-slate-500">{"Here's what's happening with your AI assistant."}</p>
+          {!loading && business ? (
+            <div className="space-y-6 pb-24 lg:pb-0">
+              {activeTab === 'overview' ? (
+                <section className="space-y-6">
+                  <div data-testid="dashboard-overview-panel" />
+                  <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+                    <StatCard label="Total Conversations" value={String(stats?.totalConversations ?? 0)} />
+                    <StatCard label="Leads Captured" value={String(stats?.leadsCaptured ?? 0)} />
+                    <StatCard label="This Month's Messages" value={String(stats?.monthlyMessages ?? 0)} />
+                    <StatCard
+                      label="Current Plan"
+                      value={currentPlanName}
+                      badgeClassName={getPlanBadgeClasses(business.plan)}
+                    />
                   </div>
 
-                  <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-                    {[
-                      { label: 'Total Conversations', value: String(dashboardData.stats?.monthlyConversations ?? 0), Icon: MessageCircle, color: 'bg-blue-100 text-blue-600' },
-                      { label: 'Leads Captured',      value: String(dashboardData.stats?.leadsCaptured ?? 0),        Icon: Users,         color: 'bg-indigo-100 text-indigo-600' },
-                      { label: 'Response Rate',        value: '100%',                                                Icon: CheckCircle2,  color: 'bg-green-100 text-green-600' },
-                      { label: 'Current Plan',         value: currentPlan,                                           Icon: CreditCard,    color: 'bg-amber-100 text-amber-600' },
-                    ].map(({ label, value, Icon, color }) => (
-                      <div key={label} className="flex items-center gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-                        <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${color}`}><Icon className="h-5 w-5" /></div>
+                  <div className="grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
+                    <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+                      <div className="flex items-center justify-between gap-4">
                         <div>
-                          <p className="text-xs font-medium text-slate-500">{label}</p>
-                          <p className="mt-0.5 text-xl font-bold capitalize text-slate-900">{value}</p>
+                          <h2 className="text-lg font-bold text-slate-900">Recent conversations</h2>
+                          <p className="mt-1 text-sm text-slate-500">Your latest 5 customer chats.</p>
                         </div>
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className="grid gap-6 lg:grid-cols-2">
-                    <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-                      <h2 className="mb-4 text-base font-bold text-slate-900">Recent Conversations</h2>
-                      {dashboardData.leads.length === 0 ? (
-                        <p className="text-sm text-slate-400">No conversations yet.</p>
-                      ) : (
-                        <ul className="space-y-3">
-                          {dashboardData.leads.slice(0, 5).map(lead => (
-                            <li key={lead.id} className="flex items-center gap-3 rounded-xl border border-slate-100 px-4 py-3">
-                              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-blue-600 to-indigo-600 text-sm font-bold text-white">
-                                {(lead.customer_name || '?')[0].toUpperCase()}
-                              </div>
-                              <div className="min-w-0 flex-1">
-                                <p className="truncate text-sm font-semibold text-slate-800">{lead.customer_name || 'Unknown visitor'}</p>
-                                <p className="truncate text-xs text-slate-500">{lead.messages?.[0]?.content || 'No message'}</p>
-                              </div>
-                              <span className="shrink-0 text-xs text-slate-400">{new Date(lead.created_at).toLocaleDateString()}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      )}
-                    </div>
-
-                    <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-                      <div className="mb-4 flex items-center justify-between gap-3">
-                        <h2 className="text-base font-bold text-slate-900">Install Widget</h2>
-                        <button onClick={handleCopyEmbed} className="flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 transition hover:bg-slate-50">
-                          {copySuccess ? <><CheckCircle2 className="h-3.5 w-3.5 text-green-500" /> Copied!</> : <><Copy className="h-3.5 w-3.5" /> Copy</>}
+                        <button
+                          type="button"
+                          onClick={() => setActiveTab('conversations')}
+                          className="inline-flex items-center gap-1 text-sm font-semibold text-blue-600 hover:text-blue-700"
+                        >
+                          View All
+                          <ChevronRight className="h-4 w-4" />
                         </button>
                       </div>
-                      <pre className="overflow-x-auto rounded-xl bg-slate-900 p-4 text-xs leading-relaxed text-slate-200"><code>{embedCode}</code></pre>
-                      <p className="mt-3 text-xs text-slate-500">Paste before the closing &lt;/body&gt; tag on your site.</p>
+
+                      <div className="mt-6 overflow-hidden rounded-2xl border border-slate-200">
+                        {conversations.length === 0 ? (
+                          <div className="px-6 py-10 text-center text-sm text-slate-500">
+                            No conversations yet. Your AI conversations will appear here once customers start chatting.
+                          </div>
+                        ) : (
+                          <table className="min-w-full text-left text-sm">
+                            <thead className="bg-slate-50 text-slate-500">
+                              <tr>
+                                <th className="px-4 py-3 font-semibold">Time</th>
+                                <th className="px-4 py-3 font-semibold">Preview</th>
+                                <th className="px-4 py-3 font-semibold">Lead Captured</th>
+                              </tr>
+                            </thead>
+                            <tbody className="divide-y divide-slate-100">
+                              {conversations.slice(0, 5).map((conversation) => (
+                                <tr key={conversation.id} className="bg-white">
+                                  <td className="px-4 py-3 text-slate-600">{formatDate(conversation.created_at)}</td>
+                                  <td className="px-4 py-3 text-slate-900">{getConversationPreview(conversation)}</td>
+                                  <td className="px-4 py-3">
+                                    <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${conversation.lead_captured ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-600'}`}>
+                                      {conversation.lead_captured ? 'Yes' : 'No'}
+                                    </span>
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+                      <div className="flex items-center justify-between gap-4">
+                        <div>
+                          <h2 className="text-lg font-bold text-slate-900">Your Widget Code</h2>
+                          <p className="mt-1 text-sm text-slate-500">Copy this into your website before the closing body tag.</p>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            void handleCopyWidgetCode();
+                          }}
+                          className="inline-flex items-center gap-2 rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+                        >
+                          <Copy className="h-4 w-4" />
+                          Copy
+                        </button>
+                      </div>
+
+                      <pre className="mt-6 overflow-x-auto rounded-2xl bg-slate-100 p-4 text-xs leading-6 text-slate-800">
+                        <code>{widgetCode}</code>
+                      </pre>
                     </div>
                   </div>
-                </div>
-              )}
+                </section>
+              ) : null}
 
-              {/* ── CONVERSATIONS ───────────────────────────────────────────── */}
-              {activeTab === 'conversations' && (
-                <div className="flex h-[calc(100vh-6rem)] gap-4 overflow-hidden">
-                  <div className="w-72 shrink-0 overflow-y-auto rounded-2xl border border-slate-200 bg-white shadow-sm">
-                    <div className="border-b border-slate-100 px-4 py-4">
-                      <h2 className="text-sm font-bold text-slate-900">All Conversations</h2>
-                      <p className="mt-0.5 text-xs text-slate-500">{dashboardData.leads.length} total</p>
+              {activeTab === 'conversations' ? (
+                <section className="grid gap-6 xl:grid-cols-[360px_minmax(0,1fr)]">
+                  <div data-testid="dashboard-conversations-panel" />
+                  <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
+                    <div className="border-b border-slate-200 px-5 py-4">
+                      <h2 className="text-lg font-bold text-slate-900">Conversations</h2>
+                      <p className="mt-1 text-sm text-slate-500">All customer conversations for this business.</p>
                     </div>
-                    {dashboardData.leads.length === 0 ? (
-                      <p className="p-6 text-sm text-slate-400">No conversations yet.</p>
+
+                    {conversations.length === 0 ? (
+                      <div className="px-5 py-10 text-sm text-slate-500">No conversations yet. Your AI inbox will populate automatically.</div>
                     ) : (
-                      <ul>
-                        {dashboardData.leads.map(lead => (
-                          <li key={lead.id}>
-                            <button
-                              onClick={() => setSelectedConversation(lead.id)}
-                              className={`w-full border-b border-slate-100 px-4 py-4 text-left transition last:border-0 hover:bg-slate-50 ${selectedConversation === lead.id ? 'bg-blue-50' : ''}`}
-                            >
-                              <div className="flex justify-between gap-2">
-                                <span className="truncate text-sm font-semibold text-slate-800">{lead.customer_name || 'Unknown visitor'}</span>
-                                <span className="shrink-0 text-xs text-slate-400">{new Date(lead.created_at).toLocaleDateString()}</span>
-                              </div>
-                              <p className="mt-0.5 truncate text-xs text-slate-500">{lead.messages?.[0]?.content || 'No message'}</p>
-                              {lead.customer_phone && <span className="mt-1.5 inline-block rounded-full bg-green-100 px-2 py-0.5 text-[10px] font-semibold text-green-700">Lead</span>}
-                            </button>
-                          </li>
+                      <div className="max-h-[70vh] overflow-y-auto">
+                        {conversations.map((conversation) => (
+                          <button
+                            key={conversation.id}
+                            type="button"
+                            onClick={() => setSelectedConversationId(conversation.id)}
+                            className={`w-full border-b border-slate-100 px-5 py-4 text-left transition last:border-b-0 hover:bg-slate-50 ${selectedConversationId === conversation.id ? 'bg-blue-50' : 'bg-white'}`}
+                          >
+                            <div className="flex items-center justify-between gap-2">
+                              <p className="truncate text-sm font-semibold text-slate-900">
+                                {conversation.customer_name || 'Unknown visitor'}
+                              </p>
+                              <span className="text-xs text-slate-500">{formatDate(conversation.created_at)}</span>
+                            </div>
+                            <p className="mt-1 truncate text-sm text-slate-600">{getConversationPreview(conversation)}</p>
+                          </button>
                         ))}
-                      </ul>
+                      </div>
                     )}
                   </div>
 
-                  <div className="flex flex-1 flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-                    {!selectedConversation ? (
-                      <div className="flex flex-1 items-center justify-center text-sm text-slate-400">
-                        Select a conversation to view messages
-                      </div>
-                    ) : (() => {
-                      const conv = dashboardData.leads.find(l => l.id === selectedConversation);
-                      if (!conv) return null;
-                      return (
-                        <>
-                          <div className="flex items-center gap-3 border-b border-slate-100 px-5 py-4">
-                            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-blue-600 to-indigo-600 text-sm font-bold text-white">
-                              {(conv.customer_name || '?')[0].toUpperCase()}
-                            </div>
+                  <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
+                    {currentConversation ? (
+                      <>
+                        <div className="border-b border-slate-200 px-6 py-4">
+                          <div className="flex items-center justify-between gap-4">
                             <div>
-                              <p className="text-sm font-bold text-slate-900">{conv.customer_name || 'Unknown visitor'}</p>
-                              <p className="text-xs text-slate-500">{conv.customer_phone || 'Phone not captured'}</p>
+                              <h3 className="text-lg font-bold text-slate-900">{currentConversation.customer_name || 'Unknown visitor'}</h3>
+                              <p className="mt-1 text-sm text-slate-500">{currentConversation.customer_phone || 'Phone not captured yet'}</p>
                             </div>
+                            <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${currentConversation.lead_captured ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-600'}`}>
+                              {currentConversation.lead_captured ? 'Lead captured' : 'No lead yet'}
+                            </span>
                           </div>
-                          <div className="flex-1 overflow-y-auto space-y-3 bg-slate-50 p-5">
-                            {(conv.messages || []).map((msg, i) => (
-                              <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                                <div className={`max-w-[75%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed ${msg.role === 'user' ? 'rounded-tr-sm bg-gradient-to-br from-blue-600 to-indigo-600 text-white' : 'rounded-tl-sm bg-white text-slate-700 shadow-sm'}`}>
-                                  {msg.content}
+                        </div>
+
+                        <div className="max-h-[70vh] space-y-4 overflow-y-auto bg-slate-50 p-6">
+                          {(currentConversation.messages || []).length > 0 ? (
+                            currentConversation.messages?.map((message, index) => (
+                              <div key={`${currentConversation.id}-${index}`} className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                                <div className={`max-w-[75%] rounded-2xl px-4 py-3 text-sm leading-6 ${message.role === 'user' ? 'rounded-br-sm bg-blue-600 text-white' : 'rounded-bl-sm bg-white text-slate-700 shadow-sm'}`}>
+                                  {message.content}
                                 </div>
                               </div>
-                            ))}
-                            {(!conv.messages || conv.messages.length === 0) && (
-                              <p className="text-center text-xs text-slate-400">No messages stored for this conversation.</p>
-                            )}
-                          </div>
-                        </>
-                      );
-                    })()}
+                            ))
+                          ) : (
+                            <div className="text-sm text-slate-500">No messages stored for this conversation.</div>
+                          )}
+                        </div>
+                      </>
+                    ) : (
+                      <div className="flex h-full min-h-[300px] items-center justify-center text-sm text-slate-500">
+                        Select a conversation to view the full transcript.
+                      </div>
+                    )}
                   </div>
-                </div>
-              )}
+                </section>
+              ) : null}
 
-              {/* ── LEADS ───────────────────────────────────────────────────── */}
-              {activeTab === 'leads' && (
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
+              {activeTab === 'leads' ? (
+                <section className="space-y-6">
+                  <div data-testid="dashboard-leads-panel" />
+                  <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                     <div>
-                      <h1 className="text-2xl font-extrabold text-slate-900">Leads</h1>
-                      <p className="mt-1 text-sm text-slate-500">{dashboardData.leads.length} captured</p>
+                      <h2 className="text-2xl font-extrabold text-slate-900">Leads</h2>
+                      <p className="mt-1 text-sm text-slate-500">All customers captured by your AI assistant.</p>
                     </div>
                     <button
-                      onClick={() => exportLeadsCSV(dashboardData.leads)}
-                      className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50"
+                      type="button"
+                      onClick={() => {
+                        exportLeadsCsv(leads);
+                        setToast({ message: 'Leads exported to CSV.', tone: 'success' });
+                      }}
+                      className="inline-flex items-center justify-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
                     >
-                      <Download className="h-4 w-4" /> Export CSV
+                      <Download className="h-4 w-4" />
+                      Export CSV
                     </button>
                   </div>
 
-                  <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-                    <table className="min-w-full text-left text-sm">
-                      <thead className="border-b border-slate-100 bg-slate-50 text-xs font-bold uppercase tracking-wider text-slate-400">
-                        <tr>
-                          <th className="px-5 py-3.5">Name</th>
-                          <th className="px-5 py-3.5">Phone</th>
-                          <th className="px-5 py-3.5">Date</th>
-                          <th className="px-5 py-3.5">First Message</th>
-                          <th className="px-5 py-3.5 text-center">Contacted</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-slate-100">
-                        {dashboardData.leads.length === 0 ? (
-                          <tr><td colSpan={5} className="py-10 text-center text-slate-400">No leads captured yet.</td></tr>
-                        ) : dashboardData.leads.map(lead => (
-                          <tr key={lead.id} className={`transition hover:bg-slate-50 ${contactedLeads.has(lead.id) ? 'opacity-50' : ''}`}>
-                            <td className="px-5 py-4 font-semibold text-slate-900">{lead.customer_name || 'Unknown'}</td>
-                            <td className="px-5 py-4 text-slate-600">{lead.customer_phone || '—'}</td>
-                            <td className="px-5 py-4 text-slate-500">{new Date(lead.created_at).toLocaleDateString()}</td>
-                            <td className="max-w-xs truncate px-5 py-4 text-slate-600">{lead.messages?.[0]?.content || '—'}</td>
-                            <td className="px-5 py-4 text-center">
-                              <input
-                                type="checkbox"
-                                checked={contactedLeads.has(lead.id)}
-                                onChange={e => {
-                                  setContactedLeads(prev => {
-                                    const next = new Set(prev);
-                                    e.target.checked ? next.add(lead.id) : next.delete(lead.id);
-                                    return next;
-                                  });
-                                }}
-                                className="h-4 w-4 cursor-pointer rounded border-slate-300 accent-blue-600"
-                                aria-label={`Mark ${lead.customer_name || 'lead'} as contacted`}
-                              />
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
+                  <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
+                    {leads.length === 0 ? (
+                      <div className="px-6 py-16 text-center text-sm text-slate-500">
+                        No leads yet. Your AI will capture leads automatically when customers chat.
+                      </div>
+                    ) : (
+                      <div className="overflow-x-auto">
+                        <table className="min-w-full text-left text-sm">
+                          <thead className="bg-slate-50 text-slate-500">
+                            <tr>
+                              <th className="px-4 py-3 font-semibold">Date</th>
+                              <th className="px-4 py-3 font-semibold">Customer Name</th>
+                              <th className="px-4 py-3 font-semibold">Phone</th>
+                              <th className="px-4 py-3 font-semibold">First Message</th>
+                              <th className="px-4 py-3 font-semibold">Action</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-slate-100">
+                            {leads.map((lead) => (
+                              <tr key={lead.id} className="bg-white">
+                                <td className="px-4 py-3 text-slate-600">{formatDate(lead.created_at)}</td>
+                                <td className="px-4 py-3 font-semibold text-slate-900">{lead.customer_name || 'Unknown'}</td>
+                                <td className="px-4 py-3 text-slate-600">{lead.customer_phone || '-'}</td>
+                                <td className="max-w-sm px-4 py-3 text-slate-600">{getConversationPreview(lead)}</td>
+                                <td className="px-4 py-3">
+                                  <label className="inline-flex items-center gap-2 text-sm font-medium text-slate-700">
+                                    <input
+                                      type="checkbox"
+                                      checked={Boolean(lead.lead_contacted)}
+                                      disabled={updatingLeadIds.has(lead.id)}
+                                      onChange={(event) => {
+                                        void handleLeadContacted(lead.id, event.target.checked);
+                                      }}
+                                      className="h-4 w-4 rounded border-slate-300 accent-blue-600"
+                                      data-testid={`lead-contacted-${lead.id}`}
+                                    />
+                                    Mark Contacted
+                                  </label>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
                   </div>
-                </div>
-              )}
+                </section>
+              ) : null}
 
-              {/* ── SETTINGS ────────────────────────────────────────────────── */}
-              {activeTab === 'settings' && (
-                <div className="grid gap-6 lg:grid-cols-2">
-                  <form onSubmit={handleSaveSettings} className="space-y-5 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-                    <div>
-                      <h1 className="text-2xl font-extrabold text-slate-900">Settings</h1>
-                      <p className="mt-1 text-sm text-slate-500">Customize your widget and AI behaviour.</p>
+              {activeTab === 'settings' ? (
+                <section className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_380px]">
+                  <div data-testid="dashboard-settings-panel" />
+                  <form onSubmit={handleSaveSettings} className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+                    <div className="flex items-start justify-between gap-4">
+                      <div>
+                        <h2 className="text-2xl font-extrabold text-slate-900">Settings</h2>
+                        <p className="mt-1 text-sm text-slate-500">Update your business profile, AI behavior, and chat widget appearance.</p>
+                      </div>
+                      <button
+                        type="submit"
+                        disabled={saveLoading}
+                        className="inline-flex items-center justify-center rounded-full bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
+                      >
+                        {saveLoading ? 'Saving...' : 'Save'}
+                      </button>
                     </div>
 
-                    <div>
-                      <label htmlFor="settings-business-name" className="mb-1.5 block text-sm font-semibold text-slate-700">Business Name</label>
-                      <input id="settings-business-name" value={settingsForm.businessName}
-                        onChange={e => setSettingsForm(p => ({ ...p, businessName: e.target.value }))}
-                        className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20" />
-                    </div>
+                    <div className="mt-6 grid gap-5 md:grid-cols-2">
+                      <div>
+                        <label htmlFor="business-name" className="mb-2 block text-sm font-semibold text-slate-700">Business Name</label>
+                        <input
+                          id="business-name"
+                          value={settingsForm.businessName}
+                          onChange={(event) => setSettingsForm((current) => ({ ...current, businessName: event.target.value }))}
+                          className="h-12 w-full rounded-2xl border border-slate-300 px-4 text-sm outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
+                        />
+                      </div>
 
-                    <div>
-                      <label htmlFor="settings-widget-color" className="mb-1.5 block text-sm font-semibold text-slate-700">Widget Colour</label>
-                      <div className="flex items-center gap-3 rounded-xl border border-slate-200 px-4 py-3">
-                        <input id="settings-widget-color" type="color" value={settingsForm.widgetColor}
-                          onChange={e => setSettingsForm(p => ({ ...p, widgetColor: e.target.value }))}
-                          className="h-9 w-12 cursor-pointer rounded-lg border-0 bg-transparent p-0" />
-                        <span className="text-sm text-slate-600">{settingsForm.widgetColor}</span>
+                      <div>
+                        <label htmlFor="business-type" className="mb-2 block text-sm font-semibold text-slate-700">Business Type</label>
+                        <select
+                          id="business-type"
+                          value={settingsForm.businessType}
+                          onChange={(event) => setSettingsForm((current) => ({ ...current, businessType: event.target.value }))}
+                          className="h-12 w-full rounded-2xl border border-slate-300 px-4 text-sm outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
+                        >
+                          {businessTypeOptions.map((option) => (
+                            <option key={option.value} value={option.value}>
+                              {option.label}
+                            </option>
+                          ))}
+                        </select>
                       </div>
                     </div>
 
-                    <div>
-                      <label htmlFor="settings-custom-instructions" className="mb-1.5 block text-sm font-semibold text-slate-700">Custom AI Instructions</label>
-                      <textarea id="settings-custom-instructions" rows={6} value={settingsForm.customInstructions}
-                        onChange={e => setSettingsForm(p => ({ ...p, customInstructions: e.target.value }))}
-                        placeholder="Tone, special offers, business rules, lead qualification notes..."
-                        className="w-full resize-none rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20" />
+                    <div className="mt-5">
+                      <label htmlFor="primary-color" className="mb-2 block text-sm font-semibold text-slate-700">Primary Color</label>
+                      <div className="flex items-center gap-3 rounded-2xl border border-slate-300 px-4 py-3">
+                        <input
+                          id="primary-color"
+                          type="color"
+                          value={settingsForm.primaryColor}
+                          onChange={(event) => setSettingsForm((current) => ({ ...current, primaryColor: event.target.value }))}
+                          className="h-10 w-14 cursor-pointer rounded-xl border-0 bg-transparent p-0"
+                        />
+                        <span className="h-8 w-8 rounded-full border border-slate-200" style={{ backgroundColor: settingsForm.primaryColor }} />
+                        <span className="text-sm font-medium text-slate-700">{settingsForm.primaryColor}</span>
+                      </div>
                     </div>
 
-                    <button type="submit" className="w-full rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 py-3 text-sm font-semibold text-white shadow transition hover:opacity-90">
-                      Save Settings
-                    </button>
+                    <div className="mt-5">
+                      <label htmlFor="ai-instructions" className="mb-2 block text-sm font-semibold text-slate-700">AI Instructions</label>
+                      <textarea
+                        id="ai-instructions"
+                        rows={6}
+                        value={settingsForm.aiInstructions}
+                        onChange={(event) => setSettingsForm((current) => ({ ...current, aiInstructions: event.target.value }))}
+                        placeholder="Add specific info about your business..."
+                        className="w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
+                      />
+                    </div>
+
+                    <div className="mt-5">
+                      <div className="mb-3 flex items-center justify-between gap-4">
+                        <div>
+                          <h3 className="text-sm font-semibold text-slate-900">Custom FAQs</h3>
+                          <p className="text-sm text-slate-500">Add question and answer pairs to guide your AI responses.</p>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={addFaq}
+                          className="inline-flex items-center gap-2 rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+                        >
+                          <Plus className="h-4 w-4" />
+                          Add FAQ
+                        </button>
+                      </div>
+
+                      <div className="space-y-4">
+                        {settingsForm.customFaqs.map((faq, index) => (
+                          <div key={`${index}-${faq.question}`} className="rounded-2xl border border-slate-200 p-4">
+                            <div className="mb-3 flex items-center justify-between gap-3">
+                              <p className="text-sm font-semibold text-slate-900">FAQ {index + 1}</p>
+                              <button
+                                type="button"
+                                onClick={() => removeFaq(index)}
+                                className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-slate-200 text-slate-500 transition hover:bg-slate-50"
+                                aria-label={`Remove FAQ ${index + 1}`}
+                              >
+                                <X className="h-4 w-4" />
+                              </button>
+                            </div>
+                            <div className="grid gap-3">
+                              <input
+                                value={faq.question}
+                                onChange={(event) => updateFaq(index, 'question', event.target.value)}
+                                placeholder="Question"
+                                className="h-11 rounded-2xl border border-slate-300 px-4 text-sm outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
+                              />
+                              <textarea
+                                rows={3}
+                                value={faq.answer}
+                                onChange={(event) => updateFaq(index, 'answer', event.target.value)}
+                                placeholder="Answer"
+                                className="rounded-2xl border border-slate-300 px-4 py-3 text-sm outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
+                              />
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
                   </form>
 
-                  <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-                    <h2 className="mb-1 text-base font-bold text-slate-900">Live Preview</h2>
-                    <p className="mb-4 text-xs text-slate-500">Reflects your current colour and name as you type.</p>
-                    <div className="h-[500px] overflow-hidden rounded-xl border border-slate-200">
+                  <div data-testid="dashboard-subscription-panel" />
+                  <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+                    <h3 className="text-lg font-bold text-slate-900">Live widget preview</h3>
+                    <p className="mt-1 text-sm text-slate-500">Preview how your chat bubble and welcome message will look.</p>
+                    <div className="mt-5 h-[560px] overflow-hidden rounded-3xl border border-slate-200 bg-slate-50">
                       <ChatWidget
                         businessId={business.id}
                         businessName={settingsForm.businessName || business.business_name}
-                        primaryColor={settingsForm.widgetColor}
+                        primaryColor={settingsForm.primaryColor}
                         welcomeMessage={`Hi, this is ${settingsForm.businessName || business.business_name}. How can I help you today?`}
                         embedded
                       />
                     </div>
                   </div>
-                </div>
-              )}
+                </section>
+              ) : null}
 
-              {/* ── UPGRADE ─────────────────────────────────────────────────── */}
-              {activeTab === 'upgrade' && (
-                <div className="space-y-6">
-                  <div>
-                    <h1 className="text-2xl font-extrabold text-slate-900">Subscription</h1>
-                    <p className="mt-1 text-sm text-slate-500">
-                      {"You're on the "}<span className="font-bold capitalize text-slate-900">{currentPlan}</span>{" plan."}
-                    </p>
-                  </div>
-
-                  {dashboardData.stats && (
-                    <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-                      <div className="mb-2 flex justify-between text-sm font-medium text-slate-700">
-                        <span>Messages this month</span>
-                        <span>{dashboardData.stats.monthlyConversations} / {currentPlan === 'basic' ? '500' : 'Unlimited'}</span>
+              {activeTab === 'subscription' ? (
+                <section className="space-y-6">
+                  <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+                    <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                      <div>
+                        <p className="text-sm font-semibold uppercase tracking-[0.2em] text-blue-600">Current plan</p>
+                        <h2 className="mt-2 text-2xl font-extrabold text-slate-900">{currentPlanName}</h2>
+                        <p className="mt-1 text-sm text-slate-500">
+                          ${currentPlanPrice}/month
+                          {business.plan_expires_at ? ` · Expires ${formatDate(business.plan_expires_at)}` : ''}
+                        </p>
                       </div>
-                      <div className="h-2.5 w-full overflow-hidden rounded-full bg-slate-100">
-                        <div
-                          className="h-full rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 transition-all"
-                          style={{ width: currentPlan === 'basic' ? `${Math.min(100, (dashboardData.stats.monthlyConversations / 500) * 100)}%` : '15%' }}
-                        />
+                      <span className={`inline-flex w-fit rounded-full px-3 py-1.5 text-sm font-semibold ${getPlanBadgeClasses(business.plan)}`}>
+                        {currentPlanName}
+                      </span>
+                    </div>
+
+                    <div className="mt-6">
+                      <div className="mb-2 flex items-center justify-between gap-3 text-sm font-medium text-slate-700">
+                        <span>Messages used this month</span>
+                        <span>
+                          {usageValue}/{planLimit ?? 'Unlimited'}
+                        </span>
+                      </div>
+                      <div className="h-3 overflow-hidden rounded-full bg-slate-100">
+                        <div className="h-full rounded-full bg-gradient-to-r from-blue-600 to-cyan-500" style={{ width: `${usageWidth}%` }} />
                       </div>
                     </div>
-                  )}
-
-                  <div className="grid gap-6 md:grid-cols-3">
-                    {Object.values(PLANS).map(plan => {
-                      const isCurrent  = plan.id === currentPlan;
-                      const isSelected = selectedPlan === plan.id;
-                      return (
-                        <div key={plan.id} className={`flex flex-col rounded-2xl border p-6 transition-all ${isCurrent ? 'border-blue-300 bg-blue-50' : isSelected ? 'border-slate-900 bg-white shadow-md' : 'border-slate-200 bg-white shadow-sm'}`}>
-                          <div className="mb-1 flex items-start justify-between gap-2">
-                            <h3 className="text-lg font-bold text-slate-900">{plan.name}</h3>
-                            {isCurrent && <span className="rounded-full bg-blue-600 px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wide text-white">Current</span>}
-                          </div>
-                          <p className="mb-4 text-2xl font-black text-slate-900">${plan.price}<span className="text-sm font-normal text-slate-400">/mo</span></p>
-                          <ul className="mb-5 flex-1 space-y-2">
-                            {plan.features.map(f => (
-                              <li key={f} className="flex items-center gap-2 text-sm text-slate-600">
-                                <CheckCircle2 className="h-4 w-4 shrink-0 text-green-500" />{f}
-                              </li>
-                            ))}
-                          </ul>
-                          {!isCurrent && (
-                            <button
-                              onClick={() => { setSelectedPlan(plan.id); setPaymentSuccess(''); setPaymentError(''); }}
-                              className={`w-full rounded-xl py-2.5 text-sm font-semibold transition ${isSelected ? 'bg-slate-900 text-white' : 'border border-slate-200 text-slate-700 hover:bg-slate-50'}`}
-                            >
-                              {isSelected ? 'Selected' : 'Select plan'}
-                            </button>
-                          )}
-                          {isSelected && !isCurrent && !isPending && (
-                            <div className="mt-3">
-                              <PayPalButtons
-                                createOrder={createOrder}
-                                onApprove={handleApprove}
-                                onError={() => setPaymentError('Payment failed. Please try again.')}
-                              />
-                            </div>
-                          )}
-                        </div>
-                      );
-                    })}
                   </div>
 
-                  {paymentError   && <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{paymentError}</div>}
-                  {paymentSuccess && <div className="rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">{paymentSuccess}</div>}
-                </div>
-              )}
-            </>
-          )}
+                  <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+                    <div className="flex items-center justify-between gap-4">
+                      <div>
+                        <h3 className="text-xl font-bold text-slate-900">Upgrade your subscription</h3>
+                        <p className="mt-1 text-sm text-slate-500">Choose another plan and pay securely with PayPal.</p>
+                      </div>
+                    </div>
+
+                    <div className="mt-6 grid gap-4 lg:grid-cols-3">
+                      {(Object.values(PLANS) as Array<(typeof PLANS)[keyof typeof PLANS]>).map((plan) => {
+                        const isCurrent = plan.id === business.plan;
+                        const isSelected = selectedUpgradePlan === plan.id;
+
+                        return (
+                          <div
+                            key={plan.id}
+                            className={`rounded-3xl border p-5 transition ${
+                              isCurrent
+                                ? 'border-blue-300 bg-blue-50'
+                                : isSelected
+                                  ? 'border-slate-900 bg-slate-900 text-white'
+                                  : 'border-slate-200 bg-white'
+                            }`}
+                          >
+                            <div className="flex items-start justify-between gap-3">
+                              <div>
+                                <h4 className={`text-lg font-bold ${isSelected && !isCurrent ? 'text-white' : 'text-slate-900'}`}>{plan.name}</h4>
+                                <p className={`mt-1 text-sm ${isSelected && !isCurrent ? 'text-slate-300' : 'text-slate-500'}`}>{plan.description}</p>
+                              </div>
+                              {isCurrent ? (
+                                <span className="rounded-full bg-blue-600 px-2.5 py-1 text-xs font-semibold text-white">Current</span>
+                              ) : null}
+                            </div>
+                            <p className={`mt-5 text-3xl font-extrabold ${isSelected && !isCurrent ? 'text-white' : 'text-slate-900'}`}>
+                              ${plan.price}
+                              <span className={`text-sm font-medium ${isSelected && !isCurrent ? 'text-slate-300' : 'text-slate-500'}`}>/mo</span>
+                            </p>
+                            <ul className="mt-4 space-y-2">
+                              {plan.features.map((feature) => (
+                                <li key={feature} className={`flex items-start gap-2 text-sm ${isSelected && !isCurrent ? 'text-slate-200' : 'text-slate-600'}`}>
+                                  <Check className={`mt-0.5 h-4 w-4 shrink-0 ${isSelected && !isCurrent ? 'text-cyan-300' : 'text-emerald-600'}`} />
+                                  {feature}
+                                </li>
+                              ))}
+                            </ul>
+
+                            {!isCurrent ? (
+                              <button
+                                type="button"
+                                onClick={() => setSelectedUpgradePlan(plan.id as 'basic' | 'pro' | 'business')}
+                                className={`mt-5 inline-flex w-full items-center justify-center rounded-full px-4 py-2.5 text-sm font-semibold transition ${
+                                  isSelected
+                                    ? 'bg-white text-slate-900 hover:bg-slate-100'
+                                    : 'border border-slate-200 text-slate-700 hover:bg-slate-50'
+                                }`}
+                              >
+                                {isSelected ? 'Selected for checkout' : 'Choose plan'}
+                              </button>
+                            ) : null}
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    {paymentError ? (
+                      <div className="mt-5 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                        {paymentError}
+                      </div>
+                    ) : null}
+
+                    {selectedUpgradePlan !== business.plan ? (
+                      <div className="mt-6 rounded-3xl border border-slate-200 bg-slate-50 p-5">
+                        <h4 className="text-lg font-bold text-slate-900">Complete upgrade</h4>
+                        <p className="mt-1 text-sm text-slate-500">Checkout for the {PLANS[selectedUpgradePlan].name} plan.</p>
+                        <div className="mt-4">
+                          <PayPalScriptProvider
+                            options={{
+                              clientId: process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || '',
+                              currency: 'USD',
+                              intent: 'capture',
+                            }}
+                          >
+                            <UpgradeCheckoutButtons
+                              planId={selectedUpgradePlan}
+                              email={business.owner_email}
+                              onError={setPaymentError}
+                              onSuccess={async () => {
+                                setPaymentError('');
+                                await refreshDashboard();
+                                setToast({ message: 'Subscription updated successfully!', tone: 'success' });
+                              }}
+                            />
+                          </PayPalScriptProvider>
+                        </div>
+                      </div>
+                    ) : null}
+                  </div>
+                </section>
+              ) : null}
+            </div>
+          ) : null}
+        </main>
+      </div>
+
+      <nav className="fixed inset-x-0 bottom-0 z-50 border-t border-slate-200 bg-white/95 px-2 py-2 backdrop-blur lg:hidden">
+        <div className="grid grid-cols-5 gap-1">
+          {tabItems.map(({ key, label, Icon }) => {
+            const active = activeTab === key;
+
+            return (
+              <button
+                key={key}
+                type="button"
+                onClick={() => setActiveTab(key)}
+                data-testid={`dashboard-mobile-tab-${key}`}
+                className={`flex flex-col items-center justify-center rounded-2xl px-2 py-2 text-[11px] font-semibold transition ${
+                  active ? 'bg-blue-600 text-white' : 'text-slate-500 hover:bg-slate-100'
+                }`}
+              >
+                <Icon className="mb-1 h-4 w-4" />
+                {label}
+              </button>
+            );
+          })}
         </div>
-      </main>
+      </nav>
+    </div>
+  );
+}
+
+function StatCard({
+  label,
+  value,
+  badgeClassName,
+}: {
+  label: string;
+  value: string;
+  badgeClassName?: string;
+}) {
+  return (
+    <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+      <p className="text-sm font-medium text-slate-500">{label}</p>
+      {badgeClassName ? (
+        <span className={`mt-4 inline-flex rounded-full px-3 py-1.5 text-sm font-semibold ${badgeClassName}`}>
+          {value}
+        </span>
+      ) : (
+        <p className="mt-4 text-3xl font-extrabold text-slate-900">{value}</p>
+      )}
     </div>
   );
 }

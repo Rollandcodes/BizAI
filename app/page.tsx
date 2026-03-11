@@ -1,7 +1,18 @@
 'use client';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Building2, MessageCircle, Send, ShieldCheck, User, Zap } from 'lucide-react';
+import {
+  ArrowRight,
+  BrainCircuit,
+  Building2,
+  ClipboardList,
+  MessageCircle,
+  Send,
+  ShieldCheck,
+  TrendingUp,
+  User,
+  Zap,
+} from 'lucide-react';
 import { HeroV2 } from '@/components/ui/hero-v2';
 import { PricingGrid } from '@/components/ui/pricing-grid';
 import { LanguageSwitcher } from '@/components/ui/language-switcher';
@@ -35,6 +46,33 @@ const featureCards = [
     title: 'Safe by Default',
     description: 'Secure data handling with clear controls and audit-friendly customer records.',
     Icon: ShieldCheck,
+  },
+];
+
+const howItWorksSteps = [
+  {
+    number: '01',
+    title: 'Tell Us About Your Business',
+    description:
+      'Fill in your business details - services, prices, FAQs, and opening hours. Takes about 15 minutes.',
+    time: '15 minutes',
+    Icon: ClipboardList,
+  },
+  {
+    number: '02',
+    title: 'We Train Your AI',
+    description:
+      'Our system configures and trains your personal AI assistant using your business information.',
+    time: 'Up to 24 hours',
+    Icon: BrainCircuit,
+  },
+  {
+    number: '03',
+    title: 'Start Getting Leads',
+    description:
+      'Paste one line of code on your website. Your AI goes live and starts capturing customers immediately.',
+    time: 'Instant',
+    Icon: TrendingUp,
   },
 ];
 
@@ -101,12 +139,36 @@ const faqItems = [
 export default function Home() {
   const [locale, setLocale] = useState<Locale>(DEFAULT_LOCALE);
   const [openFaqId, setOpenFaqId] = useState<string | null>('q1');
+  const [isHowItWorksVisible, setIsHowItWorksVisible] = useState(false);
+  const howItWorksRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
     const stored = window.localStorage.getItem(LOCALE_STORAGE_KEY);
     if (stored && isLocale(stored)) {
       setLocale(stored);
     }
+  }, []);
+
+  useEffect(() => {
+    const section = howItWorksRef.current;
+
+    if (!section) {
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry?.isIntersecting) {
+          setIsHowItWorksVisible(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.2 }
+    );
+
+    observer.observe(section);
+
+    return () => observer.disconnect();
   }, []);
 
   function handleLanguageChange(next: Locale) {
@@ -132,6 +194,79 @@ export default function Home() {
       </header>
 
       <HeroV2 dictionary={dictionary} />
+
+      <section
+        ref={howItWorksRef}
+        className="bg-white py-14 md:py-20"
+        aria-labelledby="how-it-works-title"
+      >
+        <div className="mx-auto max-w-6xl px-4 lg:px-6">
+          <div
+            className={`mx-auto max-w-3xl text-center transition-all duration-700 ${
+              isHowItWorksVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
+            }`}
+          >
+            <p className="text-sm font-semibold uppercase tracking-[0.24em] text-blue-600">How It Works</p>
+            <h2 id="how-it-works-title" className="mt-3 text-3xl font-extrabold text-slate-900 md:text-5xl">
+              Live in 24 Hours
+            </h2>
+            <p className="mt-3 text-base text-slate-600 md:text-lg">
+              From signup to your first AI conversation in less than a day
+            </p>
+          </div>
+
+          <div className="mt-10 grid gap-4 md:grid-cols-[1fr_auto_1fr_auto_1fr] md:items-stretch md:gap-0">
+            {howItWorksSteps.map(({ number, title, description, time, Icon }, index) => (
+              <div key={number} className="contents">
+                <article
+                  className={`relative overflow-hidden rounded-3xl border border-slate-200 bg-white p-6 shadow-[0_20px_60px_rgba(15,23,42,0.08)] transition-all duration-700 md:min-h-[280px] ${
+                    isHowItWorksVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'
+                  }`}
+                  style={{ transitionDelay: `${index * 140}ms` }}
+                >
+                  <span className="pointer-events-none absolute right-4 top-3 text-7xl font-black leading-none text-[#f1f5f9]">
+                    {number}
+                  </span>
+                  <div className="relative z-10 flex h-full flex-col">
+                    <div className="mb-6 flex items-start justify-between gap-4">
+                      <div className="inline-flex rounded-2xl bg-blue-50 p-3 text-[#2563eb]">
+                        <Icon className="h-6 w-6" />
+                      </div>
+                      <span className="inline-flex rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700 ring-1 ring-inset ring-emerald-200">
+                        {time}
+                      </span>
+                    </div>
+                    <h3 className="text-xl font-bold text-slate-900">{title}</h3>
+                    <p className="mt-3 text-sm leading-7 text-slate-600">{description}</p>
+                  </div>
+                </article>
+
+                {index < howItWorksSteps.length - 1 ? (
+                  <div className="hidden items-center justify-center px-3 md:flex" aria-hidden="true">
+                    <div className="flex items-center gap-2 text-blue-300">
+                      <div className="h-px w-10 border-t-2 border-dotted border-blue-200" />
+                      <ArrowRight className="h-5 w-5 text-blue-400" />
+                      <div className="h-px w-10 border-t-2 border-dotted border-blue-200" />
+                    </div>
+                  </div>
+                ) : null}
+              </div>
+            ))}
+          </div>
+
+          <div
+            className={`mt-8 rounded-2xl border border-slate-200 bg-slate-50 px-5 py-4 text-center text-sm font-semibold text-slate-700 shadow-sm transition-all duration-700 delay-500 ${
+              isHowItWorksVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
+            }`}
+          >
+            <div className="flex flex-col items-center justify-center gap-2 sm:flex-row sm:flex-wrap sm:gap-4">
+              <span>✅ No technical knowledge needed</span>
+              <span>✅ We handle setup</span>
+              <span>✅ Cancel anytime</span>
+            </div>
+          </div>
+        </div>
+      </section>
 
       <section className="border-y border-slate-200 bg-white py-8">
         <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-center gap-3 px-4 lg:px-6">
@@ -209,6 +344,26 @@ export default function Home() {
               </div>
             );
           })}
+        </div>
+      </section>
+
+      <section className="bg-slate-50 py-16">
+        <div className="mx-auto max-w-4xl px-4 text-center lg:px-6">
+          <div className="rounded-[2rem] border border-slate-200 bg-white px-6 py-10 shadow-[0_20px_70px_rgba(37,99,235,0.12)] md:px-10">
+            <h2 className="text-3xl font-extrabold text-slate-900 md:text-5xl">Still Not Sure? Try It Free.</h2>
+            <p className="mx-auto mt-3 max-w-2xl text-base text-slate-600 md:text-lg">
+              No payment needed. See your AI assistant live in 24 hours.
+            </p>
+            <a
+              href="#pricing"
+              className="mt-8 inline-flex items-center justify-center rounded-2xl bg-gradient-to-r from-blue-600 via-blue-500 to-cyan-500 px-8 py-4 text-base font-semibold text-white shadow-[0_18px_40px_rgba(37,99,235,0.35)] transition hover:brightness-105 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
+            >
+              Claim Your Free Trial
+            </a>
+            <p className="mt-4 text-sm font-medium text-slate-500">
+              Join businesses in Kyrenia, Nicosia &amp; Famagusta already using BizAI
+            </p>
+          </div>
         </div>
       </section>
 

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { ArrowRight, PlayCircle, X } from 'lucide-react';
+import { PlayCircle, X } from 'lucide-react';
 import { trackEvent } from '@/lib/analytics';
 import type { Dictionary } from '@/lib/i18n';
 
@@ -40,11 +40,10 @@ export function HeroV2({ dictionary }: Props) {
             <a
               href="#pricing"
               onClick={handlePrimaryCta}
-              aria-label={dictionary.ctaButton}
+              aria-label="Start Free 7-Day Trial"
               className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#0F6B66] px-6 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-[#0b5450] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0F6B66]"
             >
-              {dictionary.ctaButton}
-              <ArrowRight className="h-4 w-4" />
+              Start Free 7-Day Trial →
             </a>
             <button
               type="button"
@@ -57,7 +56,7 @@ export function HeroV2({ dictionary }: Props) {
             </button>
           </div>
 
-          <p className="text-xs text-slate-500">{dictionary.heroMicrotrust}</p>
+          <p className="text-xs font-medium text-slate-500">No credit card required · Cancel anytime · Setup in 24hrs</p>
 
           <div className="flex items-center gap-4">
             <div className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-700">DriveEasy Rentals</div>

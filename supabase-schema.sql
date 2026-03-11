@@ -41,6 +41,7 @@ CREATE TABLE IF NOT EXISTS public.conversations (
   session_id TEXT NOT NULL,
   messages JSONB DEFAULT '[]'::jsonb,
   lead_captured BOOLEAN DEFAULT false,
+  lead_contacted BOOLEAN DEFAULT false,
   customer_name TEXT,
   customer_phone TEXT,
   created_at TIMESTAMPTZ DEFAULT now()
@@ -51,6 +52,7 @@ CREATE INDEX IF NOT EXISTS idx_conversations_business_id ON public.conversations
 CREATE INDEX IF NOT EXISTS idx_conversations_session_id ON public.conversations(session_id);
 CREATE INDEX IF NOT EXISTS idx_conversations_business_created_at ON public.conversations(business_id, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_conversations_lead_captured ON public.conversations(lead_captured);
+CREATE INDEX IF NOT EXISTS idx_conversations_lead_contacted ON public.conversations(lead_contacted);
 
 -- ============================================================================
 -- Row Level Security (RLS) Policies
