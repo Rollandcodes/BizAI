@@ -172,6 +172,35 @@ CREATE POLICY "Anyone can create conversation" ON public.conversations
   FOR INSERT WITH CHECK (true);
 
 -- ============================================================================
+-- Broadcasts Table
+-- ============================================================================
+
+CREATE TABLE IF NOT EXISTS public.broadcasts (
+  id           UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  business_id  UUID NOT NULL REFERENCES public.businesses(id) ON DELETE CASCADE,
+  message      TEXT NOT NULL,
+  sent_to_count INTEGER NOT NULL DEFAULT 0,
+  created_at   TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_broadcasts_business_id ON public.broadcasts (business_id, created_at DESC);
+
+ALTER TABLE public.broadcasts ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Business owners can manage own broadcasts" ON public.broadcasts
+  FOR ALL USING (
+    EXISTS (
+      SELECT 1 FROM public.businesses
+      WHERE businesses.id = broadcasts.business_id
+      AND businesses.owner_email = auth.jwt() ->> 'email'
+    )
+  );
+
+-- Service role has full access (used by API routes)
+CREATE POLICY "Service role full access to broadcasts" ON public.broadcasts
+  FOR ALL USING (auth.role() = 'service_role');
+
+-- ============================================================================
 -- Storage Bucket (Optional - for widget customization assets)
 -- ============================================================================
 -- Uncomment if you want to store business logos/assets

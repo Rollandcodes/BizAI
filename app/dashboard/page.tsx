@@ -19,6 +19,7 @@ import {
   Plus,
   Printer,
   QrCode,
+  Send,
   Settings,
   ShieldAlert,
   ShieldCheck,
@@ -41,6 +42,7 @@ import {
 } from '@paypal/react-paypal-js';
 
 import QRCode from 'react-qr-code';
+import { supabase } from '@/lib/supabase';
 import ChatWidget from '@/components/ChatWidget';
 import { PLANS } from '@/lib/plans';
 
@@ -448,6 +450,22 @@ export default function DashboardPage() {
   // ── QR Code state ────────────────────────────────────────────────────────
   const qrRef = useRef<HTMLDivElement>(null);
 
+  // ── Broadcast state ──────────────────────────────────────────────────────
+  type BroadcastLead = { id: string; name: string; phone: string };
+  type BroadcastHistoryItem = {
+    id: string;
+    message: string;
+    sent_to_count: number;
+    created_at: string;
+  };
+
+  const [broadcastMessage, setBroadcastMessage] = useState('');
+  const [broadcastSending, setBroadcastSending] = useState(false);
+  const [broadcastModal, setBroadcastModal] = useState<BroadcastLead[] | null>(null);
+  const [broadcastSentCount, setBroadcastSentCount] = useState(0);
+  const [broadcastHistory, setBroadcastHistory] = useState<BroadcastHistoryItem[]>([]);
+  const [broadcastHistoryLoading, setBroadcastHistoryLoading] = useState(false);
+
   const business = dashboard.business;
   const stats = dashboard.stats;
   const conversations = dashboard.conversations;
@@ -512,6 +530,9 @@ export default function DashboardPage() {
   useEffect(() => {
     if (activeTab === 'audit' && business && !auditSummary && !auditLoading) {
       void loadAuditSummary();
+    }
+    if (activeTab === 'leads' && business && broadcastHistory.length === 0 && !broadcastHistoryLoading) {
+      void loadBroadcastHistory(business.id);
     }
   }, [activeTab, business]);
 
@@ -642,6 +663,68 @@ export default function DashboardPage() {
       <button onclick="window.print()">Print</button>
     </body></html>`);
     win.document.close();
+  }
+
+  async function loadBroadcastHistory(businessId: string) {
+    setBroadcastHistoryLoading(true);
+    try {
+      const { data } = await supabase
+        .from('broadcasts')
+        .select('id, message, sent_to_count, created_at')
+        .eq('business_id', businessId)
+        .order('created_at', { ascending: false })
+        .limit(5);
+      setBroadcastHistory((data as BroadcastHistoryItem[]) ?? []);
+    } catch {
+      // non-critical, just leave history empty
+    } finally {
+      setBroadcastHistoryLoading(false);
+    }
+  }
+
+  async function handleBroadcast() {
+    if (!business || !broadcastMessage.trim()) return;
+    setBroadcastSending(true);
+    try {
+      const { data } = await supabase
+        .from('conversations')
+        .select('id, customer_name, customer_phone')
+        .eq('business_id', business.id)
+        .eq('lead_captured', true)
+        .not('customer_phone', 'is', null);
+
+      const eligibleLeads: BroadcastLead[] = ((data ?? []) as Array<{
+        id: string;
+        customer_name: string | null;
+        customer_phone: string | null;
+      }>)
+        .filter((r) => r.customer_phone)
+        .map((r) => ({
+          id: r.id,
+          name: r.customer_name ?? 'Unknown',
+          phone: r.customer_phone!,
+        }));
+
+      if (eligibleLeads.length === 0) {
+        setToast({ message: 'No leads with phone numbers found.', tone: 'error' });
+        return;
+      }
+
+      // Save to broadcasts table
+      await supabase.from('broadcasts').insert({
+        business_id: business.id,
+        message: broadcastMessage.trim(),
+        sent_to_count: eligibleLeads.length,
+      });
+
+      setBroadcastModal(eligibleLeads);
+      setBroadcastSentCount(0);
+      void loadBroadcastHistory(business.id);
+    } catch (err) {
+      setToast({ message: err instanceof Error ? err.message : 'Broadcast failed', tone: 'error' });
+    } finally {
+      setBroadcastSending(false);
+    }
   }
 
   async function handleLeadContacted(leadId: string, nextValue: boolean) {
@@ -1146,6 +1229,39 @@ export default function DashboardPage() {
               {activeTab === 'leads' ? (
                 <section className="space-y-6">
                   <div data-testid="dashboard-leads-panel" />
+
+                  {/* Broadcast Banner */}
+                  <div className="rounded-3xl bg-gradient-to-r from-green-500 to-emerald-600 p-6 text-white shadow-sm">
+                    <div className="flex items-center gap-2">
+                      <MessageSquare className="h-5 w-5" />
+                      <h3 className="font-bold">Broadcast to All Leads</h3>
+                    </div>
+                    <p className="mt-1 text-sm text-green-100">
+                      Send a special offer or update to all {leads.filter((l) => l.customer_phone).length} leads with phone numbers via WhatsApp.
+                    </p>
+                    <textarea
+                      rows={3}
+                      placeholder="Type your message… e.g. 🚗 Weekend special! SUV 20% off this Friday–Sunday. Reply to book!"
+                      value={broadcastMessage}
+                      onChange={(e) => setBroadcastMessage(e.target.value)}
+                      className="mt-4 w-full resize-none rounded-2xl border border-white/30 bg-white/20 p-3 text-sm text-white placeholder-green-200 outline-none focus:border-white/60 focus:ring-0"
+                    />
+                    <div className="mt-3 flex items-center justify-between gap-4">
+                      <span className="text-sm text-green-100">
+                        Will open WhatsApp for {leads.filter((l) => l.customer_phone).length} lead{leads.filter((l) => l.customer_phone).length !== 1 ? 's' : ''}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => void handleBroadcast()}
+                        disabled={!broadcastMessage.trim() || broadcastSending}
+                        className="inline-flex items-center gap-2 rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-emerald-700 shadow transition hover:bg-green-50 disabled:opacity-50"
+                      >
+                        <Send className="h-4 w-4" />
+                        {broadcastSending ? 'Preparing…' : 'Send Broadcast →'}
+                      </button>
+                    </div>
+                  </div>
+
                   <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                     <div>
                       <h2 className="text-2xl font-extrabold text-slate-900">Leads</h2>
@@ -1210,6 +1326,105 @@ export default function DashboardPage() {
                       </div>
                     )}
                   </div>
+
+                  {/* Broadcast History */}
+                  <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
+                    <div className="border-b border-slate-100 px-6 py-4">
+                      <h3 className="font-bold text-slate-900">Broadcast History</h3>
+                      <p className="mt-0.5 text-sm text-slate-500">Last 5 broadcasts sent to your leads.</p>
+                    </div>
+                    {broadcastHistoryLoading ? (
+                      <div className="flex h-24 items-center justify-center">
+                        <div className="h-6 w-6 animate-spin rounded-full border-4 border-blue-600 border-t-transparent" />
+                      </div>
+                    ) : broadcastHistory.length === 0 ? (
+                      <div className="px-6 py-8 text-center text-sm text-slate-500">No broadcasts sent yet.</div>
+                    ) : (
+                      <div className="divide-y divide-slate-100">
+                        {broadcastHistory.map((item) => (
+                          <div key={item.id} className="flex items-start justify-between gap-4 px-6 py-4">
+                            <div className="min-w-0 flex-1">
+                              <p className="truncate text-sm text-slate-800">{item.message}</p>
+                              <p className="mt-1 text-xs text-slate-400">{formatDate(item.created_at)}</p>
+                            </div>
+                            <span className="shrink-0 rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-semibold text-emerald-700">
+                              {item.sent_to_count} lead{item.sent_to_count !== 1 ? 's' : ''}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Broadcast Modal */}
+                  {broadcastModal ? (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+                      <div className="relative w-full max-w-lg rounded-3xl bg-white p-6 shadow-2xl">
+                        <button
+                          type="button"
+                          aria-label="Close"
+                          onClick={() => { setBroadcastModal(null); setBroadcastMessage(''); }}
+                          className="absolute right-4 top-4 rounded-full p-2 text-slate-400 hover:bg-slate-100"
+                        >
+                          <X className="h-5 w-5" />
+                        </button>
+                        <h3 className="flex items-center gap-2 text-lg font-bold text-slate-900">
+                          <MessageSquare className="h-5 w-5 text-emerald-600" />
+                          Send Broadcast via WhatsApp
+                        </h3>
+                        <p className="mt-1 text-sm text-slate-500">
+                          Click each button to open WhatsApp and send your message. Counter updates as you go.
+                        </p>
+
+                        <div className="mt-4 rounded-2xl bg-slate-50 px-4 py-3 text-sm text-slate-700">
+                          <span className="font-semibold">Message:</span> {broadcastMessage}
+                        </div>
+
+                        <div className="mt-3 flex items-center justify-between text-sm font-semibold">
+                          <span className="text-slate-600">Sent: {broadcastSentCount}/{broadcastModal.length}</span>
+                          {broadcastSentCount === broadcastModal.length && broadcastModal.length > 0 && (
+                            <span className="text-emerald-600">✅ Broadcast complete!</span>
+                          )}
+                        </div>
+
+                        <div className="mt-3 max-h-72 space-y-2 overflow-y-auto">
+                          {broadcastModal.map((lead, idx) => {
+                            const sent = idx < broadcastSentCount;
+                            const waLink = `https://wa.me/${lead.phone.replace(/\D/g, '')}?text=${encodeURIComponent(broadcastMessage)}`;
+                            return (
+                              <a
+                                key={lead.id}
+                                href={waLink}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                onClick={() => setBroadcastSentCount((n) => Math.max(n, idx + 1))}
+                                className={`flex items-center justify-between rounded-2xl border px-4 py-3 text-sm font-semibold transition ${
+                                  sent
+                                    ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
+                                    : 'border-slate-200 bg-white text-slate-800 hover:border-green-300 hover:bg-green-50'
+                                }`}
+                              >
+                                <span>{lead.name} · {lead.phone}</span>
+                                {sent ? (
+                                  <Check className="h-4 w-4 text-emerald-600" />
+                                ) : (
+                                  <span className="text-[#25D366]">Open WhatsApp →</span>
+                                )}
+                              </a>
+                            );
+                          })}
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={() => { setBroadcastModal(null); setBroadcastMessage(''); }}
+                          className="mt-5 w-full rounded-full border border-slate-200 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50"
+                        >
+                          Close
+                        </button>
+                      </div>
+                    </div>
+                  ) : null}
                 </section>
               ) : null}
 
