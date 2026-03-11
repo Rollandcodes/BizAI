@@ -147,7 +147,7 @@ export default function SuccessPage() {
             <a
               href="https://wa.me/905338425559"
               target="_blank"
-              rel="noreferrer"
+              rel="noopener noreferrer"
               className="inline-flex items-center gap-1.5 rounded-lg border border-[#25D366] px-4 py-2 text-sm font-semibold text-[#1a9e4a] transition hover:bg-green-50"
             >
               💬 WhatsApp Us

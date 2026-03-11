@@ -1,3 +1,5 @@
+-- PostgreSQL / Supabase Schema
+-- Run this in Supabase SQL Editor, NOT in VS Code
 -- ============================================================================
 -- BizAI Supabase Schema
 -- ============================================================================

@@ -1,3 +1,5 @@
+# BizAI — AI Customer Service Assistant for Local Businesses
+
 This is a [Next.js](https://nextjs.org) project for BizAI, focused on AI customer service for local businesses in Northern Cyprus.
 
 ## Getting Started
@@ -25,12 +27,12 @@ You can start editing the page by modifying `app/page.tsx`. The page auto-update
 - Added HTML charset response headers for `/`, `/dashboard`, and `/widget/:businessId`.
 - Restored FAQ answers and ensured all FAQ entries have question and answer content.
 - Implemented new `HeroV2` with interactive demo modal and analytics events:
-	- `hero_cta_click`
-	- `hero_demo_open`
+  - `hero_cta_click`
+  - `hero_demo_open`
 - Implemented new `PricingGrid` with monthly/yearly toggle, highlighted Pro plan, mobile swipe cards, and comparison table.
 - Added pricing analytics events:
-	- `pricing_plan_click`
-	- `pricing_trial_start`
+  - `pricing_plan_click`
+  - `pricing_trial_start`
 - Added accessibility improvements (CTA labels and visible keyboard focus states).
 
 ## Run Tests

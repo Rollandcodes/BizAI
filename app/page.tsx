@@ -213,7 +213,7 @@ function LiveDemoModal({ open, onClose }: { open: boolean; onClose: () => void }
             <p className="text-[11px] font-semibold uppercase tracking-widest text-blue-600">Live Demo</p>
             <h2 className="text-lg font-bold text-slate-900">DriveEasy Car Rentals AI</h2>
           </div>
-          <button type="button" onClick={onClose} className="flex h-8 w-8 items-center justify-center rounded-full transition hover:bg-slate-100">
+          <button type="button" onClick={onClose} aria-label="Close" className="flex h-8 w-8 items-center justify-center rounded-full transition hover:bg-slate-100">
             <X className="h-4 w-4 text-slate-500" />
           </button>
         </div>
@@ -244,7 +244,7 @@ function LiveDemoModal({ open, onClose }: { open: boolean; onClose: () => void }
         <div className="border-t border-slate-100 p-4">
           <form onSubmit={(e) => { e.preventDefault(); void send(input); }} className="flex items-center gap-2">
             <input value={input} onChange={(e) => setInput(e.target.value)} placeholder="Type a message..." className="flex-1 rounded-xl border border-slate-200 px-4 py-2.5 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10" />
-            <button type="submit" disabled={!input.trim() || sending} className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-600 text-white transition hover:bg-blue-700 disabled:opacity-50">
+            <button type="submit" disabled={!input.trim() || sending} aria-label="Send message" className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-600 text-white transition hover:bg-blue-700 disabled:opacity-50">
               <Send className="h-4 w-4" />
             </button>
           </form>
@@ -408,7 +408,7 @@ export default function Home() {
           </p>
           <div className="flex">
             {[0, 1].map((i) => (
-              <div key={i} className="flex shrink-0 animate-[marquee_22s_linear_infinite] items-center gap-5 pr-5" aria-hidden={i === 1}>
+              <div key={i} className="flex shrink-0 animate-[marquee_22s_linear_infinite] items-center gap-5 pr-5" aria-hidden={i === 1 ? true : undefined}>
                 {TRUST_ITEMS.map((item) => (
                   <div key={item} className="flex items-center gap-2 whitespace-nowrap rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm">{item}</div>
                 ))}

@@ -100,7 +100,7 @@ function SignupForm() {
                 <div className="flex h-7 w-7 items-center justify-center rounded-full bg-blue-600 text-xs font-bold text-white">1</div>
                 <span className="text-sm font-semibold text-slate-900">Your Details</span>
               </div>
-              <div className="flex-1 rounded-full bg-slate-200" style={{ height: 2 }}>
+              <div className="h-0.5 flex-1 rounded-full bg-slate-200">
                 <div className="h-full w-0 rounded-full bg-blue-600" />
               </div>
               {/* Step 2 — inactive */}
@@ -176,8 +176,10 @@ function SignupForm() {
               </Field>
 
               {/* Business Type */}
-              <Field label="Business Type" required error={errors.businessType}>
+              <Field label="Business Type" required error={errors.businessType} htmlFor="business-type">
                 <select
+                  id="business-type"
+                  aria-label="Business Type"
                   value={form.businessType}
                   onChange={(e) => set('businessType', e.target.value)}
                   className={selectCls(!!errors.businessType)}
@@ -259,17 +261,19 @@ function Field({
   sublabel,
   required,
   error,
+  htmlFor,
   children,
 }: {
   label: string;
   sublabel?: string;
   required?: boolean;
   error?: string;
+  htmlFor?: string;
   children: React.ReactNode;
 }) {
   return (
     <div className="flex flex-col gap-1.5">
-      <label className="flex items-center gap-1.5 text-sm font-semibold text-slate-700">
+      <label htmlFor={htmlFor} className="flex items-center gap-1.5 text-sm font-semibold text-slate-700">
         {label}
         {required && <span className="text-red-500">*</span>}
         {sublabel && <span className="font-normal text-slate-400">({sublabel})</span>}

@@ -1,0 +1,13 @@
+{
+  "files.associations": {
+    "*.sql": "sql"
+  },
+  "[sql]": {
+    "editor.defaultFormatter": "mtxr.sqltools"
+  },
+  "sqltools.connections": [],
+  "files.exclude": {
+    "**/.next": true,
+    "**/node_modules": true
+  }
+}

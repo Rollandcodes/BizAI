@@ -4,7 +4,7 @@ export function FloatingWhatsAppButton() {
       <a
         href="https://wa.me/905338425559?text=Hi%2C%20I%27m%20interested%20in%20BizAI"
         target="_blank"
-        rel="noreferrer"
+        rel="noopener noreferrer"
         aria-label="Chat with us on WhatsApp"
         className="group relative flex h-12 w-12 items-center justify-center rounded-full bg-[#25D366] text-white shadow-lg transition-transform hover:scale-105 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#25D366] sm:h-14 sm:w-14 [animation:whatsapp-bounce_3s_ease-in-out_infinite] before:absolute before:inset-0 before:rounded-full before:border-4 before:border-[#25D366] before:animate-ping before:opacity-50"
       >

@@ -150,7 +150,7 @@ function PaymentContent() {
                 </div>
                 <span className="text-sm font-semibold text-slate-400">Your Details</span>
               </div>
-              <div className="flex-1 rounded-full bg-blue-600" style={{ height: 2 }} />
+              <div className="h-0.5 flex-1 rounded-full bg-blue-600" />
               {/* Step 2 — active */}
               <div className="flex items-center gap-2">
                 <div className="flex h-7 w-7 items-center justify-center rounded-full bg-blue-600 text-xs font-bold text-white">2</div>
