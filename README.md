@@ -1,4 +1,4 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+This is a [Next.js](https://nextjs.org) project for BizAI, focused on AI customer service for local businesses in Northern Cyprus.
 
 ## Getting Started
 
@@ -18,19 +18,50 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
+## Recent Fixes
+
+- Fixed homepage encoding artifacts and moved critical pages to clean UTF-8 output.
+- Added explicit `<meta charSet="UTF-8" />` in root layout.
+- Added HTML charset response headers for `/`, `/dashboard`, and `/widget/:businessId`.
+- Restored FAQ answers and ensured all FAQ entries have question and answer content.
+- Implemented new `HeroV2` with interactive demo modal and analytics events:
+	- `hero_cta_click`
+	- `hero_demo_open`
+- Implemented new `PricingGrid` with monthly/yearly toggle, highlighted Pro plan, mobile swipe cards, and comparison table.
+- Added pricing analytics events:
+	- `pricing_plan_click`
+	- `pricing_trial_start`
+- Added accessibility improvements (CTA labels and visible keyboard focus states).
+
+## Run Tests
+
+Run production checks:
+
+```bash
+npm run build
+```
+
+Run Playwright smoke and E2E tests:
+
+```bash
+npm run test:e2e
+```
+
+Test coverage includes:
+
+- Encoding smoke test (no mojibake artifacts like `â€”`, `ðŸ`, `Â·`)
+- Hero presence and CTA interaction
+- Demo modal open/visibility
+- Pricing "Most Popular" label
+- FAQ rendered answers (minimum 5)
+- Mobile breakpoints (320, 375, 414, 768, 1024)
+
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
 
 ## Deploy on Vercel
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Deploy via your connected GitHub repository or:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+npm run deploy
+```

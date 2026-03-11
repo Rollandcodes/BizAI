@@ -26,12 +26,13 @@ export function FaqsSection() {
 					<AccordionItem
 						value={item.id}
 						key={item.id}
+						data-testid="faq-item"
 						className="relative border-x first:rounded-t-lg first:border-t last:rounded-b-lg last:border-b"
 					>
-						<AccordionTrigger className="px-4 py-4 text-[15px] leading-6 hover:no-underline">
+						<AccordionTrigger data-testid="faq-question" className="px-4 py-4 text-[15px] leading-6 hover:no-underline">
 							{item.title}
 						</AccordionTrigger>
-						<AccordionContent className="text-muted-foreground pb-4 px-4">
+						<AccordionContent data-testid="faq-answer" className="text-muted-foreground pb-4 px-4">
 							{item.content}
 						</AccordionContent>
 					</AccordionItem>
@@ -52,40 +53,46 @@ const questions = [
 		id: 'item-1',
 		title: 'How long does setup take?',
 		content:
-			'Setup typically takes 24 hours. We configure your AI assistant, train it on your business information, and test everything before going live. You\'ll receive a confirmation email once your assistant is ready.',
+			'Setup typically takes 24 hours. We configure your AI, train it, and test before going live.',
 	},
 	{
 		id: 'item-2',
 		title: 'Do I need any technical knowledge to use BizAI?',
 		content:
-			'No technical knowledge required. After signing up, you simply copy and paste one line of code onto your website. We handle all the AI configuration and training for you.',
+			'No technical knowledge required. We handle setup.',
 	},
 	{
 		id: 'item-3',
-		title: 'What channels does the AI support?',
+		title: 'Which languages does the AI support?',
 		content:
-			'Our Starter plan covers website chat. The Pro plan adds WhatsApp integration. The Business plan includes phone support on top of chat and WhatsApp — so your customers can reach you anywhere.',
+			'Languages: English, Turkish, Arabic, Russian.',
 	},
 	{
 		id: 'item-4',
-		title: 'Do you offer a free trial?',
+		title: 'Is WhatsApp integration available?',
 		content:
-			'Yes! All plans come with a 7-day free trial. No credit card required to get started. You can explore all features risk-free and only pay if you decide to continue.',
+			'WhatsApp integration: Yes, auto-replies and lead capture.',
 	},
 	{
 		id: 'item-5',
+		title: 'Do you offer a free trial?',
+		content:
+			'Yes. All plans include a 7-day trial so you can test performance before committing.',
+	},
+	{
+		id: 'item-6',
 		title: 'What if I need to cancel?',
 		content:
 			'You can cancel anytime with no penalties or cancellation fees. Your data remains accessible for 30 days after cancellation, giving you enough time to export anything you need.',
 	},
 	{
-		id: 'item-6',
+		id: 'item-7',
 		title: 'How is my customer data protected?',
 		content:
 			'We use enterprise-grade encryption in transit and at rest. BizAI complies with GDPR, CCPA, and other major privacy regulations. All data is stored in secure US-based data centers.',
 	},
 	{
-		id: 'item-7',
+		id: 'item-8',
 		title: 'Can I upgrade or downgrade my plan?',
 		content:
 			'Yes, you can change your plan at any time from your dashboard. Upgrades take effect immediately. Downgrades apply at the start of the next billing cycle, and we prorate any charges automatically.',
