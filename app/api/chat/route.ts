@@ -23,15 +23,16 @@ interface ChatResponse {
 }
 
 // ============================================================================
-// Initialize OpenAI
+// Initialize OpenAI lazily (request-time, not build-time)
 // ============================================================================
 
-const openaiApiKey = process.env.OPENAI_API_KEY;
-if (!openaiApiKey) {
-  throw new Error('OPENAI_API_KEY environment variable is not set');
+function getOpenAIClient(): OpenAI {
+  const openaiApiKey = process.env.OPENAI_API_KEY;
+  if (!openaiApiKey) {
+    throw new Error('OPENAI_API_KEY environment variable is not set');
+  }
+  return new OpenAI({ apiKey: openaiApiKey });
 }
-
-const openai = new OpenAI({ apiKey: openaiApiKey });
 
 // ============================================================================
 // Helper Functions
@@ -119,6 +120,7 @@ async function updateConversation(
 export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
     assertSupabaseConfig();
+    const openai = getOpenAIClient();
 
     // Parse request body
     const body = await request.json();

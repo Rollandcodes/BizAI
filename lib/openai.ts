@@ -1,14 +1,20 @@
 import OpenAI from 'openai';
 
-const apiKey = process.env.OPENAI_API_KEY;
+let openaiClient: OpenAI | null = null;
 
-if (!apiKey) {
-  throw new Error('OPENAI_API_KEY environment variable is not set');
+export function getOpenAIClient(): OpenAI {
+  if (openaiClient) {
+    return openaiClient;
+  }
+
+  const apiKey = process.env.OPENAI_API_KEY;
+  if (!apiKey) {
+    throw new Error('OPENAI_API_KEY environment variable is not set');
+  }
+
+  openaiClient = new OpenAI({ apiKey });
+  return openaiClient;
 }
-
-export const openai = new OpenAI({
-  apiKey,
-});
 
 // TODO: Implement helper functions for AI responses
 export const generateChatResponse = async (
@@ -16,6 +22,8 @@ export const generateChatResponse = async (
   userMessage: string,
   conversationHistory: Array<{ role: string; content: string }>
 ) => {
+  const openai = getOpenAIClient();
+
   const systemPrompt = `You are a helpful customer service assistant for a local business. 
 Business Information: ${businessContext}
 Respond helpfully and professionally. Keep responses concise.`;
