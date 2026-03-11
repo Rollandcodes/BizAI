@@ -63,6 +63,54 @@ CREATE INDEX IF NOT EXISTS idx_conversations_lead_captured ON public.conversatio
 CREATE INDEX IF NOT EXISTS idx_conversations_lead_contacted ON public.conversations(lead_contacted);
 
 -- ============================================================================
+-- Migration: Agent Audit columns on conversations (v3 – safe to re-run)
+-- ============================================================================
+ALTER TABLE public.conversations ADD COLUMN IF NOT EXISTS ai_safety_score INTEGER CHECK (ai_safety_score IS NULL OR (ai_safety_score >= 0 AND ai_safety_score <= 100));
+ALTER TABLE public.conversations ADD COLUMN IF NOT EXISTS flagged BOOLEAN DEFAULT false;
+ALTER TABLE public.conversations ADD COLUMN IF NOT EXISTS flag_reason TEXT;
+ALTER TABLE public.conversations ADD COLUMN IF NOT EXISTS sensitive_data_detected BOOLEAN DEFAULT false;
+ALTER TABLE public.conversations ADD COLUMN IF NOT EXISTS sensitive_data_types JSONB DEFAULT '[]'::jsonb;
+ALTER TABLE public.conversations ADD COLUMN IF NOT EXISTS response_accuracy_score INTEGER CHECK (response_accuracy_score IS NULL OR (response_accuracy_score >= 0 AND response_accuracy_score <= 100));
+ALTER TABLE public.conversations ADD COLUMN IF NOT EXISTS audit_reviewed BOOLEAN DEFAULT false;
+ALTER TABLE public.conversations ADD COLUMN IF NOT EXISTS audit_reviewed_at TIMESTAMPTZ;
+
+-- Index for quickly fetching flagged conversations per business
+CREATE INDEX IF NOT EXISTS idx_conversations_flagged ON public.conversations(business_id, flagged);
+
+-- ============================================================================
+-- Table: audit_reports
+-- ============================================================================
+CREATE TABLE IF NOT EXISTS public.audit_reports (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  business_id UUID NOT NULL REFERENCES public.businesses(id) ON DELETE CASCADE,
+  report_date DATE NOT NULL,
+  total_conversations INTEGER NOT NULL DEFAULT 0,
+  flagged_count INTEGER NOT NULL DEFAULT 0,
+  avg_safety_score INTEGER,
+  sensitive_data_incidents INTEGER NOT NULL DEFAULT 0,
+  top_issues JSONB DEFAULT '[]'::jsonb,
+  ai_summary TEXT,
+  generated_at TIMESTAMPTZ DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_audit_reports_business_id ON public.audit_reports(business_id, report_date DESC);
+
+-- RLS for audit_reports
+ALTER TABLE public.audit_reports ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can view own audit reports" ON public.audit_reports
+  FOR SELECT USING (
+    EXISTS (
+      SELECT 1 FROM public.businesses
+      WHERE businesses.id = audit_reports.business_id
+      AND businesses.owner_email = auth.jwt() ->> 'email'
+    )
+  );
+
+CREATE POLICY "Service role can manage audit reports" ON public.audit_reports
+  FOR ALL USING (true);
+
+-- ============================================================================
 -- Row Level Security (RLS) Policies
 -- ============================================================================
 -- Enable RLS on both tables

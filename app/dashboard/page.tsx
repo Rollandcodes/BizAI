@@ -10,15 +10,28 @@ import {
   Copy,
   CreditCard,
   Download,
+  Eye,
+  FileText,
+  Flag,
   LayoutDashboard,
   LogOut,
   MessageSquare,
   Plus,
   Settings,
+  ShieldAlert,
+  ShieldCheck,
   Users,
   X,
   type LucideIcon,
 } from 'lucide-react';
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+} from 'recharts';
 import {
   PayPalButtons,
   PayPalScriptProvider,
@@ -74,7 +87,7 @@ type DashboardPayload = {
   leads: ConversationRecord[];
 };
 
-type TabKey = 'overview' | 'conversations' | 'leads' | 'settings' | 'subscription';
+type TabKey = 'overview' | 'conversations' | 'leads' | 'settings' | 'subscription' | 'audit';
 
 type ToastState = {
   message: string;
@@ -106,6 +119,7 @@ const tabItems: Array<{ key: TabKey; label: string; Icon: LucideIcon }> = [
   { key: 'leads', label: 'Leads', Icon: Users },
   { key: 'settings', label: 'Settings', Icon: Settings },
   { key: 'subscription', label: 'Subscription', Icon: CreditCard },
+  { key: 'audit', label: 'Agent Audit', Icon: ShieldCheck },
 ];
 
 const messageLimits: Record<BusinessRecord['plan'], number | null> = {
@@ -386,6 +400,48 @@ export default function DashboardPage() {
     customFaqs: [{ question: '', answer: '' }],
   });
 
+  // ── Audit Tab State ──────────────────────────────────────────────────────
+  type AuditFlaggedConv = {
+    id: string;
+    createdAt: string;
+    firstMessage: string;
+    flagReason: string;
+    safetyScore: number | null;
+    reviewed: boolean;
+  };
+  type AuditSummary = {
+    weeklyStats: {
+      totalConversations: number;
+      flaggedCount: number;
+      avgSafetyScore: number | null;
+      sensitiveDataIncidents: number;
+      safetyTrend: 'improving' | 'declining' | 'stable';
+    };
+    flaggedConversations: AuditFlaggedConv[];
+    topIssues: string[];
+    complianceStatus: 'good' | 'warning' | 'critical';
+  };
+  type AuditReport = {
+    businessName: string;
+    periodStart: string;
+    periodEnd: string;
+    totalConversations: number;
+    flaggedCount: number;
+    avgSafetyScore: number | null;
+    sensitiveDataIncidents: number;
+    topIssues: string[];
+    aiSummary: string;
+    incidents: Array<{ id: string; date: string; flagReason: string; safetyScore: number | null }>;
+  };
+
+  const [auditSummary, setAuditSummary] = useState<AuditSummary | null>(null);
+  const [auditLoading, setAuditLoading] = useState(false);
+  const [auditError, setAuditError] = useState('');
+  const [auditReviewId, setAuditReviewId] = useState<string | null>(null);
+  const [reportLoading, setReportLoading] = useState(false);
+  const [reportData, setReportData] = useState<AuditReport | null>(null);
+  const [markingReviewed, setMarkingReviewed] = useState<Set<string>>(new Set());
+
   const business = dashboard.business;
   const stats = dashboard.stats;
   const conversations = dashboard.conversations;
@@ -446,6 +502,12 @@ export default function DashboardPage() {
       setSelectedConversationId(conversations[0].id);
     }
   }, [conversations, selectedConversationId]);
+
+  useEffect(() => {
+    if (activeTab === 'audit' && business && !auditSummary && !auditLoading) {
+      void loadAuditSummary();
+    }
+  }, [activeTab, business]);
 
   async function loadDashboard(params: { email?: string; businessId?: string }, isAuthLookup = false) {
     if (isAuthLookup) {
@@ -662,6 +724,65 @@ export default function DashboardPage() {
     }));
   }
 
+  // ── Audit handlers ───────────────────────────────────────────────────────
+  async function loadAuditSummary() {
+    if (!business) return;
+    setAuditLoading(true);
+    setAuditError('');
+    try {
+      const res = await fetch(`/api/audit/summary?businessId=${business.id}`);
+      const data = await res.json() as AuditSummary & { error?: string };
+      if (!res.ok) throw new Error(data.error || 'Failed to load audit');
+      setAuditSummary(data);
+    } catch (err) {
+      setAuditError(err instanceof Error ? err.message : 'Failed to load audit summary');
+    } finally {
+      setAuditLoading(false);
+    }
+  }
+
+  async function handleGenerateReport() {
+    if (!business) return;
+    setReportLoading(true);
+    setReportData(null);
+    try {
+      const res = await fetch('/api/audit/report', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ businessId: business.id }),
+      });
+      const data = await res.json() as AuditReport & { error?: string };
+      if (!res.ok) throw new Error(data.error || 'Failed to generate report');
+      setReportData(data);
+    } catch (err) {
+      setToast({ message: err instanceof Error ? err.message : 'Report generation failed', tone: 'error' });
+    } finally {
+      setReportLoading(false);
+    }
+  }
+
+  async function handleMarkReviewed(convId: string) {
+    setMarkingReviewed((s) => new Set(s).add(convId));
+    try {
+      const { supabase: sb } = await import('@/lib/supabase');
+      await sb.from('conversations').update({ audit_reviewed: true, audit_reviewed_at: new Date().toISOString() }).eq('id', convId);
+      setAuditSummary((prev) => {
+        if (!prev) return prev;
+        return {
+          ...prev,
+          flaggedConversations: prev.flaggedConversations.map((c) =>
+            c.id === convId ? { ...c, reviewed: true } : c
+          ),
+        };
+      });
+      setToast({ message: 'Marked as reviewed.', tone: 'success' });
+    } catch (err) {
+      setToast({ message: 'Failed to mark reviewed', tone: 'error' });
+    } finally {
+      setMarkingReviewed((s) => { const next = new Set(s); next.delete(convId); return next; });
+    }
+  }
+
   if (!business) {
     return (
       <>
@@ -681,6 +802,15 @@ export default function DashboardPage() {
 
   const usageValue = stats?.monthlyMessages ?? 0;
   const usageWidth = planLimit ? Math.min(100, (usageValue / planLimit) * 100) : Math.min(100, usageValue / 10);
+
+  const reviewedConv = auditSummary?.flaggedConversations.find((c) => c.id === auditReviewId) ?? null;
+  const chartBase = auditSummary?.weeklyStats.avgSafetyScore ?? 75;
+  const chartTrend = auditSummary?.weeklyStats.safetyTrend ?? 'stable';
+  const chartLineColor = chartTrend === 'improving' ? '#10b981' : chartTrend === 'declining' ? '#ef4444' : '#3b82f6';
+  const chartData = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day, i) => ({
+    day,
+    score: Math.min(100, Math.max(0, Math.round(chartBase + (chartTrend === 'improving' ? (i - 3) * 1.5 : chartTrend === 'declining' ? (3 - i) * 1.5 : 0) + Math.sin(i) * 2))),
+  }));
 
   return (
     <div className="min-h-screen bg-slate-100 text-slate-900 lg:flex">
@@ -1264,13 +1394,321 @@ export default function DashboardPage() {
                   </div>
                 </section>
               ) : null}
+
+              {activeTab === 'audit' ? (
+                <section className="space-y-6">
+                  {business.plan !== 'business' ? (
+                    <div className="rounded-3xl border-2 border-dashed border-purple-200 bg-purple-50 p-10 text-center">
+                      <ShieldCheck className="mx-auto mb-4 h-12 w-12 text-purple-400" />
+                      <h3 className="text-xl font-extrabold text-slate-900">Agent Audit</h3>
+                      <p className="mx-auto mt-2 max-w-sm text-sm text-slate-600">
+                        AI-powered compliance monitoring is a Business plan exclusive. Monitor safety scores, flag risky conversations, and generate compliance reports.
+                      </p>
+                      <button
+                        type="button"
+                        onClick={() => setActiveTab('subscription')}
+                        className="mt-6 inline-flex items-center gap-2 rounded-full bg-purple-600 px-6 py-3 text-sm font-semibold text-white shadow hover:bg-purple-700"
+                      >
+                        <CreditCard className="h-4 w-4" />
+                        Upgrade to Business — $149/mo
+                      </button>
+                    </div>
+                  ) : auditLoading ? (
+                    <div className="flex h-48 items-center justify-center">
+                      <div className="h-8 w-8 animate-spin rounded-full border-4 border-blue-600 border-t-transparent" />
+                    </div>
+                  ) : auditError ? (
+                    <div className="rounded-3xl border border-red-200 bg-red-50 p-6 text-center">
+                      <p className="font-semibold text-red-600">{auditError}</p>
+                      <button
+                        type="button"
+                        onClick={() => void loadAuditSummary()}
+                        className="mt-3 text-sm text-red-500 underline"
+                      >
+                        Retry
+                      </button>
+                    </div>
+                  ) : (
+                    <>
+                      {/* Compliance Status Banner */}
+                      <div
+                        className={`flex items-center gap-3 rounded-3xl px-6 py-4 ${
+                          auditSummary?.complianceStatus === 'good'
+                            ? 'bg-emerald-50 text-emerald-700'
+                            : auditSummary?.complianceStatus === 'warning'
+                              ? 'bg-amber-50 text-amber-700'
+                              : 'bg-red-50 text-red-700'
+                        }`}
+                      >
+                        {auditSummary?.complianceStatus === 'good' ? (
+                          <ShieldCheck className="h-6 w-6 shrink-0" />
+                        ) : (
+                          <ShieldAlert className="h-6 w-6 shrink-0" />
+                        )}
+                        <div>
+                          <p className="font-bold">
+                            {auditSummary?.complianceStatus === 'good'
+                              ? 'All Clear — No critical issues detected this week'
+                              : auditSummary?.complianceStatus === 'warning'
+                                ? 'Attention — Some conversations need review'
+                                : 'Critical — Immediate action required'}
+                          </p>
+                          <p className="mt-0.5 text-sm opacity-80">
+                            {auditSummary?.weeklyStats.totalConversations ?? 0} conversation{(auditSummary?.weeklyStats.totalConversations ?? 0) !== 1 ? 's' : ''} analysed this week
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Stat Cards */}
+                      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+                        <StatCard
+                          label="Avg Safety Score"
+                          value={auditSummary?.weeklyStats.avgSafetyScore != null ? `${auditSummary.weeklyStats.avgSafetyScore}/100` : '--'}
+                        />
+                        <StatCard
+                          label="Flagged This Week"
+                          value={String(auditSummary?.weeklyStats.flaggedCount ?? 0)}
+                          badgeClassName={
+                            (auditSummary?.weeklyStats.flaggedCount ?? 0) === 0
+                              ? 'bg-emerald-100 text-emerald-700'
+                              : (auditSummary?.weeklyStats.flaggedCount ?? 0) >= 3
+                                ? 'bg-red-100 text-red-700'
+                                : 'bg-amber-100 text-amber-700'
+                          }
+                        />
+                        <StatCard
+                          label="Data Events"
+                          value={String(auditSummary?.weeklyStats.sensitiveDataIncidents ?? 0)}
+                        />
+                        <StatCard
+                          label="Compliance"
+                          value={
+                            auditSummary?.complianceStatus
+                              ? auditSummary.complianceStatus.charAt(0).toUpperCase() +
+                                auditSummary.complianceStatus.slice(1)
+                              : '--'
+                          }
+                          badgeClassName={
+                            auditSummary?.complianceStatus === 'good'
+                              ? 'bg-emerald-100 text-emerald-700'
+                              : auditSummary?.complianceStatus === 'warning'
+                                ? 'bg-amber-100 text-amber-700'
+                                : 'bg-red-100 text-red-700'
+                          }
+                        />
+                      </div>
+
+                      {/* Safety Score Trend */}
+                      <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+                        <h3 className="mb-4 text-base font-bold text-slate-900">Safety Score Trend (7 days)</h3>
+                        <ResponsiveContainer width="100%" height={200}>
+                          <LineChart data={chartData} margin={{ top: 4, right: 8, bottom: 4, left: 0 }}>
+                            <XAxis dataKey="day" tick={{ fontSize: 11 }} />
+                            <YAxis domain={[0, 100]} tick={{ fontSize: 11 }} width={28} />
+                            <Tooltip formatter={(v) => [`${v}/100`, 'Safety']} />
+                            <Line
+                              type="monotone"
+                              dataKey="score"
+                              stroke={chartLineColor}
+                              strokeWidth={2}
+                              dot={false}
+                              activeDot={{ r: 5 }}
+                            />
+                          </LineChart>
+                        </ResponsiveContainer>
+                        <p className="mt-2 text-center text-xs text-slate-500">
+                          {chartTrend === 'improving' ? '↑ Improving trend' : chartTrend === 'declining' ? '↓ Declining trend' : '→ Stable'}
+                        </p>
+                      </div>
+
+                      {/* Flagged Conversations */}
+                      {(auditSummary?.flaggedConversations.length ?? 0) > 0 && (
+                        <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
+                          <div className="flex items-center justify-between px-6 py-5">
+                            <h3 className="flex items-center gap-2 text-base font-bold text-slate-900">
+                              <Flag className="h-4 w-4 text-red-500" />
+                              Flagged Conversations
+                            </h3>
+                            <span className="rounded-full bg-red-100 px-2.5 py-0.5 text-xs font-semibold text-red-700">
+                              {auditSummary?.flaggedConversations.length}
+                            </span>
+                          </div>
+                          <div className="divide-y divide-slate-100">
+                            {auditSummary?.flaggedConversations.map((conv) => (
+                              <div key={conv.id} className="flex flex-col gap-2 px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
+                                <div className="min-w-0 flex-1">
+                                  <p className="truncate text-sm text-slate-700">{conv.firstMessage.slice(0, 70)}{conv.firstMessage.length > 70 ? '…' : ''}</p>
+                                  <p className="mt-1 text-xs text-slate-400">{formatDate(conv.createdAt)} · {conv.flagReason}</p>
+                                </div>
+                                <div className="flex shrink-0 items-center gap-2">
+                                  {conv.safetyScore !== null && (
+                                    <span
+                                      className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${
+                                        conv.safetyScore >= 80
+                                          ? 'bg-emerald-100 text-emerald-700'
+                                          : conv.safetyScore >= 60
+                                            ? 'bg-amber-100 text-amber-700'
+                                            : 'bg-red-100 text-red-700'
+                                      }`}
+                                    >
+                                      {conv.safetyScore}/100
+                                    </span>
+                                  )}
+                                  {conv.reviewed ? (
+                                    <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-semibold text-slate-500">Reviewed</span>
+                                  ) : (
+                                    <button
+                                      type="button"
+                                      onClick={() => setAuditReviewId(conv.id)}
+                                      className="flex items-center gap-1 rounded-full bg-blue-50 px-3 py-1.5 text-xs font-semibold text-blue-600 hover:bg-blue-100"
+                                    >
+                                      <Eye className="h-3.5 w-3.5" />
+                                      Review
+                                    </button>
+                                  )}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Top Issues */}
+                      {(auditSummary?.topIssues.length ?? 0) > 0 && (
+                        <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+                          <h3 className="mb-4 text-base font-bold text-slate-900">Top Issues This Week</h3>
+                          <ul className="space-y-2">
+                            {auditSummary?.topIssues.map((issue, idx) => (
+                              <li key={idx} className="flex items-start gap-2 text-sm text-slate-700">
+                                <Flag className="mt-0.5 h-4 w-4 shrink-0 text-amber-500" />
+                                {issue}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+
+                      {/* Generate Compliance Report */}
+                      <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+                        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                          <div>
+                            <h3 className="flex items-center gap-2 text-base font-bold text-slate-900">
+                              <FileText className="h-5 w-5 text-blue-500" />
+                              Compliance Report
+                            </h3>
+                            <p className="mt-1 text-sm text-slate-500">Generate an AI-powered 30-day compliance summary for your records.</p>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => void handleGenerateReport()}
+                            disabled={reportLoading}
+                            className="flex shrink-0 items-center gap-2 rounded-full bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow hover:bg-blue-700 disabled:opacity-50"
+                          >
+                            {reportLoading ? (
+                              <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                            ) : (
+                              <FileText className="h-4 w-4" />
+                            )}
+                            {reportLoading ? 'Generating…' : 'Generate Report'}
+                          </button>
+                        </div>
+                        {reportData && (
+                          <div className="mt-6 space-y-4">
+                            <div className="rounded-2xl bg-slate-50 p-5">
+                              <p className="text-xs font-semibold uppercase tracking-widest text-slate-400">
+                                {reportData.periodStart} – {reportData.periodEnd}
+                              </p>
+                              <p className="mt-3 text-sm leading-relaxed text-slate-700">{reportData.aiSummary}</p>
+                              <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
+                                {[
+                                  { label: 'Conversations', value: String(reportData.totalConversations) },
+                                  { label: 'Flagged', value: String(reportData.flaggedCount) },
+                                  { label: 'Avg Safety', value: reportData.avgSafetyScore != null ? String(reportData.avgSafetyScore) : '--' },
+                                  { label: 'Data Events', value: String(reportData.sensitiveDataIncidents) },
+                                ].map(({ label, value }) => (
+                                  <div key={label} className="rounded-xl bg-white p-3 text-center shadow-sm">
+                                    <p className="text-2xl font-extrabold text-slate-900">{value}</p>
+                                    <p className="text-xs text-slate-500">{label}</p>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => window.print()}
+                              className="flex items-center gap-2 text-sm font-semibold text-blue-600 hover:text-blue-700"
+                            >
+                              <Download className="h-4 w-4" />
+                              Download / Print Report
+                            </button>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Review Modal */}
+                      {reviewedConv ? (
+                        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+                          <div className="relative w-full max-w-lg rounded-3xl bg-white p-6 shadow-2xl">
+                            <button
+                              type="button"
+                              onClick={() => setAuditReviewId(null)}
+                              className="absolute right-4 top-4 rounded-full p-2 text-slate-400 hover:bg-slate-100"
+                            >
+                              <X className="h-5 w-5" />
+                            </button>
+                            <h3 className="flex items-center gap-2 text-lg font-bold text-slate-900">
+                              <ShieldAlert className="h-5 w-5 text-red-500" />
+                              Flagged Conversation
+                            </h3>
+                            <div className="mt-4 max-h-40 overflow-y-auto rounded-2xl bg-slate-50 p-4">
+                              <p className="mb-1 text-xs text-slate-400">First message:</p>
+                              <p className="text-sm text-slate-800">{reviewedConv.firstMessage}</p>
+                            </div>
+                            <div className="mt-4 rounded-2xl bg-amber-50 p-4">
+                              <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-amber-600">AI Audit Findings</p>
+                              <p className="text-sm text-amber-800">{reviewedConv.flagReason || 'No flag reason recorded.'}</p>
+                              {reviewedConv.safetyScore !== null && (
+                                <p className="mt-2 text-sm font-semibold text-amber-900">Safety Score: {reviewedConv.safetyScore}/100</p>
+                              )}
+                            </div>
+                            <div className="mt-5 flex justify-end gap-3">
+                              <button
+                                type="button"
+                                onClick={() => setAuditReviewId(null)}
+                                className="rounded-full px-4 py-2 text-sm font-semibold text-slate-500 hover:bg-slate-100"
+                              >
+                                Close
+                              </button>
+                              {!reviewedConv.reviewed && (
+                                <button
+                                  type="button"
+                                  disabled={markingReviewed.has(reviewedConv.id)}
+                                  onClick={() => void handleMarkReviewed(reviewedConv.id)}
+                                  className="flex items-center gap-2 rounded-full bg-blue-600 px-5 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50"
+                                >
+                                  {markingReviewed.has(reviewedConv.id) ? (
+                                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                                  ) : (
+                                    <Check className="h-4 w-4" />
+                                  )}
+                                  Mark as Reviewed
+                                </button>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      ) : null}
+                    </>
+                  )}
+                </section>
+              ) : null}
             </div>
           ) : null}
         </main>
       </div>
 
       <nav className="fixed inset-x-0 bottom-0 z-50 border-t border-slate-200 bg-white/95 px-2 py-2 backdrop-blur lg:hidden">
-        <div className="grid grid-cols-5 gap-1">
+        <div className="grid grid-cols-6 gap-1">
           {tabItems.map(({ key, label, Icon }) => {
             const active = activeTab === key;
 

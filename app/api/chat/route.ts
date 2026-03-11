@@ -3,6 +3,7 @@ import OpenAI from 'openai';
 import { assertSupabaseConfig, createServerClient } from '@/lib/supabase';
 import { getNicheConfig, interpolateNicheConfig } from '@/lib/niches';
 import { Business, ConversationMessage, Conversation } from '@/lib/supabase';
+import { analyzeConversation } from '@/lib/auditAnalyzer';
 
 const supabase = createServerClient();
 
@@ -119,6 +120,29 @@ async function updateConversation(
   if (error) {
     throw new Error(`Failed to update conversation: ${error.message}`);
   }
+}
+
+/**
+ * Runs audit analysis in the background and persists results to Supabase.
+ * Should never be awaited from the request handler.
+ */
+async function analyzeAndSaveAudit(
+  conversationId: string,
+  messages: Array<{ role: string; content: string }>,
+  businessConfig: { businessName: string; businessType: string; systemPrompt: string; allowedTopics: string[] }
+): Promise<void> {
+  const result = await analyzeConversation(messages, businessConfig);
+  const client = createServerClient();
+  await client
+    .from('conversations')
+    .update({
+      ai_safety_score: result.safetyScore,
+      flagged: result.flagged,
+      flag_reason: result.flagReasons.join(', ') || null,
+      sensitive_data_detected: result.sensitiveDataDetected,
+      sensitive_data_types: result.sensitiveDataTypes,
+    })
+    .eq('id', conversationId);
 }
 
 // ============================================================================
@@ -287,7 +311,22 @@ Additional context:
     );
 
     // ========================================================================
-    // 10. Return response
+    // 10. Background audit (4+ messages OR lead captured)
+    // ========================================================================
+    if (updatedMessages.length >= 4 || hasLeadInfo) {
+      const businessConfig = {
+        businessName: business.business_name,
+        businessType: business.business_type || 'general',
+        systemPrompt: business.system_prompt || '',
+        allowedTopics: [],
+      };
+      analyzeAndSaveAudit(conversationId, updatedMessages, businessConfig).catch(
+        (err) => console.error('Background audit failed:', err)
+      );
+    }
+
+    // ========================================================================
+    // 11. Return response
     // ========================================================================
     return NextResponse.json({
       reply,
