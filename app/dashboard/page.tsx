@@ -127,9 +127,9 @@ function emptyPayload(): DashboardPayload {
 function getPlanBadgeClasses(plan: BusinessRecord['plan']) {
   const styles: Record<BusinessRecord['plan'], string> = {
     trial: 'bg-slate-100 text-slate-700',
-    basic: 'bg-blue-100 text-blue-700',
-    pro: 'bg-violet-100 text-violet-700',
-    business: 'bg-amber-100 text-amber-700',
+    basic: 'bg-green-100 text-green-700',
+    pro: 'bg-blue-100 text-blue-700',
+    business: 'bg-purple-100 text-purple-700',
   };
 
   return styles[plan] || styles.trial;
@@ -275,7 +275,7 @@ function AccessGate({
 
         {error ? (
           <div className="mt-5 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
-            <p>No account found. Sign up first.</p>
+            <p>No account found. Sign up first or contact <a href="mailto:bizaicyprus123@gmail.com" className="font-semibold text-blue-700 hover:underline">bizaicyprus123@gmail.com</a></p>
             <Link href="/#pricing" className="mt-2 inline-flex font-semibold text-blue-700 hover:underline">
               View pricing
             </Link>
@@ -399,7 +399,7 @@ export default function DashboardPage() {
       return '';
     }
 
-    return `<script>\n  window.BizAIConfig = { businessId: "${business.id}" }\n</script>\n<script src="https://bizai.vercel.app/widget.js"></script>`;
+    return `<script>\n  window.BizAIConfig = { businessId: "${business.id}" }\n</script>\n<script src="https://biz-ai-u4n3.vercel.app/widget.js"></script>`;
   }, [business]);
 
   useEffect(() => {
@@ -713,6 +713,7 @@ export default function DashboardPage() {
         <div className="mx-4 h-px bg-white/10" />
 
         <div className="p-4">
+          <p className="mb-2 truncate px-4 text-xs font-medium text-slate-400">{business?.owner_email}</p>
           <button
             type="button"
             onClick={handleLogout}
@@ -728,8 +729,19 @@ export default function DashboardPage() {
         <header className="border-b border-slate-200 bg-white px-4 py-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between gap-4">
             <div>
-              <p className="text-sm font-medium text-slate-500">Business owner dashboard</p>
-              <h1 className="text-2xl font-extrabold text-slate-900">{business?.business_name || 'BizAI Dashboard'}</h1>
+              <div className="flex items-center gap-3">
+                <h1 className="text-2xl font-extrabold text-slate-900">
+                  Good morning, {business?.business_name || 'BizAI'} 👋
+                </h1>
+                <span className={`hidden rounded-full px-3 py-1 text-xs font-semibold sm:inline-flex ${getPlanBadgeClasses(business.plan)}`}>
+                  {currentPlanName}
+                </span>
+                {(business.plan === 'trial' || business.plan === 'basic') ? (
+                  <Link href="/#pricing" className="hidden text-xs font-semibold text-blue-600 hover:underline sm:inline-flex">
+                    Upgrade ↑
+                  </Link>
+                ) : null}
+              </div>
             </div>
             <div className="flex items-center gap-3">
               <span className="hidden rounded-full bg-slate-100 px-3 py-1.5 text-sm font-medium text-slate-600 sm:inline-flex">
