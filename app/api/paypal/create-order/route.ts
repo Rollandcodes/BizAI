@@ -6,6 +6,7 @@ const PAYPAL_BASE =
     : 'https://api-m.sandbox.paypal.com';
 
 const PLANS = {
+  starter:  { price: '29.00',  name: 'BizAI Starter Plan' },
   basic:    { price: '29.00',  name: 'BizAI Basic Plan' },
   pro:      { price: '79.00',  name: 'BizAI Pro Plan' },
   business: { price: '149.00', name: 'BizAI Business Plan' },

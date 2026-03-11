@@ -6,6 +6,7 @@ import { Check } from 'lucide-react';
 import { PLANS } from '@/lib/plans';
 
 const PLAN_STYLES: Record<string, { badge: string; dot: string }> = {
+  starter: { badge: 'bg-green-50 text-green-700 border-green-200', dot: 'bg-green-500' },
   basic: { badge: 'bg-slate-100 text-slate-700 border-slate-200', dot: 'bg-slate-400' },
   pro:   { badge: 'bg-blue-50 text-blue-700 border-blue-200',     dot: 'bg-blue-500' },
   business: { badge: 'bg-violet-50 text-violet-700 border-violet-200', dot: 'bg-violet-500' },

@@ -15,6 +15,18 @@ export interface Plan {
 }
 
 export const PLANS: Record<string, Plan> = {
+  starter: {
+    id: 'starter',
+    name: 'Starter',
+    price: '29.00',
+    description: 'AI Assistant Starter - 500 messages/month',
+    features: [
+      '500 messages/month',
+      'Website chat widget',
+      'Lead capture',
+      'Email support',
+    ],
+  },
   basic: {
     id: 'basic',
     name: 'Basic',

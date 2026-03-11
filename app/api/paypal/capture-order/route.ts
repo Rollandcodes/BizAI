@@ -94,6 +94,9 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     }
     const supabase = createClient(supabaseUrl, serviceKey);
 
+    // Map 'starter' to 'basic' for DB (CHECK constraint uses 'basic')
+    const dbPlan = planId === 'starter' ? 'basic' : planId;
+
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + 37); // 7-day trial + 30 days
 
@@ -107,7 +110,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
           owner_name:             signupData.yourName,
           whatsapp:               signupData.whatsapp,
           website:                signupData.website || null,
-          plan:                   planId,
+          plan:                   dbPlan,
           plan_expires_at:        expiresAt.toISOString(),
           paypal_subscription_id: orderID,
           widget_color:           '#2563eb',

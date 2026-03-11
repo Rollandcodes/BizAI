@@ -1,6 +1,7 @@
 ﻿'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import {
   BarChart2,
   Check,
@@ -262,6 +263,7 @@ export default function Home() {
   const [openFaqId, setOpenFaqId] = useState<string | null>('q1');
   const [scrolled, setScrolled] = useState(false);
   const [visibleSections, setVisibleSections] = useState<Set<string>>(new Set());
+  const router = useRouter();
 
   const dictionary = getDictionary(locale);
 
@@ -307,6 +309,7 @@ export default function Home() {
             <a href="#pricing" className="transition hover:text-slate-900">Pricing</a>
             <a href="#how-it-works" className="transition hover:text-slate-900">How It Works</a>
             <a href="#faq" className="transition hover:text-slate-900">FAQ</a>
+            <a href="/dashboard" className="font-semibold text-blue-600 transition hover:text-blue-700">Dashboard</a>
           </nav>
           <div className="hidden items-center gap-3 md:flex">
             <a href={WA_LINK} target="_blank" rel="noreferrer" aria-label="Chat on WhatsApp" className="flex h-9 w-9 items-center justify-center rounded-full text-[#25D366] transition hover:bg-green-50">
@@ -322,7 +325,7 @@ export default function Home() {
         {mobileMenuOpen && (
           <div className="border-t border-slate-100 bg-white px-4 pb-5 pt-3 md:hidden">
             <nav className="flex flex-col gap-1 text-sm font-semibold text-slate-700">
-              {[{ label: 'Features', href: '#features' }, { label: 'Pricing', href: '#pricing' }, { label: 'How It Works', href: '#how-it-works' }, { label: 'FAQ', href: '#faq' }].map(({ label, href }) => (
+              {[{ label: 'Features', href: '#features' }, { label: 'Pricing', href: '#pricing' }, { label: 'How It Works', href: '#how-it-works' }, { label: 'FAQ', href: '#faq' }, { label: 'Dashboard', href: '/dashboard' }].map(({ label, href }) => (
                 <a key={label} href={href} onClick={() => setMobileMenuOpen(false)} className="rounded-lg px-3 py-2.5 transition hover:bg-slate-50">{label}</a>
               ))}
               <div className="mt-3 flex gap-2">
@@ -350,9 +353,9 @@ export default function Home() {
                   Deploy a 24/7 AI assistant that answers customers, captures leads, and books appointments — on your website and WhatsApp. Live in 24 hours.
                 </p>
                 <div className="mt-8 flex flex-wrap items-center gap-3">
-                  <a href="#pricing" className="inline-flex items-center justify-center rounded-lg bg-blue-600 px-6 py-3 text-sm font-semibold text-white shadow-sm transition hover:scale-[1.02] hover:bg-blue-700">
-                    Build Your Agent Free →
-                  </a>
+                  <button type="button" onClick={() => router.push('/signup?plan=pro')} className="inline-flex items-center justify-center rounded-lg bg-blue-600 px-6 py-3 text-sm font-semibold text-white shadow-sm transition hover:scale-[1.02] hover:bg-blue-700">
+                    Start Free Trial →
+                  </button>
                   <button type="button" onClick={() => setDemoOpen(true)} className="inline-flex items-center justify-center rounded-lg border border-slate-200 bg-white px-6 py-3 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50">
                     See Live Demo
                   </button>

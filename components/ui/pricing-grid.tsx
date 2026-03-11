@@ -12,7 +12,7 @@ import { trackEvent } from '@/lib/analytics';
 import type { Dictionary } from '@/lib/i18n';
 
 type Plan = {
-  id: 'basic' | 'pro' | 'business';
+  id: 'starter' | 'pro' | 'business';
   title: string;
   monthly: number;
   description: string;
@@ -24,7 +24,7 @@ type Props = {
 };
 
 const yearlySavings: Record<Plan['id'], number> = {
-  basic: 58,
+  starter: 58,
   pro: 158,
   business: 298,
 };
@@ -40,7 +40,7 @@ export function PricingGrid({ dictionary }: Props) {
 
   const plans: Plan[] = [
     {
-      id: 'basic',
+      id: 'starter',
       title: dictionary.starter,
       monthly: 29,
       description: 'For new businesses',
@@ -169,7 +169,7 @@ export function PricingGrid({ dictionary }: Props) {
                   }}
                   className={`mt-6 w-full rounded-xl px-4 py-3 text-sm font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0F6B66] ${highlighted ? 'bg-[#0F6B66] text-white hover:bg-[#0b5450]' : 'border border-slate-300 text-slate-800 hover:bg-slate-50'}`}
                 >
-                  Start {plan.title} Plan
+                  Start Free Trial
                 </button>
               </article>
             );
@@ -279,7 +279,7 @@ function PayPalCheckoutButtons({
   onPaymentError,
   onSuccess,
 }: {
-  planId: 'basic' | 'pro' | 'business';
+  planId: 'starter' | 'pro' | 'business';
   customerEmail: string;
   onPaymentError: (message: string) => void;
   onSuccess: () => void;
