@@ -3,8 +3,13 @@
 import { useState } from 'react';
 import { ArrowRight, PlayCircle, X } from 'lucide-react';
 import { trackEvent } from '@/lib/analytics';
+import type { Dictionary } from '@/lib/i18n';
 
-export function HeroV2() {
+type Props = {
+  dictionary: Dictionary;
+};
+
+export function HeroV2({ dictionary }: Props) {
   const [isDemoOpen, setIsDemoOpen] = useState(false);
 
   function handlePrimaryCta() {
@@ -20,39 +25,39 @@ export function HeroV2() {
     <section className="relative overflow-hidden bg-[var(--color-neutral)] pb-14 pt-24 md:pb-20 md:pt-32">
       <div aria-hidden className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(15,107,102,0.16),transparent_45%)]" />
       <div className="relative mx-auto grid max-w-6xl grid-cols-1 items-center gap-8 px-4 md:gap-12 lg:grid-cols-2 lg:px-6">
-        <div className="order-1 flex flex-col gap-5 lg:order-1">
+        <div className="order-1 flex flex-col gap-5">
           <p className="inline-flex w-fit rounded-full border border-[#0F6B66]/20 bg-white px-3 py-1 text-xs font-semibold text-[#0F6B66]">
-            Built for Northern Cyprus businesses
+            {dictionary.heroBadge}
           </p>
           <h1 className="text-4xl font-extrabold leading-tight text-slate-900 md:text-5xl">
-            Your AI assistant that never misses a customer.
+            {dictionary.heroTitle}
           </h1>
           <p className="max-w-xl text-base leading-7 text-slate-600 md:text-lg">
-            Go live in 24 hours with a multilingual chatbot for car rentals, barbershops, clinics, and restaurants.
+            {dictionary.heroSubtitle}
           </p>
 
           <div className="order-1 flex flex-col gap-3 sm:flex-row">
             <a
               href="#pricing"
               onClick={handlePrimaryCta}
-              aria-label="Get Live in 24 Hours"
+              aria-label={dictionary.ctaButton}
               className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#0F6B66] px-6 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-[#0b5450] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0F6B66]"
             >
-              Get Live in 24 Hours
+              {dictionary.ctaButton}
               <ArrowRight className="h-4 w-4" />
             </a>
             <button
               type="button"
               onClick={openDemo}
-              aria-label="See a Live Demo"
+              aria-label={dictionary.heroSecondaryCta}
               className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-6 py-3 text-sm font-semibold text-slate-800 transition hover:bg-slate-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0F6B66]"
             >
-              See a Live Demo
+              {dictionary.heroSecondaryCta}
               <PlayCircle className="h-4 w-4" />
             </button>
           </div>
 
-          <p className="text-xs text-slate-500">No technical setup on your side. We configure, train, and test everything.</p>
+          <p className="text-xs text-slate-500">{dictionary.heroMicrotrust}</p>
 
           <div className="flex items-center gap-4">
             <div className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-700">DriveEasy Rentals</div>
@@ -60,23 +65,23 @@ export function HeroV2() {
           </div>
         </div>
 
-        <div className="order-2 lg:order-2">
+        <div className="order-2">
           <button
             type="button"
             onClick={openDemo}
-            aria-label="Play Demo"
+            aria-label={dictionary.playDemo}
             className="group w-full rounded-2xl border border-slate-200 bg-white p-4 text-left shadow-sm transition hover:shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0F6B66]"
           >
             <div className="mb-3 flex items-center justify-between">
               <p className="text-sm font-semibold text-slate-900">DriveEasy Car Rentals</p>
-              <span className="text-xs font-medium text-[#0F6B66]">Play Demo</span>
+              <span className="text-xs font-medium text-[#0F6B66]">{dictionary.playDemo}</span>
             </div>
             <div className="space-y-2 rounded-xl bg-slate-50 p-3 text-sm">
-              <p className="w-fit max-w-[90%] rounded-xl rounded-tl-sm bg-white px-3 py-2 text-slate-700 shadow-sm">Hi, do you have a car for this weekend?</p>
-              <p className="ml-auto w-fit max-w-[90%] rounded-xl rounded-tr-sm bg-[#0F6B66] px-3 py-2 text-white">Yes, 3 options available. Want me to reserve one?</p>
-              <p className="w-fit max-w-[90%] rounded-xl rounded-tl-sm bg-white px-3 py-2 text-slate-700 shadow-sm">Great. Please share your name and phone.</p>
+              <p className="w-fit max-w-[90%] rounded-xl rounded-tl-sm bg-white px-3 py-2 text-slate-700 shadow-sm">👋 {dictionary.demoCustomer1}</p>
+              <p className="ml-auto w-fit max-w-[90%] rounded-xl rounded-tr-sm bg-[#0F6B66] px-3 py-2 text-white">{dictionary.demoAi1}</p>
+              <p className="w-fit max-w-[90%] rounded-xl rounded-tl-sm bg-white px-3 py-2 text-slate-700 shadow-sm">{dictionary.demoCustomer2}</p>
+              <p className="ml-auto w-fit max-w-[90%] rounded-xl rounded-tr-sm bg-[#0F6B66] px-3 py-2 text-white">{dictionary.demoAi2}</p>
             </div>
-            <p className="mt-3 text-xs text-slate-500">Interactive demo modal opens on click.</p>
           </button>
         </div>
       </div>
@@ -85,7 +90,7 @@ export function HeroV2() {
         <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/60 p-4">
           <div className="w-full max-w-lg rounded-2xl bg-white p-5 shadow-2xl">
             <div className="mb-4 flex items-center justify-between">
-              <h3 className="text-lg font-bold text-slate-900">Live Demo Conversation</h3>
+              <h3 className="text-lg font-bold text-slate-900">{dictionary.demoTitle}</h3>
               <button
                 type="button"
                 onClick={() => setIsDemoOpen(false)}
@@ -97,10 +102,10 @@ export function HeroV2() {
             </div>
 
             <div className="space-y-3 rounded-xl bg-slate-50 p-4 text-sm">
-              <p className="w-fit max-w-[80%] rounded-xl rounded-tl-sm bg-white px-3 py-2 text-slate-700">Hello, I need a small automatic car for Friday to Sunday.</p>
-              <p className="ml-auto w-fit max-w-[80%] rounded-xl rounded-tr-sm bg-[#0F6B66] px-3 py-2 text-white">Great choice. We have a Toyota Yaris available. Pickup in Kyrenia?</p>
-              <p className="w-fit max-w-[80%] rounded-xl rounded-tl-sm bg-white px-3 py-2 text-slate-700">Yes. What is the total price?</p>
-              <p className="ml-auto w-fit max-w-[80%] rounded-xl rounded-tr-sm bg-[#0F6B66] px-3 py-2 text-white">90 EUR total with insurance included. Share your name and phone and I will reserve it now.</p>
+              <p className="w-fit max-w-[80%] rounded-xl rounded-tl-sm bg-white px-3 py-2 text-slate-700">{dictionary.demoCustomer1}</p>
+              <p className="ml-auto w-fit max-w-[80%] rounded-xl rounded-tr-sm bg-[#0F6B66] px-3 py-2 text-white">{dictionary.demoAi1}</p>
+              <p className="w-fit max-w-[80%] rounded-xl rounded-tl-sm bg-white px-3 py-2 text-slate-700">{dictionary.demoCustomer2}</p>
+              <p className="ml-auto w-fit max-w-[80%] rounded-xl rounded-tr-sm bg-[#0F6B66] px-3 py-2 text-white">{dictionary.demoAi2}</p>
             </div>
           </div>
         </div>
