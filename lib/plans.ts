@@ -59,6 +59,11 @@ export const PLANS: Record<string, Plan> = {
     description: 'AI Assistant Business - Full Suite',
     features: [
       'Everything in Pro',
+      'Agent Audit Dashboard',
+      'Weekly Safety Score Report',
+      'Flagged Conversation Alerts',
+      'Monthly Compliance PDF Export',
+      'Sensitive Data Monitoring',
       'Multiple locations',
       'White-label',
       'Custom integrations',

@@ -53,8 +53,11 @@ const plans = [
     buttonText: "Contact sales",
     buttonVariant: "outline" as const,
     includes: [
-      "Everything in Professional, plus:",
-      "White-label solution",
+      "Everything in Professional, plus:",      "Agent Audit Dashboard",
+      "Weekly Safety Score Report",
+      "Flagged Conversation Alerts",
+      "Monthly Compliance PDF Export",
+      "Sensitive Data Monitoring",      "White-label solution",
       "Custom integrations",
       "Phone support",
       "Dedicated account manager",

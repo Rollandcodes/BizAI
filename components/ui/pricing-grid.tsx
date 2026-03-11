@@ -58,7 +58,7 @@ export function PricingGrid({ dictionary }: Props) {
       title: dictionary.business,
       monthly: 149,
       description: 'For multi-location operations',
-      features: ['Everything in Pro', 'Multi-location setup', 'Custom integrations', 'Phone support'],
+      features: ['Everything in Pro', 'Agent Audit Dashboard', 'Weekly Safety Score Report', 'Flagged Conversation Alerts', 'Monthly Compliance PDF Export', 'Sensitive Data Monitoring', 'Multi-location setup', 'Custom integrations', 'Phone support'],
     },
   ];
 
