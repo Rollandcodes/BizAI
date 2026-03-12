@@ -201,6 +201,46 @@ CREATE POLICY "Service role full access to broadcasts" ON public.broadcasts
   FOR ALL USING (auth.role() = 'service_role');
 
 -- ============================================================================
+-- Bookings Table (car rental & booking-based businesses)
+-- ============================================================================
+CREATE TABLE IF NOT EXISTS public.bookings (
+  id             UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  business_id    UUID NOT NULL REFERENCES public.businesses(id) ON DELETE CASCADE,
+  session_id     TEXT NOT NULL,
+  customer_name  TEXT NOT NULL,
+  customer_phone TEXT NOT NULL,
+  pickup_date    TEXT NOT NULL,
+  return_date    TEXT NOT NULL,
+  car_type       TEXT NOT NULL DEFAULT 'Standard',
+  total_days     INTEGER NOT NULL DEFAULT 1,
+  status         TEXT NOT NULL DEFAULT 'pending'
+                   CHECK (status IN ('pending', 'confirmed', 'declined')),
+  created_at     TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_bookings_business_id ON public.bookings (business_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_bookings_status ON public.bookings (business_id, status);
+
+ALTER TABLE public.bookings ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Business owners can manage own bookings" ON public.bookings
+  FOR ALL USING (
+    EXISTS (
+      SELECT 1 FROM public.businesses
+      WHERE businesses.id = bookings.business_id
+      AND businesses.owner_email = auth.jwt() ->> 'email'
+    )
+  );
+
+-- Service role has full access (used by API routes)
+CREATE POLICY "Service role full access to bookings" ON public.bookings
+  FOR ALL USING (auth.role() = 'service_role');
+
+-- Widget can create bookings (triggered by chat AI)
+CREATE POLICY "Anyone can create booking" ON public.bookings
+  FOR INSERT WITH CHECK (true);
+
+-- ============================================================================
 -- Storage Bucket (Optional - for widget customization assets)
 -- ============================================================================
 -- Uncomment if you want to store business logos/assets

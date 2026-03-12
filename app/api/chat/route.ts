@@ -278,11 +278,16 @@ Additional context:
     const reply =
       completion.choices[0]?.message?.content || 'Unable to generate response';
 
+    // Strip booking marker so the customer only sees the confirmation message
+    const BOOKING_MARKER = '[BOOKING_READY]';
+    const markerIdx = reply.indexOf(BOOKING_MARKER);
+    const cleanReply = markerIdx >= 0 ? reply.slice(0, markerIdx).trim() : reply;
+
     // ========================================================================
     // 7. Check for lead capture (phone/name/email in response)
     // ========================================================================
     const hasLeadInfo =
-      containsLeadInfo(message) || containsLeadInfo(reply);
+      containsLeadInfo(message) || containsLeadInfo(cleanReply);
 
     // ========================================================================
     // 8. Get or create conversation
@@ -301,7 +306,7 @@ Additional context:
         content: msg.content,
       })),
       { role: 'user', content: message },
-      { role: 'assistant', content: reply },
+      { role: 'assistant', content: cleanReply },
     ];
 
     await updateConversation(
@@ -326,10 +331,40 @@ Additional context:
     }
 
     // ========================================================================
-    // 11. Return response
+    // 11. Save booking if AI collected all booking details
+    // ========================================================================
+    if (markerIdx >= 0) {
+      const jsonFragment = reply.slice(markerIdx + BOOKING_MARKER.length).trim();
+      try {
+        const bookingData = JSON.parse(jsonFragment) as {
+          name: string;
+          phone: string;
+          pickupDate: string;
+          returnDate: string;
+          carType: string;
+          totalDays: number;
+        };
+        await supabase.from('bookings').insert({
+          business_id: businessId,
+          session_id: sessionId,
+          customer_name: bookingData.name,
+          customer_phone: bookingData.phone,
+          pickup_date: bookingData.pickupDate,
+          return_date: bookingData.returnDate,
+          car_type: bookingData.carType,
+          total_days: bookingData.totalDays,
+          status: 'pending',
+        });
+      } catch (parseErr) {
+        console.error('Booking parse/save error:', parseErr);
+      }
+    }
+
+    // ========================================================================
+    // 12. Return response
     // ========================================================================
     return NextResponse.json({
-      reply,
+      reply: cleanReply,
       sessionId,
     } as ChatResponse);
   } catch (error) {
