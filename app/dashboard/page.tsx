@@ -74,7 +74,7 @@ type BusinessRecord = {
   business_name: string;
   business_type?: string | null;
   widget_color?: string | null;
-  plan: 'trial' | 'basic' | 'pro' | 'business';
+  plan: 'trial' | 'starter' | 'pro' | 'business';
   plan_expires_at?: string | null;
   customInstructions?: string;
   customFaqs?: CustomFaq[];
@@ -146,7 +146,7 @@ const tabItems: Array<{ key: TabKey; label: string; Icon: LucideIcon }> = [
 
 const messageLimits: Record<BusinessRecord['plan'], number | null> = {
   trial: 100,
-  basic: 500,
+  starter: 500,
   pro: null,
   business: null,
 };
@@ -163,7 +163,7 @@ function emptyPayload(): DashboardPayload {
 function getPlanBadgeClasses(plan: BusinessRecord['plan']) {
   const styles: Record<BusinessRecord['plan'], string> = {
     trial: 'bg-slate-100 text-slate-700',
-    basic: 'bg-green-100 text-green-700',
+    starter: 'bg-green-100 text-green-700',
     pro: 'bg-blue-100 text-blue-700',
     business: 'bg-purple-100 text-purple-700',
   };
@@ -174,7 +174,7 @@ function getPlanBadgeClasses(plan: BusinessRecord['plan']) {
 function getPlanDisplayName(plan: BusinessRecord['plan']) {
   const names: Record<BusinessRecord['plan'], string> = {
     trial: 'Trial',
-    basic: 'Basic',
+    starter: 'Starter',
     pro: 'Pro',
     business: 'Business',
   };
@@ -340,7 +340,7 @@ function UpgradeCheckoutButtons({
   onSuccess,
   onError,
 }: {
-  planId: 'basic' | 'pro' | 'business';
+  planId: 'starter' | 'pro' | 'business';
   email: string;
   onSuccess: () => Promise<void>;
   onError: (message: string) => void;
@@ -412,7 +412,7 @@ export default function DashboardPage() {
   const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null);
   const [updatingLeadIds, setUpdatingLeadIds] = useState<Set<string>>(new Set());
   const [toast, setToast] = useState<ToastState | null>(null);
-  const [selectedUpgradePlan, setSelectedUpgradePlan] = useState<'basic' | 'pro' | 'business'>('pro');
+  const [selectedUpgradePlan, setSelectedUpgradePlan] = useState<'starter' | 'pro' | 'business'>('pro');
   const [paymentError, setPaymentError] = useState('');
   const [settingsForm, setSettingsForm] = useState<SettingsFormState>({
     businessName: '',
@@ -551,8 +551,8 @@ export default function DashboardPage() {
       customFaqs: business.customFaqs && business.customFaqs.length > 0 ? business.customFaqs : [{ question: '', answer: '' }],
     });
 
-    const eligiblePlan = business.plan === 'trial' ? 'basic' : business.plan;
-    setSelectedUpgradePlan((eligiblePlan as 'basic' | 'pro' | 'business') || 'pro');
+    const eligiblePlan = business.plan === 'trial' ? 'starter' : business.plan;
+    setSelectedUpgradePlan((eligiblePlan as 'starter' | 'pro' | 'business') || 'pro');
 
     // Eagerly load bookings so the sidebar badge count is ready on all tabs
     if (!bookingsInitialized && !bookingsLoading) {
@@ -1113,7 +1113,7 @@ export default function DashboardPage() {
                 <span className={`hidden rounded-full px-3 py-1 text-xs font-semibold sm:inline-flex ${getPlanBadgeClasses(business.plan)}`}>
                   {currentPlanName}
                 </span>
-                {(business.plan === 'trial' || business.plan === 'basic') ? (
+                {(business.plan === 'trial' || business.plan === 'starter') ? (
                   <Link href="/#pricing" className="hidden text-xs font-semibold text-blue-600 hover:underline sm:inline-flex">
                     Upgrade ↑
                   </Link>
@@ -1909,130 +1909,161 @@ export default function DashboardPage() {
 
               {activeTab === 'subscription' ? (
                 <section className="space-y-6">
-                  <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-                    <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-                      <div>
-                        <p className="text-sm font-semibold uppercase tracking-[0.2em] text-blue-600">Current plan</p>
-                        <h2 className="mt-2 text-2xl font-extrabold text-slate-900">{currentPlanName}</h2>
-                        <p className="mt-1 text-sm text-slate-500">
-                          ${currentPlanPrice}/month
-                          {business.plan_expires_at ? ` · Expires ${formatDate(business.plan_expires_at)}` : ''}
-                        </p>
+                  <div className="max-w-5xl mx-auto px-0">
+
+                    {/* Trial banner */}
+                    {business.plan === 'trial' ? (
+                      <div className="mb-6 rounded-2xl border border-amber-200 bg-amber-50 px-5 py-4 text-sm font-medium text-amber-900">
+                        ⚠️ You&apos;re on a free trial. Choose a plan below to continue after 7 days.
                       </div>
-                      <span className={`inline-flex w-fit rounded-full px-3 py-1.5 text-sm font-semibold ${getPlanBadgeClasses(business.plan)}`}>
-                        {currentPlanName}
-                      </span>
+                    ) : null}
+
+                    <div className="text-center mb-10">
+                      <h2 className="text-2xl font-bold text-gray-900">Choose Your Plan</h2>
+                      <p className="text-gray-500 mt-2">Upgrade or downgrade anytime. 7-day free trial on all plans.</p>
                     </div>
 
-                    <div className="mt-6">
-                      <div className="mb-2 flex items-center justify-between gap-3 text-sm font-medium text-slate-700">
-                        <span>Messages used this month</span>
-                        <span>
-                          {usageValue}/{planLimit ?? 'Unlimited'}
-                        </span>
-                      </div>
-                      <div className="h-3 overflow-hidden rounded-full bg-slate-100">
-                        <div className="h-full rounded-full bg-gradient-to-r from-blue-600 to-cyan-500" style={{ width: `${usageWidth}%` }} />
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-                    <div className="flex items-center justify-between gap-4">
-                      <div>
-                        <h3 className="text-xl font-bold text-slate-900">Upgrade your subscription</h3>
-                        <p className="mt-1 text-sm text-slate-500">Choose another plan and pay securely with PayPal.</p>
-                      </div>
-                    </div>
-
-                    <div className="mt-6 grid gap-4 lg:grid-cols-3">
-                      {(Object.values(PLANS) as Array<(typeof PLANS)[keyof typeof PLANS]>).map((plan) => {
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch">
+                      {([
+                        {
+                          id: 'starter' as const,
+                          name: 'Starter',
+                          price: 29,
+                          description: 'Perfect for small local businesses',
+                          features: [
+                            '500 messages/month',
+                            'Website chat widget',
+                            'Lead capture (name + phone)',
+                            'Basic analytics',
+                            'Email support',
+                            'QR code for walk-in customers',
+                            'Mobile-friendly chat',
+                          ],
+                          cta: 'Upgrade to Starter',
+                          popular: false,
+                          hint: null,
+                        },
+                        {
+                          id: 'pro' as const,
+                          name: 'Pro',
+                          price: 79,
+                          description: 'For growing businesses that need more',
+                          features: [
+                            'Unlimited messages',
+                            'Website chat widget',
+                            'Lead capture (name + phone)',
+                            'WhatsApp integration',
+                            'Advanced analytics & reports',
+                            'Priority support (24h response)',
+                            'Custom AI training & FAQs',
+                            'QR code + booking system',
+                            'Customer satisfaction ratings',
+                            'Broadcast messages to leads',
+                          ],
+                          cta: 'Upgrade to Pro',
+                          popular: true,
+                          hint: '💡 Most businesses start here',
+                        },
+                        {
+                          id: 'business' as const,
+                          name: 'Business',
+                          price: 149,
+                          description: 'Full suite for serious businesses',
+                          features: [
+                            'Everything in Pro',
+                            'Agent Audit & compliance reports',
+                            'AI safety scoring per conversation',
+                            'Sensitive data detection',
+                            'Weekly PDF compliance report',
+                            'Multi-location support',
+                            'Phone support',
+                            'Dedicated onboarding call',
+                            'Custom integrations on request',
+                            'SLA guarantee',
+                          ],
+                          cta: 'Upgrade to Business',
+                          popular: false,
+                          hint: '🏆 Best for established businesses',
+                        },
+                      ] as Array<{
+                        id: 'starter' | 'pro' | 'business';
+                        name: string;
+                        price: number;
+                        description: string;
+                        features: string[];
+                        cta: string;
+                        popular: boolean;
+                        hint: string | null;
+                      }>).map((plan) => {
                         const isCurrent = plan.id === business.plan;
-                        const isSelected = selectedUpgradePlan === plan.id;
-
                         return (
                           <div
                             key={plan.id}
-                            className={`rounded-3xl border p-5 transition ${
-                              isCurrent
-                                ? 'border-blue-300 bg-blue-50'
-                                : isSelected
-                                  ? 'border-slate-900 bg-slate-900 text-white'
-                                  : 'border-slate-200 bg-white'
+                            className={`relative flex flex-col h-full rounded-2xl p-6 bg-white ${
+                              plan.popular
+                                ? 'border-2 border-blue-600 shadow-[0_0_0_1px_rgba(37,99,235,0.1)]'
+                                : 'border border-gray-200'
                             }`}
                           >
-                            <div className="flex items-start justify-between gap-3">
-                              <div>
-                                <h4 className={`text-lg font-bold ${isSelected && !isCurrent ? 'text-white' : 'text-slate-900'}`}>{plan.name}</h4>
-                                <p className={`mt-1 text-sm ${isSelected && !isCurrent ? 'text-slate-300' : 'text-slate-500'}`}>{plan.description}</p>
-                              </div>
-                              {isCurrent ? (
-                                <span className="rounded-full bg-blue-600 px-2.5 py-1 text-xs font-semibold text-white">Current</span>
-                              ) : null}
-                            </div>
-                            <p className={`mt-5 text-3xl font-extrabold ${isSelected && !isCurrent ? 'text-white' : 'text-slate-900'}`}>
-                              ${plan.price}
-                              <span className={`text-sm font-medium ${isSelected && !isCurrent ? 'text-slate-300' : 'text-slate-500'}`}>/mo</span>
+                            {/* Most Popular badge */}
+                            {plan.popular ? (
+                              <span className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-blue-600 text-white text-xs font-bold px-3 py-1 rounded-full uppercase">
+                                Most Popular
+                              </span>
+                            ) : null}
+
+                            {/* Current Plan badge */}
+                            {isCurrent ? (
+                              <span className="absolute top-3 right-3 bg-blue-600 text-white text-xs font-semibold px-2.5 py-1 rounded-full">
+                                Current Plan
+                              </span>
+                            ) : null}
+
+                            <h3 className="text-xl font-bold text-gray-900">{plan.name}</h3>
+                            <p className="mt-1 text-sm text-gray-500">{plan.description}</p>
+
+                            <p className="mt-4">
+                              <span className="text-4xl font-bold text-gray-900">${plan.price}</span>
+                              <span className="text-lg text-gray-500">/mo</span>
                             </p>
-                            <ul className="mt-4 space-y-2">
+
+                            {plan.hint ? (
+                              <p className="mt-1 text-sm text-blue-600 font-medium">{plan.hint}</p>
+                            ) : null}
+
+                            <ul className="flex-1 mt-4 space-y-2 text-sm text-gray-700">
                               {plan.features.map((feature) => (
-                                <li key={feature} className={`flex items-start gap-2 text-sm ${isSelected && !isCurrent ? 'text-slate-200' : 'text-slate-600'}`}>
-                                  <Check className={`mt-0.5 h-4 w-4 shrink-0 ${isSelected && !isCurrent ? 'text-cyan-300' : 'text-emerald-600'}`} />
+                                <li key={feature} className="flex items-start gap-2">
+                                  <span className="text-green-500 font-bold mt-0.5">✓</span>
                                   {feature}
                                 </li>
                               ))}
                             </ul>
 
-                            {!isCurrent ? (
-                              <button
-                                type="button"
-                                onClick={() => setSelectedUpgradePlan(plan.id as 'basic' | 'pro' | 'business')}
-                                className={`mt-5 inline-flex w-full items-center justify-center rounded-full px-4 py-2.5 text-sm font-semibold transition ${
-                                  isSelected
-                                    ? 'bg-white text-slate-900 hover:bg-slate-100'
-                                    : 'border border-slate-200 text-slate-700 hover:bg-slate-50'
-                                }`}
-                              >
-                                {isSelected ? 'Selected for checkout' : 'Choose plan'}
-                              </button>
-                            ) : null}
+                            <button
+                              type="button"
+                              disabled={isCurrent}
+                              onClick={() => {
+                                if (!isCurrent) router.push(`/payment?plan=${plan.id}&upgrade=true`);
+                              }}
+                              className={`mt-6 w-full py-3 px-6 rounded-xl font-semibold text-sm transition-all duration-200 ${
+                                isCurrent
+                                  ? 'border border-gray-200 text-gray-400 cursor-not-allowed'
+                                  : plan.popular
+                                    ? 'bg-blue-600 text-white hover:bg-blue-700'
+                                    : 'border border-gray-300 text-gray-700 hover:bg-gray-50'
+                              }`}
+                            >
+                              {isCurrent ? '✓ Your current plan' : plan.cta}
+                            </button>
                           </div>
                         );
                       })}
                     </div>
 
-                    {paymentError ? (
-                      <div className="mt-5 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-                        {paymentError}
-                      </div>
-                    ) : null}
-
-                    {selectedUpgradePlan !== business.plan ? (
-                      <div className="mt-6 rounded-3xl border border-slate-200 bg-slate-50 p-5">
-                        <h4 className="text-lg font-bold text-slate-900">Complete upgrade</h4>
-                        <p className="mt-1 text-sm text-slate-500">Checkout for the {PLANS[selectedUpgradePlan].name} plan.</p>
-                        <div className="mt-4">
-                          <PayPalScriptProvider
-                            options={{
-                              clientId: process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || '',
-                              currency: 'USD',
-                              intent: 'capture',
-                            }}
-                          >
-                            <UpgradeCheckoutButtons
-                              planId={selectedUpgradePlan}
-                              email={business.owner_email}
-                              onError={setPaymentError}
-                              onSuccess={async () => {
-                                setPaymentError('');
-                                await refreshDashboard();
-                                setToast({ message: 'Subscription updated successfully!', tone: 'success' });
-                              }}
-                            />
-                          </PayPalScriptProvider>
-                        </div>
-                      </div>
-                    ) : null}
+                    <p className="text-center text-sm text-gray-400 mt-8">
+                      All plans include a 7-day free trial. Cancel anytime. Payments via PayPal.
+                    </p>
                   </div>
                 </section>
               ) : null}
