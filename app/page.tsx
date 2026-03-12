@@ -641,7 +641,7 @@ export default function Home() {
                 <ul className="space-y-2.5 text-sm text-slate-600">
                   <li><a href="#features" className="transition hover:text-slate-900">Features</a></li>
                   <li><a href="#pricing" className="transition hover:text-slate-900">Pricing</a></li>
-                  <li><button type="button" onClick={() => setDemoOpen(true)} className="transition hover:text-slate-900">Demo</button></li>
+                  <li><a href="/demo" className="transition hover:text-slate-900">Demo</a></li>
                   <li><a href="/dashboard" className="transition hover:text-slate-900">Dashboard</a></li>
                 </ul>
               </div>
@@ -649,7 +649,7 @@ export default function Home() {
                 <p className="mb-4 text-[11px] font-semibold uppercase tracking-widest text-slate-400">Support</p>
                 <ul className="space-y-2.5 text-sm text-slate-600">
                   <li><a href="#faq" className="transition hover:text-slate-900">FAQ</a></li>
-                  <li><a href={`mailto:${CONTACT_EMAIL}`} className="transition hover:text-slate-900">Contact</a></li>
+                  <li><a href="/contact" className="transition hover:text-slate-900">Contact</a></li>
                   <li><a href="/privacy" className="transition hover:text-slate-900">Privacy Policy</a></li>
                   <li><a href="/terms" className="transition hover:text-slate-900">Terms</a></li>
                 </ul>
@@ -663,7 +663,7 @@ export default function Home() {
                 </ul>
               </div>
             </div>
-            <div className="mt-10 border-t border-slate-200 pt-6 text-center text-xs text-slate-400">© 2025 BizAI · All rights reserved</div>
+            <div className="mt-10 border-t border-slate-200 pt-6 text-center text-xs text-slate-400">© 2026 BizAI · All rights reserved</div>
           </div>
         </footer>
       </main>
