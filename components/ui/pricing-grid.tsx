@@ -88,45 +88,51 @@ export function PricingGrid({ dictionary }: Props) {
     <section id="pricing" className="bg-white py-16 md:py-20">
       <div className="mx-auto max-w-6xl px-4 lg:px-6">
         <div className="mb-8 text-center">
-          <h2 className="text-3xl font-extrabold text-slate-900 md:text-4xl">{dictionary.pricingTitle}</h2>
-          <p className="mt-2 text-slate-600">{dictionary.pricingSubtitle}</p>
+          <h2 className="text-4xl font-bold text-gray-900 mb-4">Simple, Honest Pricing</h2>
+          <p className="text-xl text-gray-500">No hidden fees. No contracts. Cancel anytime.</p>
 
-          <div className="mx-auto mt-6 max-w-3xl rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-900 shadow-sm">
-            ⚡ Limited Offer: Free setup (worth $99) included with any plan this month
-          </div>
-
-          <div className="mt-6 inline-flex rounded-full border border-slate-200 bg-slate-50 p-1">
+          <div className="flex items-center justify-center gap-3 mt-6">
+            <span className={`text-sm font-semibold ${billing === 'monthly' ? 'text-gray-900' : 'text-gray-400'}`}>Monthly</span>
             <button
               type="button"
-              onClick={() => setBilling('monthly')}
-              aria-label="Switch to monthly billing"
-              className={`rounded-full px-4 py-2 text-sm font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0F6B66] ${billing === 'monthly' ? 'bg-[#0F6B66] text-white' : 'text-slate-700'}`}
+              onClick={() => setBilling(billing === 'monthly' ? 'yearly' : 'monthly')}
+              aria-label="Toggle billing period"
+              className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 ${billing === 'yearly' ? 'bg-blue-600' : 'bg-gray-300'}`}
             >
-              {dictionary.monthly}
+              <span
+                className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${billing === 'yearly' ? 'translate-x-5' : 'translate-x-0'}`}
+              />
             </button>
-            <button
-              type="button"
-              onClick={() => setBilling('yearly')}
-              aria-label="Switch to yearly billing"
-              className={`rounded-full px-4 py-2 text-sm font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0F6B66] ${billing === 'yearly' ? 'bg-[#0F6B66] text-white' : 'text-slate-700'}`}
-            >
-              {dictionary.yearly}
-            </button>
+            <span className={`text-sm font-semibold ${billing === 'yearly' ? 'text-gray-900' : 'text-gray-400'}`}>Yearly</span>
+            <span className="bg-green-100 text-green-700 text-xs font-bold px-2 py-1 rounded-full">Save 17%</span>
           </div>
         </div>
 
-        <div className="-mx-4 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-4 md:mx-0 md:grid md:grid-cols-3 md:overflow-visible md:px-0">
+        {/* Urgency banner */}
+        <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 text-center mb-8">
+          <p className="text-amber-800 font-medium">
+            ⚡ Limited Offer: Free setup included this month{' '}
+            <span className="font-bold">(worth $99)</span> — only 5 spots remaining
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-stretch">
           {plans.map((plan) => {
             const highlighted = plan.id === 'pro';
+            const isStarter = plan.id === 'starter';
             return (
               <article
                 key={plan.id}
-                className={`w-[84%] shrink-0 snap-center rounded-2xl border p-6 md:w-auto ${highlighted ? 'border-[#FF6B4A] shadow-md ring-2 ring-[#FF6B4A]/20' : 'border-slate-200'}`}
+                className={`flex flex-col h-full rounded-2xl p-6 ${
+                  highlighted
+                    ? 'relative border-2 border-blue-600 shadow-[0_0_30px_rgba(37,99,235,0.15)] bg-white pt-10'
+                    : 'border border-gray-200 bg-white'
+                }`}
               >
                 {highlighted ? (
-                  <p className="mb-3 inline-flex rounded-full bg-[#FF6B4A] px-3 py-1 text-xs font-bold uppercase tracking-wide text-white">
+                  <span className="absolute -top-4 left-1/2 -translate-x-1/2 bg-blue-600 text-white px-4 py-1 rounded-full text-xs font-bold uppercase">
                     {dictionary.mostPopular}
-                  </p>
+                  </span>
                 ) : null}
                 <h3 className="text-xl font-bold text-slate-900">{plan.title}</h3>
                 <p className="mt-1 text-sm text-slate-600">{plan.description}</p>
@@ -135,12 +141,12 @@ export function PricingGrid({ dictionary }: Props) {
                     ${plan.monthly}/mo
                   </p>
                 ) : null}
-                <p className="mt-2 text-4xl font-extrabold text-slate-900">
+                <p className="mt-2 text-4xl font-extrabold text-gray-900">
                   ${getDisplayedPrice(plan)}
                   <span className="text-base font-medium text-slate-500">/mo</span>
                 </p>
                 {plan.id === 'pro' ? (
-                  <p className="mt-2 text-sm font-semibold text-orange-600">🔥 Most chosen by Cyprus businesses</p>
+                  <p className="mt-2 text-sm font-medium text-blue-600">🔥 Most chosen by Cyprus businesses</p>
                 ) : null}
                 {billing === 'yearly' ? (
                   <div className="mt-3 flex flex-wrap items-center gap-2">
@@ -151,10 +157,10 @@ export function PricingGrid({ dictionary }: Props) {
                   </div>
                 ) : null}
 
-                <ul className="mt-4 space-y-2 text-sm text-slate-700">
+                <ul className="flex-1 mt-4 space-y-2 text-sm text-slate-700">
                   {plan.features.map((feature) => (
                     <li key={feature} className="flex items-center gap-2">
-                      <Check className="h-4 w-4 text-[#0F6B66]" />
+                      <Check className="h-4 w-4 shrink-0 text-blue-600" />
                       {feature}
                     </li>
                   ))}
@@ -167,7 +173,13 @@ export function PricingGrid({ dictionary }: Props) {
                     trackEvent('pricing_plan_click', { plan: plan.id, billing });
                     router.push(`/signup?plan=${plan.id}`);
                   }}
-                  className={`mt-6 w-full rounded-xl px-4 py-3 text-sm font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0F6B66] ${highlighted ? 'bg-[#0F6B66] text-white hover:bg-[#0b5450]' : 'border border-slate-300 text-slate-800 hover:bg-slate-50'}`}
+                  className={
+                    highlighted
+                      ? 'w-full mt-auto py-3 px-6 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 transition-all duration-200 shadow-lg shadow-blue-200'
+                      : isStarter
+                        ? 'w-full mt-auto py-3 px-6 border-2 border-gray-900 text-gray-900 font-semibold rounded-xl hover:bg-gray-900 hover:text-white transition-all duration-200'
+                        : 'w-full mt-auto py-3 px-6 bg-gray-900 text-white font-semibold rounded-xl hover:bg-gray-800 transition-all duration-200'
+                  }
                 >
                   Start Free Trial
                 </button>
@@ -176,10 +188,12 @@ export function PricingGrid({ dictionary }: Props) {
           })}
         </div>
 
-        <div className="mt-8 grid gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-center text-sm font-semibold text-slate-700 shadow-sm md:grid-cols-3">
-          <div>🔒 Secure PayPal Payments</div>
-          <div>↩️ 7-Day Money Back Guarantee</div>
-          <div>🇨🇾 Local Cyprus Support</div>
+        {/* Trust strip */}
+        <div className="flex flex-wrap justify-center gap-6 mt-8 text-sm text-gray-500">
+          <span>🔒 Secure PayPal Payments</span>
+          <span>↩️ 7-Day Money Back Guarantee</span>
+          <span>🇨🇾 Local Cyprus Support</span>
+          <span>✓ Cancel Anytime</span>
         </div>
 
         <div className="mt-10 overflow-hidden rounded-2xl border border-slate-200">
