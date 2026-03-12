@@ -36,7 +36,9 @@ export default function ChatWidget({
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [sessionId] = useState<string>(() => crypto.randomUUID());
+  const [feedbackState, setFeedbackState] = useState<'idle' | 'prompt' | 'done'>('idle');
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const inactivityTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -52,9 +54,37 @@ export default function ChatWidget({
     }
   }, [embedded]);
 
+  // Inactivity timer: show feedback poll after 5 min of no messages
+  useEffect(() => {
+    if (feedbackState !== 'idle') return;
+    if (messages.length <= 1) return; // no real conversation yet
+    if (isLoading) return;
+    if (inactivityTimerRef.current) clearTimeout(inactivityTimerRef.current);
+    inactivityTimerRef.current = setTimeout(() => setFeedbackState('prompt'), 5 * 60 * 1000);
+    return () => {
+      if (inactivityTimerRef.current) clearTimeout(inactivityTimerRef.current);
+    };
+  }, [messages, isLoading, feedbackState]);
+
+  async function submitFeedback(rating: number) {
+    setFeedbackState('done');
+    try {
+      await fetch('/api/chat/rating', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ businessId, sessionId, rating }),
+      });
+    } catch {
+      // silently ignore — UI already shows thank-you
+    }
+  }
+
   const sendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!inputValue.trim() || isLoading) return;
+
+    // If the feedback prompt was visible, user chose to keep chatting — reset it
+    if (feedbackState === 'prompt') setFeedbackState('idle');
 
     const userMessage: Message = {
       id: Date.now().toString(),
@@ -164,6 +194,47 @@ export default function ChatWidget({
                 </div>
               </div>
             ))}
+
+            {/* Feedback poll */}
+            {feedbackState === 'prompt' && (
+              <div className="flex flex-col gap-2">
+                <div className="flex justify-start">
+                  <div className="max-w-[85%] px-3 py-2 rounded-2xl text-sm leading-relaxed bg-[#f3f4f6] text-[#111827]">
+                    Before you go — how was your experience today? Your feedback helps us improve! 😊
+                  </div>
+                </div>
+                <div className="flex justify-start gap-1 ml-1">
+                  {(['😡', '😕', '😐', '😊', '😍'] as const).map((emoji, idx) => (
+                    <button
+                      key={emoji}
+                      type="button"
+                      onClick={() => void submitFeedback(idx + 1)}
+                      className="flex flex-col items-center gap-0.5 rounded-xl px-2 py-1.5 text-xl transition hover:bg-slate-100 active:scale-95"
+                      title={`Rate ${idx + 1} out of 5`}
+                    >
+                      <span>{emoji}</span>
+                      <span className="text-[10px] font-medium text-slate-400">{idx + 1}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Thank-you after rating */}
+            {feedbackState === 'done' && (
+              <div className="flex flex-col gap-1.5">
+                <div className="flex justify-start">
+                  <div className="max-w-[85%] px-3 py-2 rounded-2xl text-sm leading-relaxed bg-[#f3f4f6] text-[#111827]">
+                    Thank you! ⭐ We appreciate your feedback.
+                  </div>
+                </div>
+                <div className="flex justify-start">
+                  <div className="max-w-[85%] px-3 py-2 rounded-2xl text-sm leading-relaxed bg-[#f3f4f6] text-[#111827]">
+                    Feel free to contact us anytime.
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Typing indicator */}
             {isLoading && (

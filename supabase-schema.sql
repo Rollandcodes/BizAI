@@ -241,6 +241,12 @@ CREATE POLICY "Anyone can create booking" ON public.bookings
   FOR INSERT WITH CHECK (true);
 
 -- ============================================================================
+-- Migration: customer_rating column on conversations (v5 – safe to re-run)
+-- ============================================================================
+ALTER TABLE public.conversations ADD COLUMN IF NOT EXISTS customer_rating INTEGER
+  CHECK (customer_rating IS NULL OR (customer_rating >= 1 AND customer_rating <= 5));
+
+-- ============================================================================
 -- Storage Bucket (Optional - for widget customization assets)
 -- ============================================================================
 -- Uncomment if you want to store business logos/assets

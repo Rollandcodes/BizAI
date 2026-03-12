@@ -23,6 +23,7 @@ import {
   Send,
   Settings,
   ShieldAlert,
+  Star,
   ShieldCheck,
   Users,
   X,
@@ -488,6 +489,14 @@ export default function DashboardPage() {
   const [bookingsInitialized, setBookingsInitialized] = useState(false);
   const [updatingBookingIds, setUpdatingBookingIds] = useState<Set<string>>(new Set());
 
+  // ── Customer Satisfaction State ──────────────────────────────────────────
+  const [satisfactionData, setSatisfactionData] = useState<{
+    avgRating: number;
+    totalRatings: number;
+    distribution: number[]; // index 0 = rating 1 stars … index 4 = rating 5 stars
+  } | null>(null);
+  const [satisfactionLoading, setSatisfactionLoading] = useState(false);
+
   const business = dashboard.business;
   const stats = dashboard.stats;
   const conversations = dashboard.conversations;
@@ -530,6 +539,7 @@ export default function DashboardPage() {
     if (!business) {
       setBookings([]);
       setBookingsInitialized(false);
+      setSatisfactionData(null);
       return;
     }
 
@@ -548,6 +558,7 @@ export default function DashboardPage() {
     if (!bookingsInitialized && !bookingsLoading) {
       void loadBookings(business.id);
     }
+    void loadSatisfaction(business.id);
   }, [business]);
 
   useEffect(() => {
@@ -726,6 +737,36 @@ export default function DashboardPage() {
     } finally {
       setBookingsLoading(false);
       setBookingsInitialized(true);
+    }
+  }
+
+  async function loadSatisfaction(bId: string) {
+    setSatisfactionLoading(true);
+    try {
+      const now = new Date();
+      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+      const { data } = await supabase
+        .from('conversations')
+        .select('customer_rating')
+        .eq('business_id', bId)
+        .not('customer_rating', 'is', null)
+        .gte('created_at', startOfMonth);
+      if (!data || data.length === 0) {
+        setSatisfactionData(null);
+      } else {
+        const ratings = (data as { customer_rating: number }[]).map((r) => r.customer_rating);
+        const avg = ratings.reduce((sum, r) => sum + r, 0) / ratings.length;
+        const distribution = [1, 2, 3, 4, 5].map((r) => ratings.filter((v) => v === r).length);
+        setSatisfactionData({
+          avgRating: Math.round(avg * 10) / 10,
+          totalRatings: ratings.length,
+          distribution,
+        });
+      }
+    } catch {
+      // silently fail
+    } finally {
+      setSatisfactionLoading(false);
     }
   }
 
@@ -1112,6 +1153,68 @@ export default function DashboardPage() {
                       value={currentPlanName}
                       badgeClassName={getPlanBadgeClasses(business.plan)}
                     />
+                  </div>
+
+                  {/* Customer Satisfaction */}
+                  <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+                    <div className="flex items-center justify-between gap-4">
+                      <div className="flex items-center gap-2">
+                        <Star className="h-5 w-5 text-amber-400 fill-amber-400" />
+                        <h2 className="text-lg font-bold text-slate-900">Customer Satisfaction</h2>
+                      </div>
+                      <span className="text-sm text-slate-400">This month</span>
+                    </div>
+
+                    {satisfactionLoading ? (
+                      <div className="mt-6 flex items-center gap-2 text-sm text-slate-400">
+                        <span className="h-4 w-4 animate-spin rounded-full border-2 border-slate-200 border-t-amber-400" />
+                        Loading ratings…
+                      </div>
+                    ) : !satisfactionData ? (
+                      <div className="mt-6 rounded-2xl bg-slate-50 px-4 py-6 text-center text-sm text-slate-400">
+                        No ratings yet this month. Ratings appear after customers complete the post-chat feedback poll.
+                      </div>
+                    ) : (
+                      <div className="mt-5 grid gap-5 sm:grid-cols-[auto_1fr]">
+                        {/* Score display */}
+                        <div className="flex flex-col items-center justify-center gap-1 rounded-2xl bg-amber-50 px-6 py-4">
+                          <span className="text-5xl font-extrabold text-slate-900">{satisfactionData.avgRating}</span>
+                          <span className="text-sm font-medium text-slate-400">out of 5</span>
+                          <div className="mt-1 flex gap-0.5">
+                            {[1, 2, 3, 4, 5].map((star) => (
+                              <Star
+                                key={star}
+                                className={`h-4 w-4 ${star <= Math.round(satisfactionData.avgRating) ? 'fill-amber-400 text-amber-400' : 'fill-slate-200 text-slate-200'}`}
+                              />
+                            ))}
+                          </div>
+                          <span className="mt-1 text-xs text-slate-400">
+                            Based on {satisfactionData.totalRatings} review{satisfactionData.totalRatings !== 1 ? 's' : ''}
+                          </span>
+                        </div>
+
+                        {/* Rating distribution bars */}
+                        <div className="flex flex-col justify-center gap-2">
+                          {[5, 4, 3, 2, 1].map((r) => {
+                            const count = satisfactionData.distribution[r - 1];
+                            const pct = satisfactionData.totalRatings > 0 ? (count / satisfactionData.totalRatings) * 100 : 0;
+                            return (
+                              <div key={r} className="flex items-center gap-2 text-sm">
+                                <span className="w-3 shrink-0 text-right text-slate-500">{r}</span>
+                                <Star className="h-3.5 w-3.5 shrink-0 fill-amber-400 text-amber-400" />
+                                <div className="h-2 flex-1 overflow-hidden rounded-full bg-slate-100">
+                                  <div
+                                    className="h-full rounded-full bg-amber-400 transition-all duration-500"
+                                    style={{ width: `${pct}%` }}
+                                  />
+                                </div>
+                                <span className="w-5 shrink-0 text-right text-xs text-slate-400">{count}</span>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
                   </div>
 
                   <div className="grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
