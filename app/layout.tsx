@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Plus_Jakarta_Sans } from 'next/font/google';
 import { FloatingWhatsAppButton } from '@/components/ui/floating-whatsapp-button';
+import PayPalProvider from '@/components/PayPalProvider';
 
 import { AppProviders } from './providers';
 import './globals.css';
@@ -51,7 +52,9 @@ export default function RootLayout({
         </noscript>
       </head>
       <body className={`${jakarta.variable} antialiased`}>
-        <AppProviders>{children}</AppProviders>
+        <PayPalProvider>
+          <AppProviders>{children}</AppProviders>
+        </PayPalProvider>
         <FloatingWhatsAppButton />
       </body>
     </html>

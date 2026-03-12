@@ -37,79 +37,103 @@ function PayPalSection({
   if (isPending) {
     return (
       <div className="flex flex-col items-center py-8 gap-3">
-        <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
-        <p className="text-gray-500 text-sm">Loading PayPal…</p>
+        <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
+        <p className="text-gray-500 text-sm">Loading secure payment...</p>
       </div>
     );
   }
 
   if (isRejected) {
     return (
-      <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-center">
-        <p className="text-red-600 font-medium">⚠️ PayPal failed to load</p>
-        <p className="text-red-500 text-sm mt-1">
-          This usually means the PayPal Client ID is missing or incorrect.
-        </p>
-        <p className="text-gray-600 text-sm mt-3">Please contact us directly:</p>
+      <div className="space-y-4">
+        <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-center">
+          <p className="text-red-600 font-semibold mb-1">⚠️ PayPal unavailable</p>
+          <p className="text-red-500 text-sm">Please pay via WhatsApp instead</p>
+        </div>
         <a
-          href="https://wa.me/905338425559?text=Hi%2C%20I%20want%20to%20sign%20up%20for%20CypAI"
+          href={`https://wa.me/905338425559?text=Hi!%20I%20want%20to%20sign%20up%20for%20CypAI%20${encodeURIComponent((PLANS[planId] ?? PLANS.pro).name)}%20Plan.%20My%20business:%20${encodeURIComponent(signupData.businessName)},%20Email:%20${encodeURIComponent(signupData.email)}`}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-block mt-2 bg-green-500 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-green-600 transition-colors"
+          className="w-full flex items-center justify-center gap-2 bg-green-500 hover:bg-green-600 text-white font-bold py-4 rounded-xl transition-colors"
         >
-          💬 Pay via WhatsApp Instead
+          💬 Pay via WhatsApp
         </a>
       </div>
     );
   }
 
   return (
-    <PayPalButtons
-      style={{ layout: 'vertical', color: 'blue', shape: 'rect', label: 'paypal', height: 48 }}
-      createOrder={async () => {
-        const res = await fetch('/api/paypal/create-order', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            planId,
-            customerEmail: signupData.email,
-          }),
-        });
-        if (!res.ok) throw new Error('Failed to create order');
-        const data = (await res.json()) as { id: string };
-        return data.id;
-      }}
-      onApprove={async (data) => {
-        const res = await fetch('/api/paypal/capture-order', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            orderID: data.orderID,
-            planId,
-            customerEmail: signupData.email,
-          }),
-        });
-        const result = (await res.json()) as {
-          success: boolean;
-          businessId?: string;
-          message: string;
-          error?: string;
-        };
-        if (result.success && result.businessId) {
-          onSuccess(result.businessId);
-        } else {
-          onError(result.error ?? result.message ?? 'Payment could not be completed.');
-        }
-      }}
-      onError={() => {
-        onError(
-          'Payment failed. Please try again or contact bizaicyprus123@gmail.com',
-        );
-      }}
-      onCancel={() => {
-        // user dismissed the PayPal popup — no action needed
-      }}
-    />
+    <div className="space-y-3">
+      <PayPalButtons
+        style={{ layout: 'vertical', color: 'blue', shape: 'rect', label: 'paypal', height: 50 }}
+        createOrder={async () => {
+          const res = await fetch('/api/paypal/create-order', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              planId,
+              customerEmail: signupData.email,
+            }),
+          });
+          const data = (await res.json()) as { id?: string; error?: string };
+          if (data.error || !data.id) {
+            throw new Error(data.error || 'Failed to create order');
+          }
+          return data.id;
+        }}
+        onApprove={async (data) => {
+          const res = await fetch('/api/paypal/capture-order', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              orderID: data.orderID,
+              planId,
+              signupData,
+            }),
+          });
+          const result = (await res.json()) as {
+            success?: boolean;
+            businessId?: string;
+            user?: { id?: string; email?: string; businessName?: string; plan?: string };
+            error?: string;
+            warning?: string;
+          };
+          if (result.success) {
+            if (result.user) {
+              localStorage.setItem('cypai_user', JSON.stringify(result.user));
+            }
+            onSuccess(result.businessId || result.user?.id || '');
+          } else {
+            onError(result.error || 'Payment could not be completed.');
+          }
+        }}
+        onError={(err) => {
+          console.error('PayPal error:', err);
+          onError('Payment failed. Try again or contact us on WhatsApp: +90 533 842 5559');
+        }}
+        onCancel={() => {
+          console.log('Payment cancelled');
+        }}
+      />
+
+      <div className="relative">
+        <div className="absolute inset-0 flex items-center">
+          <div className="w-full border-t border-gray-200" />
+        </div>
+        <div className="relative flex justify-center">
+          <span className="bg-white px-3 text-gray-400 text-xs">or</span>
+        </div>
+      </div>
+
+      <a
+        href={`https://wa.me/905338425559?text=Hi!%20I%20want%20to%20sign%20up%20for%20CypAI%20${encodeURIComponent((PLANS[planId] ?? PLANS.pro).name)}%20Plan.%20My%20business:%20${encodeURIComponent(signupData.businessName)},%20Email:%20${encodeURIComponent(signupData.email)}`}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="w-full flex items-center justify-center gap-2 border border-green-300 text-green-600 font-medium py-3 rounded-xl hover:bg-green-50 transition-colors text-sm"
+      >
+        💬 Pay manually via WhatsApp
+      </a>
+    </div>
   );
 }
 
@@ -144,7 +168,7 @@ function PaymentContent() {
   function handleSuccess(businessId: string) {
     setProcessing(true);
     Analytics.paymentCompleted(planId, Number(plan.price));
-    if (signupData) {
+    if (signupData && businessId) {
       localStorage.setItem(
         'cypai_user',
         JSON.stringify({ ...signupData, businessId, plan: planId }),

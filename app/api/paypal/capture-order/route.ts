@@ -1,14 +1,17 @@
 ﻿import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
-const PAYPAL_BASE =
-  process.env.PAYPAL_MODE === 'live'
-    ? 'https://api-m.paypal.com'
-    : 'https://api-m.sandbox.paypal.com';
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+);
+
+const PLAN_EXPIRY_DAYS = 30;
 
 type SignupData = {
   businessName: string;
-  yourName: string;
+  yourName?: string;
+  ownerName?: string;
   email: string;
   whatsapp: string;
   businessType: string;
@@ -27,14 +30,14 @@ interface PayPalCaptureResponse {
   status: string;
 }
 
-async function getAccessToken(): Promise<string> {
-  const clientId     = process.env.PAYPAL_CLIENT_ID;
+async function getPayPalToken(): Promise<string> {
+  const clientId = process.env.PAYPAL_CLIENT_ID;
   const clientSecret = process.env.PAYPAL_CLIENT_SECRET;
   if (!clientId || !clientSecret) {
     throw new Error('Missing PAYPAL_CLIENT_ID or PAYPAL_CLIENT_SECRET');
   }
   const auth = Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
-  const res = await fetch(`${PAYPAL_BASE}/v1/oauth2/token`, {
+  const res = await fetch(`${process.env.PAYPAL_BASE_URL}/v1/oauth2/token`, {
     method: 'POST',
     headers: {
       Authorization: `Basic ${auth}`,
@@ -59,10 +62,9 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       );
     }
 
-    // ── Capture PayPal order ────────────────────────────────────────────────
-    const accessToken = await getAccessToken();
+    const accessToken = await getPayPalToken();
     const captureRes = await fetch(
-      `${PAYPAL_BASE}/v2/checkout/orders/${orderID}/capture`,
+      `${process.env.PAYPAL_BASE_URL}/v2/checkout/orders/${orderID}/capture`,
       {
         method: 'POST',
         headers: {
@@ -86,34 +88,26 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       );
     }
 
-    // ── Save to Supabase ────────────────────────────────────────────────────
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const serviceKey  = process.env.SUPABASE_SERVICE_ROLE_KEY;
-    if (!supabaseUrl || !serviceKey) {
-      throw new Error('Missing Supabase environment variables');
-    }
-    const supabase = createClient(supabaseUrl, serviceKey);
-
-    // Map 'starter' to 'basic' for DB (CHECK constraint uses 'basic')
-    const dbPlan = planId === 'starter' ? 'basic' : planId;
-
     const expiresAt = new Date();
-    expiresAt.setDate(expiresAt.getDate() + 37); // 7-day trial + 30 days
+    expiresAt.setDate(expiresAt.getDate() + PLAN_EXPIRY_DAYS);
+
+    // Keep compatibility with the current DB constraint while preserving Starter in the UI.
+    const dbPlan = planId === 'starter' ? 'basic' : planId;
 
     const { data: business, error } = await supabase
       .from('businesses')
       .upsert(
         {
-          owner_email:            signupData.email,
-          business_name:          signupData.businessName,
-          business_type:          signupData.businessType,
-          owner_name:             signupData.yourName,
-          whatsapp:               signupData.whatsapp,
-          website:                signupData.website || null,
-          plan:                   dbPlan,
-          plan_expires_at:        expiresAt.toISOString(),
+          owner_email: signupData.email.trim().toLowerCase(),
+          owner_name: signupData.ownerName || signupData.yourName || signupData.email,
+          business_name: signupData.businessName,
+          business_type: signupData.businessType || 'general',
+          whatsapp: signupData.whatsapp || '',
+          website: signupData.website || '',
+          plan: dbPlan,
+          plan_expires_at: expiresAt.toISOString(),
           paypal_subscription_id: orderID,
-          widget_color:           '#2563eb',
+          widget_color: '#2563eb',
         },
         { onConflict: 'owner_email' },
       )
@@ -122,7 +116,14 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 
     if (error || !business) {
       console.error('Supabase upsert error:', error);
-      throw new Error(error?.message ?? 'Failed to save business record');
+      return NextResponse.json({
+        success: true,
+        warning: 'Payment received, account setup delayed',
+        user: {
+          email: signupData.email,
+          plan: planId,
+        },
+      });
     }
 
     return NextResponse.json({
