@@ -1,384 +1,219 @@
 import { NextRequest, NextResponse } from 'next/server';
 import OpenAI from 'openai';
-import { assertSupabaseConfig, createServerClient } from '@/lib/supabase';
-import { getNicheConfig, interpolateNicheConfig } from '@/lib/niches';
-import { Business, ConversationMessage, Conversation } from '@/lib/supabase';
-import { analyzeConversation } from '@/lib/auditAnalyzer';
-import { getOpenAIClient } from '@/lib/openai';
+import { createClient } from '@supabase/supabase-js';
+import { corsHeaders } from './cors';
 
-const supabase = createServerClient();
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
 
-// ============================================================================
-// Types
-// ============================================================================
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+);
 
-interface ChatRequest {
-  businessId: string;
-  sessionId: string;
-  message: string;
-  conversationHistory: Array<{ role: string; content: string }>;
-}
+const NICHE_PROMPTS: Record<string, string> = {
+  car_rental: `You are a friendly AI assistant for a
+car rental business in Northern Cyprus.
+Prices: Economy $25/day, Compact $35/day,
+SUV $55/day, Van $75/day.
+Your job:
+1. Answer questions about prices, availability,
+   pickup/dropoff locations
+2. Collect customer name and phone number for bookings
+3. When you have their name AND phone, say exactly:
+   [LEAD_CAPTURED] Name: {name}, Phone: {phone}
+4. Speak in whatever language the customer uses
+   (English, Turkish, Arabic, Russian)
+Be warm, helpful, and professional.`,
 
-interface DemoChatRequest {
-  businessName: string;
-  businessType: string;
-  systemPrompt: string;
-  userMessage: string;
-  conversationHistory: Array<{ role: string; content: string }>;
-}
+  barbershop: `You are a friendly AI assistant for a
+barbershop/salon in Northern Cyprus.
+Hours: Monday-Saturday 9am-7pm, Sunday closed.
+Services: Haircut $15, Beard trim $10,
+Full groom $22, Kids cut $10.
+Your job:
+1. Answer questions about services, prices, hours
+2. Help book appointments - collect name, phone,
+   preferred date and service
+3. When you have their details say:
+   [LEAD_CAPTURED] Name: {name}, Phone: {phone}
+4. Speak in whatever language the customer uses
+Be warm, friendly, and welcoming.`,
 
-interface ChatResponse {
-  reply: string;
-  sessionId: string;
-}
+  student_accommodation: `You are a helpful AI
+assistant for student accommodation in Northern Cyprus.
+Near: EMU, CIU, NEU, LAU universities.
+Room types: Single $250/mo, Double $180/mo,
+Studio $350/mo. Utilities included.
+Your job:
+1. Answer questions about rooms, prices, location,
+   amenities, availability
+2. Collect student name, phone, university,
+   move-in date
+3. When you have name AND phone say:
+   [LEAD_CAPTURED] Name: {name}, Phone: {phone}
+4. Speak in whatever language the student uses
+Be helpful and reassuring for international students.`,
 
-// ============================================================================
-// Helper Functions
-// ============================================================================
+  restaurant: `You are a friendly AI assistant for
+a restaurant in Northern Cyprus.
+Your job:
+1. Share menu info, opening hours, location
+2. Help with reservations - collect name, phone,
+   date, party size
+3. When you have name AND phone say:
+   [LEAD_CAPTURED] Name: {name}, Phone: {phone}
+4. Speak in whatever language the customer uses`,
 
-/**
- * Check if text contains a phone number or name pattern (lead capture)
- */
-function containsLeadInfo(text: string): boolean {
-  // Simple phone number patterns (basic)
-  const phonePattern = /(\d{3}[-.\s]?\d{3}[-.\s]?\d{4}|\+\d{1,3}\s?\d{1,14})/;
-  
-  // Check for common name patterns (has both first and last name or email)
-  const emailPattern = /[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/;
-  const namePattern = /my name is|i'm|i am|call me|you can reach me/i;
+  default: `You are a helpful AI customer service
+assistant for a local business in Northern Cyprus.
+Your job:
+1. Answer customer questions helpfully
+2. Collect customer name and phone number
+3. When you have name AND phone say:
+   [LEAD_CAPTURED] Name: {name}, Phone: {phone}
+4. Speak in whatever language the customer uses
+Be professional, warm, and helpful.`,
+};
 
-  return phonePattern.test(text) || emailPattern.test(text) || namePattern.test(text);
-}
-
-/**
- * Extract conversation ID from sessionId or create new conversation
- */
-async function getOrCreateConversation(
-  businessId: string,
-  sessionId: string
-): Promise<string> {
-  // Try to find existing conversation
-  const { data: existingConversation } = await supabase
-    .from('conversations')
-    .select('id')
-    .eq('business_id', businessId)
-    .eq('session_id', sessionId)
-    .single();
-
-  if (existingConversation) {
-    return existingConversation.id;
-  }
-
-  // Create new conversation
-  const { data: newConversation, error } = await supabase
-    .from('conversations')
-    .insert([
-      {
-        business_id: businessId,
-        session_id: sessionId,
-        messages: [],
-        lead_captured: false,
-      },
-    ])
-    .select('id')
-    .single();
-
-  if (error) {
-    throw new Error(`Failed to create conversation: ${error.message}`);
-  }
-
-  return newConversation.id;
-}
-
-/**
- * Update conversation with new message and lead status
- */
-async function updateConversation(
-  conversationId: string,
-  messages: ConversationMessage[],
-  leadCaptured: boolean
-): Promise<void> {
-  const { error } = await supabase
-    .from('conversations')
-    .update({
-      messages,
-      lead_captured: leadCaptured,
-    })
-    .eq('id', conversationId);
-
-  if (error) {
-    throw new Error(`Failed to update conversation: ${error.message}`);
-  }
-}
-
-/**
- * Runs audit analysis in the background and persists results to Supabase.
- * Should never be awaited from the request handler.
- */
-async function analyzeAndSaveAudit(
-  conversationId: string,
-  messages: Array<{ role: string; content: string }>,
-  businessConfig: { businessName: string; businessType: string; systemPrompt: string; allowedTopics: string[] }
-): Promise<void> {
-  const result = await analyzeConversation(messages, businessConfig);
-  const client = createServerClient();
-  await client
-    .from('conversations')
-    .update({
-      ai_safety_score: result.safetyScore,
-      flagged: result.flagged,
-      flag_reason: result.flagReasons.join(', ') || null,
-      sensitive_data_detected: result.sensitiveDataDetected,
-      sensitive_data_types: result.sensitiveDataTypes,
-    })
-    .eq('id', conversationId);
-}
-
-// ============================================================================
-// POST Handler
-// ============================================================================
-
-export async function POST(request: NextRequest): Promise<NextResponse> {
+export async function POST(request: NextRequest) {
   try {
-    const openai = getOpenAIClient();
+    const body = await request.json();
+    const {
+      messages,
+      businessId,
+      sessionId,
+      businessType = 'default',
+      systemPrompt,
+      businessName = 'this business',
+    } = body;
 
-    // Parse request body
-    const body = await request.json() as ChatRequest & DemoChatRequest;
-
-    // ------------------------------------------------------------------------
-    // Demo mode (used by homepage LiveDemo)
-    // ------------------------------------------------------------------------
-    if (
-      body.businessName &&
-      body.businessType &&
-      body.systemPrompt &&
-      body.userMessage &&
-      Array.isArray(body.conversationHistory)
-    ) {
-      const demoMessages: Array<{ role: string; content: string }> = [
-        { role: 'system', content: body.systemPrompt },
-        ...body.conversationHistory.map((msg) => ({ role: msg.role, content: msg.content })),
-        { role: 'user', content: body.userMessage },
-      ];
-
-      const completion = await openai.chat.completions.create({
-        model: 'gpt-4o-mini',
-        messages: demoMessages as OpenAI.Chat.ChatCompletionMessageParam[],
-        max_tokens: 300,
-        temperature: 0.7,
-      });
-
-      return NextResponse.json({
-        reply: completion.choices[0]?.message?.content || 'Unable to generate response',
-        sessionId: 'demo-session',
-      } as ChatResponse);
-    }
-
-    assertSupabaseConfig();
-    const { businessId, sessionId, message, conversationHistory } =
-      body as ChatRequest;
-
-    // Validate required fields
-    if (
-      !businessId ||
-      !sessionId ||
-      !message ||
-      !Array.isArray(conversationHistory)
-    ) {
+    if (!messages || !Array.isArray(messages)) {
       return NextResponse.json(
-        {
-          error: 'Missing required fields: businessId, sessionId, message, conversationHistory',
-        },
-        { status: 400 }
+        { error: 'Messages array required' },
+        { status: 400, headers: corsHeaders }
       );
     }
 
-    // Guard against oversized payloads
-    const MAX_MESSAGE_LENGTH = 2000;
-    const MAX_HISTORY_ITEMS = 50;
-    if (message.length > MAX_MESSAGE_LENGTH) {
-      return NextResponse.json(
-        { error: `Message exceeds maximum length of ${MAX_MESSAGE_LENGTH} characters` },
-        { status: 400 }
-      );
-    }
-    if (conversationHistory.length > MAX_HISTORY_ITEMS) {
-      return NextResponse.json(
-        { error: `Conversation history exceeds maximum of ${MAX_HISTORY_ITEMS} messages` },
-        { status: 400 }
-      );
-    }
+    const systemMessage =
+      systemPrompt || NICHE_PROMPTS[businessType] || NICHE_PROMPTS.default;
 
-    // ========================================================================
-    // 1. Fetch business details
-    // ========================================================================
-    const { data: business, error: businessError } = await supabase
-      .from('businesses')
-      .select('*')
-      .eq('id', businessId)
-      .single();
-
-    if (businessError || !business) {
-      console.error('Business fetch error:', businessError);
-      return NextResponse.json(
-        { error: 'Business not found' },
-        { status: 404 }
-      );
-    }
-
-    // ========================================================================
-    // 2. Get niche config
-    // ========================================================================
-    const nicheConfig = getNicheConfig(business.business_type || 'default');
-    if (!nicheConfig) {
-      console.warn(
-        `No niche config found for business_type: ${business.business_type}`
-      );
-      return NextResponse.json(
-        { error: 'Business type not supported' },
-        { status: 400 }
-      );
-    }
-
-    // ========================================================================
-    // 3. Interpolate niche config with business name
-    // ========================================================================
-    const interpolatedConfig = interpolateNicheConfig(
-      nicheConfig,
-      business.business_name
-    );
-
-    // ========================================================================
-    // 4. Build system message
-    // ========================================================================
-    const systemMessage = `${interpolatedConfig.systemPrompt}
-
-Additional context:
-- Customer is interacting with our chat assistant
-- Our goal is to provide excellent service and collect contact information (name, phone)
-- If the customer provides contact info, acknowledge and confirm it`;
-
-    // ========================================================================
-    // 5. Build messages array for OpenAI
-    // ========================================================================
-    const messages: Array<{ role: string; content: string }> = [
-      { role: 'system', content: systemMessage },
-      ...conversationHistory.map((msg) => ({
-        role: msg.role,
-        content: msg.content,
-      })),
-      { role: 'user', content: message },
-    ];
-
-    // ========================================================================
-    // 6. Call OpenAI Chat Completions
-    // ========================================================================
     const completion = await openai.chat.completions.create({
       model: 'gpt-4o-mini',
-      messages: messages as OpenAI.Chat.ChatCompletionMessageParam[],
-      max_tokens: 400,
+      messages: [
+        {
+          role: 'system',
+          content: `${systemMessage}\n\nBusiness name: ${businessName}`,
+        },
+        ...messages,
+      ],
+      max_tokens: 500,
       temperature: 0.7,
     });
 
-    const reply =
-      completion.choices[0]?.message?.content || 'Unable to generate response';
+    const aiMessage = completion.choices[0].message.content || '';
 
-    // Strip booking marker so the customer only sees the confirmation message
-    const BOOKING_MARKER = '[BOOKING_READY]';
-    const markerIdx = reply.indexOf(BOOKING_MARKER);
-    const cleanReply = markerIdx >= 0 ? reply.slice(0, markerIdx).trim() : reply;
+    let leadCaptured = false;
+    let customerName: string | null = null;
+    let customerPhone: string | null = null;
 
-    // ========================================================================
-    // 7. Check for lead capture (phone/name/email in response)
-    // ========================================================================
-    const hasLeadInfo =
-      containsLeadInfo(message) || containsLeadInfo(cleanReply);
-
-    // ========================================================================
-    // 8. Get or create conversation
-    // ========================================================================
-    const conversationId = await getOrCreateConversation(
-      businessId,
-      sessionId
-    );
-
-    // ========================================================================
-    // 9. Update conversation with new messages
-    // ========================================================================
-    const updatedMessages: ConversationMessage[] = [
-      ...conversationHistory.map((msg) => ({
-        role: msg.role as 'user' | 'assistant',
-        content: msg.content,
-      })),
-      { role: 'user', content: message },
-      { role: 'assistant', content: cleanReply },
-    ];
-
-    await updateConversation(
-      conversationId,
-      updatedMessages,
-      hasLeadInfo
-    );
-
-    // ========================================================================
-    // 10. Background audit (4+ messages OR lead captured)
-    // ========================================================================
-    if (updatedMessages.length >= 4 || hasLeadInfo) {
-      const businessConfig = {
-        businessName: business.business_name,
-        businessType: business.business_type || 'general',
-        systemPrompt: business.system_prompt || '',
-        allowedTopics: [],
-      };
-      analyzeAndSaveAudit(conversationId, updatedMessages, businessConfig).catch(
-        (err) => console.error('Background audit failed:', err)
-      );
+    if (aiMessage.includes('[LEAD_CAPTURED]')) {
+      leadCaptured = true;
+      const nameMatch = aiMessage.match(/Name:\s*([^,\n]+)/);
+      const phoneMatch = aiMessage.match(/Phone:\s*([^\n]+)/);
+      customerName = nameMatch?.[1]?.trim() || null;
+      customerPhone = phoneMatch?.[1]?.trim() || null;
     }
 
-    // ========================================================================
-    // 11. Save booking if AI collected all booking details
-    // ========================================================================
-    if (markerIdx >= 0) {
-      const jsonFragment = reply.slice(markerIdx + BOOKING_MARKER.length).trim();
+    if (businessId && sessionId) {
       try {
-        const bookingData = JSON.parse(jsonFragment) as {
-          name: string;
-          phone: string;
-          pickupDate: string;
-          returnDate: string;
-          carType: string;
-          totalDays: number;
-        };
-        await supabase.from('bookings').insert({
-          business_id: businessId,
-          session_id: sessionId,
-          customer_name: bookingData.name,
-          customer_phone: bookingData.phone,
-          pickup_date: bookingData.pickupDate,
-          return_date: bookingData.returnDate,
-          car_type: bookingData.carType,
-          total_days: bookingData.totalDays,
-          status: 'pending',
-        });
-      } catch (parseErr) {
-        console.error('Booking parse/save error:', parseErr);
+        const allMessages = [...messages, { role: 'assistant', content: aiMessage }];
+
+        const { data: existing } = await supabase
+          .from('conversations')
+          .select('id')
+          .eq('session_id', sessionId)
+          .eq('business_id', businessId)
+          .single();
+
+        if (existing) {
+          await supabase
+            .from('conversations')
+            .update({
+              messages: allMessages,
+              ...(leadCaptured && {
+                lead_captured: true,
+                customer_name: customerName,
+                customer_phone: customerPhone,
+              }),
+            })
+            .eq('id', existing.id);
+        } else {
+          await supabase.from('conversations').insert({
+            business_id: businessId,
+            session_id: sessionId,
+            messages: allMessages,
+            lead_captured: leadCaptured,
+            customer_name: customerName,
+            customer_phone: customerPhone,
+          });
+        }
+      } catch (dbError) {
+        console.error('DB save error:', dbError);
       }
     }
 
-    // ========================================================================
-    // 12. Return response
-    // ========================================================================
-    return NextResponse.json({
-      reply: cleanReply,
-      sessionId,
-    } as ChatResponse);
-  } catch (error) {
-    console.error('Chat API error:', error);
-    const errorMessage =
-      error instanceof Error ? error.message : 'Unknown error';
+    const cleanMessage = aiMessage.replace(/\[LEAD_CAPTURED\].*$/m, '').trim();
+
     return NextResponse.json(
-      { error: 'Failed to process chat', details: errorMessage },
-      { status: 500 }
+      {
+        message: cleanMessage,
+        leadCaptured,
+        customerName,
+        customerPhone,
+      },
+      { headers: corsHeaders }
+    );
+  } catch (error: unknown) {
+    console.error('Chat API error:', error);
+
+    const err = error as { status?: number };
+    if (err?.status === 401) {
+      return NextResponse.json(
+        { error: 'OpenAI API key invalid' },
+        { status: 500, headers: corsHeaders }
+      );
+    }
+
+    if (err?.status === 429) {
+      return NextResponse.json(
+        { error: 'Too many requests, please wait' },
+        { status: 429, headers: corsHeaders }
+      );
+    }
+
+    return NextResponse.json(
+      { error: 'AI service temporarily unavailable' },
+      { status: 500, headers: corsHeaders }
     );
   }
+}
+
+export async function GET() {
+  return NextResponse.json(
+    {
+      status: 'CypAI Chat API is running',
+      version: '1.0.0',
+      timestamp: new Date().toISOString(),
+    },
+    { headers: corsHeaders }
+  );
+}
+
+export async function OPTIONS() {
+  return new NextResponse(null, {
+    status: 200,
+    headers: corsHeaders,
+  });
 }
