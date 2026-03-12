@@ -1,21 +1,7 @@
 ﻿'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import {
-  BarChart2,
-  Check,
-  Clock,
-  Globe,
-  Menu,
-  MessageCircle,
-  Plus,
-  Send,
-  Star,
-  Users,
-  X,
-  Zap,
-} from 'lucide-react';
+import { Check, Menu, Send, X } from 'lucide-react';
 
 import { PricingGrid } from '@/components/ui/pricing-grid';
 import {
@@ -28,7 +14,7 @@ import {
 
 // Constants
 const WA_LINK =
-  'https://wa.me/905338425559?text=Hi%2C%20I%27m%20interested%20in%20BizAI';
+  'https://wa.me/905338425559?text=Hi%2C%20I%27m%20interested%20in%20CypAI';
 const WA_NUMBER = '+90 533 842 5559';
 const CONTACT_EMAIL = 'bizaicyprus123@gmail.com';
 
@@ -50,20 +36,76 @@ const HOW_STEPS = [
 ] as const;
 
 const FAQ_ITEMS = [
-  { id: 'q1', q: 'Do I need technical knowledge?', a: 'No technical knowledge needed. We handle setup within 24 hours. You just paste one line of code — we send exact instructions.' },
-  { id: 'q2', q: 'Which languages does the AI support?', a: 'BizAI speaks English, Turkish, Arabic, and Russian fluently. Perfect for Northern Cyprus businesses serving tourists and international students.' },
-  { id: 'q3', q: 'Can it connect to my WhatsApp?', a: 'Yes! WhatsApp is available on Pro and Business plans. Setup takes under 10 minutes with our guidance.' },
-  { id: 'q4', q: 'How long does setup take?', a: 'Most businesses are live within 24 hours. You fill in your details (15 min), we train the AI, you add one line of code and go live.' },
-  { id: 'q5', q: 'How is customer data protected?', a: 'All data is encrypted and stored securely. We never sell your customer information. Export or delete anytime from your dashboard.' },
-  { id: 'q6', q: 'Can I change what the AI says?', a: 'Yes, from your dashboard update instructions, FAQs, prices, and personality anytime. Changes go live in minutes.' },
-  { id: 'q7', q: "What if the AI doesn't know the answer?", a: "It politely says someone will follow up, saves the conversation, and you respond personally. It never makes up wrong information." },
-  { id: 'q8', q: 'Can I cancel anytime?', a: 'Yes. No contracts, no fees. Cancel from your dashboard with one click. Access continues until your billing period ends.' },
+  {
+    id: 'faq-1',
+    q: 'How long does setup take?',
+    a: 'Most businesses are live within 15 minutes. You fill in your business details, upload your FAQs and prices, and we generate your AI agent. No coding required.',
+  },
+  {
+    id: 'faq-2',
+    q: 'Which languages does the AI speak?',
+    a: 'Your AI agent speaks English, Turkish, Arabic, and Russian — automatically detecting which language your customer is using and responding in the same language.',
+  },
+  {
+    id: 'faq-3',
+    q: 'How does WhatsApp integration work?',
+    a: "On the Pro and Business plans, your AI connects to your WhatsApp Business number. When customers message you on WhatsApp, the AI responds instantly — 24/7, even when you're closed.",
+  },
+  {
+    id: 'faq-4',
+    q: 'Can I edit what the AI says?',
+    a: 'Yes, fully. From your dashboard you can write custom instructions, add your prices, set your hours, and add FAQs. The AI learns your business and responds accordingly.',
+  },
+  {
+    id: 'faq-5',
+    q: 'How is customer data protected?',
+    a: 'All conversations and lead data are stored securely in our encrypted database. We never share your customer data with third parties. Business plan includes compliance reports and audit logs.',
+  },
+  {
+    id: 'faq-6',
+    q: 'What happens after the 7-day trial?',
+    a: "After your trial, you choose a paid plan starting at $29/month. If you don't upgrade, your widget stops responding but your data is kept safe for 30 days.",
+  },
+  {
+    id: 'faq-7',
+    q: 'Do I need a website to use CypAI?',
+    a: 'No. You can use the QR code feature — print it and place it in your shop. Customers scan it and chat with your AI instantly, no website needed.',
+  },
+  {
+    id: 'faq-8',
+    q: 'Can I cancel anytime?',
+    a: "Yes. No contracts, no cancellation fees. Cancel from your dashboard at any time and you won't be charged again.",
+  },
 ];
 
 const TESTIMONIALS = [
-  { quote: 'We used to miss bookings every night. Now BizAI handles everything while we sleep.', name: 'Mehmet K.', role: 'Car Rental Owner, Kyrenia', initials: 'MK', color: 'bg-blue-500' },
-  { quote: 'International students love that it speaks their language. Bookings doubled.', name: 'Sarah A.', role: 'Accommodation Manager, Nicosia', initials: 'SA', color: 'bg-violet-500' },
-  { quote: 'Setup was done in one day. Worth every dollar.', name: 'Ali R.', role: 'Barbershop Owner, Famagusta', initials: 'AR', color: 'bg-emerald-500' },
+  {
+    name: 'Mehmet Aydın',
+    business: 'Kyrenia Car Rentals',
+    location: 'Kyrenia, TRNC',
+    text: 'Before CypAI, I was answering WhatsApp messages at midnight for price quotes. Now the AI handles everything. I wake up to confirmed bookings.',
+    result: 'Bookings up 40% in first month',
+    avatar: '🚗',
+    stars: 5,
+  },
+  {
+    name: 'Anastasia K.',
+    business: 'Bellapais Accommodation',
+    location: 'Bellapais, TRNC',
+    text: "Our guests speak English, Russian, and Arabic. CypAI answers all of them instantly in their language. We haven't missed a single inquiry since setup.",
+    result: 'Zero missed inquiries in 3 months',
+    avatar: '🏠',
+    stars: 5,
+  },
+  {
+    name: 'Yusuf Özkan',
+    business: 'Studio One Barbershop',
+    location: 'Nicosia, TRNC',
+    text: "I spent 2 hours a day answering 'what are your hours?' and 'how much is a haircut?'. CypAI answers all of that now. I just focus on cutting hair.",
+    result: 'Saved 2+ hours every day',
+    avatar: '✂️',
+    stars: 5,
+  },
 ];
 
 const TRUST_ITEMS = ['🚗 Car Rentals', '💈 Barbershops', '🏠 Accommodation', '🍕 Restaurants', '🏥 Clinics', '💪 Gyms'];
@@ -77,6 +119,49 @@ const INTEGRATIONS = [
   { label: 'Zapier', emoji: '⚡' },
   { label: 'Make.com', emoji: '🔗' },
   { label: 'Google Calendar', emoji: '📅' },
+];
+
+const FEATURES = [
+  {
+    icon: '💬',
+    title: 'WhatsApp + Website Chat',
+    desc: 'One AI handles both your website widget and WhatsApp Business — customers reach you wherever they prefer.',
+  },
+  {
+    icon: '📩',
+    title: 'Automatic Lead Capture',
+    desc: 'AI collects customer name and phone number naturally in conversation. Every lead saved to your dashboard instantly.',
+  },
+  {
+    icon: '🌍',
+    title: '4 Languages Automatically',
+    desc: 'Detects and responds in English, Turkish, Arabic, or Russian — whichever your customer writes in first.',
+  },
+  {
+    icon: '📅',
+    title: 'Booking & Appointment Flow',
+    desc: 'AI guides customers through booking — collects dates, preferences, confirms details — then notifies you.',
+  },
+  {
+    icon: '📊',
+    title: 'Analytics Dashboard',
+    desc: 'See every conversation, all captured leads, satisfaction ratings, and weekly performance reports.',
+  },
+  {
+    icon: '🔒',
+    title: 'Business Plan: Agent Audit',
+    desc: 'AI monitors itself for accuracy and safety. Get a weekly compliance PDF showing how well your agent performed.',
+  },
+  {
+    icon: '⚡',
+    title: '15-Minute Setup',
+    desc: 'Answer a few questions about your business, set your prices and hours, and go live. No developer needed.',
+  },
+  {
+    icon: '📱',
+    title: 'QR Code for Walk-Ins',
+    desc: 'Print your QR code, stick it on your counter. Walk-in customers scan and chat — no app download needed.',
+  },
 ];
 
 // HowItWorks panels
@@ -122,11 +207,11 @@ function HowPanel({ visual }: { visual: string }) {
         <div className="rounded-xl bg-slate-900 p-4 font-mono text-xs leading-6 text-slate-300">
           <div className="text-slate-500">{'<!-- Paste before </body> -->'}</div>
           <div className="mt-1 text-emerald-400">{'<script>'}</div>
-          <div className="pl-3 text-yellow-300">{'  window.BizAIConfig = {'}</div>
+          <div className="pl-3 text-yellow-300">{'  window.CypAIConfig = {'}</div>
           <div className="pl-6 text-blue-300">{'businessId: "your-id"'}</div>
           <div className="pl-3 text-yellow-300">{'}'}</div>
           <div className="text-emerald-400">{'</script>'}</div>
-          <div className="mt-1 text-emerald-400">{'<script src="bizai.vercel.app/widget.js"></script>'}</div>
+          <div className="mt-1 text-emerald-400">{'<script src="cypai.vercel.app/widget.js"></script>'}</div>
         </div>
         <div className="flex items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2.5">
           <Check className="h-4 w-4 text-emerald-600" />
@@ -179,7 +264,7 @@ function LiveDemoModal({ open, onClose }: { open: boolean; onClose: () => void }
 
   useEffect(() => {
     if (open && messages.length === 0) {
-      setMessages([{ role: 'assistant', content: "Hi! 👋 I'm BizAI, demo mode for DriveEasy Car Rentals. Ask me anything about rentals, prices, or availability!" }]);
+      setMessages([{ role: 'assistant', content: "Hi! 👋 I'm CypAI, demo mode for DriveEasy Car Rentals. Ask me anything about rentals, prices, or availability!" }]);
     }
   }, [open, messages.length]);
 
@@ -260,10 +345,9 @@ export default function Home() {
   const [demoOpen, setDemoOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeStep, setActiveStep] = useState(0);
-  const [openFaqId, setOpenFaqId] = useState<string | null>('q1');
+  const [openFaqId, setOpenFaqId] = useState<string | null>('faq-1');
   const [scrolled, setScrolled] = useState(false);
   const [visibleSections, setVisibleSections] = useState<Set<string>>(new Set());
-  const router = useRouter();
 
   const dictionary = getDictionary(locale);
 
@@ -303,12 +387,12 @@ export default function Home() {
       {/* NAVBAR */}
       <header className={`fixed inset-x-0 top-0 z-40 transition-all duration-200 ${scrolled ? 'border-b border-slate-200 bg-white/95 shadow-sm backdrop-blur-md' : 'border-b border-slate-100 bg-white'}`}>
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-4 lg:px-6">
-          <a href="/" className="flex items-center gap-2 text-xl font-extrabold text-slate-900">🤖 BizAI</a>
+          <a href="/" className="flex items-center gap-2 text-xl font-extrabold text-slate-900">🤖 CypAI</a>
           <nav className="hidden items-center gap-7 text-sm font-semibold text-slate-600 md:flex">
             <a href="#features" className="transition hover:text-slate-900">Features</a>
             <a href="#pricing" className="transition hover:text-slate-900">Pricing</a>
-            <a href="#how-it-works" className="transition hover:text-slate-900">How It Works</a>
             <a href="#faq" className="transition hover:text-slate-900">FAQ</a>
+            <a href="/demo" className="transition hover:text-slate-900">Demo</a>
             <a href="/dashboard" className="font-semibold text-blue-600 transition hover:text-blue-700">Dashboard</a>
           </nav>
           <div className="hidden items-center gap-3 md:flex">
@@ -325,7 +409,7 @@ export default function Home() {
         {mobileMenuOpen && (
           <div className="border-t border-slate-100 bg-white px-4 pb-5 pt-3 md:hidden">
             <nav className="flex flex-col gap-1 text-sm font-semibold text-slate-700">
-              {[{ label: 'Features', href: '#features' }, { label: 'Pricing', href: '#pricing' }, { label: 'How It Works', href: '#how-it-works' }, { label: 'FAQ', href: '#faq' }, { label: 'Dashboard', href: '/dashboard' }].map(({ label, href }) => (
+              {[{ label: 'Features', href: '#features' }, { label: 'Pricing', href: '#pricing' }, { label: 'FAQ', href: '#faq' }, { label: 'Demo', href: '/demo' }, { label: 'Dashboard', href: '/dashboard' }].map(({ label, href }) => (
                 <a key={label} href={href} onClick={() => setMobileMenuOpen(false)} className="rounded-lg px-3 py-2.5 transition hover:bg-slate-50">{label}</a>
               ))}
               <div className="mt-3 flex gap-2">
@@ -339,63 +423,116 @@ export default function Home() {
 
       <main className="pt-16">
         {/* HERO */}
-        <section className="relative overflow-hidden bg-white py-16 md:py-24">
-          <div className="mx-auto max-w-6xl px-4 lg:px-6">
-            <div className="grid items-center gap-12 lg:grid-cols-2">
+        <section className="bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 text-white py-24 px-4 relative overflow-hidden">
+          <div className="absolute inset-0 opacity-10" aria-hidden="true">
+            <div className="absolute top-20 left-10 w-72 h-72 bg-blue-500 rounded-full blur-3xl" />
+            <div className="absolute bottom-20 right-10 w-96 h-96 bg-blue-600 rounded-full blur-3xl" />
+          </div>
+          <div className="max-w-6xl mx-auto relative z-10">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+              {/* Left: Copy */}
               <div>
-                <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-blue-100 bg-blue-50 px-3 py-1.5 text-xs font-semibold text-blue-700">
-                  🤖 AI-Powered · Built for Cyprus
+                <div className="inline-flex items-center gap-2 bg-blue-600/20 border border-blue-500/30 rounded-full px-4 py-1.5 text-blue-300 text-sm font-medium mb-6">
+                  🇬🇾 Built for Northern Cyprus Businesses
                 </div>
-                <h1 className="text-4xl font-extrabold leading-tight text-slate-900 md:text-5xl lg:text-[3.5rem]">
-                  AI Agents for Local Businesses in Cyprus
+                <h1 className="text-5xl font-bold leading-tight mb-6">
+                  Your AI Agent That{' '}
+                  <span className="text-blue-400">Never Misses a Customer</span>
                 </h1>
-                <p className="mt-5 text-lg leading-relaxed text-slate-500">
-                  Deploy a 24/7 AI assistant that answers customers, captures leads, and books appointments — on your website and WhatsApp. Live in 24 hours.
+                <p className="text-xl text-slate-300 mb-4 leading-relaxed">
+                  24/7 AI assistant for car rentals, barbershops, hotels, and restaurants. Handles WhatsApp + website chat automatically — in English, Turkish, Arabic, and Russian.
                 </p>
-                <div className="mt-8 flex flex-wrap items-center gap-3">
-                  <button type="button" onClick={() => router.push('/signup?plan=pro')} className="inline-flex items-center justify-center rounded-lg bg-blue-600 px-6 py-3 text-sm font-semibold text-white shadow-sm transition hover:scale-[1.02] hover:bg-blue-700">
-                    Start Free Trial →
-                  </button>
-                  <button type="button" onClick={() => setDemoOpen(true)} className="inline-flex items-center justify-center rounded-lg border border-slate-200 bg-white px-6 py-3 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50">
-                    See Live Demo
-                  </button>
+                <div className="flex flex-wrap gap-3 mb-8 text-sm text-slate-400">
+                  <span className="flex items-center gap-1">✓ Setup in 15 minutes</span>
+                  <span className="flex items-center gap-1">✓ No technical skills needed</span>
+                  <span className="flex items-center gap-1">✓ 7-day free trial</span>
                 </div>
-                <p className="mt-4 text-xs font-medium text-slate-500">
-                  ✓ No credit card required &nbsp;·&nbsp; ✓ Setup in 24 hours &nbsp;·&nbsp; ✓ Cancel anytime
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <a href="/signup?plan=pro" className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-8 py-4 rounded-xl text-lg transition-all hover:scale-105 text-center">
+                    Start Free Trial →
+                  </a>
+                  <a href="/demo" className="border border-slate-600 hover:border-slate-400 text-slate-300 font-semibold px-8 py-4 rounded-xl text-lg transition-all text-center">
+                    See Live Demo
+                  </a>
+                </div>
+                <p className="text-slate-500 text-sm mt-4">
+                  No credit card required for trial · Cancel anytime · PayPal secure payment
                 </p>
               </div>
 
-              <div className="relative flex items-center justify-center">
-                <div className="absolute h-72 w-72 rounded-full bg-blue-100/70 blur-3xl" aria-hidden="true" />
-                <div className="absolute -top-3 right-2 z-10 flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 shadow-lg md:-top-4 md:right-0">
-                  <span className="text-lg">🎉</span>
-                  <div className="leading-tight">
-                    <p className="text-xs font-bold text-slate-900">New lead captured!</p>
-                    <p className="text-xs text-slate-500">Ahmed · +905XX XXX XXXX</p>
+              {/* Right: Live chat demo preview */}
+              <div className="bg-white/5 border border-white/10 rounded-2xl p-4 backdrop-blur-sm">
+                <div className="bg-slate-800 rounded-xl overflow-hidden">
+                  <div className="bg-blue-600 px-4 py-3 flex items-center gap-3">
+                    <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center text-sm">🤖</div>
+                    <div>
+                      <p className="text-white font-semibold text-sm">Kyrenia Car Rentals AI</p>
+                      <p className="text-blue-200 text-xs">🟢 Online 24/7</p>
+                    </div>
                   </div>
-                </div>
-                <div className="relative z-[1] w-[17rem] overflow-hidden rounded-[2rem] border-[6px] border-slate-900 bg-white shadow-2xl">
-                  <div className="flex items-center gap-2 border-b border-white/10 bg-slate-900 px-4 py-3">
-                    <div className="h-2 w-2 rounded-full bg-emerald-400" />
-                    <p className="text-xs font-semibold text-white">BizAI — DriveEasy Car Rentals</p>
-                  </div>
-                  <div className="space-y-2 bg-slate-50 px-3 py-3">
-                    {[
-                      { r: 'user', t: 'Do you have SUVs available this weekend?' },
-                      { r: 'ai', t: 'Yes! 🚗 We have 3 SUVs from $55/day. What are your dates?' },
-                      { r: 'user', t: 'Great, how do I book?' },
-                      { r: 'ai', t: 'I can help with that! What are your dates? 📅' },
-                    ].map((msg, i) => (
-                      <div key={i} className={`flex ${msg.r === 'user' ? 'justify-end' : 'justify-start'}`}>
-                        <div className={`max-w-[85%] rounded-2xl px-3 py-2 text-[11px] leading-relaxed ${msg.r === 'user' ? 'rounded-br-sm bg-blue-600 text-white' : 'rounded-bl-sm bg-white text-slate-700 shadow-sm'}`}>{msg.t}</div>
+                  <div className="p-4 space-y-3 min-h-[280px]">
+                    <div className="flex gap-2">
+                      <div className="w-6 h-6 bg-blue-600 rounded-full flex-shrink-0 flex items-center justify-center text-xs">🤖</div>
+                      <div className="bg-slate-700 rounded-2xl rounded-tl-none px-3 py-2 text-sm text-white max-w-[80%]">
+                        Merhaba! 👋 Hi! How can I help you today? I can help with car rentals, prices, and availability.
                       </div>
-                    ))}
+                    </div>
+                    <div className="flex justify-end">
+                      <div className="bg-blue-600 rounded-2xl rounded-tr-none px-3 py-2 text-sm text-white max-w-[80%]">
+                        How much for a SUV for 3 days?
+                      </div>
+                    </div>
+                    <div className="flex gap-2">
+                      <div className="w-6 h-6 bg-blue-600 rounded-full flex-shrink-0 flex items-center justify-center text-xs">🤖</div>
+                      <div className="bg-slate-700 rounded-2xl rounded-tl-none px-3 py-2 text-sm text-white max-w-[80%]">
+                        Our SUV is $55/day — so 3 days would be <strong>$165 total</strong>. 🚙 Shall I take your name and number to confirm the booking?
+                      </div>
+                    </div>
+                    <div className="flex justify-end">
+                      <div className="bg-blue-600 rounded-2xl rounded-tr-none px-3 py-2 text-sm text-white max-w-[80%]">
+                        Yes! I&apos;m Ahmed, +90 533 xxx xxxx
+                      </div>
+                    </div>
+                    <div className="flex gap-2">
+                      <div className="w-6 h-6 bg-blue-600 rounded-full flex-shrink-0 flex items-center justify-center text-xs">🤖</div>
+                      <div className="bg-green-700 rounded-2xl rounded-tl-none px-3 py-2 text-sm text-white max-w-[80%]">
+                        ✅ Perfect Ahmed! Lead captured. The owner will confirm your booking within 1 hour. Thank you!
+                      </div>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2 border-t border-slate-100 bg-white px-3 py-2.5">
-                    <div className="flex-1 rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-[11px] text-slate-400">Type a message...</div>
-                    <div className="flex h-7 w-7 items-center justify-center rounded-full bg-blue-600"><Send className="h-3 w-3 text-white" /></div>
+                  <div className="border-t border-slate-700 px-4 py-3 flex gap-2">
+                    <a href="/demo" className="flex-1 bg-slate-700 rounded-lg px-3 py-2 text-slate-400 text-sm cursor-pointer hover:bg-slate-600 transition-colors text-center">
+                      💬 Try the live demo yourself →
+                    </a>
                   </div>
                 </div>
+                <div className="mt-3 bg-green-500/10 border border-green-500/20 rounded-lg p-3 flex items-center gap-3">
+                  <span className="text-green-400 text-lg">📩</span>
+                  <div>
+                    <p className="text-green-400 text-sm font-medium">Lead captured automatically</p>
+                    <p className="text-slate-400 text-xs">Ahmed&apos;s contact saved to your dashboard</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Social proof bar */}
+            <div className="mt-16 pt-8 border-t border-white/10 grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+              <div>
+                <p className="text-3xl font-bold text-white">24/7</p>
+                <p className="text-slate-400 text-sm">Always online</p>
+              </div>
+              <div>
+                <p className="text-3xl font-bold text-white">4</p>
+                <p className="text-slate-400 text-sm">Languages spoken</p>
+              </div>
+              <div>
+                <p className="text-3xl font-bold text-white">15min</p>
+                <p className="text-slate-400 text-sm">Setup time</p>
+              </div>
+              <div>
+                <p className="text-3xl font-bold text-white">$0</p>
+                <p className="text-slate-400 text-sm">To start (7-day trial)</p>
               </div>
             </div>
           </div>
@@ -458,67 +595,18 @@ export default function Home() {
           <div className="mx-auto max-w-6xl px-4 lg:px-6">
             <div className="mb-12 text-center">
               <p className="text-[11px] font-semibold uppercase tracking-widest text-blue-600">Features</p>
-              <h2 className="mt-3 text-3xl font-extrabold text-slate-900 md:text-4xl">Build the perfect AI agent for your business</h2>
+              <h2 className="mt-3 text-3xl font-extrabold text-slate-900 md:text-4xl">Everything your business needs</h2>
             </div>
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
-              {/* Large: Lead Capture */}
-              <div className="group overflow-hidden rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md xl:row-span-2">
-                <div className="mb-4 inline-flex rounded-xl bg-blue-50 p-3 text-blue-600"><Users className="h-6 w-6" /></div>
-                <h3 className="text-lg font-bold text-slate-900">Lead Capture That Works</h3>
-                <p className="mt-2 text-sm leading-relaxed text-slate-600">AI collects customer name and phone number automatically during every conversation. Never lose a lead again.</p>
-                <div className="mt-5 overflow-hidden rounded-xl border border-slate-200">
-                  <div className="grid grid-cols-3 bg-slate-50 px-3 py-2 text-[11px] font-semibold uppercase text-slate-400">
-                    <span>Name</span><span>Phone</span><span>Date</span>
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+              {FEATURES.map((f) => (
+                <div key={f.title} className="rounded-xl bg-white p-6 shadow-sm hover:shadow-md transition-shadow">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-50 text-2xl mb-4">
+                    {f.icon}
                   </div>
-                  {[['Ahmed M.', '+905XX XXX', 'Today'], ['Natalia K.', '+905XX XXX', 'Yesterday'], ['Özgür T.', '+905XX XXX', '2 days ago']].map(([n, p, d]) => (
-                    <div key={n} className="grid grid-cols-3 border-t border-slate-100 px-3 py-2.5 text-xs text-slate-700">
-                      <span className="font-semibold">{n}</span><span className="text-slate-500">{p}</span><span className="text-slate-500">{d}</span>
-                    </div>
-                  ))}
+                  <h3 className="font-semibold text-gray-900 mb-2">{f.title}</h3>
+                  <p className="text-gray-500 text-sm leading-relaxed">{f.desc}</p>
                 </div>
-              </div>
-              {/* Large: WhatsApp */}
-              <div className="group overflow-hidden rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md">
-                <div className="mb-4 inline-flex rounded-xl bg-green-50 p-3 text-[#25D366]"><MessageCircle className="h-6 w-6" /></div>
-                <h3 className="text-lg font-bold text-slate-900">WhatsApp Integration</h3>
-                <p className="mt-2 text-sm leading-relaxed text-slate-600">Your AI replies to WhatsApp messages automatically. Businesses in Cyprus live on WhatsApp.</p>
-                <div className="mt-5 space-y-2 rounded-xl bg-[#e5ddd5] p-3">
-                  {[{ r: 'user', t: '🙋 Do you have rooms available?' }, { r: 'ai', t: '✅ Yes! From $45/night. What dates?' }, { r: 'user', t: 'June 15–20' }].map((m, i) => (
-                    <div key={i} className={`flex ${m.r === 'user' ? 'justify-end' : 'justify-start'}`}>
-                      <div className={`max-w-[85%] rounded-xl px-3 py-2 text-xs leading-relaxed ${m.r === 'user' ? 'bg-[#dcf8c6] text-slate-800' : 'bg-white text-slate-800 shadow-sm'}`}>{m.t}</div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-              {/* Small: Multilingual */}
-              <div className="group rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md">
-                <div className="mb-4 inline-flex rounded-xl bg-violet-50 p-3 text-violet-600"><Globe className="h-6 w-6" /></div>
-                <h3 className="text-base font-bold text-slate-900">Multilingual</h3>
-                <p className="mt-1 text-sm text-slate-600">English, Turkish, Arabic, and Russian — perfect for Northern Cyprus.</p>
-                <div className="mt-3 flex flex-wrap gap-1.5">
-                  {['🇬🇧 EN', '🇹🇷 TR', '🇸🇦 AR', '🇷🇺 RU'].map((l) => (
-                    <span key={l} className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700">{l}</span>
-                  ))}
-                </div>
-              </div>
-              {/* Small: 24/7 */}
-              <div className="group rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md">
-                <div className="mb-4 inline-flex rounded-xl bg-amber-50 p-3 text-amber-500"><Clock className="h-6 w-6" /></div>
-                <h3 className="text-base font-bold text-slate-900">24/7 Availability</h3>
-                <p className="mt-1 text-sm text-slate-600">Never misses a customer, even at 3am. Your AI works while you sleep.</p>
-              </div>
-              {/* Small: Analytics */}
-              <div className="group rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md">
-                <div className="mb-4 inline-flex rounded-xl bg-cyan-50 p-3 text-cyan-600"><BarChart2 className="h-6 w-6" /></div>
-                <h3 className="text-base font-bold text-slate-900">Analytics Dashboard</h3>
-                <p className="mt-1 text-sm text-slate-600">See all conversations, leads, and performance metrics in one clean view.</p>
-              </div>
-              {/* Small: Easy Setup */}
-              <div className="group rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md">
-                <div className="mb-4 inline-flex rounded-xl bg-emerald-50 p-3 text-emerald-600"><Zap className="h-6 w-6" /></div>
-                <h3 className="text-base font-bold text-slate-900">Easy Setup</h3>
-                <p className="mt-1 text-sm text-slate-600">Live in 24 hours. No technical skills required — we do the setup for you.</p>
-              </div>
+              ))}
             </div>
           </div>
         </section>
@@ -550,22 +638,29 @@ export default function Home() {
           <div className="mx-auto max-w-6xl px-4 lg:px-6">
             <div className="mb-12 text-center">
               <p className="text-[11px] font-semibold uppercase tracking-widest text-blue-600">Testimonials</p>
-              <h2 className="mt-3 text-3xl font-extrabold text-slate-900 md:text-4xl">Businesses growing with BizAI</h2>
+              <h2 className="mt-3 text-3xl font-extrabold text-slate-900 md:text-4xl">Businesses growing with CypAI</h2>
             </div>
             <div className="grid gap-6 md:grid-cols-3">
               {TESTIMONIALS.map((t) => (
-                <div key={t.name} className="flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md">
+                <div key={t.name} className="flex flex-col gap-4 rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
                   <div className="flex gap-0.5">
-                    {Array.from({ length: 5 }).map((_, i) => (<Star key={i} className="h-4 w-4 fill-amber-400 text-amber-400" />))}
+                    {Array.from({ length: t.stars }).map((_, i) => (
+                      <span key={i} className="text-yellow-400 text-lg">★</span>
+                    ))}
                   </div>
-                  <p className="flex-1 text-sm leading-relaxed text-slate-700">&ldquo;{t.quote}&rdquo;</p>
+                  <p className="flex-1 text-sm leading-relaxed text-gray-600 italic">&ldquo;{t.text}&rdquo;</p>
                   <div className="flex items-center gap-3">
-                    <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-sm font-bold text-white ${t.color}`}>{t.initials}</div>
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-50 text-xl">
+                      {t.avatar}
+                    </div>
                     <div className="leading-tight">
                       <p className="text-sm font-bold text-slate-900">{t.name}</p>
-                      <p className="text-xs text-slate-500">{t.role}</p>
+                      <p className="text-xs text-gray-500">{t.business} · {t.location}</p>
                     </div>
                   </div>
+                  <span className="inline-flex self-start items-center bg-green-50 text-green-700 text-xs font-medium px-2 py-1 rounded-full">
+                    {t.result}
+                  </span>
                 </div>
               ))}
             </div>
@@ -579,19 +674,22 @@ export default function Home() {
               <p className="text-[11px] font-semibold uppercase tracking-widest text-blue-600">FAQ</p>
               <h2 className="mt-3 text-3xl font-extrabold text-slate-900 md:text-4xl">Frequently Asked Questions</h2>
             </div>
-            <div className="space-y-3">
+            <div className="divide-y divide-gray-200">
               {FAQ_ITEMS.map((item) => {
                 const open = openFaqId === item.id;
                 return (
-                  <div key={item.id} className={`overflow-hidden rounded-2xl border transition-colors duration-200 ${open ? 'border-blue-200 bg-white' : 'border-slate-200 bg-white'}`}>
-                    <button type="button" data-testid="faq-question" onClick={() => setOpenFaqId(open ? null : item.id)} className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left">
-                      <span className="text-sm font-semibold text-slate-900">{item.q}</span>
-                      <div className={`shrink-0 transition-transform duration-200 ${open ? 'rotate-45' : 'rotate-0'}`}>
-                        <Plus className={`h-4 w-4 ${open ? 'text-blue-600' : 'text-slate-400'}`} />
-                      </div>
+                  <div key={item.id}>
+                    <button
+                      type="button"
+                      data-testid="faq-question"
+                      onClick={() => setOpenFaqId(open ? null : item.id)}
+                      className="flex w-full items-center justify-between gap-4 py-5 text-left"
+                    >
+                      <span className="font-semibold text-gray-900">{item.q}</span>
+                      <span className={`shrink-0 text-xl font-light text-slate-400 transition-transform duration-200 ${open ? 'rotate-45' : ''}`}>+</span>
                     </button>
                     {open && (
-                      <div data-testid="faq-answer" data-state="open" className="border-t border-slate-100 px-5 pb-5 pt-3 text-sm leading-relaxed text-slate-600">
+                      <div data-testid="faq-answer" data-state="open" className="text-gray-600 text-sm leading-relaxed pb-5">
                         {item.a}
                       </div>
                     )}
@@ -602,60 +700,89 @@ export default function Home() {
           </div>
         </section>
 
-        {/* FINAL CTA */}
-        <section data-observe="cta" className={`bg-[#0f172a] py-20 transition-all duration-700 ${vis('cta')}`}>
-          <div className="mx-auto max-w-3xl px-4 text-center lg:px-6">
-            <h2 className="text-3xl font-extrabold text-white md:text-5xl">Ready to never miss a customer again?</h2>
-            <p className="mt-4 text-base leading-relaxed text-slate-400">Join businesses across Cyprus already using BizAI to capture more leads.</p>
-            <a href="#pricing" className="mt-8 inline-flex items-center justify-center rounded-xl bg-white px-8 py-4 text-base font-extrabold text-slate-900 shadow-xl transition hover:bg-slate-100">
-              Start Building Free →
-            </a>
-            <p className="mt-6 text-sm text-slate-500">
-              Questions?{' '}
-              <a href={`mailto:${CONTACT_EMAIL}`} className="text-slate-300 transition hover:text-white">Email {CONTACT_EMAIL}</a>
-              {' '}or{' '}
-              <a href={WA_LINK} target="_blank" rel="noreferrer" className="text-slate-300 transition hover:text-white">WhatsApp {WA_NUMBER}</a>
+        {/* TRUST / CTA */}
+        <section className="bg-blue-600 py-16 px-4 text-white text-center">
+          <div className="max-w-3xl mx-auto">
+            <h2 className="text-3xl font-bold mb-4">Ready to never miss a customer again?</h2>
+            <p className="text-blue-100 text-lg mb-8">
+              Join local Cyprus businesses already using AI to capture leads while they sleep.
             </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
+              <a
+                href="/signup?plan=pro"
+                className="bg-white text-blue-600 font-bold px-8 py-4 rounded-xl text-lg hover:bg-blue-50 transition-all"
+              >
+                Start Free 7-Day Trial
+              </a>
+              <a
+                href="https://wa.me/905338425559?text=Hi%2C%20I%20want%20to%20learn%20more%20about%20CypAI"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="border-2 border-white text-white font-bold px-8 py-4 rounded-xl text-lg hover:bg-white/10 transition-all"
+              >
+                💬 Chat With Us First
+              </a>
+            </div>
+            <div className="flex flex-wrap justify-center gap-6 text-blue-100 text-sm">
+              <span>✓ No credit card required</span>
+              <span>✓ Setup in 15 minutes</span>
+              <span>✓ Cancel anytime</span>
+              <span>✓ PayPal secure payment</span>
+            </div>
           </div>
         </section>
 
         {/* FOOTER */}
-        <footer id="footer" className="border-t border-slate-200 bg-white py-12">
-          <div className="mx-auto max-w-6xl px-4 lg:px-6">
-            <div className="grid gap-10 md:grid-cols-4">
-              <div>
-                <p className="text-xl font-extrabold text-slate-900">🤖 BizAI</p>
-                <p className="mt-2 text-sm leading-relaxed text-slate-500">AI assistants for local businesses.</p>
-                <p className="mt-3 text-xs font-semibold text-slate-400">Made in Cyprus 🇨🇾</p>
+        <footer className="bg-slate-900 text-slate-400 py-12 px-4">
+          <div className="max-w-6xl mx-auto">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+              <div className="md:col-span-2">
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="text-2xl">🤖</span>
+                  <span className="text-white font-bold text-xl">CypAI</span>
+                </div>
+                <p className="text-sm leading-relaxed mb-4">
+                  AI agents for local businesses in Cyprus. 24/7 customer support in English, Turkish, Arabic, and Russian — on WhatsApp and your website.
+                </p>
+                <div className="flex items-center gap-2 text-sm text-green-400">
+                  <span>📍</span>
+                  <span>Made for Northern Cyprus 🇨🇾</span>
+                </div>
+                <div className="mt-3 space-y-1 text-sm">
+                  <a href={`mailto:${CONTACT_EMAIL}`} className="flex items-center gap-2 hover:text-white transition-colors">
+                    ✉️ {CONTACT_EMAIL}
+                  </a>
+                  <a href="https://wa.me/905338425559" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 hover:text-white transition-colors">
+                    💬 WhatsApp: {WA_NUMBER}
+                  </a>
+                </div>
               </div>
               <div>
-                <p className="mb-4 text-[11px] font-semibold uppercase tracking-widest text-slate-400">Product</p>
-                <ul className="space-y-2.5 text-sm text-slate-600">
-                  <li><a href="#features" className="transition hover:text-slate-900">Features</a></li>
-                  <li><a href="#pricing" className="transition hover:text-slate-900">Pricing</a></li>
-                  <li><a href="/demo" className="transition hover:text-slate-900">Demo</a></li>
-                  <li><a href="/dashboard" className="transition hover:text-slate-900">Dashboard</a></li>
+                <h4 className="text-white font-semibold mb-3">Product</h4>
+                <ul className="space-y-2 text-sm">
+                  <li><a href="#features" className="hover:text-white transition-colors">Features</a></li>
+                  <li><a href="#pricing" className="hover:text-white transition-colors">Pricing</a></li>
+                  <li><a href="/demo" className="hover:text-white transition-colors">Live Demo</a></li>
+                  <li><a href="/dashboard" className="hover:text-white transition-colors">Dashboard</a></li>
+                  <li><a href="#faq" className="hover:text-white transition-colors">FAQ</a></li>
                 </ul>
               </div>
               <div>
-                <p className="mb-4 text-[11px] font-semibold uppercase tracking-widest text-slate-400">Support</p>
-                <ul className="space-y-2.5 text-sm text-slate-600">
-                  <li><a href="#faq" className="transition hover:text-slate-900">FAQ</a></li>
-                  <li><a href="/contact" className="transition hover:text-slate-900">Contact</a></li>
-                  <li><a href="/privacy" className="transition hover:text-slate-900">Privacy Policy</a></li>
-                  <li><a href="/terms" className="transition hover:text-slate-900">Terms</a></li>
-                </ul>
-              </div>
-              <div>
-                <p className="mb-4 text-[11px] font-semibold uppercase tracking-widest text-slate-400">Contact</p>
-                <ul className="space-y-3 text-sm text-slate-600">
-                  <li><a href={`mailto:${CONTACT_EMAIL}`} className="flex items-start gap-2 transition hover:text-slate-900"><span>📧</span><span className="break-all">{CONTACT_EMAIL}</span></a></li>
-                  <li><a href={WA_LINK} target="_blank" rel="noreferrer" className="flex items-center gap-2 transition hover:text-slate-900"><span>💬</span>{WA_NUMBER}</a></li>
-                  <li className="flex items-center gap-2"><span>📍</span>Nicosia, Northern Cyprus</li>
+                <h4 className="text-white font-semibold mb-3">Company</h4>
+                <ul className="space-y-2 text-sm">
+                  <li><a href="/contact" className="hover:text-white transition-colors">Contact Us</a></li>
+                  <li><a href="/privacy" className="hover:text-white transition-colors">Privacy Policy</a></li>
+                  <li><a href="/terms" className="hover:text-white transition-colors">Terms of Service</a></li>
+                  <li><a href="/login" className="hover:text-white transition-colors">Client Login</a></li>
                 </ul>
               </div>
             </div>
-            <div className="mt-10 border-t border-slate-200 pt-6 text-center text-xs text-slate-400">© 2026 BizAI · All rights reserved</div>
+            <div className="border-t border-slate-800 pt-6 flex flex-col sm:flex-row justify-between items-center gap-3 text-sm">
+              <p>© 2026 CypAI. All rights reserved.</p>
+              <p className="text-slate-500">
+                Serving businesses across Northern Cyprus — Kyrenia · Nicosia · Famagusta · Güzelyurt
+              </p>
+            </div>
           </div>
         </footer>
       </main>

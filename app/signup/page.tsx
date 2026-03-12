@@ -73,7 +73,7 @@ function SignupForm() {
     e.preventDefault();
     if (!validate()) return;
     localStorage.setItem(
-      'bizai_signup',
+      'cypai_signup',
       JSON.stringify({ ...form, plan: planId }),
     );
     router.push(`/payment?plan=${planId}`);
@@ -84,7 +84,7 @@ function SignupForm() {
       {/* Top bar */}
       <header className="border-b border-slate-200 bg-white px-4 py-4">
         <div className="mx-auto flex max-w-lg items-center justify-between">
-          <a href="/" className="text-lg font-extrabold text-slate-900">🤖 BizAI</a>
+          <a href="/" className="text-lg font-extrabold text-slate-900">🤖 CypAI</a>
           <a href="/" className="text-sm font-semibold text-slate-500 transition hover:text-slate-800">← Back</a>
         </div>
       </header>

@@ -15,7 +15,7 @@ export default function TermsPage() {
       {/* Nav */}
       <nav className="border-b border-slate-200 bg-white px-4 py-4">
         <div className="mx-auto flex max-w-5xl items-center justify-between">
-          <Link href="/" className="text-xl font-extrabold text-slate-900">🤖 BizAI</Link>
+          <Link href="/" className="text-xl font-extrabold text-slate-900">🤖 CypAI</Link>
           <Link
             href="/"
             className="flex items-center gap-1.5 rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
@@ -54,14 +54,14 @@ export default function TermsPage() {
           {/* Content */}
           <div className="space-y-12 text-slate-700">
             <p className="rounded-2xl bg-blue-50 px-5 py-4 text-sm leading-relaxed text-blue-800">
-              By signing up for or using BizAI, you agree to these terms. Please read them carefully.
+              By signing up for or using CypAI, you agree to these terms. Please read them carefully.
               If you have any questions, contact us before subscribing.
             </p>
 
             <section id="service-description" className="scroll-mt-8">
               <h2 className="mb-4 text-xl font-bold text-slate-900">1. Service Description</h2>
               <p className="text-sm leading-relaxed">
-                BizAI provides AI-powered customer service tools for local businesses. This includes a
+                CypAI provides AI-powered customer service tools for local businesses. This includes a
                 customisable chat widget you can embed on your website, a lead capture dashboard, conversation
                 analytics, and optional integrations (e.g. WhatsApp). The AI is powered by OpenAI language
                 models and configured to represent your specific business.
@@ -71,10 +71,10 @@ export default function TermsPage() {
             <section id="acceptable-use" className="scroll-mt-8">
               <h2 className="mb-4 text-xl font-bold text-slate-900">2. Acceptable Use</h2>
               <ul className="space-y-3 text-sm leading-relaxed">
-                <li className="flex gap-2"><span className="mt-1 text-blue-500">▸</span><span>You may only use BizAI for <strong>legitimate business purposes</strong> — to answer customer questions and capture leads for your real business.</span></li>
+                <li className="flex gap-2"><span className="mt-1 text-blue-500">▸</span><span>You may only use CypAI for <strong>legitimate business purposes</strong> — to answer customer questions and capture leads for your real business.</span></li>
                 <li className="flex gap-2"><span className="mt-1 text-blue-500">▸</span><span>Do not use the service to send spam, misleading information, or harmful content to customers.</span></li>
                 <li className="flex gap-2"><span className="mt-1 text-blue-500">▸</span><span>Starter and Pro plans are limited to <strong>one business location</strong>. The Business plan supports multiple locations.</span></li>
-                <li className="flex gap-2"><span className="mt-1 text-red-500">✕</span><span>Do not attempt to reverse-engineer, scrape, or resell the BizAI platform or its outputs.</span></li>
+                <li className="flex gap-2"><span className="mt-1 text-red-500">✕</span><span>Do not attempt to reverse-engineer, scrape, or resell the CypAI platform or its outputs.</span></li>
                 <li className="flex gap-2"><span className="mt-1 text-red-500">✕</span><span>Do not impersonate another business or use the service to collect customer data without their knowledge.</span></li>
               </ul>
             </section>
@@ -93,7 +93,7 @@ export default function TermsPage() {
             <section id="availability" className="scroll-mt-8">
               <h2 className="mb-4 text-xl font-bold text-slate-900">4. Service Availability</h2>
               <ul className="space-y-3 text-sm leading-relaxed">
-                <li className="flex gap-2"><span className="mt-1 text-blue-500">▸</span><span>We aim for <strong>99.9% uptime</strong> for the BizAI platform and widget.</span></li>
+                <li className="flex gap-2"><span className="mt-1 text-blue-500">▸</span><span>We aim for <strong>99.9% uptime</strong> for the CypAI platform and widget.</span></li>
                 <li className="flex gap-2"><span className="mt-1 text-blue-500">▸</span><span>Scheduled maintenance will be communicated in advance where possible.</span></li>
                 <li className="flex gap-2"><span className="mt-1 text-blue-500">▸</span><span>AI response quality is subject to the availability and performance of <strong>OpenAI&apos;s API</strong>. We are not responsible for degraded AI quality during OpenAI outages.</span></li>
                 <li className="flex gap-2"><span className="mt-1 text-blue-500">▸</span><span>We reserve the right to suspend accounts that violate these terms without prior notice.</span></li>
@@ -103,10 +103,10 @@ export default function TermsPage() {
             <section id="liability" className="scroll-mt-8">
               <h2 className="mb-4 text-xl font-bold text-slate-900">5. Limitation of Liability</h2>
               <p className="mb-4 text-sm leading-relaxed">
-                BizAI is provided as-is, without warranty of any kind. To the maximum extent permitted by law:
+                CypAI is provided as-is, without warranty of any kind. To the maximum extent permitted by law:
               </p>
               <ul className="space-y-3 text-sm leading-relaxed">
-                <li className="flex gap-2"><span className="mt-1 text-amber-500">⚠</span><span>BizAI is <strong>not liable for business losses</strong> caused by AI responses, including incorrect information given to customers.</span></li>
+                <li className="flex gap-2"><span className="mt-1 text-amber-500">⚠</span><span>CypAI is <strong>not liable for business losses</strong> caused by AI responses, including incorrect information given to customers.</span></li>
                 <li className="flex gap-2"><span className="mt-1 text-amber-500">⚠</span><span>Always <strong>review AI-captured leads</strong> before contacting them or taking business decisions based on them.</span></li>
                 <li className="flex gap-2"><span className="mt-1 text-amber-500">⚠</span><span>Our total liability to you in any month is limited to the subscription fee paid in that month.</span></li>
                 <li className="flex gap-2"><span className="mt-1 text-blue-500">▸</span><span>If a confirmed technical failure on our part results in extended downtime (&gt;48 hours), we will issue a proportional credit or refund upon request.</span></li>

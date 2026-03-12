@@ -14,7 +14,7 @@ export default function PrivacyPage() {
       {/* Nav */}
       <nav className="border-b border-slate-200 bg-white px-4 py-4">
         <div className="mx-auto flex max-w-5xl items-center justify-between">
-          <Link href="/" className="text-xl font-extrabold text-slate-900">🤖 BizAI</Link>
+          <Link href="/" className="text-xl font-extrabold text-slate-900">🤖 CypAI</Link>
           <Link
             href="/"
             className="flex items-center gap-1.5 rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
@@ -53,7 +53,7 @@ export default function PrivacyPage() {
           {/* Content */}
           <div className="prose prose-slate max-w-none space-y-12 text-slate-700">
             <p className="rounded-2xl bg-blue-50 px-5 py-4 text-sm leading-relaxed text-blue-800">
-              BizAI is committed to protecting your privacy. This policy explains what data we collect,
+              CypAI is committed to protecting your privacy. This policy explains what data we collect,
               how we use it, and your rights. We keep it short and honest.
             </p>
 
@@ -71,7 +71,7 @@ export default function PrivacyPage() {
             <section id="how-we-use" className="scroll-mt-8">
               <h2 className="mb-4 text-xl font-bold text-slate-900">2. How We Use Your Information</h2>
               <ul className="space-y-3 text-sm leading-relaxed">
-                <li className="flex gap-2"><span className="mt-1 text-blue-500">▸</span><span>To provide, maintain, and improve the BizAI service.</span></li>
+                <li className="flex gap-2"><span className="mt-1 text-blue-500">▸</span><span>To provide, maintain, and improve the CypAI service.</span></li>
                 <li className="flex gap-2"><span className="mt-1 text-blue-500">▸</span><span>To send important account updates (new features, billing notices, policy changes).</span></li>
                 <li className="flex gap-2"><span className="mt-1 text-blue-500">▸</span><span>To power the AI responses for your customers using OpenAI models.</span></li>
                 <li className="flex gap-2"><span className="mt-1 text-green-600">✓</span><span><strong>We never sell your data to third parties.</strong> Your business and customer data is not used for advertising.</span></li>

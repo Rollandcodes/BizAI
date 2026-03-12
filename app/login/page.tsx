@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 
-const DASHBOARD_STORAGE_KEY = 'bizai_dashboard_email';
+const DASHBOARD_STORAGE_KEY = 'cypai_dashboard_email';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -57,7 +57,7 @@ export default function LoginPage() {
         {/* Logo */}
         <div className="mb-8 text-center">
           <Link href="/" className="inline-block text-3xl font-extrabold text-slate-900">
-            🤖 BizAI
+            🤖 CypAI
           </Link>
         </div>
 
@@ -139,7 +139,7 @@ export default function LoginPage() {
             href="/#pricing"
             className="block w-full rounded-xl border-2 border-slate-200 py-3 text-center text-sm font-semibold text-slate-700 transition hover:border-blue-300 hover:text-blue-700"
           >
-            New to BizAI? Start your free 7-day trial →
+            New to CypAI? Start your free 7-day trial →
           </Link>
         </div>
 

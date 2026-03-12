@@ -1,9 +1,9 @@
 /**
- * BizAI Chat Widget — Embeddable Script
+ * CypAI Chat Widget — Embeddable Script
  *
  * Usage:
  *   <script>
- *     window.BizAIConfig = {
+ *     window.CypAIConfig = {
  *       businessId: "YOUR_BUSINESS_ID",
  *       primaryColor: "#4F46E5",      // optional, default indigo
  *       widgetUrl: "https://yourdomain.com" // optional, defaults to script src origin
@@ -14,11 +14,11 @@
 (function () {
   "use strict";
 
-  var config = window.BizAIConfig || {};
+  var config = window.CypAIConfig || {};
   var businessId = config.businessId;
 
   if (!businessId) {
-    console.warn("[BizAI] widget.js: window.BizAIConfig.businessId is required.");
+    console.warn("[CypAI] widget.js: window.CypAIConfig.businessId is required.");
     return;
   }
 
@@ -45,20 +45,20 @@
   // ── Inject minimal reset styles ──────────────────────────────────────────
   var style = document.createElement("style");
   style.textContent =
-    "#bizai-toggle-btn,#bizai-iframe-container{all:initial;box-sizing:border-box;font-family:inherit}" +
-    "#bizai-toggle-btn{position:fixed;bottom:" + BOTTOM_OFFSET + "px;right:" + RIGHT_OFFSET + "px;z-index:2147483646;" +
+    "#cypai-toggle-btn,#cypai-iframe-container{all:initial;box-sizing:border-box;font-family:inherit}" +
+    "#cypai-toggle-btn{position:fixed;bottom:" + BOTTOM_OFFSET + "px;right:" + RIGHT_OFFSET + "px;z-index:2147483646;" +
       "width:" + BUTTON_SIZE + "px;height:" + BUTTON_SIZE + "px;border-radius:50%;" +
       "background:" + primaryColor + ";border:none;cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,0.25);" +
       "display:flex;align-items:center;justify-content:center;transition:transform .2s;}" +
-    "#bizai-toggle-btn:hover{transform:scale(1.08)}" +
-    "#bizai-toggle-btn svg{display:block}" +
-    "#bizai-iframe-container{position:fixed;bottom:" + (BOTTOM_OFFSET + BUTTON_SIZE + 12) + "px;right:" + RIGHT_OFFSET + "px;" +
+    "#cypai-toggle-btn:hover{transform:scale(1.08)}" +
+    "#cypai-toggle-btn svg{display:block}" +
+    "#cypai-iframe-container{position:fixed;bottom:" + (BOTTOM_OFFSET + BUTTON_SIZE + 12) + "px;right:" + RIGHT_OFFSET + "px;" +
       "z-index:2147483645;width:" + PANEL_WIDTH + "px;height:" + PANEL_HEIGHT + "px;" +
       "border-radius:16px;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,0.2);" +
       "transform-origin:bottom right;transition:transform .25s,opacity .25s;" +
       "transform:scale(0);opacity:0;pointer-events:none;}" +
-    "#bizai-iframe-container.bizai-open{transform:scale(1);opacity:1;pointer-events:auto}" +
-    "#bizai-iframe{width:100%;height:100%;border:none;display:block}";
+    "#cypai-iframe-container.cypai-open{transform:scale(1);opacity:1;pointer-events:auto}" +
+    "#cypai-iframe{width:100%;height:100%;border:none;display:block}";
   document.head.appendChild(style);
 
   // ── Chat icon SVG ─────────────────────────────────────────────────────────
@@ -74,11 +74,11 @@
 
   // ── Create iframe ─────────────────────────────────────────────────────────
   var iframeContainer = document.createElement("div");
-  iframeContainer.id = "bizai-iframe-container";
+  iframeContainer.id = "cypai-iframe-container";
 
   var iframe = document.createElement("iframe");
-  iframe.id = "bizai-iframe";
-  iframe.title = "BizAI Chat";
+  iframe.id = "cypai-iframe";
+  iframe.title = "CypAI Chat";
   iframe.allow = "microphone";
 
   // Lazy-load: set src only when first opened
@@ -89,7 +89,7 @@
 
   // ── Create toggle button ──────────────────────────────────────────────────
   var btn = document.createElement("button");
-  btn.id = "bizai-toggle-btn";
+  btn.id = "cypai-toggle-btn";
   btn.setAttribute("aria-label", "Open chat");
   btn.innerHTML = chatIconSVG;
   document.body.appendChild(btn);
@@ -110,11 +110,11 @@
           encodeURIComponent(primaryColor);
         iframeLoaded = true;
       }
-      iframeContainer.classList.add("bizai-open");
+      iframeContainer.classList.add("cypai-open");
       btn.innerHTML = closeIconSVG;
       btn.setAttribute("aria-label", "Close chat");
     } else {
-      iframeContainer.classList.remove("bizai-open");
+      iframeContainer.classList.remove("cypai-open");
       btn.innerHTML = chatIconSVG;
       btn.setAttribute("aria-label", "Open chat");
     }
@@ -122,7 +122,7 @@
 
   // ── Allow iframe to close the widget via postMessage ──────────────────────
   window.addEventListener("message", function (event) {
-    if (event.data === "bizai:close") {
+    if (event.data === "cypai:close") {
       if (isOpen) btn.click();
     }
   });

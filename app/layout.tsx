@@ -12,9 +12,18 @@ const jakarta = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
-  title: 'BizAI — AI Agents for Local Businesses in Cyprus',
+  title: 'CypAI — AI Agents for Cyprus Businesses',
   description:
-    'Deploy a 24/7 AI assistant that answers customers, captures leads, and books appointments on your website and WhatsApp. Live in 24 hours.',
+    '24/7 AI customer service for local businesses in Northern Cyprus. Auto-capture leads, handle WhatsApp, speak English, Turkish, Arabic & Russian. Setup in 15 minutes.',
+  keywords: 'AI chatbot Cyprus, WhatsApp AI Northern Cyprus, AI agent TRNC, customer service automation Cyprus, CypAI',
+  openGraph: {
+    title: 'CypAI — AI Agents for Cyprus Businesses',
+    description: 'Never miss a lead again. 24/7 AI on WhatsApp + website for car rentals, hotels, barbershops in Cyprus.',
+    url: 'https://biz-ai-u4n3.vercel.app',
+    siteName: 'CypAI',
+    locale: 'en_US',
+    type: 'website',
+  },
 };
 
 export default function RootLayout({

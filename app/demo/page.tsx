@@ -222,7 +222,7 @@ export default function DemoPage() {
       {/* Navbar */}
       <nav className="border-b border-slate-200 bg-white px-4 py-4">
         <div className="mx-auto flex max-w-5xl items-center justify-between">
-          <Link href="/" className="text-xl font-extrabold text-slate-900">🤖 BizAI</Link>
+          <Link href="/" className="text-xl font-extrabold text-slate-900">🤖 CypAI</Link>
           <Link
             href="/"
             className="flex items-center gap-1.5 rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
@@ -235,7 +235,7 @@ export default function DemoPage() {
       {/* Hero */}
       <div className="mx-auto max-w-3xl px-4 pb-6 pt-14 text-center">
         <p className="mb-3 text-xs font-bold uppercase tracking-widest text-blue-600">Live Demo · No Signup Required</p>
-        <h1 className="text-4xl font-extrabold text-slate-900 sm:text-5xl">Try BizAI Live</h1>
+        <h1 className="text-4xl font-extrabold text-slate-900 sm:text-5xl">Try CypAI Live</h1>
         <p className="mt-4 text-lg text-slate-500">
           Chat with our AI assistant configured for different local businesses.<br />
           This is powered by real AI — just like yours would be.
@@ -270,7 +270,7 @@ export default function DemoPage() {
       {/* Footer note + CTA */}
       <div className="mx-auto max-w-xl px-4 pb-16 text-center">
         <p className="text-sm text-slate-400">
-          This is a live demo powered by real AI. Your BizAI will be trained specifically on{' '}
+          This is a live demo powered by real AI. Your CypAI will be trained specifically on{' '}
           <span className="font-semibold text-slate-600">YOUR</span> business.
         </p>
         <Link

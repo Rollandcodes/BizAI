@@ -4,7 +4,7 @@ import { useState, type FormEvent } from 'react';
 import Link from 'next/link';
 
 const CONTACT_EMAIL = 'bizaicyprus123@gmail.com';
-const WA_LINK = 'https://wa.me/905338425559?text=Hi%2C%20I%27m%20interested%20in%20BizAI';
+const WA_LINK = 'https://wa.me/905338425559?text=Hi%2C%20I%27m%20interested%20in%20CypAI';
 const WA_NUMBER = '+90 533 842 5559';
 
 type FormState = {
@@ -29,7 +29,7 @@ export default function ContactPage() {
 
   function handleSubmit(e: FormEvent) {
     e.preventDefault();
-    const subject = encodeURIComponent(`BizAI Inquiry from ${form.name} — ${form.businessName}`);
+    const subject = encodeURIComponent(`CypAI Inquiry from ${form.name} — ${form.businessName}`);
     const body = encodeURIComponent(
       `Name: ${form.name}\nEmail: ${form.email}\nBusiness: ${form.businessName}\n\nMessage:\n${form.message}`
     );
@@ -42,7 +42,7 @@ export default function ContactPage() {
       {/* Nav */}
       <nav className="border-b border-slate-200 bg-white px-4 py-4">
         <div className="mx-auto flex max-w-5xl items-center justify-between">
-          <Link href="/" className="text-xl font-extrabold text-slate-900">🤖 BizAI</Link>
+          <Link href="/" className="text-xl font-extrabold text-slate-900">🤖 CypAI</Link>
           <Link
             href="/"
             className="flex items-center gap-1.5 rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"

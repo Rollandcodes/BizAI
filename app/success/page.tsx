@@ -59,7 +59,7 @@ export default function SuccessPage() {
 
   useEffect(() => {
     try {
-      const raw = localStorage.getItem('bizai_user');
+      const raw = localStorage.getItem('cypai_user');
       if (raw) setUser(JSON.parse(raw) as BizUser);
     } catch {
       // ignore
@@ -93,7 +93,7 @@ export default function SuccessPage() {
         <div className="mb-8 text-center">
           <h1 className="text-3xl font-extrabold text-slate-900 md:text-4xl">🎉 You&apos;re all set!</h1>
           <p className="mt-2 text-lg font-semibold text-slate-600">
-            Welcome to BizAI,{' '}
+            Welcome to CypAI,{' '}
             <span className="text-blue-600">{businessName}</span>!
           </p>
         </div>

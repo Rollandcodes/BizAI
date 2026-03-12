@@ -37,7 +37,7 @@ export function Header() {
       })}
     >
       <nav className="mx-auto flex h-14 w-full max-w-5xl items-center justify-between px-4">
-        <a className="hover:bg-accent rounded-md p-2" href="#top" aria-label="BizAI – back to top">
+        <a className="hover:bg-accent rounded-md p-2" href="#top" aria-label="CypAI – back to top">
           <WordmarkIcon className="h-4" />
         </a>
         <div className="hidden items-center gap-2 md:flex">

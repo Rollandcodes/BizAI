@@ -16,7 +16,7 @@ export function FaqsSection({ dictionary }: Props) {
     {
       id: 'item-1',
       title: 'Do I need technical knowledge?',
-      content: 'No. BizAI installs easily with one line of code.',
+      content: 'No. CypAI installs easily with one line of code.',
     },
     {
       id: 'item-2',

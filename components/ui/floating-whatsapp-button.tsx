@@ -2,7 +2,7 @@ export function FloatingWhatsAppButton() {
   return (
     <div className="fixed bottom-5 left-4 z-50 sm:bottom-6 sm:left-6">
       <a
-        href="https://wa.me/905338425559?text=Hi%2C%20I%27m%20interested%20in%20BizAI"
+        href="https://wa.me/905338425559?text=Hi%2C%20I%27m%20interested%20in%20CypAI"
         target="_blank"
         rel="noopener noreferrer"
         aria-label="Chat with us on WhatsApp"

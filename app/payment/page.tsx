@@ -51,7 +51,7 @@ function PayPalSection({
         </p>
         <p className="text-gray-600 text-sm mt-3">Please contact us directly:</p>
         <a
-          href="https://wa.me/905338425559?text=Hi%2C%20I%20want%20to%20sign%20up%20for%20BizAI"
+          href="https://wa.me/905338425559?text=Hi%2C%20I%20want%20to%20sign%20up%20for%20CypAI"
           target="_blank"
           rel="noopener noreferrer"
           className="inline-block mt-2 bg-green-500 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-green-600 transition-colors"
@@ -126,7 +126,7 @@ function PaymentContent() {
 
   useEffect(() => {
     try {
-      const raw = localStorage.getItem('bizai_signup');
+      const raw = localStorage.getItem('cypai_signup');
       if (raw) setSignupData(JSON.parse(raw) as SignupData);
     } catch {
       // localStorage unavailable or corrupt — proceed without pre-fill
@@ -137,7 +137,7 @@ function PaymentContent() {
     setProcessing(true);
     if (signupData) {
       localStorage.setItem(
-        'bizai_user',
+        'cypai_user',
         JSON.stringify({ ...signupData, businessId, plan: planId }),
       );
     }
@@ -155,7 +155,7 @@ function PaymentContent() {
       {/* Top bar */}
       <header className="border-b border-slate-200 bg-white px-4 py-4">
         <div className="mx-auto flex max-w-5xl items-center justify-between">
-          <a href="/" className="text-lg font-extrabold text-slate-900">🤖 BizAI</a>
+          <a href="/" className="text-lg font-extrabold text-slate-900">🤖 CypAI</a>
           <a href={`/signup?plan=${planId}`} className="text-sm font-semibold text-slate-500 transition hover:text-slate-800">← Back</a>
         </div>
       </header>
@@ -292,7 +292,7 @@ function PaymentContent() {
                       <div className="mt-4 pt-4 border-t border-slate-100 text-center">
                         <p className="text-xs text-gray-400 mb-2">Prefer to pay manually?</p>
                         <a
-                          href={`https://wa.me/905338425559?text=Hi!%20I%20want%20to%20sign%20up%20for%20BizAI%20${encodeURIComponent(plan.name)}%20Plan%20(%24${plan.price}%2Fmo).%20My%20business%3A%20${encodeURIComponent(signupData.businessName)}%2C%20Email%3A%20${encodeURIComponent(signupData.email)}`}
+                          href={`https://wa.me/905338425559?text=Hi!%20I%20want%20to%20sign%20up%20for%20CypAI%20${encodeURIComponent(plan.name)}%20Plan%20(%24${plan.price}%2Fmo).%20My%20business%3A%20${encodeURIComponent(signupData.businessName)}%2C%20Email%3A%20${encodeURIComponent(signupData.email)}`}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="text-green-600 text-sm font-medium hover:underline flex items-center justify-center gap-1"
@@ -317,7 +317,7 @@ function PaymentContent() {
               )}
 
               <p className="mt-6 text-center text-xs text-slate-400">
-                🔒 Payments are handled securely by PayPal. BizAI never stores your card details.
+                🔒 Payments are handled securely by PayPal. CypAI never stores your card details.
               </p>
             </div>
 

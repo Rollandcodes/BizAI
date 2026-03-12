@@ -162,7 +162,7 @@ function ChatWidget({
             <button
               onClick={() => {
                 if (embedded && typeof window !== 'undefined') {
-                  window.parent.postMessage('bizai:close', '*');
+                  window.parent.postMessage('cypai:close', '*');
                 }
                 setIsOpen(false);
               }}

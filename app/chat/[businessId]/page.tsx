@@ -21,7 +21,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     .eq('id', businessId)
     .maybeSingle();
 
-  const name = data?.business_name ?? 'BizAI';
+  const name = data?.business_name ?? 'CypAI';
   return {
     title: `Chat with ${name}`,
     description: `Chat with the AI assistant for ${name}`,

@@ -123,7 +123,7 @@ type SettingsFormState = {
   customFaqs: CustomFaq[];
 };
 
-const DASHBOARD_STORAGE_KEY = 'bizai-dashboard-email';
+const DASHBOARD_STORAGE_KEY = 'cypai-dashboard-email';
 const businessTypeOptions = [
   { value: 'car_rental', label: 'Car Rental' },
   { value: 'barbershop', label: 'Barbershop' },
@@ -218,7 +218,7 @@ function exportLeadsCsv(leads: ConversationRecord[]) {
   const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
   link.href = url;
-  link.download = 'bizai-leads.csv';
+  link.download = 'cypai-leads.csv';
   link.click();
   URL.revokeObjectURL(url);
 }
@@ -280,7 +280,7 @@ function AccessGate({
             <Bot className="h-6 w-6" />
           </div>
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-blue-600">BizAI Dashboard</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-blue-600">CypAI Dashboard</p>
             <h1 className="text-2xl font-extrabold text-slate-900">Enter your business email to access dashboard</h1>
           </div>
         </div>
@@ -510,7 +510,7 @@ export default function DashboardPage() {
       return '';
     }
 
-    return `<script>\n  window.BizAIConfig = { businessId: "${business.id}" }\n</script>\n<script src="https://biz-ai-u4n3.vercel.app/widget.js"></script>`;
+    return `<script>\n  window.CypAIConfig = { businessId: "${business.id}" }\n</script>\n<script src="https://biz-ai-u4n3.vercel.app/widget.js"></script>`;
   }, [business]);
 
   useEffect(() => {
@@ -678,7 +678,7 @@ export default function DashboardPage() {
     const { default: html2canvas } = await import('html2canvas');
     const canvas = await html2canvas(qrRef.current, { backgroundColor: '#ffffff', scale: 3 });
     const link = document.createElement('a');
-    link.download = `bizai-qr-${business.business_name.replace(/\s+/g, '-').toLowerCase()}.png`;
+    link.download = `cypai-qr-${business.business_name.replace(/\s+/g, '-').toLowerCase()}.png`;
     link.href = canvas.toDataURL('image/png');
     link.click();
   }
@@ -1057,7 +1057,7 @@ export default function DashboardPage() {
       {toast ? <Toast toast={toast} /> : null}
 
       <aside className="hidden w-60 shrink-0 flex-col bg-[#0f172a] text-white lg:flex">
-        <div className="flex h-20 items-center px-6 text-xl font-extrabold">BizAI</div>
+        <div className="flex h-20 items-center px-6 text-xl font-extrabold">CypAI</div>
 
         <nav className="flex-1 space-y-2 px-4 py-4">
           {tabItems.map(({ key, label, Icon }) => {
@@ -1108,7 +1108,7 @@ export default function DashboardPage() {
             <div>
               <div className="flex items-center gap-3">
                 <h1 className="text-2xl font-extrabold text-slate-900">
-                  Good morning, {business?.business_name || 'BizAI'} 👋
+                  Good morning, {business?.business_name || 'CypAI'} 👋
                 </h1>
                 <span className={`hidden rounded-full px-3 py-1 text-xs font-semibold sm:inline-flex ${getPlanBadgeClasses(business.plan)}`}>
                   {currentPlanName}
