@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import OpenAI from 'openai';
 import { createClient } from '@supabase/supabase-js';
 import { corsHeaders } from './cors';
 
-function getOpenAIClient() {
+async function getOpenAIClient() {
+  const { default: OpenAI } = await import('openai');
   return new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
   });
@@ -83,7 +83,7 @@ Be professional, warm, and helpful.`,
 
 export async function POST(request: NextRequest) {
   try {
-    const openai = getOpenAIClient();
+    const openai = await getOpenAIClient();
     const supabase = getSupabaseClient();
     const body = await request.json();
     const {
