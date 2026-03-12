@@ -408,7 +408,7 @@ export default function Home() {
           </p>
           <div className="flex">
             {[0, 1].map((i) => (
-              <div key={i} className="flex shrink-0 animate-[marquee_22s_linear_infinite] items-center gap-5 pr-5" aria-hidden={i === 1 ? true : undefined}>
+              <div key={i} className="flex shrink-0 animate-[marquee_22s_linear_infinite] items-center gap-5 pr-5" {...(i === 1 ? { 'aria-hidden': true as const } : {})}>
                 {TRUST_ITEMS.map((item) => (
                   <div key={item} className="flex items-center gap-2 whitespace-nowrap rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm">{item}</div>
                 ))}
