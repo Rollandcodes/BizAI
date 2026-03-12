@@ -541,15 +541,7 @@ export default function Home() {
         {/* PRICING */}
         <section id="pricing" data-observe="pricing" className={`bg-slate-50 py-16 transition-all duration-700 md:py-24 ${vis('pricing')}`}>
           <div className="mx-auto max-w-6xl px-4 lg:px-6">
-            <div className="mx-auto mb-8 max-w-xl rounded-2xl border border-amber-200 bg-amber-50 px-5 py-3.5 text-center text-sm font-semibold text-amber-900 shadow-sm">
-              ⚡ Free setup included this month (worth $99) — limited spots available
-            </div>
             <PricingGrid dictionary={dictionary} />
-            <div className="mt-8 grid grid-cols-1 gap-3 sm:grid-cols-3">
-              {['🔒 Secure PayPal Payments', '↩️ 7-Day Money Back Guarantee', '📞 Local Cyprus Support'].map((item) => (
-                <div key={item} className="rounded-xl border border-slate-200 bg-white py-3 text-center text-sm font-semibold text-slate-600 shadow-sm">{item}</div>
-              ))}
-            </div>
           </div>
         </section>
 

@@ -85,9 +85,8 @@ export function PricingGrid({ dictionary }: Props) {
   }
 
   return (
-    <section id="pricing" className="bg-white py-16 md:py-20">
-      <div className="mx-auto max-w-6xl px-4 lg:px-6">
-        <div className="mb-8 text-center">
+    <div>
+      <div className="text-center mb-12">
           <h2 className="text-4xl font-bold text-gray-900 mb-4">Simple, Honest Pricing</h2>
           <p className="text-xl text-gray-500">No hidden fees. No contracts. Cancel anytime.</p>
 
@@ -214,7 +213,6 @@ export function PricingGrid({ dictionary }: Props) {
             </tbody>
           </table>
         </div>
-      </div>
 
       {isModalOpen && selectedPlan ? (
         <div
@@ -283,7 +281,7 @@ export function PricingGrid({ dictionary }: Props) {
           </div>
         </div>
       ) : null}
-    </section>
+    </div>
   );
 }
 
