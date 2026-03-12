@@ -35,6 +35,20 @@ export default function RootLayout({
     <html lang="en">
       <head>
         <meta charSet="UTF-8" />
+        {/* SimpleAnalytics - Privacy friendly analytics */}
+        <script
+          data-collect-dnt="true"
+          async
+          defer
+          src="https://scripts.simpleanalyticscdn.com/latest.js"
+        />
+        <noscript>
+          <img
+            src="https://queue.simpleanalyticscdn.com/noscript.gif?collect-dnt=true"
+            alt=""
+            referrerPolicy="no-referrer-when-downgrade"
+          />
+        </noscript>
       </head>
       <body className={`${jakarta.variable} antialiased`}>
         <AppProviders>{children}</AppProviders>

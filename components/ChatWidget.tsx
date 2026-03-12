@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect, useCallback, memo } from 'react';
+import { Analytics } from '@/lib/analytics';
 
 interface Message {
   id: string;
@@ -14,6 +15,7 @@ interface ChatWidgetProps {
   businessName: string;
   primaryColor: string;
   welcomeMessage: string;
+  businessType?: string;
   embedded?: boolean;
 }
 
@@ -22,6 +24,7 @@ function ChatWidget({
   businessName,
   primaryColor,
   welcomeMessage,
+  businessType = 'default',
   embedded = false,
 }: ChatWidgetProps) {
   const [isOpen, setIsOpen] = useState(embedded);
@@ -50,9 +53,10 @@ function ChatWidget({
 
   useEffect(() => {
     if (embedded) {
+      Analytics.chatOpened(businessType);
       setIsOpen(true);
     }
-  }, [embedded]);
+  }, [businessType, embedded]);
 
   // Inactivity timer: show feedback poll after 5 min of no messages
   useEffect(() => {
@@ -111,16 +115,28 @@ function ChatWidget({
           sessionId,
           message: inputValue,
           conversationHistory,
+          messages: [...conversationHistory, { role: 'user', content: inputValue }],
+          businessType,
         }),
       });
 
-      const data = await response.json();
+      const data = await response.json() as {
+        message?: string;
+        reply?: string;
+        response?: string;
+        leadCaptured?: boolean;
+      };
+
+      const assistantText = data.message ?? data.reply ?? data.response ?? 'Sorry, something went wrong.';
+      if (data.leadCaptured || assistantText.includes('[LEAD_CAPTURED]')) {
+        Analytics.leadCaptured(businessType);
+      }
 
       setMessages((prev) => [
         ...prev,
         {
           id: (Date.now() + 1).toString(),
-          text: data.reply ?? data.response ?? 'Sorry, something went wrong.',
+          text: assistantText,
           sender: 'assistant',
           timestamp: new Date(),
         },
@@ -276,7 +292,15 @@ function ChatWidget({
       {/* Floating Toggle Button */}
       {!embedded && (
         <button
-          onClick={() => setIsOpen((prev) => !prev)}
+          onClick={() => {
+            setIsOpen((prev) => {
+              const next = !prev;
+              if (next) {
+                Analytics.chatOpened(businessType);
+              }
+              return next;
+            });
+          }}
           className="fixed bottom-6 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-[var(--bizai-color)] shadow-lg transition-transform hover:scale-110 active:scale-95"
           aria-label={isOpen ? 'Close chat' : 'Open chat'}
         >

@@ -1,30 +1,56 @@
-export type AnalyticsPayload = Record<string, string | number | boolean | null | undefined>;
-
-declare global {
-  interface Window {
-    dataLayer?: Array<Record<string, unknown>>;
-    gtag?: (...args: unknown[]) => void;
+export const trackEvent = (
+  eventName: string,
+  metadata?: Record<string, string | number>
+) => {
+  try {
+    if (typeof window !== 'undefined' && window.sa_event) {
+      window.sa_event(eventName, metadata);
+    }
+  } catch {
+    // Silent fail - analytics should never break the app
   }
-}
+};
 
-export function trackEvent(eventName: string, payload: AnalyticsPayload = {}): void {
-  if (typeof window === 'undefined') {
-    return;
-  }
+export const Analytics = {
+  heroCtaClicked: (plan: string) =>
+    trackEvent('hero_cta_clicked', { plan }),
 
-  const eventData = { event: eventName, ...payload };
+  pricingViewed: () =>
+    trackEvent('pricing_viewed'),
 
-  if (typeof window.gtag === 'function') {
-    window.gtag('event', eventName, payload);
-  }
+  planSelected: (plan: string, price: number) =>
+    trackEvent('plan_selected', { plan, price }),
 
-  if (Array.isArray(window.dataLayer)) {
-    window.dataLayer.push(eventData);
-  }
+  demoViewed: () =>
+    trackEvent('demo_viewed'),
 
-  // Keep this log in dev for quick analytics verification.
-  if (process.env.NODE_ENV !== 'production') {
-    // eslint-disable-next-line no-console
-    console.info('[analytics]', eventData);
-  }
-}
+  signupStarted: (plan: string) =>
+    trackEvent('signup_started', { plan }),
+
+  signupCompleted: (plan: string) =>
+    trackEvent('signup_completed', { plan }),
+
+  paymentStarted: (plan: string, amount: number) =>
+    trackEvent('payment_started', { plan, amount }),
+
+  paymentCompleted: (plan: string, amount: number) =>
+    trackEvent('payment_completed', { plan, amount }),
+
+  paymentFailed: (plan: string) =>
+    trackEvent('payment_failed', { plan }),
+
+  chatOpened: (businessType: string) =>
+    trackEvent('chat_opened', { businessType }),
+
+  leadCaptured: (businessType: string) =>
+    trackEvent('lead_captured', { businessType }),
+
+  whatsappClicked: (source: string) =>
+    trackEvent('whatsapp_clicked', { source }),
+
+  dashboardLogin: () =>
+    trackEvent('dashboard_login'),
+
+  dashboardTabViewed: (tab: string) =>
+    trackEvent('dashboard_tab_viewed', { tab }),
+};

@@ -4,6 +4,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { Suspense, useState } from 'react';
 import { Check } from 'lucide-react';
 import { PLANS } from '@/lib/plans';
+import { Analytics } from '@/lib/analytics';
 
 const PLAN_STYLES: Record<string, { badge: string; dot: string }> = {
   starter: { badge: 'bg-green-50 text-green-700 border-green-200', dot: 'bg-green-500' },
@@ -72,6 +73,7 @@ function SignupForm() {
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!validate()) return;
+    Analytics.signupStarted(planId);
     localStorage.setItem(
       'cypai_signup',
       JSON.stringify({ ...form, plan: planId }),

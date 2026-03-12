@@ -1,10 +1,11 @@
 'use client';
 
-import { Suspense, useEffect, useState } from 'react';
+import { Suspense, useEffect, useRef, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Check, Loader2 } from 'lucide-react';
 import { PayPalButtons, usePayPalScriptReducer } from '@paypal/react-paypal-js';
 import { PLANS } from '@/lib/plans';
+import { Analytics } from '@/lib/analytics';
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
@@ -123,6 +124,7 @@ function PaymentContent() {
   const [signupData, setSignupData] = useState<SignupData | null>(null);
   const [processing, setProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const hasTrackedPaymentStart = useRef(false);
 
   useEffect(() => {
     try {
@@ -133,8 +135,15 @@ function PaymentContent() {
     }
   }, []);
 
+  useEffect(() => {
+    if (hasTrackedPaymentStart.current) return;
+    hasTrackedPaymentStart.current = true;
+    Analytics.paymentStarted(planId, Number(plan.price));
+  }, [plan.price, planId]);
+
   function handleSuccess(businessId: string) {
     setProcessing(true);
+    Analytics.paymentCompleted(planId, Number(plan.price));
     if (signupData) {
       localStorage.setItem(
         'cypai_user',
@@ -145,6 +154,7 @@ function PaymentContent() {
   }
 
   function handleError(msg: string) {
+    Analytics.paymentFailed(planId);
     setError(msg);
     setProcessing(false);
   }

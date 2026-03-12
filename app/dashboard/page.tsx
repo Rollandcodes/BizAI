@@ -47,6 +47,7 @@ import QRCode from 'react-qr-code';
 import { supabase } from '@/lib/supabase';
 import ChatWidget from '@/components/ChatWidget';
 import { PLANS } from '@/lib/plans';
+import { Analytics } from '@/lib/analytics';
 
 type CustomFaq = {
   question: string;
@@ -496,6 +497,7 @@ export default function DashboardPage() {
     distribution: number[]; // index 0 = rating 1 stars … index 4 = rating 5 stars
   } | null>(null);
   const [satisfactionLoading, setSatisfactionLoading] = useState(false);
+  const hasTrackedInitialTab = useRef(false);
 
   const business = dashboard.business;
   const stats = dashboard.stats;
@@ -576,6 +578,15 @@ export default function DashboardPage() {
     }
   }, [activeTab, business]);
 
+  useEffect(() => {
+    if (!business) return;
+    if (!hasTrackedInitialTab.current) {
+      hasTrackedInitialTab.current = true;
+      return;
+    }
+    Analytics.dashboardTabViewed(activeTab);
+  }, [activeTab, business]);
+
   async function loadDashboard(params: { email?: string; businessId?: string }, isAuthLookup = false) {
     if (isAuthLookup) {
       setAuthLoading(true);
@@ -614,6 +625,9 @@ export default function DashboardPage() {
         conversations: data.conversations || [],
         leads: data.leads || [],
       });
+      if (isAuthLookup) {
+        Analytics.dashboardLogin();
+      }
       setBusinessId(data.business.id);
       setSelectedConversationId((data.conversations || [])[0]?.id || null);
       setPaymentError('');

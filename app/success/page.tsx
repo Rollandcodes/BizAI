@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { Check } from 'lucide-react';
+import { Analytics } from '@/lib/analytics';
 
 type BizUser = {
   id?: string;
@@ -60,7 +61,11 @@ export default function SuccessPage() {
   useEffect(() => {
     try {
       const raw = localStorage.getItem('cypai_user');
-      if (raw) setUser(JSON.parse(raw) as BizUser);
+      if (raw) {
+        const parsed = JSON.parse(raw) as BizUser;
+        setUser(parsed);
+        Analytics.signupCompleted(parsed.plan ?? 'unknown');
+      }
     } catch {
       // ignore
     }
