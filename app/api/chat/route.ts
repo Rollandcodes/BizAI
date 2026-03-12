@@ -3,14 +3,18 @@ import OpenAI from 'openai';
 import { createClient } from '@supabase/supabase-js';
 import { corsHeaders } from './cors';
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+function getOpenAIClient() {
+  return new OpenAI({
+    apiKey: process.env.OPENAI_API_KEY,
+  });
+}
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+function getSupabaseClient() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  );
+}
 
 const NICHE_PROMPTS: Record<string, string> = {
   car_rental: `You are a friendly AI assistant for a
@@ -79,6 +83,8 @@ Be professional, warm, and helpful.`,
 
 export async function POST(request: NextRequest) {
   try {
+    const openai = getOpenAIClient();
+    const supabase = getSupabaseClient();
     const body = await request.json();
     const {
       messages,
