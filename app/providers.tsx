@@ -8,6 +8,7 @@ export function AppProviders({ children }: { children: React.ReactNode }) {
       options={{
         clientId: process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || '',
         currency: 'USD',
+        intent: 'capture',
       }}
     >
       {children}

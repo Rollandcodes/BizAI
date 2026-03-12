@@ -31,20 +31,40 @@ function PayPalSection({
   onSuccess: (businessId: string) => void;
   onError: (msg: string) => void;
 }) {
-  const [{ isPending }] = usePayPalScriptReducer();
+  const [{ isPending, isRejected }] = usePayPalScriptReducer();
 
   if (isPending) {
     return (
-      <div className="flex items-center justify-center gap-2 py-8 text-sm text-slate-500">
-        <Loader2 className="h-4 w-4 animate-spin" />
-        Loading PayPal…
+      <div className="flex flex-col items-center py-8 gap-3">
+        <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
+        <p className="text-gray-500 text-sm">Loading PayPal…</p>
+      </div>
+    );
+  }
+
+  if (isRejected) {
+    return (
+      <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-center">
+        <p className="text-red-600 font-medium">⚠️ PayPal failed to load</p>
+        <p className="text-red-500 text-sm mt-1">
+          This usually means the PayPal Client ID is missing or incorrect.
+        </p>
+        <p className="text-gray-600 text-sm mt-3">Please contact us directly:</p>
+        <a
+          href="https://wa.me/905338425559?text=Hi%2C%20I%20want%20to%20sign%20up%20for%20BizAI"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-block mt-2 bg-green-500 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-green-600 transition-colors"
+        >
+          💬 Pay via WhatsApp Instead
+        </a>
       </div>
     );
   }
 
   return (
     <PayPalButtons
-      style={{ layout: 'vertical', shape: 'rect', label: 'pay' }}
+      style={{ layout: 'vertical', color: 'blue', shape: 'rect', label: 'paypal', height: 48 }}
       createOrder={async () => {
         const res = await fetch('/api/paypal/create-order', {
           method: 'POST',
@@ -84,6 +104,9 @@ function PayPalSection({
         onError(
           'Payment failed. Please try again or contact bizaicyprus123@gmail.com',
         );
+      }}
+      onCancel={() => {
+        // user dismissed the PayPal popup — no action needed
       }}
     />
   );
@@ -258,12 +281,26 @@ function PaymentContent() {
                     Pay securely with PayPal
                   </p>
                   {signupData ? (
-                    <PayPalSection
-                      planId={planId}
-                      signupData={signupData}
-                      onSuccess={handleSuccess}
-                      onError={handleError}
-                    />
+                    <>
+                      <PayPalSection
+                        planId={planId}
+                        signupData={signupData}
+                        onSuccess={handleSuccess}
+                        onError={handleError}
+                      />
+                      {/* WhatsApp fallback */}
+                      <div className="mt-4 pt-4 border-t border-slate-100 text-center">
+                        <p className="text-xs text-gray-400 mb-2">Prefer to pay manually?</p>
+                        <a
+                          href={`https://wa.me/905338425559?text=Hi!%20I%20want%20to%20sign%20up%20for%20BizAI%20${encodeURIComponent(plan.name)}%20Plan%20(%24${plan.price}%2Fmo).%20My%20business%3A%20${encodeURIComponent(signupData.businessName)}%2C%20Email%3A%20${encodeURIComponent(signupData.email)}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-green-600 text-sm font-medium hover:underline flex items-center justify-center gap-1"
+                        >
+                          💬 Contact us on WhatsApp to arrange payment
+                        </a>
+                      </div>
+                    </>
                   ) : (
                     <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-4 text-sm text-amber-800">
                       <p className="font-semibold">Missing account details</p>
