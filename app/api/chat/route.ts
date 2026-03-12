@@ -4,6 +4,7 @@ import { assertSupabaseConfig, createServerClient } from '@/lib/supabase';
 import { getNicheConfig, interpolateNicheConfig } from '@/lib/niches';
 import { Business, ConversationMessage, Conversation } from '@/lib/supabase';
 import { analyzeConversation } from '@/lib/auditAnalyzer';
+import { getOpenAIClient } from '@/lib/openai';
 
 const supabase = createServerClient();
 
@@ -29,18 +30,6 @@ interface DemoChatRequest {
 interface ChatResponse {
   reply: string;
   sessionId: string;
-}
-
-// ============================================================================
-// Initialize OpenAI lazily (request-time, not build-time)
-// ============================================================================
-
-function getOpenAIClient(): OpenAI {
-  const openaiApiKey = process.env.OPENAI_API_KEY;
-  if (!openaiApiKey) {
-    throw new Error('OPENAI_API_KEY environment variable is not set');
-  }
-  return new OpenAI({ apiKey: openaiApiKey });
 }
 
 // ============================================================================
@@ -200,6 +189,22 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         {
           error: 'Missing required fields: businessId, sessionId, message, conversationHistory',
         },
+        { status: 400 }
+      );
+    }
+
+    // Guard against oversized payloads
+    const MAX_MESSAGE_LENGTH = 2000;
+    const MAX_HISTORY_ITEMS = 50;
+    if (message.length > MAX_MESSAGE_LENGTH) {
+      return NextResponse.json(
+        { error: `Message exceeds maximum length of ${MAX_MESSAGE_LENGTH} characters` },
+        { status: 400 }
+      );
+    }
+    if (conversationHistory.length > MAX_HISTORY_ITEMS) {
+      return NextResponse.json(
+        { error: `Conversation history exceeds maximum of ${MAX_HISTORY_ITEMS} messages` },
         { status: 400 }
       );
     }

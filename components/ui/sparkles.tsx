@@ -3,7 +3,7 @@
 import { useEffect, useId, useState } from "react"
 import Particles, { initParticlesEngine } from "@tsparticles/react"
 import { loadSlim } from "@tsparticles/slim"
-import type { IOptions } from "@tsparticles/engine"
+import type { ISourceOptions, MoveDirection } from "@tsparticles/engine"
 
 interface SparklesProps {
   className?: string
@@ -17,7 +17,7 @@ interface SparklesProps {
   minOpacity?: number | null
   color?: string
   background?: string
-  options?: any
+  options?: ISourceOptions
   direction?: "bottom" | "none" | "top" | string
 }
 
@@ -48,7 +48,7 @@ export function Sparkles({
 
   const id = useId()
 
-  const defaultOptions: any = {
+  const defaultOptions: ISourceOptions = {
     background: {
       color: {
         value: background,
@@ -65,7 +65,7 @@ export function Sparkles({
       },
       move: {
         enable: true,
-        direction: direction,
+        direction: direction as MoveDirection,
         speed: {
           min: minSpeed || speed / 10,
           max: speed,

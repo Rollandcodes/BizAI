@@ -1,14 +1,14 @@
 'use client'
 
 import React, { ReactNode, useEffect, useRef } from 'react'
-import { motion, useInView, useAnimation } from 'framer-motion'
+import { motion, useInView, useAnimation, Variants } from 'framer-motion'
 
 interface TimelineContentProps {
   children: ReactNode
   as?: keyof React.JSX.IntrinsicElements
   animationNum?: number
   timelineRef: React.RefObject<HTMLElement | null>
-  customVariants?: Record<string, any>
+  customVariants?: Variants
   className?: string
 }
 

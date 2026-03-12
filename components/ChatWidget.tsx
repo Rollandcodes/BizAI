@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback, memo } from 'react';
 
 interface Message {
   id: string;
@@ -17,7 +17,7 @@ interface ChatWidgetProps {
   embedded?: boolean;
 }
 
-export default function ChatWidget({
+function ChatWidget({
   businessId,
   businessName,
   primaryColor,
@@ -40,9 +40,9 @@ export default function ChatWidget({
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inactivityTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const scrollToBottom = () => {
+  const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
+  }, []);
 
   useEffect(() => {
     if (isOpen) scrollToBottom();
@@ -295,3 +295,11 @@ export default function ChatWidget({
     </>
   );
 }
+
+export default memo(ChatWidget, (prev, next) =>
+  prev.businessId === next.businessId &&
+  prev.businessName === next.businessName &&
+  prev.primaryColor === next.primaryColor &&
+  prev.welcomeMessage === next.welcomeMessage &&
+  prev.embedded === next.embedded
+);
