@@ -1,13 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { corsHeaders } from './cors';
-
-async function getOpenAIClient() {
-  const { default: OpenAI } = await import('openai');
-  return new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY,
-  });
-}
+import { getOpenAIClient } from '@/lib/openai';
 
 function getSupabaseClient() {
   return createClient(
@@ -141,9 +135,49 @@ ${LANGUAGE_RULE}
 Be professional, warm, and helpful.`,
 };
 
+type ChatError = {
+  status?: number;
+  code?: string;
+  message?: string;
+};
+
+function buildDegradedChatResponse(reason: 'missing_api_key' | 'invalid_api_key' | 'provider_unavailable') {
+  const reasonText: Record<typeof reason, string> = {
+    missing_api_key: 'OPENAI_API_KEY is missing on the server.',
+    invalid_api_key: 'OPENAI_API_KEY is invalid or unauthorized.',
+    provider_unavailable: 'OpenAI service is temporarily unavailable.',
+  };
+
+  return NextResponse.json(
+    {
+      message:
+        'I am temporarily in fallback mode right now. Please leave your phone number and we will contact you directly.',
+      degraded: true,
+      diagnostics: {
+        reason,
+        detail: reasonText[reason],
+        retryable: reason === 'provider_unavailable',
+      },
+    },
+    { status: 200, headers: corsHeaders }
+  );
+}
+
+function isMissingKeyError(error: ChatError): boolean {
+  return Boolean(error?.message?.includes('OPENAI_API_KEY environment variable is not set'));
+}
+
+function isInvalidKeyError(error: ChatError): boolean {
+  return Boolean(
+    error?.status === 401 ||
+      error?.code === 'invalid_api_key' ||
+      error?.message?.includes('Incorrect API key provided')
+  );
+}
+
 export async function POST(request: NextRequest) {
   try {
-    const openai = await getOpenAIClient();
+    const openai = getOpenAIClient();
     const supabase = getSupabaseClient();
     const body = await request.json();
     const {
@@ -264,12 +298,14 @@ export async function POST(request: NextRequest) {
   } catch (error: unknown) {
     console.error('Chat API error:', error);
 
-    const err = error as { status?: number };
-    if (err?.status === 401) {
-      return NextResponse.json(
-        { error: 'OpenAI API key invalid' },
-        { status: 500, headers: corsHeaders }
-      );
+    const err = error as ChatError;
+
+    if (isMissingKeyError(err)) {
+      return buildDegradedChatResponse('missing_api_key');
+    }
+
+    if (isInvalidKeyError(err)) {
+      return buildDegradedChatResponse('invalid_api_key');
     }
 
     if (err?.status === 429) {
@@ -277,6 +313,10 @@ export async function POST(request: NextRequest) {
         { error: 'Too many requests, please wait' },
         { status: 429, headers: corsHeaders }
       );
+    }
+
+    if (err?.status === 502 || err?.status === 503 || err?.status === 504) {
+      return buildDegradedChatResponse('provider_unavailable');
     }
 
     return NextResponse.json(

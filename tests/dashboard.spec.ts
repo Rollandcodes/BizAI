@@ -9,6 +9,7 @@ const dashboardPayload = {
     widget_color: '#2563eb',
     plan: 'pro',
     plan_expires_at: '2026-12-31T00:00:00.000Z',
+    onboarding_complete: true,
     customInstructions: 'Focus on airport pickup questions.',
     customFaqs: [{ question: 'Do you offer airport pickup?', answer: 'Yes, every day.' }],
   },
@@ -80,7 +81,7 @@ test('dashboard auth gate allows email lookup and loads overview', async ({ page
   await page.getByRole('button', { name: 'Access Dashboard' }).click();
 
   await expect(page.getByText('Total Conversations')).toBeVisible();
-  await expect(page.getByText('DriveEasy Rentals')).toBeVisible();
+  await expect(page.getByRole('heading', { name: /Welcome back, DriveEasy Rentals/i })).toBeVisible();
   await expect(page.getByText('18')).toBeVisible();
 });
 
@@ -91,7 +92,7 @@ test('dashboard tabs switch across conversations, leads, settings, and subscript
 
   await page.getByTestId('dashboard-tab-conversations').click();
   await expect(page.getByText('All customer conversations for this business.')).toBeVisible();
-  await expect(page.getByText('Do you have SUVs available this weekend?')).toBeVisible();
+  await expect(page.getByText('Do you have SUVs available this weekend?').last()).toBeVisible();
 
   await page.getByTestId('dashboard-tab-leads').click();
   await expect(page.getByText('All customers captured by your AI assistant.')).toBeVisible();
@@ -105,6 +106,6 @@ test('dashboard tabs switch across conversations, leads, settings, and subscript
   await expect(page.getByLabel('Business Name')).toHaveValue('DriveEasy Rentals');
 
   await page.getByTestId('dashboard-tab-subscription').click();
-  await expect(page.getByText('Upgrade your subscription')).toBeVisible();
-  await expect(page.getByText('Upgrade your subscription')).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Choose Your Plan' })).toBeVisible();
+  await expect(page.getByText('Current Plan', { exact: true })).toBeVisible();
 });

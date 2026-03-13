@@ -1,5 +1,7 @@
 'use client';
 
+import PayPalProvider from '@/components/PayPalProvider';
+
 export function AppProviders({ children }: { children: React.ReactNode }) {
-  return <>{children}</>;
+  return <PayPalProvider>{children}</PayPalProvider>;
 }

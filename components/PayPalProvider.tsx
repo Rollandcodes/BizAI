@@ -7,10 +7,12 @@ export default function PayPalProvider({
 }: {
   children: React.ReactNode;
 }) {
+  const clientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || 'test';
+
   return (
     <PayPalScriptProvider
       options={{
-        clientId: process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID!,
+        clientId,
         currency: 'USD',
         intent: 'capture',
         components: 'buttons',

@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { Plus_Jakarta_Sans, Geist } from 'next/font/google'
 import './globals.css'
 import { cn } from "@/lib/utils";
+import { AppProviders } from './providers';
 
 const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 
@@ -71,7 +72,7 @@ export default function RootLayout({
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
         />
-        {children}
+        <AppProviders>{children}</AppProviders>
       </body>
     </html>
   )

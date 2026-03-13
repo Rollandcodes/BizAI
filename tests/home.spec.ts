@@ -2,26 +2,27 @@ import { expect, test } from '@playwright/test';
 
 test('homepage hero is visible and CTA is clickable', async ({ page }) => {
   await page.goto('/');
-  await expect(page.locator('h1').filter({ hasText: 'Never Miss a Customer Again' }).first()).toBeVisible();
+  await expect(page.getByRole('heading', { name: /Never Miss Another Customer/i })).toBeVisible();
 
-  const cta = page.getByRole('link', { name: /Start Free 7-Day Trial/i }).first();
+  const cta = page.getByRole('link', { name: /Start Free Trial/i }).first();
   await expect(cta).toBeVisible();
   await cta.click();
-  await expect(page).toHaveURL(/#pricing/);
+  await expect(page).toHaveURL(/\/signup\?plan=pro/);
 });
 
-test('demo modal opens and shows conversation content', async ({ page }) => {
+test('demo page opens from homepage and shows the demo interface', async ({ page }) => {
   await page.goto('/');
-  await page.getByRole('button', { name: 'See Live Demo' }).click();
+  await page.getByRole('link', { name: 'Try Live Demo' }).first().click();
 
-  await expect(page.getByText('Live Demo Conversation')).toBeVisible();
-  await expect(page.getByText('Yes! 🚗 Our SUVs start at $55/day.', { exact: false }).last()).toBeVisible();
+  await expect(page).toHaveURL(/\/demo/);
+  await expect(page.getByRole('heading', { name: 'Try the AI Demo' })).toBeVisible();
+  await expect(page.getByText('Live demo for Car Rental')).toBeVisible();
 });
 
 test('pricing section shows Most Popular label on Pro card', async ({ page }) => {
   await page.goto('/');
   await expect(page.getByText('Most Popular')).toBeVisible();
-  await expect(page.getByText('Most chosen by Cyprus businesses')).toBeVisible();
+  await expect(page.getByText('For growing businesses that want full control')).toBeVisible();
 });
 
 test('faq expands and shows answer content', async ({ page }) => {
@@ -29,7 +30,7 @@ test('faq expands and shows answer content', async ({ page }) => {
   const questionButton = page.locator('button').filter({ hasText: 'Which languages does the AI speak?' }).first();
   await expect(questionButton).toBeVisible();
   await questionButton.click();
-  await expect(page.getByText('Your AI agent speaks English, Turkish, Arabic, Russian, and Greek', { exact: false })).toBeVisible();
+  await expect(page.getByText('English, Turkish, Arabic, Russian, and Greek. It detects language automatically', { exact: false })).toBeVisible();
 });
 
 test('mobile responsive breakpoints render key sections', async ({ page }) => {
@@ -44,7 +45,7 @@ test('mobile responsive breakpoints render key sections', async ({ page }) => {
   for (const bp of breakpoints) {
     await page.setViewportSize(bp);
     await page.goto('/');
-    await expect(page.locator('h1').filter({ hasText: 'Never Miss a Customer Again' }).first()).toBeVisible();
+    await expect(page.getByRole('heading', { name: /Never Miss Another Customer/i })).toBeVisible();
     await expect(page.locator('#pricing')).toBeVisible();
   }
 });
