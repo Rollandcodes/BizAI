@@ -79,6 +79,10 @@ export async function POST(request: NextRequest) {
             brand_name:  'CypAI',
             landing_page: 'BILLING',
             user_action:  'PAY_NOW',
+            payment_method: {
+              payer_selected: 'PAYPAL',
+              payee_preferred: 'IMMEDIATE_PAYMENT_REQUIRED'
+            },
             return_url: `${process.env.NEXT_PUBLIC_APP_URL}/success`,
             cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/payment`
           }

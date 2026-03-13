@@ -3,7 +3,7 @@
 import { Suspense, useEffect, useRef, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Check, Loader2 } from 'lucide-react';
-import { PayPalButtons, usePayPalScriptReducer } from '@paypal/react-paypal-js';
+import { FUNDING, PayPalButtons, usePayPalScriptReducer } from '@paypal/react-paypal-js';
 import { PLANS } from '@/lib/plans';
 import { Analytics } from '@/lib/analytics';
 
@@ -62,55 +62,72 @@ function PayPalSection({
     );
   }
 
+  const createOrder = async () => {
+    const res = await fetch('/api/paypal/create-order', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        planId,
+        customerEmail: signupData.email,
+      }),
+    });
+    const data = (await res.json()) as { id?: string; error?: string };
+    if (data.error || !data.id) {
+      throw new Error(data.error || 'Failed to create order');
+    }
+    return data.id;
+  };
+
+  const onApprove = async (data: { orderID?: string }) => {
+    const res = await fetch('/api/paypal/capture-order', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        orderID: data.orderID,
+        planId,
+        signupData,
+      }),
+    });
+    const result = (await res.json()) as {
+      success?: boolean;
+      businessId?: string;
+      user?: { id?: string; email?: string; businessName?: string; plan?: string };
+      error?: string;
+      warning?: string;
+    };
+    if (result.success) {
+      if (result.user) {
+        localStorage.setItem('cypai_user', JSON.stringify(result.user));
+      }
+      onSuccess(result.businessId || result.user?.id || '');
+    } else {
+      onError(result.error || 'Payment could not be completed.');
+    }
+  };
+
+  const onPayPalError = (err: unknown) => {
+    console.error('PayPal error:', err);
+    onError('Payment failed. Try again or contact us on WhatsApp: +90 533 842 5559');
+  };
+
   return (
     <div className="space-y-3">
       <PayPalButtons
-        style={{ layout: 'vertical', color: 'blue', shape: 'rect', label: 'paypal', height: 50 }}
-        createOrder={async () => {
-          const res = await fetch('/api/paypal/create-order', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              planId,
-              customerEmail: signupData.email,
-            }),
-          });
-          const data = (await res.json()) as { id?: string; error?: string };
-          if (data.error || !data.id) {
-            throw new Error(data.error || 'Failed to create order');
-          }
-          return data.id;
+        style={{ layout: 'vertical', color: 'blue', shape: 'rect', label: 'paypal', height: 50, tagline: false }}
+        createOrder={createOrder}
+        onApprove={onApprove}
+        onError={onPayPalError}
+        onCancel={() => {
+          console.log('Payment cancelled');
         }}
-        onApprove={async (data) => {
-          const res = await fetch('/api/paypal/capture-order', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              orderID: data.orderID,
-              planId,
-              signupData,
-            }),
-          });
-          const result = (await res.json()) as {
-            success?: boolean;
-            businessId?: string;
-            user?: { id?: string; email?: string; businessName?: string; plan?: string };
-            error?: string;
-            warning?: string;
-          };
-          if (result.success) {
-            if (result.user) {
-              localStorage.setItem('cypai_user', JSON.stringify(result.user));
-            }
-            onSuccess(result.businessId || result.user?.id || '');
-          } else {
-            onError(result.error || 'Payment could not be completed.');
-          }
-        }}
-        onError={(err) => {
-          console.error('PayPal error:', err);
-          onError('Payment failed. Try again or contact us on WhatsApp: +90 533 842 5559');
-        }}
+      />
+
+      <PayPalButtons
+        style={{ layout: 'vertical', color: 'black', shape: 'rect', label: 'pay', height: 45, tagline: false }}
+        fundingSource={FUNDING.CARD}
+        createOrder={createOrder}
+        onApprove={onApprove}
+        onError={onPayPalError}
         onCancel={() => {
           console.log('Payment cancelled');
         }}
