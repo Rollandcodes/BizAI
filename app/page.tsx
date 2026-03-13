@@ -28,6 +28,8 @@ const DEMO_SUGGESTIONS = [
   'How much does a compact cost?',
 ];
 
+const REF_STORAGE_KEY = 'cypai_referral_code';
+
 const HOW_STEPS = [
   { num: '01', title: 'Tell Us About Your Business', body: 'Fill in your services, prices, FAQs, and opening hours. Takes about 15 minutes.', visual: 'form' },
   { num: '02', title: 'We Train Your AI Agent', body: 'We configure and train your personal AI on your business data within 24 hours.', visual: 'training' },
@@ -352,6 +354,14 @@ export default function Home() {
   const hasTrackedPricingView = useRef(false);
 
   const dictionary = getDictionary(locale);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const ref = params.get('ref')?.trim().toUpperCase();
+    if (ref) {
+      window.localStorage.setItem(REF_STORAGE_KEY, ref);
+    }
+  }, []);
 
   useEffect(() => {
     const stored = window.localStorage.getItem(LOCALE_STORAGE_KEY);

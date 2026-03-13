@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Suspense, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { Check } from 'lucide-react';
 import { PLANS } from '@/lib/plans';
 import { Analytics } from '@/lib/analytics';
@@ -33,14 +33,18 @@ type FormData = {
   website: string;
 };
 
+const REF_STORAGE_KEY = 'cypai_referral_code';
+
 type FormErrors = Partial<Record<keyof FormData, string>>;
 
 function SignupForm() {
   const router = useRouter();
   const params = useSearchParams();
   const planId = params.get('plan') ?? 'pro';
+  const refParam = params.get('ref')?.trim().toUpperCase() || '';
   const plan = PLANS[planId] ?? PLANS.pro;
   const planStyle = PLAN_STYLES[planId] ?? PLAN_STYLES.pro;
+  const [referralCode, setReferralCode] = useState('');
 
   const [form, setForm] = useState<FormData>({
     businessName: '',
@@ -51,6 +55,15 @@ function SignupForm() {
     website: '',
   });
   const [errors, setErrors] = useState<FormErrors>({});
+
+  useEffect(() => {
+    const stored = typeof window !== 'undefined' ? localStorage.getItem(REF_STORAGE_KEY) || '' : '';
+    const normalized = (refParam || stored).trim().toUpperCase();
+    if (normalized) {
+      setReferralCode(normalized);
+      localStorage.setItem(REF_STORAGE_KEY, normalized);
+    }
+  }, [refParam]);
 
   function set(field: keyof FormData, value: string) {
     setForm((prev) => ({ ...prev, [field]: value }));
@@ -85,6 +98,7 @@ function SignupForm() {
       businessType: form.businessType,
       website: form.website.trim(),
       plan: planId,
+      referralCode: referralCode || undefined,
     };
     localStorage.setItem('bizai_signup', JSON.stringify(signupPayload));
     localStorage.setItem('cypai_signup', JSON.stringify(signupPayload));

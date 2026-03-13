@@ -17,6 +17,7 @@ type SignupData = {
   businessType: string;
   website: string;
   plan: string;
+  referralCode?: string;
 };
 
 interface CaptureBody {
@@ -29,6 +30,8 @@ interface PayPalCaptureResponse {
   id: string;
   status: string;
 }
+
+const PRO_AFFILIATE_COMMISSION = 15.8;
 
 async function getPayPalToken(): Promise<string> {
   const clientId = process.env.PAYPAL_CLIENT_ID;
@@ -94,6 +97,16 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     // Keep compatibility with the current DB constraint while preserving Starter in the UI.
     const dbPlan = planId === 'starter' ? 'basic' : planId;
 
+    const referralCode = signupData.referralCode?.trim().toUpperCase() || null;
+
+    const { data: existingBusiness } = await supabase
+      .from('businesses')
+      .select('id, referral_code')
+      .eq('owner_email', signupData.email.trim().toLowerCase())
+      .maybeSingle();
+
+    const normalizedReferralCode = existingBusiness?.referral_code || referralCode;
+
     const { data: business, error } = await supabase
       .from('businesses')
       .upsert(
@@ -108,10 +121,11 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
           plan_expires_at: expiresAt.toISOString(),
           paypal_subscription_id: orderID,
           widget_color: '#2563eb',
+          referral_code: normalizedReferralCode,
         },
         { onConflict: 'owner_email' },
       )
-      .select('id, owner_email, business_name, plan')
+      .select('id, owner_email, business_name, plan, referral_code')
       .single();
 
     if (error || !business) {
@@ -124,6 +138,26 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
           plan: planId,
         },
       });
+    }
+
+    if (planId === 'pro' && business.referral_code) {
+      const { data: affiliateRow } = await supabase
+        .from('affiliates')
+        .select('id, total_referrals, total_earnings')
+        .eq('referral_code', business.referral_code)
+        .maybeSingle();
+
+      if (affiliateRow?.id) {
+        await supabase
+          .from('affiliates')
+          .update({
+            total_referrals: (affiliateRow.total_referrals || 0) + 1,
+            total_earnings: Number(
+              (Number(affiliateRow.total_earnings || 0) + PRO_AFFILIATE_COMMISSION).toFixed(2)
+            ),
+          })
+          .eq('id', affiliateRow.id);
+      }
     }
 
     return NextResponse.json({

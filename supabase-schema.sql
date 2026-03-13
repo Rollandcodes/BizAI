@@ -45,10 +45,32 @@ ALTER TABLE public.businesses ADD COLUMN IF NOT EXISTS pricing_info TEXT;
 ALTER TABLE public.businesses ADD COLUMN IF NOT EXISTS common_questions_text TEXT;
 ALTER TABLE public.businesses ADD COLUMN IF NOT EXISTS additional_info TEXT;
 ALTER TABLE public.businesses ADD COLUMN IF NOT EXISTS onboarding_complete BOOLEAN DEFAULT false;
+ALTER TABLE public.businesses ADD COLUMN IF NOT EXISTS referral_code TEXT;
+ALTER TABLE public.businesses ADD COLUMN IF NOT EXISTS affiliate_commission_credited BOOLEAN DEFAULT false;
 
 -- Create index for faster lookups
 CREATE INDEX IF NOT EXISTS idx_businesses_owner_email ON public.businesses(owner_email);
 CREATE INDEX IF NOT EXISTS idx_businesses_created_at ON public.businesses(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_businesses_referral_code ON public.businesses(referral_code);
+
+-- ============================================================================
+-- Table: affiliates
+-- ============================================================================
+CREATE TABLE IF NOT EXISTS public.affiliates (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  email TEXT NOT NULL UNIQUE,
+  name TEXT NOT NULL,
+  referral_code TEXT NOT NULL UNIQUE,
+  total_referrals INTEGER NOT NULL DEFAULT 0,
+  total_earnings NUMERIC(10,2) NOT NULL DEFAULT 0,
+  payout_requested BOOLEAN NOT NULL DEFAULT false,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  CONSTRAINT affiliates_referral_code_len CHECK (char_length(referral_code) = 8),
+  CONSTRAINT affiliates_email_valid CHECK (email ~* '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}$')
+);
+
+CREATE INDEX IF NOT EXISTS idx_affiliates_email ON public.affiliates(email);
+CREATE INDEX IF NOT EXISTS idx_affiliates_referral_code ON public.affiliates(referral_code);
 
 -- ============================================================================
 -- Table: conversations

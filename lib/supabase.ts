@@ -63,6 +63,8 @@ export interface Business {
   common_questions_text?: string;
   additional_info?: string;
   onboarding_complete?: boolean;
+  referral_code?: string;
+  affiliate_commission_credited?: boolean;
   plan: BusinessPlan;
   plan_expires_at?: string;
   paypal_subscription_id?: string;

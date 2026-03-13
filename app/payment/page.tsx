@@ -18,6 +18,7 @@ type SignupData = {
   businessType?: string;
   website?: string;
   plan?: string;
+  referralCode?: string;
 };
 
 function getBusinessName(signupData: SignupData | null) {
