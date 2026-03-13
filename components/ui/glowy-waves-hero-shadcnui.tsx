@@ -2,6 +2,7 @@
 
 import { motion, type Variants } from 'framer-motion';
 import { ArrowRight, Sparkles } from 'lucide-react';
+import Link from 'next/link';
 import { useEffect, useRef } from 'react';
 
 import { Button } from '@/components/ui/button';
@@ -342,21 +343,25 @@ export function GlowyWavesHero() {
             className="mb-10 flex flex-col items-center justify-center gap-4 sm:flex-row"
           >
             <Button
+              asChild
               size="lg"
               className="group gap-2 rounded-full px-8 text-base uppercase tracking-[0.2em]"
             >
-              Launch Studio
-              <ArrowRight
-                className="h-4 w-4 transition-transform group-hover:translate-x-1"
-                aria-hidden="true"
-              />
+              <Link href="/dashboard">
+                Launch Studio
+                <ArrowRight
+                  className="h-4 w-4 transition-transform group-hover:translate-x-1"
+                  aria-hidden="true"
+                />
+              </Link>
             </Button>
             <Button
+              asChild
               size="lg"
               variant="outline"
               className="rounded-full border-border/40 bg-background/60 px-8 text-base text-foreground/80 backdrop-blur transition-all hover:border-border/60 hover:bg-background/70 dark:border-border/50 dark:bg-background/40 dark:text-foreground/70 dark:hover:border-border/70 dark:hover:bg-background/50"
             >
-              Explore stories
+              <Link href="/blog">Explore stories</Link>
             </Button>
           </motion.div>
 
