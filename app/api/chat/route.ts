@@ -81,6 +81,21 @@ Your job:
 ${LANGUAGE_RULE}
 Be warm, friendly, and welcoming.`,
 
+  hotel: `You are a friendly AI assistant for a
+hotel in Northern Cyprus.
+Your job:
+1. Answer questions about room types, prices,
+   check-in/check-out times, location and amenities
+2. Help with reservations - collect name, phone,
+   dates and guest count
+3. When you have name AND phone say:
+   [LEAD_CAPTURED] Name: {name}, Phone: {phone}
+4. Speak in whatever language the customer uses
+  (English, Turkish, Arabic, Russian, or Greek).
+  If the customer writes in Greek, respond fully in Greek.
+${LANGUAGE_RULE}
+Be warm, professional, and concise.`,
+
   student_accommodation: `You are a helpful AI
 assistant for student accommodation in Northern Cyprus.
 Near: EMU, CIU, NEU, LAU universities.
@@ -133,14 +148,23 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const {
       messages,
+      message,
       businessId,
       sessionId,
-      businessType = 'default',
+      businessType,
+      niche,
       systemPrompt,
       businessName = 'this business',
     } = body;
 
-    if (!messages || !Array.isArray(messages)) {
+    const normalizedBusinessType = (niche || businessType || 'default') as string;
+    const normalizedMessages = Array.isArray(messages)
+      ? messages
+      : typeof message === 'string' && message.trim().length > 0
+        ? [{ role: 'user', content: message.trim() }]
+        : null;
+
+    if (!normalizedMessages || !Array.isArray(normalizedMessages)) {
       return NextResponse.json(
         { error: 'Messages array required' },
         { status: 400, headers: corsHeaders }
@@ -159,7 +183,7 @@ export async function POST(request: NextRequest) {
     }
 
     const systemMessage =
-      systemPrompt || NICHE_PROMPTS[businessType] || NICHE_PROMPTS.default;
+      systemPrompt || NICHE_PROMPTS[normalizedBusinessType] || NICHE_PROMPTS.default;
 
     const completion = await openai.chat.completions.create({
       model: 'gpt-4o-mini',
@@ -168,7 +192,7 @@ export async function POST(request: NextRequest) {
           role: 'system',
           content: `${systemMessage}\n\nBusiness name: ${businessName}`,
         },
-        ...messages,
+        ...normalizedMessages,
       ],
       max_tokens: 500,
       temperature: 0.7,
@@ -190,7 +214,7 @@ export async function POST(request: NextRequest) {
 
     if (businessId && sessionId) {
       try {
-        const allMessages = [...messages, { role: 'assistant', content: aiMessage }];
+        const allMessages = [...normalizedMessages, { role: 'assistant', content: aiMessage }];
 
         const { data: existing } = await supabase
           .from('conversations')
