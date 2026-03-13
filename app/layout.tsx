@@ -66,8 +66,7 @@ export default function RootLayout({
         <meta charSet="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </head>
-      <body className={`${font.className} 
-        bg-white text-gray-900 antialiased`}>
+      <body className={`${font.className} bg-zinc-950 text-zinc-100 antialiased`}>
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
