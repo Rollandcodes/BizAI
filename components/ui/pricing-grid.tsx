@@ -9,7 +9,13 @@ import {
   usePayPalScriptReducer,
 } from '@paypal/react-paypal-js';
 import { trackEvent } from '@/lib/analytics';
-import type { Dictionary } from '@/lib/i18n';
+
+type PricingDictionary = {
+  starter: string;
+  pro: string;
+  business: string;
+  mostPopular: string;
+};
 
 type Plan = {
   id: 'starter' | 'pro' | 'business';
@@ -20,7 +26,7 @@ type Plan = {
 };
 
 type Props = {
-  dictionary: Dictionary;
+  dictionary: PricingDictionary;
 };
 
 const yearlySavings: Record<Plan['id'], number> = {

@@ -3,10 +3,22 @@
 import { useState } from 'react';
 import { PlayCircle, X } from 'lucide-react';
 import { trackEvent } from '@/lib/analytics';
-import type { Dictionary } from '@/lib/i18n';
+
+type HeroDictionary = {
+  heroBadge: string;
+  heroTitle: string;
+  heroSubtitle: string;
+  heroSecondaryCta: string;
+  playDemo: string;
+  demoCustomer1: string;
+  demoAi1: string;
+  demoCustomer2: string;
+  demoAi2: string;
+  demoTitle: string;
+};
 
 type Props = {
-  dictionary: Dictionary;
+  dictionary: HeroDictionary;
 };
 
 export function HeroV2({ dictionary }: Props) {

@@ -52,19 +52,19 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4 py-12 dark:bg-gray-950">
+    <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4 py-12">
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="mb-8 text-center">
-          <Link href="/" className="inline-block text-3xl font-extrabold text-slate-900 dark:text-gray-50">
+          <Link href="/" className="inline-block text-3xl font-extrabold text-gray-900">
             🤖 CypAI
           </Link>
         </div>
 
         {/* Card */}
-        <div className="rounded-2xl border border-slate-200 bg-white p-8 shadow-sm dark:border-gray-700 dark:bg-gray-900">
-          <h1 className="text-2xl font-extrabold text-slate-900 dark:text-gray-50">Welcome back</h1>
-          <p className="mt-1.5 text-sm text-slate-500 dark:text-gray-400">
+        <div className="rounded-2xl border border-gray-200 bg-white p-8 shadow-sm">
+          <h1 className="text-2xl font-extrabold text-gray-900">Welcome back</h1>
+          <p className="mt-1.5 text-sm text-gray-500">
             Enter your email to access your dashboard
           </p>
 
@@ -78,7 +78,7 @@ export default function LoginPage() {
 
           <form onSubmit={handleSubmit} className="mt-6 space-y-4" noValidate>
             <div>
-              <label htmlFor="email" className="mb-1.5 block text-sm font-semibold text-slate-700 dark:text-gray-300">
+              <label htmlFor="email" className="mb-1.5 block text-sm font-semibold text-gray-700">
                 Business Email
               </label>
               <input
@@ -93,10 +93,10 @@ export default function LoginPage() {
                 }}
                 placeholder="you@business.com"
                 disabled={loading || !!welcomeMsg}
-                className={`h-12 w-full rounded-xl border px-4 text-sm text-slate-900 outline-none transition focus:ring-2 disabled:opacity-60 dark:bg-gray-800 dark:text-white dark:placeholder:text-gray-500 ${
+                className={`h-12 w-full rounded-xl border px-4 text-sm text-gray-900 outline-none transition focus:ring-2 disabled:opacity-60 ${
                   error
                     ? 'border-red-400 bg-red-50 focus:border-red-400 focus:ring-red-400/10'
-                    : 'border-slate-200 dark:border-gray-600 focus:border-blue-400 focus:ring-blue-400/10'
+                    : 'border-gray-200 focus:border-blue-400 focus:ring-blue-400/10'
                 }`}
               />
               {error && (
@@ -130,24 +130,25 @@ export default function LoginPage() {
 
           {/* Divider */}
           <div className="my-6 flex items-center gap-3">
-            <span className="h-px flex-1 bg-slate-200 dark:bg-gray-700" />
-            <span className="text-xs font-semibold text-slate-400 dark:text-gray-500">or</span>
-            <span className="h-px flex-1 bg-slate-200 dark:bg-gray-700" />
+            <span className="h-px flex-1 bg-slate-200" />
+            <span className="text-xs font-semibold text-gray-400">or</span>
+            <span className="h-px flex-1 bg-slate-200" />
           </div>
 
           <Link
             href="/#pricing"
-            className="block w-full rounded-xl border-2 border-slate-200 py-3 text-center text-sm font-semibold text-slate-700 transition hover:border-blue-300 hover:text-blue-700 dark:border-gray-700 dark:text-gray-300"
+            className="block w-full rounded-xl border-2 border-gray-200 py-3 text-center text-sm font-semibold text-gray-700 transition hover:border-blue-300 hover:text-blue-700"
           >
             New to CypAI? Start your free 7-day trial →
           </Link>
         </div>
 
         {/* Back link */}
-        <p className="mt-6 text-center text-xs text-slate-400 dark:text-gray-500">
-          <Link href="/" className="transition hover:text-slate-600 dark:hover:text-gray-300">← Back to homepage</Link>
+        <p className="mt-6 text-center text-xs text-gray-400">
+          <Link href="/" className="transition hover:text-gray-600">← Back to homepage</Link>
         </p>
       </div>
     </div>
   );
 }
+

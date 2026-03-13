@@ -5,10 +5,14 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion';
-import type { Dictionary } from '@/lib/i18n';
+
+type FaqDictionary = {
+  faqTitle: string;
+  faqDescription: string;
+};
 
 type Props = {
-  dictionary: Dictionary;
+  dictionary: FaqDictionary;
 };
 
 export function FaqsSection({ dictionary }: Props) {
@@ -49,7 +53,7 @@ export function FaqsSection({ dictionary }: Props) {
       <Accordion
         type="single"
         collapsible
-        className="bg-card dark:bg-card/50 w-full -space-y-px rounded-lg"
+        className="bg-card w-full -space-y-px rounded-lg"
         defaultValue="item-1"
       >
         {questions.map((item) => (

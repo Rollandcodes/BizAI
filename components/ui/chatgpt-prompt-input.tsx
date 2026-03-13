@@ -53,7 +53,7 @@ const PopoverContent = React.forwardRef<
       align={align}
       sideOffset={sideOffset}
       className={cn(
-        "z-50 w-64 rounded-xl bg-popover dark:bg-[#303030] p-2 text-popover-foreground dark:text-white shadow-md outline-none animate-in data-[state=open]:fade-in-0 data-[state=closed]:fade-out-0 data-[state=open]:zoom-in-95 data-[state=closed]:zoom-out-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
+        "z-50 w-64 rounded-xl bg-popover p-2 text-popover-foreground shadow-md outline-none animate-in data-[state=open]:fade-in-0 data-[state=closed]:fade-out-0 data-[state=open]:zoom-in-95 data-[state=closed]:zoom-out-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
         className
       )}
       {...props}
@@ -95,10 +95,10 @@ const DialogContent = React.forwardRef<
       )}
       {...props}
     >
-      <div className="relative bg-card dark:bg-[#303030] rounded-[28px] overflow-hidden shadow-2xl p-1">
+      <div className="relative bg-card rounded-[28px] overflow-hidden shadow-2xl p-1">
         {children}
-        <DialogPrimitive.Close className="absolute right-3 top-3 z-10 rounded-full bg-background/50 dark:bg-[#303030] p-1 hover:bg-accent dark:hover:bg-[#515151] transition-all">
-          <XIcon className="h-5 w-5 text-muted-foreground dark:text-gray-200 hover:text-foreground dark:hover:text-white" />
+        <DialogPrimitive.Close className="absolute right-3 top-3 z-10 rounded-full bg-background/50 p-1 hover:bg-accent transition-all">
+          <XIcon className="h-5 w-5 text-muted-foreground hover:text-foreground" />
           <span className="sr-only">Close</span>
         </DialogPrimitive.Close>
       </div>
@@ -265,7 +265,7 @@ export const PromptBox = React.forwardRef<
   return (
     <div
       className={cn(
-        "flex flex-col rounded-[28px] p-2 shadow-sm transition-colors bg-white border dark:bg-[#303030] dark:border-transparent cursor-text",
+        "flex flex-col rounded-[28px] p-2 shadow-sm transition-colors bg-white border cursor-text",
         className
       )}
     >
@@ -295,7 +295,7 @@ export const PromptBox = React.forwardRef<
             </button>
             <button
               onClick={handleRemoveImage}
-              className="absolute right-2 top-2 z-10 flex h-4 w-4 items-center justify-center rounded-full bg-white/50 dark:bg-[#303030] text-black dark:text-white transition-colors hover:bg-accent dark:hover:bg-[#515151]"
+              className="absolute right-2 top-2 z-10 flex h-4 w-4 items-center justify-center rounded-full bg-white/50 text-black transition-colors hover:bg-accent"
               aria-label="Remove image"
             >
               <XIcon className="h-4 w-4" />
@@ -318,7 +318,7 @@ export const PromptBox = React.forwardRef<
         value={value}
         onChange={handleInputChange}
         placeholder="Message..."
-        className="custom-scrollbar w-full resize-none border-0 bg-transparent p-3 text-foreground dark:text-white placeholder:text-muted-foreground dark:placeholder:text-gray-300 focus:ring-0 focus-visible:outline-none min-h-12"
+        className="custom-scrollbar w-full resize-none border-0 bg-transparent p-3 text-foreground placeholder:text-muted-foreground focus:ring-0 focus-visible:outline-none min-h-12"
         {...props}
       />
 
@@ -330,7 +330,7 @@ export const PromptBox = React.forwardRef<
                 <button
                   type="button"
                   onClick={handlePlusClick}
-                  className="flex h-8 w-8 items-center justify-center rounded-full text-foreground dark:text-white transition-colors hover:bg-accent dark:hover:bg-[#515151] focus-visible:outline-none"
+                  className="flex h-8 w-8 items-center justify-center rounded-full text-foreground transition-colors hover:bg-accent focus-visible:outline-none"
                 >
                   <PlusIcon className="h-6 w-6" />
                   <span className="sr-only">Attach image</span>
@@ -347,7 +347,7 @@ export const PromptBox = React.forwardRef<
                   <PopoverTrigger asChild>
                     <button
                       type="button"
-                      className="flex h-8 items-center gap-2 rounded-full p-2 text-sm text-foreground dark:text-white transition-colors hover:bg-accent dark:hover:bg-[#515151] focus-visible:outline-none focus-visible:ring-ring"
+                      className="flex h-8 items-center gap-2 rounded-full p-2 text-sm text-foreground transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-ring"
                     >
                       <Settings2Icon className="h-4 w-4" />
                       {!selectedTool && "Tools"}
@@ -367,12 +367,12 @@ export const PromptBox = React.forwardRef<
                         setSelectedTool(tool.id);
                         setIsPopoverOpen(false);
                       }}
-                      className="flex w-full items-center gap-2 rounded-md p-2 text-left text-sm hover:bg-accent dark:hover:bg-[#515151]"
+                      className="flex w-full items-center gap-2 rounded-md p-2 text-left text-sm hover:bg-accent"
                     >
                       <tool.icon className="h-4 w-4" />
                       <span>{tool.name}</span>
                       {tool.extra && (
-                        <span className="ml-auto text-xs text-muted-foreground dark:text-gray-400">
+                        <span className="ml-auto text-xs text-muted-foreground">
                           {tool.extra}
                         </span>
                       )}
@@ -384,10 +384,10 @@ export const PromptBox = React.forwardRef<
 
             {activeTool && (
               <>
-                <div className="h-4 w-px bg-border dark:bg-gray-600" />
+                <div className="h-4 w-px bg-border" />
                 <button
                   onClick={() => setSelectedTool(null)}
-                  className="flex h-8 items-center gap-2 rounded-full px-2 text-sm dark:hover:bg-[#3b4045] hover:bg-accent cursor-pointer dark:text-[#99ceff] text-[#2294ff] transition-colors flex-row justify-center"
+                  className="flex h-8 items-center gap-2 rounded-full px-2 text-sm hover:bg-accent cursor-pointer text-[#2294ff] transition-colors flex-row justify-center"
                 >
                   {ActiveToolIcon && <ActiveToolIcon className="h-4 w-4" />}
                   {activeTool.shortName}
@@ -401,7 +401,7 @@ export const PromptBox = React.forwardRef<
                 <TooltipTrigger asChild>
                   <button
                     type="button"
-                    className="flex h-8 w-8 items-center justify-center rounded-full text-foreground dark:text-white transition-colors hover:bg-accent dark:hover:bg-[#515151] focus-visible:outline-none"
+                    className="flex h-8 w-8 items-center justify-center rounded-full text-foreground transition-colors hover:bg-accent focus-visible:outline-none"
                   >
                     <MicIcon className="h-5 w-5" />
                     <span className="sr-only">Record voice</span>
@@ -417,7 +417,7 @@ export const PromptBox = React.forwardRef<
                   <button
                     type="submit"
                     disabled={!hasValue}
-                    className="flex h-8 w-8 items-center justify-center rounded-full text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none bg-black text-white hover:bg-black/80 dark:bg-white dark:text-black dark:hover:bg-white/80 disabled:bg-black/40 dark:disabled:bg-[#515151]"
+                    className="flex h-8 w-8 items-center justify-center rounded-full text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none bg-black text-white hover:bg-black/80 disabled:bg-black/40"
                   >
                     <SendIcon className="h-6 w-6" />
                     <span className="sr-only">Send message</span>
@@ -435,3 +435,4 @@ export const PromptBox = React.forwardRef<
   );
 });
 PromptBox.displayName = "PromptBox";
+

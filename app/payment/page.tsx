@@ -231,11 +231,11 @@ function PaymentContent() {
   const email = getSignupEmail(signupData);
 
   return (
-    <div className="flex min-h-screen flex-col bg-slate-50 dark:bg-gray-950">
-      <header className="border-b border-slate-200 bg-white px-4 py-4 dark:border-gray-700 dark:bg-gray-900">
+    <div className="flex min-h-screen flex-col bg-gray-50">
+      <header className="border-b border-gray-200 bg-white px-4 py-4">
         <div className="mx-auto flex max-w-5xl items-center justify-between">
-          <a href="/" className="text-lg font-extrabold text-slate-900 dark:text-gray-50">🤖 CypAI</a>
-          <a href={`/signup?plan=${planId}`} className="text-sm font-semibold text-slate-500 transition hover:text-slate-800 dark:text-gray-400 dark:hover:text-gray-100">← Back</a>
+          <a href="/" className="text-lg font-extrabold text-gray-900">🤖 CypAI</a>
+          <a href={`/signup?plan=${planId}`} className="text-sm font-semibold text-gray-500 transition hover:text-gray-800">← Back</a>
         </div>
       </header>
 
@@ -247,31 +247,31 @@ function PaymentContent() {
                 <div className="flex h-7 w-7 items-center justify-center rounded-full bg-emerald-500 text-xs font-bold text-white">
                   <Check className="h-3.5 w-3.5" />
                 </div>
-                <span className="text-sm font-semibold text-slate-400">Your Details</span>
+                <span className="text-sm font-semibold text-gray-400">Your Details</span>
               </div>
               <div className="h-0.5 flex-1 rounded-full bg-blue-600" />
               <div className="flex items-center gap-2">
                 <div className="flex h-7 w-7 items-center justify-center rounded-full bg-blue-600 text-xs font-bold text-white">2</div>
-                <span className="text-sm font-semibold text-slate-900">Payment</span>
+                <span className="text-sm font-semibold text-gray-900">Payment</span>
               </div>
             </div>
           </div>
 
           <div className="grid gap-6 md:grid-cols-2">
-            <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-900">
-              <h2 className="text-lg font-extrabold text-slate-900 dark:text-gray-50">Order Summary</h2>
+            <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+              <h2 className="text-lg font-extrabold text-gray-900">Order Summary</h2>
 
-              <div className="mt-5 rounded-xl border border-slate-100 bg-slate-50 p-4 dark:border-gray-700 dark:bg-gray-800">
+              <div className="mt-5 rounded-xl border border-gray-100 bg-gray-50 p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-base font-extrabold text-slate-900 dark:text-gray-50">{plan.name} Plan</p>
-                    <p className="text-sm text-slate-500 dark:text-gray-400">{plan.description}</p>
+                    <p className="text-base font-extrabold text-gray-900">{plan.name} Plan</p>
+                    <p className="text-sm text-gray-500">{plan.description}</p>
                   </div>
-                  <p className="text-xl font-extrabold text-slate-900 dark:text-gray-50">${plan.price}<span className="text-sm font-normal text-slate-500 dark:text-gray-400">/mo</span></p>
+                  <p className="text-xl font-extrabold text-gray-900">${plan.price}<span className="text-sm font-normal text-gray-500">/mo</span></p>
                 </div>
                 <ul className="mt-4 space-y-2">
                   {plan.features.map((feature) => (
-                    <li key={feature} className="flex items-center gap-2 text-sm text-slate-700 dark:text-gray-300">
+                    <li key={feature} className="flex items-center gap-2 text-sm text-gray-700">
                       <Check className="h-3.5 w-3.5 shrink-0 text-blue-500" />
                       {feature}
                     </li>
@@ -283,16 +283,16 @@ function PaymentContent() {
                 </div>
               </div>
 
-              <div className="my-5 border-t border-slate-100 dark:border-gray-700" />
+              <div className="my-5 border-t border-gray-100" />
 
               <div className="flex items-end justify-between">
                 <div>
-                  <p className="text-sm font-semibold text-slate-500 dark:text-gray-400">Total today</p>
-                  <p className="text-xs text-slate-400 dark:text-gray-500">after 7-day free trial</p>
+                  <p className="text-sm font-semibold text-gray-500">Total today</p>
+                  <p className="text-xs text-gray-400">after 7-day free trial</p>
                 </div>
                 <div className="text-right">
-                  <p className="text-2xl font-extrabold text-slate-900 dark:text-gray-50">${plan.price}</p>
-                  <p className="text-xs text-slate-400 dark:text-gray-500">per month</p>
+                  <p className="text-2xl font-extrabold text-gray-900">${plan.price}</p>
+                  <p className="text-xs text-gray-400">per month</p>
                 </div>
               </div>
 
@@ -302,7 +302,7 @@ function PaymentContent() {
                   { icon: '↩️', text: 'Cancel anytime, no contracts' },
                   { icon: '🇨🇾', text: 'Cyprus local support' },
                 ].map(({ icon, text }) => (
-                  <div key={text} className="flex items-center gap-2.5 text-sm text-slate-600 dark:text-gray-400">
+                  <div key={text} className="flex items-center gap-2.5 text-sm text-gray-600">
                     <span className="text-base">{icon}</span>
                     {text}
                   </div>
@@ -310,24 +310,24 @@ function PaymentContent() {
               </div>
             </div>
 
-            <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-900">
-              <h2 className="text-lg font-extrabold text-slate-900 dark:text-gray-50">Complete Your Order</h2>
+            <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+              <h2 className="text-lg font-extrabold text-gray-900">Complete Your Order</h2>
 
               {signupData && (
-                <div className="mt-4 rounded-xl border border-slate-100 bg-slate-50 px-4 py-3.5 text-sm dark:border-gray-700 dark:bg-gray-800">
-                  <p className="text-slate-500 dark:text-gray-400">
-                    <span className="font-semibold text-slate-700 dark:text-gray-200">Paying as:</span>{' '}
+                <div className="mt-4 rounded-xl border border-gray-100 bg-gray-50 px-4 py-3.5 text-sm">
+                  <p className="text-gray-500">
+                    <span className="font-semibold text-gray-700">Paying as:</span>{' '}
                     {email || 'No email provided'}
                   </p>
-                  <p className="mt-1 text-slate-500 dark:text-gray-400">
-                    <span className="font-semibold text-slate-700 dark:text-gray-200">Business:</span>{' '}
+                  <p className="mt-1 text-gray-500">
+                    <span className="font-semibold text-gray-700">Business:</span>{' '}
                     {businessName}
                   </p>
                 </div>
               )}
 
               <div className="mt-6">
-                <p className="mb-4 text-[11px] font-semibold uppercase tracking-widest text-slate-400 dark:text-gray-500">
+                <p className="mb-4 text-[11px] font-semibold uppercase tracking-widest text-gray-400">
                   Pay securely without leaving CypAI
                 </p>
                 {signupData ? (
@@ -360,3 +360,4 @@ export default function PaymentPage() {
     </Suspense>
   );
 }
+

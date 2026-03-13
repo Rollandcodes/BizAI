@@ -205,10 +205,10 @@ function ChatWidget({
           ref={chatRef}
           className={
             embedded
-              ? 'flex h-full w-full flex-col overflow-hidden bg-white dark:bg-gray-900'
+              ? 'flex h-full w-full flex-col overflow-hidden bg-white'
               : isMobile
-                ? 'fixed inset-0 z-50 flex h-[100vh] w-[100vw] flex-col bg-white dark:bg-gray-900'
-                : 'fixed bottom-4 right-4 z-50 flex w-96 max-h-[600px] flex-col overflow-hidden rounded-2xl bg-white shadow-2xl dark:bg-gray-900'
+                ? 'fixed inset-0 z-50 flex h-[100vh] w-[100vw] flex-col bg-white'
+                : 'fixed bottom-4 right-4 z-50 flex w-96 max-h-[600px] flex-col overflow-hidden rounded-2xl bg-white shadow-2xl'
           }
           style={{ '--bizai-color': primaryColor } as React.CSSProperties}
         >
@@ -236,7 +236,7 @@ function ChatWidget({
           </div>
 
           {/* Messages */}
-          <div className="flex-1 overflow-y-auto space-y-3 bg-white p-4 dark:bg-gray-900">
+          <div className="flex-1 overflow-y-auto space-y-3 bg-white p-4">
             {messages.map((message) => (
               <div
                 key={message.id}
@@ -246,7 +246,7 @@ function ChatWidget({
                   className={
                     message.sender === 'user'
                       ? 'max-w-[75%] px-3 py-2 rounded-2xl text-sm leading-relaxed bg-[var(--bizai-color)] text-white'
-                      : 'max-w-[75%] rounded-2xl bg-gray-100 px-3 py-2 text-sm leading-relaxed text-gray-900 dark:bg-gray-800 dark:text-gray-100'
+                      : 'max-w-[75%] rounded-2xl bg-gray-100 px-3 py-2 text-sm leading-relaxed text-gray-900'
                   }
                 >
                   {message.text}
@@ -258,7 +258,7 @@ function ChatWidget({
             {feedbackState === 'prompt' && (
               <div className="flex flex-col gap-2">
                 <div className="flex justify-start">
-                  <div className="max-w-[85%] rounded-2xl bg-gray-100 px-3 py-2 text-sm leading-relaxed text-gray-900 dark:bg-gray-800 dark:text-gray-100">
+                  <div className="max-w-[85%] rounded-2xl bg-gray-100 px-3 py-2 text-sm leading-relaxed text-gray-900">
                     Before you go — how was your experience today? Your feedback helps us improve! 😊
                   </div>
                 </div>
@@ -268,11 +268,11 @@ function ChatWidget({
                       key={emoji}
                       type="button"
                       onClick={() => void submitFeedback(idx + 1)}
-                      className="flex flex-col items-center gap-0.5 rounded-xl px-2 py-1.5 text-xl transition hover:bg-slate-100 active:scale-95 dark:hover:bg-gray-800"
+                      className="flex flex-col items-center gap-0.5 rounded-xl px-2 py-1.5 text-xl transition hover:bg-gray-100 active:scale-95"
                       title={`Rate ${idx + 1} out of 5`}
                     >
                       <span>{emoji}</span>
-                      <span className="text-[10px] font-medium text-slate-400">{idx + 1}</span>
+                      <span className="text-[10px] font-medium text-gray-400">{idx + 1}</span>
                     </button>
                   ))}
                 </div>
@@ -283,12 +283,12 @@ function ChatWidget({
             {feedbackState === 'done' && (
               <div className="flex flex-col gap-1.5">
                 <div className="flex justify-start">
-                  <div className="max-w-[85%] rounded-2xl bg-gray-100 px-3 py-2 text-sm leading-relaxed text-gray-900 dark:bg-gray-800 dark:text-gray-100">
+                  <div className="max-w-[85%] rounded-2xl bg-gray-100 px-3 py-2 text-sm leading-relaxed text-gray-900">
                     Thank you! ⭐ We appreciate your feedback.
                   </div>
                 </div>
                 <div className="flex justify-start">
-                  <div className="max-w-[85%] rounded-2xl bg-gray-100 px-3 py-2 text-sm leading-relaxed text-gray-900 dark:bg-gray-800 dark:text-gray-100">
+                  <div className="max-w-[85%] rounded-2xl bg-gray-100 px-3 py-2 text-sm leading-relaxed text-gray-900">
                     Feel free to contact us anytime.
                   </div>
                 </div>
@@ -298,7 +298,7 @@ function ChatWidget({
             {/* Typing indicator */}
             {isLoading && (
               <div className="flex justify-start">
-                <div className="flex items-center gap-1 rounded-2xl bg-gray-100 px-4 py-3 dark:bg-gray-800">
+                <div className="flex items-center gap-1 rounded-2xl bg-gray-100 px-4 py-3">
                   <span className="h-2 w-2 rounded-full bg-gray-400 animate-bounce [animation-delay:0ms]" />
                   <span className="h-2 w-2 rounded-full bg-gray-400 animate-bounce [animation-delay:150ms]" />
                   <span className="h-2 w-2 rounded-full bg-gray-400 animate-bounce [animation-delay:300ms]" />
@@ -309,13 +309,13 @@ function ChatWidget({
           </div>
 
           {/* Input */}
-          <form onSubmit={sendMessage} className="flex gap-2 border-t border-gray-200 bg-white p-3 dark:border-gray-700 dark:bg-gray-900">
+          <form onSubmit={sendMessage} className="flex gap-2 border-t border-gray-200 bg-white p-3">
             <input
               type="text"
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
               placeholder="Type a message..."
-              className="flex-1 rounded-full border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[var(--bizai-color)] dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:placeholder:text-gray-500"
+              className="flex-1 rounded-full border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[var(--bizai-color)]"
             />
             <button
               type="submit"
@@ -370,3 +370,4 @@ export default memo(ChatWidget, (prev, next) =>
   prev.welcomeMessage === next.welcomeMessage &&
   prev.embedded === next.embedded
 );
+
