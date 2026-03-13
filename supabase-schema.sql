@@ -278,6 +278,40 @@ ALTER TABLE public.conversations ADD COLUMN IF NOT EXISTS customer_rating INTEGE
   CHECK (customer_rating IS NULL OR (customer_rating >= 1 AND customer_rating <= 5));
 
 -- ============================================================================
+-- Migration: CRM contact fields on conversations (v6 – safe to re-run)
+-- ============================================================================
+ALTER TABLE public.conversations ADD COLUMN IF NOT EXISTS contact_status TEXT DEFAULT 'new';
+ALTER TABLE public.conversations ADD COLUMN IF NOT EXISTS contact_notes TEXT;
+ALTER TABLE public.conversations ADD COLUMN IF NOT EXISTS contacted_at TIMESTAMPTZ;
+ALTER TABLE public.conversations ADD COLUMN IF NOT EXISTS converted_at TIMESTAMPTZ;
+
+-- Optional helper index for CRM filtering by status per business
+CREATE INDEX IF NOT EXISTS idx_conversations_contact_status
+  ON public.conversations (business_id, contact_status, created_at DESC);
+
+-- ============================================================================
+-- Migration: Generic booking fields (v6 – safe to re-run)
+-- ============================================================================
+-- Keep existing car-rental columns for backward compatibility while enabling
+-- generic service bookings used by the new dashboard booking workflows.
+ALTER TABLE public.bookings ADD COLUMN IF NOT EXISTS service_type TEXT;
+ALTER TABLE public.bookings ADD COLUMN IF NOT EXISTS booking_date DATE;
+ALTER TABLE public.bookings ADD COLUMN IF NOT EXISTS booking_time TEXT;
+ALTER TABLE public.bookings ADD COLUMN IF NOT EXISTS special_requests TEXT;
+ALTER TABLE public.bookings ADD COLUMN IF NOT EXISTS confirmed_at TIMESTAMPTZ;
+ALTER TABLE public.bookings ADD COLUMN IF NOT EXISTS cancelled_at TIMESTAMPTZ;
+ALTER TABLE public.bookings ADD COLUMN IF NOT EXISTS notes TEXT;
+
+-- Extend status enum check to support cancelled if this is an older schema.
+ALTER TABLE public.bookings DROP CONSTRAINT IF EXISTS bookings_status_check;
+ALTER TABLE public.bookings
+  ADD CONSTRAINT bookings_status_check
+  CHECK (status IN ('pending', 'confirmed', 'declined', 'cancelled'));
+
+CREATE INDEX IF NOT EXISTS idx_bookings_business_booking_date
+  ON public.bookings (business_id, booking_date, created_at DESC);
+
+-- ============================================================================
 -- Storage Bucket (Optional - for widget customization assets)
 -- ============================================================================
 -- Uncomment if you want to store business logos/assets

@@ -16,6 +16,27 @@ function getSupabaseClient() {
   );
 }
 
+const rateLimits = new Map<string, { count: number; resetAt: number }>()
+
+function isRateLimited(identifier: string): boolean {
+  const now = Date.now()
+  const windowMs = 60 * 1000  // 1 minute
+  const maxRequests = 20  // per minute per business
+
+  const record = rateLimits.get(identifier) ||
+    { count: 0, resetAt: now + windowMs }
+
+  if (now > record.resetAt) {
+    record.count = 0
+    record.resetAt = now + windowMs
+  }
+
+  record.count++
+  rateLimits.set(identifier, record)
+
+  return record.count > maxRequests
+}
+
 const LANGUAGE_RULE = `LANGUAGE RULE — CRITICAL:
 Detect the language the customer writes in and ALWAYS respond in that exact language.
 Supported languages:
@@ -124,6 +145,17 @@ export async function POST(request: NextRequest) {
         { error: 'Messages array required' },
         { status: 400, headers: corsHeaders }
       );
+    }
+
+    const identifier = businessId ||
+      request.headers.get('x-forwarded-for') ||
+      'anonymous'
+
+    if (isRateLimited(identifier)) {
+      return NextResponse.json(
+        { error: 'Too many messages. Please wait.' },
+        { status: 429, headers: corsHeaders }
+      )
     }
 
     const systemMessage =

@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import {
   Bot,
+  Building2,
   Check,
   ChevronRight,
   Copy,
@@ -25,6 +26,7 @@ import {
   ShieldAlert,
   Star,
   ShieldCheck,
+  TrendingUp,
   Users,
   X,
   type LucideIcon,
@@ -47,6 +49,11 @@ import QRCode from 'react-qr-code';
 import { supabase } from '@/lib/supabase';
 import ChatWidget from '@/components/ChatWidget';
 import OnboardingWizard from '@/components/OnboardingWizard';
+import CRMTab from '@/components/dashboard/CRMTab';
+import BookingsTab from '@/components/dashboard/BookingsTab';
+import FollowUpsTab from '@/components/dashboard/FollowUpsTab';
+import AnalyticsTab from '@/components/dashboard/AnalyticsTab';
+import AgencyTab from '@/components/dashboard/AgencyTab';
 import { PLANS } from '@/lib/plans';
 import { Analytics } from '@/lib/analytics';
 
@@ -121,7 +128,7 @@ type BookingRecord = {
   created_at: string;
 };
 
-type TabKey = 'overview' | 'conversations' | 'leads' | 'bookings' | 'settings' | 'subscription' | 'audit';
+type TabKey = 'overview' | 'conversations' | 'leads' | 'crm' | 'bookings' | 'followups' | 'analytics' | 'audit' | 'agency' | 'settings' | 'subscription';
 
 type ToastState = {
   message: string;
@@ -147,14 +154,20 @@ const businessTypeOptions = [
   { value: 'other', label: 'Other' },
 ];
 
-const tabItems: Array<{ key: TabKey; label: string; Icon: LucideIcon }> = [
-  { key: 'overview', label: 'Overview', Icon: LayoutDashboard },
-  { key: 'conversations', label: 'Conversations', Icon: MessageSquare },
-  { key: 'leads', label: 'Leads', Icon: Users },
-  { key: 'bookings', label: 'Bookings', Icon: Calendar },
-  { key: 'settings', label: 'Settings', Icon: Settings },
-  { key: 'subscription', label: 'Subscription', Icon: CreditCard },
-  { key: 'audit', label: 'Agent Audit', Icon: ShieldCheck },
+type SidebarPlan = 'trial' | 'starter' | 'pro' | 'business';
+
+const tabItems: Array<{ key: TabKey; label: string; Icon: LucideIcon; plans: SidebarPlan[] }> = [
+  { key: 'overview', label: 'Overview', Icon: LayoutDashboard, plans: ['trial', 'starter', 'pro', 'business'] },
+  { key: 'conversations', label: 'Conversations', Icon: MessageSquare, plans: ['trial', 'starter', 'pro', 'business'] },
+  { key: 'crm', label: 'CRM & Leads', Icon: Users, plans: ['starter', 'pro', 'business'] },
+  { key: 'leads', label: 'Leads', Icon: Users, plans: ['trial', 'starter', 'pro', 'business'] },
+  { key: 'bookings', label: 'Bookings', Icon: Calendar, plans: ['starter', 'pro', 'business'] },
+  { key: 'followups', label: 'Follow-ups', Icon: Send, plans: ['pro', 'business'] },
+  { key: 'analytics', label: 'Analytics', Icon: TrendingUp, plans: ['pro', 'business'] },
+  { key: 'audit', label: 'Agent Audit', Icon: ShieldCheck, plans: ['business'] },
+  { key: 'agency', label: 'Manage Clients', Icon: Building2, plans: ['business'] },
+  { key: 'settings', label: 'Settings', Icon: Settings, plans: ['trial', 'starter', 'pro', 'business'] },
+  { key: 'subscription', label: 'Subscription', Icon: CreditCard, plans: ['trial', 'starter', 'pro', 'business'] },
 ];
 
 const messageLimits: Record<BusinessRecord['plan'], number | null> = {
@@ -483,6 +496,9 @@ export default function DashboardPage() {
 
   // ── QR Code state ────────────────────────────────────────────────────────
   const qrRef = useRef<HTMLDivElement>(null);
+
+  // ── Upgrade lock state ─────────────────────────────────────────────────
+  const [upgradeLockTab, setUpgradeLockTab] = useState<TabKey | null>(null);
 
   // ── Broadcast state ──────────────────────────────────────────────────────
   type BroadcastLead = { id: string; name: string; phone: string };
@@ -1073,6 +1089,8 @@ export default function DashboardPage() {
   const usageValue = stats?.monthlyMessages ?? 0;
   const usageWidth = planLimit ? Math.min(100, (usageValue / planLimit) * 100) : Math.min(100, usageValue / 10);
   const pendingBookingsCount = bookings.filter((b) => b.status === 'pending').length;
+  const oneDayAgo = Date.now() - 24 * 60 * 60 * 1000;
+  const newLeadsCount = leads.filter((l) => new Date(l.created_at).getTime() > oneDayAgo).length;
 
   const reviewedConv = auditSummary?.flaggedConversations.find((c) => c.id === auditReviewId) ?? null;
   const chartBase = auditSummary?.weeklyStats.avgSafetyScore ?? 75;
@@ -1101,23 +1119,39 @@ export default function DashboardPage() {
       <aside className="hidden w-60 shrink-0 flex-col bg-[#0f172a] text-white lg:flex">
         <div className="flex h-20 items-center px-6 text-xl font-extrabold">CypAI</div>
 
-        <nav className="flex-1 space-y-2 px-4 py-4">
-          {tabItems.map(({ key, label, Icon }) => {
+        <nav className="flex-1 space-y-1 overflow-y-auto px-4 py-4">
+          {tabItems.map(({ key, label, Icon, plans }) => {
             const active = activeTab === key;
+            const normalizedPlan: SidebarPlan =
+              business.plan === 'basic' ? 'starter' : (business.plan as SidebarPlan);
+            const isLocked = !plans.includes(normalizedPlan);
 
             return (
               <button
                 key={key}
                 type="button"
-                onClick={() => setActiveTab(key)}
+                onClick={() => {
+                  if (isLocked) {
+                    setUpgradeLockTab(key);
+                  } else {
+                    setActiveTab(key);
+                  }
+                }}
                 data-testid={`dashboard-tab-${key}`}
                 className={`flex w-full items-center gap-3 rounded-full px-4 py-3 text-sm font-semibold transition ${
-                  active ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/20' : 'text-slate-300 hover:bg-white/5 hover:text-white'
+                  active
+                    ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/20'
+                    : isLocked
+                      ? 'text-slate-600 hover:bg-white/5'
+                      : 'text-slate-300 hover:bg-white/5 hover:text-white'
                 }`}
               >
                 <span className="relative inline-flex">
                   <Icon className="h-4 w-4" />
-                  {key === 'bookings' && pendingBookingsCount > 0 && (
+                  {isLocked && (
+                    <span className="absolute -right-2 -top-2 text-[9px] leading-none">🔒</span>
+                  )}
+                  {!isLocked && key === 'bookings' && pendingBookingsCount > 0 && (
                     <span className="absolute -right-2 -top-2 flex h-4 min-w-[1rem] items-center justify-center rounded-full bg-red-500 px-1 text-[9px] font-bold leading-none text-white">
                       {pendingBookingsCount}
                     </span>
@@ -1661,150 +1695,7 @@ export default function DashboardPage() {
               {activeTab === 'bookings' ? (
                 <section className="space-y-6">
                   <div data-testid="dashboard-bookings-panel" />
-                  <div>
-                    <h2 className="text-2xl font-extrabold text-slate-900">Booking Requests</h2>
-                    <p className="mt-1 text-sm text-slate-500">
-                      Manage booking requests captured by your AI assistant.
-                    </p>
-                  </div>
-
-                  {bookingsLoading ? (
-                    <div className="flex h-48 items-center justify-center">
-                      <div className="h-8 w-8 animate-spin rounded-full border-4 border-blue-600 border-t-transparent" />
-                    </div>
-                  ) : (
-                    <>
-                      {/* Pending booking cards */}
-                      {bookings.filter((b) => b.status === 'pending').length === 0 ? (
-                        <div className="rounded-3xl border border-slate-200 bg-white px-6 py-16 text-center">
-                          <Calendar className="mx-auto mb-4 h-10 w-10 text-slate-300" />
-                          <p className="text-sm font-semibold text-slate-500">No pending booking requests.</p>
-                          <p className="mt-1 text-xs text-slate-400">
-                            When your AI collects all booking details, requests appear here automatically.
-                          </p>
-                        </div>
-                      ) : (
-                        <div className="grid gap-4 lg:grid-cols-2">
-                          {bookings
-                            .filter((b) => b.status === 'pending')
-                            .map((booking) => {
-                              const RATES: Record<string, number> = { economy: 25, compact: 35, suv: 55 };
-                              const rate = RATES[booking.car_type.toLowerCase()] ?? 45;
-                              const estimated = booking.total_days * rate;
-                              const confirmMsg = `Hi ${booking.customer_name}! Your ${booking.car_type} booking for ${booking.pickup_date}\u2013${booking.return_date} is confirmed \u2705 We look forward to seeing you!`;
-                              const declineMsg = `Hi ${booking.customer_name}, we\u2019re sorry but we\u2019re unable to confirm your ${booking.car_type} booking for ${booking.pickup_date}\u2013${booking.return_date}. Please contact us to discuss alternatives.`;
-                              const waConfirm = `https://wa.me/${booking.customer_phone.replace(/\D/g, '')}?text=${encodeURIComponent(confirmMsg)}`;
-                              const waDecline = `https://wa.me/${booking.customer_phone.replace(/\D/g, '')}?text=${encodeURIComponent(declineMsg)}`;
-                              const updating = updatingBookingIds.has(booking.id);
-                              return (
-                                <div key={booking.id} className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-                                  <div className="flex items-center gap-2">
-                                    <span className="text-xl">\uD83D\uDE97</span>
-                                    <h3 className="font-bold text-slate-900">New Booking Request</h3>
-                                    <span className="ml-auto rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-semibold text-amber-700">
-                                      Pending
-                                    </span>
-                                  </div>
-                                  <dl className="mt-4 space-y-2 text-sm">
-                                    <div className="flex justify-between">
-                                      <dt className="font-semibold text-slate-500">Customer</dt>
-                                      <dd className="text-slate-900">{booking.customer_name}</dd>
-                                    </div>
-                                    <div className="flex justify-between">
-                                      <dt className="font-semibold text-slate-500">Phone</dt>
-                                      <dd className="text-slate-900">{booking.customer_phone}</dd>
-                                    </div>
-                                    <div className="flex justify-between">
-                                      <dt className="font-semibold text-slate-500">Dates</dt>
-                                      <dd className="text-slate-900">{booking.pickup_date} \u2192 {booking.return_date}</dd>
-                                    </div>
-                                    <div className="flex justify-between">
-                                      <dt className="font-semibold text-slate-500">Car</dt>
-                                      <dd className="text-slate-900">{booking.car_type}</dd>
-                                    </div>
-                                    <div className="flex justify-between">
-                                      <dt className="font-semibold text-slate-500">Duration</dt>
-                                      <dd className="text-slate-900">{booking.total_days} day{booking.total_days !== 1 ? 's' : ''}</dd>
-                                    </div>
-                                    <div className="flex justify-between border-t border-slate-100 pt-2">
-                                      <dt className="font-semibold text-slate-500">Estimated</dt>
-                                      <dd className="text-lg font-extrabold text-slate-900">${estimated}</dd>
-                                    </div>
-                                  </dl>
-                                  <div className="mt-5 flex gap-3">
-                                    <a
-                                      href={waConfirm}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      onClick={() => void handleConfirmBooking(booking.id)}
-                                      className={`flex flex-1 items-center justify-center gap-2 rounded-full bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-emerald-700 ${updating ? 'pointer-events-none opacity-50' : ''}`}
-                                    >
-                                      <Check className="h-4 w-4" />
-                                      Confirm
-                                    </a>
-                                    <a
-                                      href={waDecline}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      onClick={() => void handleDeclineBooking(booking.id)}
-                                      className={`flex flex-1 items-center justify-center gap-2 rounded-full border border-red-200 bg-red-50 px-4 py-2.5 text-sm font-semibold text-red-600 transition hover:bg-red-100 ${updating ? 'pointer-events-none opacity-50' : ''}`}
-                                    >
-                                      <X className="h-4 w-4" />
-                                      Decline
-                                    </a>
-                                  </div>
-                                </div>
-                              );
-                            })}
-                        </div>
-                      )}
-
-                      {/* Booking history table */}
-                      {bookings.filter((b) => b.status !== 'pending').length > 0 && (
-                        <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
-                          <div className="border-b border-slate-100 px-6 py-4">
-                            <h3 className="font-bold text-slate-900">Booking History</h3>
-                          </div>
-                          <div className="overflow-x-auto">
-                            <table className="min-w-full text-left text-sm">
-                              <thead className="bg-slate-50 text-slate-500">
-                                <tr>
-                                  <th className="px-4 py-3 font-semibold">Date</th>
-                                  <th className="px-4 py-3 font-semibold">Customer</th>
-                                  <th className="px-4 py-3 font-semibold">Phone</th>
-                                  <th className="px-4 py-3 font-semibold">Dates</th>
-                                  <th className="px-4 py-3 font-semibold">Car</th>
-                                  <th className="px-4 py-3 font-semibold">Status</th>
-                                </tr>
-                              </thead>
-                              <tbody className="divide-y divide-slate-100">
-                                {bookings
-                                  .filter((b) => b.status !== 'pending')
-                                  .map((booking) => (
-                                    <tr key={booking.id} className="bg-white">
-                                      <td className="px-4 py-3 text-slate-600">{formatDate(booking.created_at)}</td>
-                                      <td className="px-4 py-3 font-semibold text-slate-900">{booking.customer_name}</td>
-                                      <td className="px-4 py-3 text-slate-600">{booking.customer_phone}</td>
-                                      <td className="px-4 py-3 text-slate-600">{booking.pickup_date} \u2192 {booking.return_date}</td>
-                                      <td className="px-4 py-3 text-slate-600">{booking.car_type}</td>
-                                      <td className="px-4 py-3">
-                                        <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${
-                                          booking.status === 'confirmed'
-                                            ? 'bg-emerald-100 text-emerald-700'
-                                            : 'bg-red-100 text-red-700'
-                                        }`}>
-                                          {booking.status === 'confirmed' ? '\u2705 Confirmed' : '\u274C Declined'}
-                                        </span>
-                                      </td>
-                                    </tr>
-                                  ))}
-                              </tbody>
-                            </table>
-                          </div>
-                        </div>
-                      )}
-                    </>
-                  )}
+                  <BookingsTab businessId={business.id} businessName={business.business_name} />
                 </section>
               ) : null}
 
@@ -2418,40 +2309,132 @@ export default function DashboardPage() {
                   )}
                 </section>
               ) : null}
+
+              {activeTab === 'crm' ? (
+                <section>
+                  <div data-testid="dashboard-crm-panel" />
+                  <CRMTab businessId={business.id} businessName={business.business_name} />
+                </section>
+              ) : null}
+
+              {activeTab === 'followups' ? (
+                <section>
+                  <div data-testid="dashboard-followups-panel" />
+                  <FollowUpsTab businessId={business.id} businessName={business.business_name} />
+                </section>
+              ) : null}
+
+              {activeTab === 'analytics' ? (
+                <section>
+                  <div data-testid="dashboard-analytics-panel" />
+                  <AnalyticsTab businessId={business.id} />
+                </section>
+              ) : null}
+
+              {activeTab === 'agency' ? (
+                <section>
+                  <div data-testid="dashboard-agency-panel" />
+                  <AgencyTab ownerEmail={business.owner_email} />
+                </section>
+              ) : null}
             </div>
           ) : null}
         </main>
-      </div>
+
+        {/* Upgrade lock modal */}
+        {upgradeLockTab ? (
+          <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 p-4">
+            <div className="relative w-full max-w-sm rounded-3xl bg-white p-8 text-center shadow-2xl">
+              <button
+                type="button"
+                aria-label="Close"
+                onClick={() => setUpgradeLockTab(null)}
+                className="absolute right-4 top-4 rounded-full p-2 text-slate-400 hover:bg-slate-100"
+              >
+                <X className="h-5 w-5" />
+              </button>
+              <div className="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-100 text-2xl">🔒</div>
+              <h3 className="mt-4 text-xl font-extrabold text-slate-900">Feature Locked</h3>
+              <p className="mt-2 text-sm text-slate-600">
+                This feature requires a higher plan. Upgrade to unlock CRM, Follow-ups, Analytics, and more.
+              </p>
+              <button
+                type="button"
+                onClick={() => { setActiveTab('subscription'); setUpgradeLockTab(null); }}
+                className="mt-6 w-full rounded-2xl bg-blue-600 py-3 text-sm font-semibold text-white hover:bg-blue-700"
+              >
+                Upgrade Now →
+              </button>
+            </div>
+          </div>
+        ) : null}
+
+        {/* Quick Actions floating bar */}
+        {(newLeadsCount > 0 || pendingBookingsCount > 0) && (
+          <div className="fixed bottom-24 right-6 z-40 flex flex-col gap-2 lg:bottom-6">
+            {newLeadsCount > 0 && (
+              <button
+                type="button"
+                onClick={() => setActiveTab('crm')}
+                className="flex items-center gap-2 rounded-full bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-lg transition-all hover:bg-blue-700"
+              >
+                👥 {newLeadsCount} New Lead{newLeadsCount !== 1 ? 's' : ''}
+              </button>
+            )}
+            {pendingBookingsCount > 0 && (
+              <button
+                type="button"
+                onClick={() => setActiveTab('bookings')}
+                className="flex items-center gap-2 rounded-full bg-orange-500 px-4 py-2 text-sm font-medium text-white shadow-lg transition-all hover:bg-orange-600"
+              >
+                📅 {pendingBookingsCount} Pending Booking{pendingBookingsCount !== 1 ? 's' : ''}
+              </button>
+            )}
+          </div>
+        )}
 
       <nav className="fixed inset-x-0 bottom-0 z-50 border-t border-slate-200 bg-white/95 px-2 py-2 backdrop-blur lg:hidden">
-        <div className="grid grid-cols-7 gap-1">
-          {tabItems.map(({ key, label, Icon }) => {
-            const active = activeTab === key;
+        <div className="flex overflow-x-auto gap-1 scrollbar-none">
+          {tabItems
+            .filter(({ key }) => ['overview', 'conversations', 'crm', 'bookings', 'followups', 'settings', 'subscription'].includes(key))
+            .map(({ key, label, Icon, plans }) => {
+              const active = activeTab === key;
+              const normalizedPlan: SidebarPlan =
+                business?.plan === 'basic' ? 'starter' : ((business?.plan ?? 'trial') as SidebarPlan);
+              const isLocked = !plans.includes(normalizedPlan);
 
-            return (
-              <button
-                key={key}
-                type="button"
-                onClick={() => setActiveTab(key)}
-                data-testid={`dashboard-mobile-tab-${key}`}
-                className={`flex flex-col items-center justify-center rounded-2xl px-2 py-2 text-[11px] font-semibold transition ${
-                  active ? 'bg-blue-600 text-white' : 'text-slate-500 hover:bg-slate-100'
-                }`}
-              >
-                <span className="relative inline-flex">
-                  <Icon className="mb-1 h-4 w-4" />
-                  {key === 'bookings' && pendingBookingsCount > 0 && (
-                    <span className="absolute -right-2 -top-1 flex h-3.5 min-w-[0.875rem] items-center justify-center rounded-full bg-red-500 px-0.5 text-[8px] font-bold leading-none text-white">
-                      {pendingBookingsCount}
-                    </span>
-                  )}
-                </span>
-                {label}
-              </button>
-            );
+              return (
+                <button
+                  key={key}
+                  type="button"
+                  onClick={() => {
+                    if (isLocked) {
+                      setUpgradeLockTab(key);
+                    } else {
+                      setActiveTab(key);
+                    }
+                  }}
+                  data-testid={`dashboard-mobile-tab-${key}`}
+                  className={`flex shrink-0 flex-col items-center justify-center rounded-2xl px-3 py-2 text-[11px] font-semibold transition ${
+                    active ? 'bg-blue-600 text-white' : isLocked ? 'text-slate-400' : 'text-slate-500 hover:bg-slate-100'
+                  }`}
+                >
+                  <span className="relative inline-flex">
+                    <Icon className="mb-1 h-4 w-4" />
+                    {isLocked && <span className="absolute -right-2 -top-1 text-[8px]">🔒</span>}
+                    {!isLocked && key === 'bookings' && pendingBookingsCount > 0 && (
+                      <span className="absolute -right-2 -top-1 flex h-3.5 min-w-[0.875rem] items-center justify-center rounded-full bg-red-500 px-0.5 text-[8px] font-bold leading-none text-white">
+                        {pendingBookingsCount}
+                      </span>
+                    )}
+                  </span>
+                  {label}
+                </button>
+              );
           })}
         </div>
       </nav>
+      </div>
     </div>
   );
 }
