@@ -10,14 +10,14 @@ const SECTIONS = [
 
 export default function PrivacyPage() {
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-zinc-950 text-zinc-100">
       {/* Nav */}
-      <nav className="border-b border-slate-200 bg-white px-4 py-4">
+      <nav className="border-b border-zinc-800 bg-zinc-950/90 px-4 py-4 backdrop-blur">
         <div className="mx-auto flex max-w-5xl items-center justify-between">
-          <Link href="/" className="text-xl font-extrabold text-slate-900">🤖 CypAI</Link>
+          <Link href="/" className="text-xl font-extrabold text-white">🤖 CypAI</Link>
           <Link
             href="/"
-            className="flex items-center gap-1.5 rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+            className="flex items-center gap-1.5 rounded-xl border border-zinc-700 px-4 py-2 text-sm font-semibold text-zinc-300 transition hover:bg-zinc-900"
           >
             ← Back to Home
           </Link>
@@ -26,22 +26,22 @@ export default function PrivacyPage() {
 
       <div className="mx-auto max-w-5xl px-4 py-14">
         <div className="mb-10">
-          <p className="mb-2 text-xs font-bold uppercase tracking-widest text-blue-600">Legal</p>
-          <h1 className="text-4xl font-extrabold text-slate-900">Privacy Policy</h1>
-          <p className="mt-2 text-sm text-slate-400">Last updated: March 2026</p>
+          <p className="mb-2 text-xs font-bold uppercase tracking-widest text-zinc-500">Legal</p>
+          <h1 className="text-4xl font-extrabold text-white">Privacy Policy</h1>
+          <p className="mt-2 text-sm text-zinc-500">Last updated: March 2026</p>
         </div>
 
         <div className="grid gap-12 lg:grid-cols-[220px_1fr]">
           {/* Sticky TOC sidebar */}
           <aside className="hidden lg:block">
-            <div className="sticky top-8 rounded-2xl border border-slate-200 bg-slate-50 p-5">
-              <p className="mb-3 text-[11px] font-bold uppercase tracking-widest text-slate-400">Contents</p>
+            <div className="sticky top-8 rounded-2xl border border-zinc-800 bg-zinc-900 p-5">
+              <p className="mb-3 text-[11px] font-bold uppercase tracking-widest text-zinc-500">Contents</p>
               <nav className="space-y-1">
                 {SECTIONS.map((s) => (
                   <a
                     key={s.id}
                     href={`#${s.id}`}
-                    className="block rounded-lg px-3 py-2 text-sm text-slate-600 transition hover:bg-white hover:text-slate-900"
+                    className="block rounded-lg px-3 py-2 text-sm text-zinc-400 transition hover:bg-zinc-800 hover:text-zinc-100"
                   >
                     {s.title}
                   </a>
@@ -51,14 +51,14 @@ export default function PrivacyPage() {
           </aside>
 
           {/* Content */}
-          <div className="prose prose-slate max-w-none space-y-12 text-slate-700">
-            <p className="rounded-2xl bg-blue-50 px-5 py-4 text-sm leading-relaxed text-blue-800">
+          <div className="max-w-none space-y-12 text-zinc-300">
+            <p className="rounded-2xl border border-blue-500/20 bg-blue-600/10 px-5 py-4 text-sm leading-relaxed text-blue-200">
               CypAI is committed to protecting your privacy. This policy explains what data we collect,
               how we use it, and your rights. We keep it short and honest.
             </p>
 
             <section id="what-we-collect" className="scroll-mt-8">
-              <h2 className="mb-4 text-xl font-bold text-slate-900">1. What Information We Collect</h2>
+              <h2 className="mb-4 text-xl font-bold text-white">1. What Information We Collect</h2>
               <ul className="space-y-3 text-sm leading-relaxed">
                 <li className="flex gap-2"><span className="mt-1 text-blue-500">▸</span><span><strong>Account information</strong> — your business name and email address when you sign up.</span></li>
                 <li className="flex gap-2"><span className="mt-1 text-blue-500">▸</span><span><strong>Business configuration</strong> — the custom instructions, FAQs, and settings you add to train your AI.</span></li>
@@ -69,7 +69,7 @@ export default function PrivacyPage() {
             </section>
 
             <section id="how-we-use" className="scroll-mt-8">
-              <h2 className="mb-4 text-xl font-bold text-slate-900">2. How We Use Your Information</h2>
+              <h2 className="mb-4 text-xl font-bold text-white">2. How We Use Your Information</h2>
               <ul className="space-y-3 text-sm leading-relaxed">
                 <li className="flex gap-2"><span className="mt-1 text-blue-500">▸</span><span>To provide, maintain, and improve the CypAI service.</span></li>
                 <li className="flex gap-2"><span className="mt-1 text-blue-500">▸</span><span>To send important account updates (new features, billing notices, policy changes).</span></li>
@@ -79,7 +79,7 @@ export default function PrivacyPage() {
             </section>
 
             <section id="data-security" className="scroll-mt-8">
-              <h2 className="mb-4 text-xl font-bold text-slate-900">3. Data Security</h2>
+              <h2 className="mb-4 text-xl font-bold text-white">3. Data Security</h2>
               <ul className="space-y-3 text-sm leading-relaxed">
                 <li className="flex gap-2"><span className="mt-1 text-blue-500">▸</span><span>All data is <strong>encrypted in transit</strong> (HTTPS/TLS) and <strong>at rest</strong>.</span></li>
                 <li className="flex gap-2"><span className="mt-1 text-blue-500">▸</span><span>Hosted on <strong>Supabase</strong> — a secure, enterprise-grade PostgreSQL infrastructure with row-level security.</span></li>
@@ -89,7 +89,7 @@ export default function PrivacyPage() {
             </section>
 
             <section id="customer-data" className="scroll-mt-8">
-              <h2 className="mb-4 text-xl font-bold text-slate-900">4. Customer Data</h2>
+              <h2 className="mb-4 text-xl font-bold text-white">4. Customer Data</h2>
               <ul className="space-y-3 text-sm leading-relaxed">
                 <li className="flex gap-2"><span className="mt-1 text-blue-500">▸</span><span>Customer conversations belong to <strong>you</strong>, the business owner.</span></li>
                 <li className="flex gap-2"><span className="mt-1 text-blue-500">▸</span><span>You can export or delete all conversation data at any time from your dashboard.</span></li>
@@ -99,11 +99,11 @@ export default function PrivacyPage() {
             </section>
 
             <section id="contact" className="scroll-mt-8">
-              <h2 className="mb-4 text-xl font-bold text-slate-900">5. Contact</h2>
+              <h2 className="mb-4 text-xl font-bold text-white">5. Contact</h2>
               <p className="text-sm leading-relaxed">
                 For any privacy-related questions, data deletion requests, or concerns, contact us at:
               </p>
-              <div className="mt-4 rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm">
+              <div className="mt-4 rounded-xl border border-zinc-800 bg-zinc-900 p-4 text-sm">
                 <p>📧 <a href="mailto:cypai.app@cypai.app" className="font-semibold text-blue-600 hover:underline">cypai.app@cypai.app</a></p>
                 <p className="mt-1.5">📍 Nicosia, Northern Cyprus</p>
               </div>

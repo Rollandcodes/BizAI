@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { FormEvent, useMemo, useState } from 'react';
 
@@ -79,21 +79,21 @@ export default function AffiliatePage() {
   }
 
   return (
-    <main className="min-h-screen bg-slate-50 px-4 py-12 text-slate-900">
+    <main className="min-h-screen bg-zinc-950 px-4 py-12 text-zinc-100">
       <div className="mx-auto grid w-full max-w-5xl gap-8 lg:grid-cols-[1fr_1.1fr]">
-        <section className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-blue-600">CypAI Affiliate Program</p>
-          <h1 className="mt-3 text-4xl font-extrabold leading-tight">Earn 20% recurring commission</h1>
-          <p className="mt-4 text-lg leading-8 text-slate-600">
+        <section className="rounded-2xl border border-zinc-800 bg-zinc-900 p-8 shadow-xl shadow-black/30">
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-blue-400">CypAI Affiliate Program</p>
+          <h1 className="mt-3 text-4xl font-extrabold leading-tight text-white">Earn 20% recurring commission</h1>
+          <p className="mt-4 text-lg leading-8 text-zinc-400">
             Share your link, earn $15.80 for every Pro client you refer.
           </p>
 
           {!affiliate ? (
             <form className="mt-8 space-y-4" onSubmit={handleSignup}>
-              <label className="block text-sm font-semibold text-slate-700">
+              <label className="block text-sm font-semibold text-zinc-300">
                 Name
                 <input
-                  className="mt-2 h-11 w-full rounded-xl border border-slate-300 px-4 text-sm outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
+                  className="mt-2 h-11 w-full rounded-xl border border-zinc-700 px-4 text-sm outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
                   value={name}
                   onChange={(event) => setName(event.target.value)}
                   placeholder="Your full name"
@@ -101,10 +101,10 @@ export default function AffiliatePage() {
                 />
               </label>
 
-              <label className="block text-sm font-semibold text-slate-700">
+              <label className="block text-sm font-semibold text-zinc-300">
                 Email
                 <input
-                  className="mt-2 h-11 w-full rounded-xl border border-slate-300 px-4 text-sm outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
+                  className="mt-2 h-11 w-full rounded-xl border border-zinc-700 px-4 text-sm outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
                   type="email"
                   value={email}
                   onChange={(event) => setEmail(event.target.value)}
@@ -129,9 +129,9 @@ export default function AffiliatePage() {
             </form>
           ) : (
             <div className="mt-8 space-y-4">
-              <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
-                <p className="text-sm font-semibold text-emerald-800">Your unique referral link</p>
-                <p className="mt-2 break-all rounded-lg bg-white px-3 py-2 font-mono text-sm text-slate-700">{referralLink}</p>
+              <div className="rounded-2xl border border-emerald-500/20 bg-emerald-500/10 p-4">
+                <p className="text-sm font-semibold text-emerald-300">Your unique referral link</p>
+                <p className="mt-2 break-all rounded-lg border border-zinc-700 bg-zinc-950 px-3 py-2 font-mono text-sm text-zinc-200">{referralLink}</p>
               </div>
 
               {error ? (
@@ -143,17 +143,17 @@ export default function AffiliatePage() {
           )}
         </section>
 
-        <section className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
-          <h2 className="text-2xl font-extrabold text-slate-900">Earnings Dashboard</h2>
+        <section className="rounded-2xl border border-zinc-800 bg-zinc-900 p-8 shadow-xl shadow-black/30">
+          <h2 className="text-2xl font-extrabold text-white">Earnings Dashboard</h2>
 
           <div className="mt-6 grid gap-4 sm:grid-cols-2">
-            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-              <p className="text-xs font-semibold uppercase tracking-widest text-slate-500">Total referrals</p>
-              <p className="mt-2 text-3xl font-extrabold text-slate-900">{affiliate?.total_referrals ?? 0}</p>
+            <div className="rounded-2xl border border-zinc-800 bg-zinc-950 p-4">
+              <p className="text-xs font-semibold uppercase tracking-widest text-zinc-500">Total referrals</p>
+              <p className="mt-2 text-3xl font-extrabold text-white">{affiliate?.total_referrals ?? 0}</p>
             </div>
-            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-              <p className="text-xs font-semibold uppercase tracking-widest text-slate-500">Total earned</p>
-              <p className="mt-2 text-3xl font-extrabold text-slate-900">${Number(affiliate?.total_earnings ?? 0).toFixed(2)}</p>
+            <div className="rounded-2xl border border-zinc-800 bg-zinc-950 p-4">
+              <p className="text-xs font-semibold uppercase tracking-widest text-zinc-500">Total earned</p>
+              <p className="mt-2 text-3xl font-extrabold text-white">${Number(affiliate?.total_earnings ?? 0).toFixed(2)}</p>
             </div>
           </div>
 
@@ -161,7 +161,7 @@ export default function AffiliatePage() {
             type="button"
             disabled={!affiliate || affiliate.payout_requested || payoutLoading}
             onClick={() => void requestPayout()}
-            className="mt-6 inline-flex h-11 items-center rounded-xl border border-slate-300 px-6 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-60"
+            className="mt-6 inline-flex h-11 items-center rounded-xl border border-zinc-700 bg-zinc-950 px-6 text-sm font-semibold text-zinc-200 transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-60"
           >
             {affiliate?.payout_requested
               ? 'Payout Requested'
@@ -171,10 +171,11 @@ export default function AffiliatePage() {
           </button>
 
           {!affiliate ? (
-            <p className="mt-4 text-sm text-slate-500">Create your affiliate account to unlock your personal dashboard and referral link.</p>
+            <p className="mt-4 text-sm text-zinc-500">Create your affiliate account to unlock your personal dashboard and referral link.</p>
           ) : null}
         </section>
       </div>
     </main>
   );
 }
+

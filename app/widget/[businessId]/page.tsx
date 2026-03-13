@@ -1,4 +1,4 @@
-import { createServerClient } from '@/lib/supabase'
+﻿import { createServerClient } from '@/lib/supabase'
 
 import ChatWidget from '@/components/ChatWidget'
 
@@ -24,14 +24,14 @@ export default async function WidgetPage({
 
   if (!business || !businessId) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-white px-6 text-center text-sm text-slate-500">
+      <div className="flex min-h-screen items-center justify-center bg-zinc-900 px-6 text-center text-sm text-zinc-500">
         This widget is not available.
       </div>
     )
   }
 
   return (
-    <div className="h-screen w-screen overflow-hidden bg-white">
+    <div className="h-screen w-screen overflow-hidden bg-zinc-900">
       <ChatWidget
         businessId={businessId}
         businessName={business.business_name}

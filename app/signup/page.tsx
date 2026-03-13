@@ -8,7 +8,7 @@ import { Analytics } from '@/lib/analytics';
 
 const PLAN_STYLES: Record<string, { badge: string; dot: string }> = {
   starter: { badge: 'bg-green-50 text-green-700 border-green-200', dot: 'bg-green-500' },
-  basic: { badge: 'bg-gray-100 text-gray-700 border-gray-200', dot: 'bg-slate-400' },
+  basic: { badge: 'bg-zinc-800 text-zinc-300 border-zinc-700', dot: 'bg-zinc-400' },
   pro:   { badge: 'bg-blue-50 text-blue-700 border-blue-200',     dot: 'bg-blue-500' },
   business: { badge: 'bg-violet-50 text-violet-700 border-violet-200', dot: 'bg-violet-500' },
 };
@@ -106,12 +106,11 @@ function SignupForm() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-gray-50">
-      {/* Top bar */}
-      <header className="border-b border-gray-200 bg-white px-4 py-4">
+    <div className="flex min-h-screen flex-col bg-zinc-950 text-zinc-100">
+      <header className="border-b border-zinc-800 bg-zinc-950/90 px-4 py-4 backdrop-blur">
         <div className="mx-auto flex max-w-lg items-center justify-between">
-          <a href="/" className="text-lg font-extrabold text-gray-900">🤖 CypAI</a>
-          <a href="/" className="text-sm font-semibold text-gray-500 transition hover:text-gray-800">← Back</a>
+          <a href="/" className="text-lg font-extrabold text-white">🤖 CypAI</a>
+          <a href="/" className="text-sm font-semibold text-zinc-400 transition hover:text-zinc-200">← Back</a>
         </div>
       </header>
 
@@ -124,21 +123,19 @@ function SignupForm() {
               {/* Step 1 — active */}
               <div className="flex items-center gap-2">
                 <div className="flex h-7 w-7 items-center justify-center rounded-full bg-blue-600 text-xs font-bold text-white">1</div>
-                <span className="text-sm font-semibold text-gray-900">Your Details</span>
+                <span className="text-sm font-semibold text-zinc-100">Your Details</span>
               </div>
-              <div className="h-0.5 flex-1 rounded-full bg-slate-200">
+              <div className="h-0.5 flex-1 rounded-full bg-zinc-800">
                 <div className="h-full w-0 rounded-full bg-blue-600" />
               </div>
-              {/* Step 2 — inactive */}
               <div className="flex items-center gap-2">
-                <div className="flex h-7 w-7 items-center justify-center rounded-full border-2 border-gray-200 bg-white text-xs font-bold text-gray-400">2</div>
-                <span className="text-sm font-semibold text-gray-400">Payment</span>
+                <div className="flex h-7 w-7 items-center justify-center rounded-full border-2 border-zinc-700 bg-zinc-900 text-xs font-bold text-zinc-500">2</div>
+                <span className="text-sm font-semibold text-zinc-500">Payment</span>
               </div>
             </div>
           </div>
 
-          {/* Card */}
-          <div className="rounded-2xl border border-gray-200 bg-white p-7 shadow-sm">
+          <div className="rounded-2xl border border-zinc-800 bg-zinc-900 p-7 shadow-xl shadow-black/30">
 
             {/* Plan badge */}
             <div className="mb-5 flex items-center gap-2">
@@ -148,8 +145,8 @@ function SignupForm() {
               </span>
             </div>
 
-            <h1 className="text-2xl font-extrabold text-gray-900">Set up your AI assistant</h1>
-            <p className="mt-1.5 text-sm text-gray-500">Takes 2 minutes. Live in 24 hours.</p>
+            <h1 className="text-2xl font-extrabold text-white">Set up your AI assistant</h1>
+            <p className="mt-1.5 text-sm text-zinc-400">Takes 2 minutes. Live in 24 hours.</p>
 
             <form onSubmit={handleSubmit} noValidate className="mt-7 grid grid-cols-1 gap-5 md:grid-cols-2">
 
@@ -241,14 +238,14 @@ function SignupForm() {
               </div>
 
               {/* What's included */}
-              <div className="rounded-xl border border-gray-100 bg-gray-50 px-4 py-3.5 md:col-span-2">
-                <p className="mb-2.5 text-[11px] font-semibold uppercase tracking-widest text-gray-400">
+              <div className="rounded-xl border border-zinc-800 bg-zinc-950 px-4 py-3.5 md:col-span-2">
+                <p className="mb-2.5 text-[11px] font-semibold uppercase tracking-widest text-zinc-500">
                   {plan.name} Plan includes
                 </p>
                 <ul className="space-y-1.5">
                   {plan.features.map((f) => (
-                    <li key={f} className="flex items-center gap-2 text-xs font-medium text-gray-700">
-                      <Check className="h-3.5 w-3.5 shrink-0 text-blue-500" />
+                    <li key={f} className="flex items-center gap-2 text-xs font-medium text-zinc-300">
+                      <Check className="h-3.5 w-3.5 shrink-0 text-blue-400" />
                       {f}
                     </li>
                   ))}
@@ -257,13 +254,13 @@ function SignupForm() {
 
               <button
                 type="submit"
-                className="flex w-full items-center justify-center rounded-xl bg-blue-600 py-3.5 text-sm font-bold text-white shadow-sm transition hover:bg-blue-700 active:scale-[0.99] md:col-span-2"
+                className="flex w-full items-center justify-center rounded-xl bg-blue-600 py-3.5 text-sm font-bold text-white transition-all hover:-translate-y-0.5 hover:bg-blue-500 hover:shadow-lg hover:shadow-blue-500/25 active:scale-[0.99] md:col-span-2"
               >
                 Continue to Payment →
               </button>
             </form>
 
-            <p className="mt-5 text-center text-xs text-gray-400">
+            <p className="mt-5 text-center text-xs text-zinc-500">
               🔒 Your information is secure and never shared
             </p>
           </div>
@@ -277,7 +274,7 @@ function SignupForm() {
 
 function inputCls(hasError: boolean) {
   return [
-    'w-full rounded-xl border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-900 outline-none transition placeholder:text-gray-400',
+    'w-full rounded-xl border border-zinc-700 bg-zinc-950 px-4 py-2.5 text-sm text-zinc-100 outline-none transition placeholder:text-zinc-500',
     hasError
       ? 'border-red-400 bg-red-50 focus:border-red-500 focus:ring-2 focus:ring-red-500/15'
       : 'focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10',
@@ -286,7 +283,7 @@ function inputCls(hasError: boolean) {
 
 function selectCls(hasError: boolean) {
   return [
-    'w-full appearance-none rounded-xl border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-900 outline-none transition',
+    'w-full appearance-none rounded-xl border border-zinc-700 bg-zinc-950 px-4 py-2.5 text-sm text-zinc-100 outline-none transition',
     hasError
       ? 'border-red-400 bg-red-50 focus:border-red-500 focus:ring-2 focus:ring-red-500/15'
       : 'focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10',
@@ -310,13 +307,13 @@ function Field({
 }) {
   return (
     <div className="flex flex-col gap-1.5">
-      <label htmlFor={htmlFor} className="flex items-center gap-1.5 text-sm font-semibold text-gray-700">
+      <label htmlFor={htmlFor} className="flex items-center gap-1.5 text-sm font-semibold text-zinc-300">
         {label}
         {required && <span className="text-red-500">*</span>}
-        {sublabel && <span className="font-normal text-gray-400">({sublabel})</span>}
+        {sublabel && <span className="font-normal text-zinc-500">({sublabel})</span>}
       </label>
       {children}
-      {error && <p className="text-xs font-medium text-red-500">{error}</p>}
+      {error && <p className="text-xs font-medium text-red-400">{error}</p>}
     </div>
   );
 }

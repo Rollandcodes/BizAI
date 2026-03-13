@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
 import Link from 'next/link';
@@ -188,7 +188,7 @@ function emptyPayload(): DashboardPayload {
 
 function getPlanBadgeClasses(plan: BusinessRecord['plan']) {
   const styles: Record<BusinessRecord['plan'], string> = {
-    trial: 'bg-gray-100 text-gray-700',
+    trial: 'bg-zinc-800 text-zinc-300',
     basic: 'bg-green-100 text-green-700',
     starter: 'bg-green-100 text-green-700',
     pro: 'bg-blue-100 text-blue-700',
@@ -260,14 +260,14 @@ function DashboardSkeleton() {
     <div className="space-y-6">
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         {Array.from({ length: 4 }).map((_, index) => (
-          <div key={index} className="rounded-3xl border border-gray-200 bg-white p-5 shadow-sm">
+          <div key={index} className="rounded-3xl border border-zinc-800 bg-zinc-900 p-5 shadow-sm">
             <SkeletonBlock className="h-5 w-24" />
             <SkeletonBlock className="mt-4 h-9 w-20" />
           </div>
         ))}
       </div>
       <div className="grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
-        <div className="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm">
+        <div className="rounded-3xl border border-zinc-800 bg-zinc-900 p-6 shadow-sm">
           <SkeletonBlock className="h-5 w-32" />
           <div className="mt-6 space-y-3">
             {Array.from({ length: 5 }).map((_, index) => (
@@ -275,7 +275,7 @@ function DashboardSkeleton() {
             ))}
           </div>
         </div>
-        <div className="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm">
+        <div className="rounded-3xl border border-zinc-800 bg-zinc-900 p-6 shadow-sm">
           <SkeletonBlock className="h-5 w-28" />
           <SkeletonBlock className="mt-6 h-40 w-full" />
         </div>
@@ -302,14 +302,14 @@ function AccessGate({
       className="flex min-h-screen items-center justify-center bg-[radial-gradient(circle_at_top,rgba(37,99,235,0.12),transparent_40%),#e2e8f0] px-4"
       data-testid="dashboard-access-gate"
     >
-      <div className="w-full max-w-md rounded-3xl border border-gray-200 bg-white p-8 shadow-[0_24px_80px_rgba(15,23,42,0.12)]">
+      <div className="w-full max-w-md rounded-3xl border border-zinc-800 bg-zinc-900 p-8 shadow-[0_24px_80px_rgba(15,23,42,0.12)]">
         <div className="mb-8 flex items-center gap-3">
-          <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-900 text-white">
+          <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-zinc-900 text-white">
             <Bot className="h-6 w-6" />
           </div>
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-blue-600">CypAI Dashboard</p>
-            <h1 className="text-2xl font-extrabold text-gray-900">Enter your business email to access dashboard</h1>
+            <h1 className="text-2xl font-extrabold text-white">Enter your business email to access dashboard</h1>
           </div>
         </div>
 
@@ -319,7 +319,7 @@ function AccessGate({
             value={email}
             onChange={(event) => onEmailChange(event.target.value)}
             placeholder="owner@business.com"
-            className="h-12 w-full rounded-2xl border border-gray-300 px-4 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
+            className="h-12 w-full rounded-2xl border border-zinc-700 px-4 text-sm text-white outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
             onKeyDown={(event) => {
               if (event.key === 'Enter') {
                 event.preventDefault();
@@ -331,7 +331,7 @@ function AccessGate({
             type="button"
             onClick={onSubmit}
             disabled={loading}
-            className="inline-flex h-12 w-full items-center justify-center rounded-2xl bg-slate-900 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
+            className="inline-flex h-12 w-full items-center justify-center rounded-2xl bg-zinc-900 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
           >
             {loading ? 'Checking account...' : 'Access Dashboard'}
           </button>
@@ -376,7 +376,7 @@ function UpgradeCheckoutButtons({
   const [{ isPending }] = usePayPalScriptReducer();
 
   if (isPending) {
-    return <div className="rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-600">Loading PayPal checkout...</div>;
+    return <div className="rounded-2xl border border-zinc-800 bg-zinc-950 px-4 py-3 text-sm text-zinc-400">Loading PayPal checkout...</div>;
   }
 
   return (
@@ -451,7 +451,7 @@ export default function DashboardPage() {
     customFaqs: [{ question: '', answer: '' }],
   });
 
-  // ── Audit Tab State ──────────────────────────────────────────────────────
+  // â”€â”€ Audit Tab State â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   type AuditFlaggedConv = {
     id: string;
     createdAt: string;
@@ -493,14 +493,14 @@ export default function DashboardPage() {
   const [reportData, setReportData] = useState<AuditReport | null>(null);
   const [markingReviewed, setMarkingReviewed] = useState<Set<string>>(new Set());
 
-  // ── QR Code state ────────────────────────────────────────────────────────
+  // â”€â”€ QR Code state â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const qrRef = useRef<HTMLDivElement>(null);
 
-  // ── Upgrade lock state ─────────────────────────────────────────────────
+  // â”€â”€ Upgrade lock state â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const [upgradeLockTab, setUpgradeLockTab] = useState<TabKey | null>(null);
   const [isTabletSidebarOpen, setIsTabletSidebarOpen] = useState(false);
 
-  // ── Broadcast state ──────────────────────────────────────────────────────
+  // â”€â”€ Broadcast state â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   type BroadcastLead = { id: string; name: string; phone: string };
   type BroadcastHistoryItem = {
     id: string;
@@ -516,17 +516,17 @@ export default function DashboardPage() {
   const [broadcastHistory, setBroadcastHistory] = useState<BroadcastHistoryItem[]>([]);
   const [broadcastHistoryLoading, setBroadcastHistoryLoading] = useState(false);
 
-  // ── Bookings Tab State ───────────────────────────────────────────────────
+  // â”€â”€ Bookings Tab State â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const [bookings, setBookings] = useState<BookingRecord[]>([]);
   const [bookingsLoading, setBookingsLoading] = useState(false);
   const [bookingsInitialized, setBookingsInitialized] = useState(false);
   const [updatingBookingIds, setUpdatingBookingIds] = useState<Set<string>>(new Set());
 
-  // ── Customer Satisfaction State ──────────────────────────────────────────
+  // â”€â”€ Customer Satisfaction State â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const [satisfactionData, setSatisfactionData] = useState<{
     avgRating: number;
     totalRatings: number;
-    distribution: number[]; // index 0 = rating 1 stars … index 4 = rating 5 stars
+    distribution: number[]; // index 0 = rating 1 stars â€¦ index 4 = rating 5 stars
   } | null>(null);
   const [satisfactionLoading, setSatisfactionLoading] = useState(false);
   const hasTrackedInitialTab = useRef(false);
@@ -736,7 +736,7 @@ export default function DashboardPage() {
     const svgData = svgEl ? new XMLSerializer().serializeToString(svgEl) : '';
     const win = window.open('', '_blank', 'width=480,height=600');
     if (!win) return;
-    win.document.write(`<!DOCTYPE html><html><head><title>QR Code – ${business.business_name}</title><style>
+    win.document.write(`<!DOCTYPE html><html><head><title>QR Code â€“ ${business.business_name}</title><style>
       body{margin:0;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;font-family:sans-serif;background:#fff;padding:32px;box-sizing:border-box}
       svg{width:200px;height:200px}
       h2{margin:16px 0 4px;font-size:18px;color:#0f172a}
@@ -824,7 +824,7 @@ export default function DashboardPage() {
       setBookings((prev) =>
         prev.map((b) => (b.id === id ? { ...b, status: 'confirmed' as const } : b))
       );
-      setToast({ message: 'Booking confirmed! Opening WhatsApp…', tone: 'success' });
+      setToast({ message: 'Booking confirmed! Opening WhatsAppâ€¦', tone: 'success' });
     } catch {
       setToast({ message: 'Failed to confirm booking.', tone: 'error' });
     } finally {
@@ -839,7 +839,7 @@ export default function DashboardPage() {
       setBookings((prev) =>
         prev.map((b) => (b.id === id ? { ...b, status: 'declined' as const } : b))
       );
-      setToast({ message: 'Booking declined. Opening WhatsApp…', tone: 'success' });
+      setToast({ message: 'Booking declined. Opening WhatsAppâ€¦', tone: 'success' });
     } catch {
       setToast({ message: 'Failed to decline booking.', tone: 'error' });
     } finally {
@@ -1010,7 +1010,7 @@ export default function DashboardPage() {
     }));
   }
 
-  // ── Audit handlers ───────────────────────────────────────────────────────
+  // â”€â”€ Audit handlers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   async function loadAuditSummary() {
     if (!business) return;
     setAuditLoading(true);
@@ -1102,16 +1102,16 @@ export default function DashboardPage() {
   }));
   const showOnboardingWizard = Boolean(business && business.onboarding_complete !== true && !onboardingDismissed);
   const mobileTabs: Array<{ id: TabKey; label: string; icon: string }> = [
-    { id: 'overview', label: 'Overview', icon: '📊' },
-    { id: 'conversations', label: 'Chats', icon: '💬' },
-    { id: 'crm', label: 'CRM', icon: '👥' },
-    { id: 'bookings', label: 'Book', icon: '📅' },
-    { id: 'settings', label: 'Settings', icon: '⚙️' },
+    { id: 'overview', label: 'Overview', icon: 'ðŸ“Š' },
+    { id: 'conversations', label: 'Chats', icon: 'ðŸ’¬' },
+    { id: 'crm', label: 'CRM', icon: 'ðŸ‘¥' },
+    { id: 'bookings', label: 'Book', icon: 'ðŸ“…' },
+    { id: 'settings', label: 'Settings', icon: 'âš™ï¸' },
   ];
 
   return (
     <div
-      className="min-h-screen bg-gray-50 text-[#0a0a0a] lg:flex"
+      className="min-h-screen bg-zinc-950 text-zinc-100 lg:flex"
       style={{ fontFamily: "-apple-system, BlinkMacSystemFont, 'Inter', sans-serif" }}
     >
       {toast ? <Toast toast={toast} /> : null}
@@ -1134,16 +1134,16 @@ export default function DashboardPage() {
             onClick={() => setIsTabletSidebarOpen(false)}
             aria-label="Close sidebar"
           />
-          <aside className="relative h-full w-72 border-r border-gray-200 bg-white text-[#0a0a0a] shadow-2xl">
+          <aside className="relative h-full w-72 border-r border-zinc-800 bg-zinc-900 text-zinc-100 shadow-2xl">
             <div className="flex h-20 items-center justify-between px-6 text-xl font-black tracking-tight">
               CypAI
               <button
                 type="button"
-                className="rounded-full p-2 text-gray-500 hover:bg-gray-100 hover:text-[#0a0a0a]"
+                className="rounded-full p-2 text-zinc-500 hover:bg-zinc-800 hover:text-zinc-100"
                 onClick={() => setIsTabletSidebarOpen(false)}
                 aria-label="Close menu"
               >
-                ✕
+                âœ•
               </button>
             </div>
             <nav className="space-y-1 overflow-y-auto px-4 py-4">
@@ -1169,8 +1169,8 @@ export default function DashboardPage() {
                       active
                         ? 'bg-black text-white'
                         : isLocked
-                          ? 'text-gray-400 hover:bg-gray-50'
-                          : 'text-gray-600 hover:bg-gray-100 hover:text-[#0a0a0a]'
+                          ? 'text-zinc-500 hover:bg-zinc-950'
+                          : 'text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100'
                     }`}
                   >
                     <Icon className="h-4 w-4" />
@@ -1183,7 +1183,7 @@ export default function DashboardPage() {
         </div>
       ) : null}
 
-      <aside className="hidden w-60 shrink-0 flex-col border-r border-gray-200 bg-white text-[#0a0a0a] lg:flex">
+      <aside className="hidden w-60 shrink-0 flex-col border-r border-zinc-800 bg-zinc-900 text-zinc-100 lg:flex">
         <div className="flex h-20 items-center px-6 text-xl font-black tracking-tight">CypAI</div>
 
         <nav className="flex-1 space-y-1 overflow-y-auto px-4 py-4">
@@ -1209,14 +1209,14 @@ export default function DashboardPage() {
                   active
                     ? 'bg-black text-white'
                     : isLocked
-                      ? 'text-gray-400 hover:bg-gray-50'
-                      : 'text-gray-600 hover:bg-gray-100 hover:text-[#0a0a0a]'
+                      ? 'text-zinc-500 hover:bg-zinc-950'
+                      : 'text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100'
                 }`}
               >
                 <span className="relative inline-flex">
                   <Icon className="h-4 w-4" />
                   {isLocked && (
-                    <span className="absolute -right-2 -top-2 text-[9px] leading-none">🔒</span>
+                    <span className="absolute -right-2 -top-2 text-[9px] leading-none">ðŸ”’</span>
                   )}
                   {!isLocked && key === 'bookings' && pendingBookingsCount > 0 && (
                     <span className="absolute -right-2 -top-2 flex h-4 min-w-[1rem] items-center justify-center rounded-full bg-red-500 px-1 text-[9px] font-bold leading-none text-white">
@@ -1230,14 +1230,14 @@ export default function DashboardPage() {
           })}
         </nav>
 
-        <div className="mx-4 h-px bg-gray-100" />
+        <div className="mx-4 h-px bg-zinc-800" />
 
         <div className="p-4">
-          <p className="mb-2 truncate px-4 text-xs font-medium text-gray-400">{business?.owner_email}</p>
+          <p className="mb-2 truncate px-4 text-xs font-medium text-zinc-500">{business?.owner_email}</p>
           <button
             type="button"
             onClick={handleLogout}
-            className="flex w-full items-center gap-3 rounded-full px-4 py-3 text-sm font-semibold text-gray-600 transition hover:bg-gray-100 hover:text-[#0a0a0a]"
+            className="flex w-full items-center gap-3 rounded-full px-4 py-3 text-sm font-semibold text-zinc-400 transition hover:bg-zinc-800 hover:text-zinc-100"
           >
             <LogOut className="h-4 w-4" />
             Logout
@@ -1246,38 +1246,38 @@ export default function DashboardPage() {
       </aside>
 
       <div className="flex min-h-screen flex-1 flex-col">
-        <header className="border-b border-gray-100 bg-white px-4 py-4 sm:px-6 lg:px-8">
+        <header className="border-b border-zinc-800 bg-zinc-900 px-4 py-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between gap-4">
             <div>
               <div className="flex items-center gap-3">
                 <button
                   type="button"
-                  className="hidden rounded-full border border-gray-200 px-3 py-1.5 text-sm font-semibold text-gray-700 transition hover:bg-gray-50 md:inline-flex lg:hidden"
+                  className="hidden rounded-full border border-zinc-800 px-3 py-1.5 text-sm font-semibold text-zinc-300 transition hover:bg-zinc-950 md:inline-flex lg:hidden"
                   onClick={() => setIsTabletSidebarOpen(true)}
                 >
                   Menu
                 </button>
-                <h1 className="text-3xl font-black leading-none tracking-tight text-[#0a0a0a]">
-                  Welcome back, {business?.business_name || 'CypAI'} 👋
+                <h1 className="text-3xl font-black leading-none tracking-tight text-zinc-100">
+                  Welcome back, {business?.business_name || 'CypAI'} ðŸ‘‹
                 </h1>
                 <span className={`hidden rounded-full px-3 py-1 text-xs font-semibold sm:inline-flex ${getPlanBadgeClasses(business.plan)}`}>
                   {currentPlanName}
                 </span>
                 {(business.plan === 'trial' || business.plan === 'starter' || business.plan === 'basic') ? (
-                  <Link href="/#pricing" className="hidden text-xs font-semibold uppercase tracking-wide text-gray-500 hover:text-[#0a0a0a] sm:inline-flex">
-                    Upgrade ↑
+                  <Link href="/#pricing" className="hidden text-xs font-semibold uppercase tracking-wide text-zinc-500 hover:text-zinc-100 sm:inline-flex">
+                    Upgrade â†‘
                   </Link>
                 ) : null}
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <span className="hidden rounded-full bg-gray-100 px-3 py-1.5 text-sm font-medium text-gray-600 sm:inline-flex">
+              <span className="hidden rounded-full bg-zinc-800 px-3 py-1.5 text-sm font-medium text-zinc-400 sm:inline-flex">
                 {business?.owner_email}
               </span>
               <button
                 type="button"
                 onClick={handleLogout}
-                className="inline-flex items-center gap-2 rounded-full border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-700 transition hover:bg-gray-50 lg:hidden"
+                className="inline-flex items-center gap-2 rounded-full border border-zinc-800 px-4 py-2 text-sm font-semibold text-zinc-300 transition hover:bg-zinc-950 lg:hidden"
               >
                 <LogOut className="h-4 w-4" />
                 Logout
@@ -1306,30 +1306,30 @@ export default function DashboardPage() {
                   </div>
 
                   {/* Customer Satisfaction */}
-                  <div className="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm">
+                  <div className="rounded-3xl border border-zinc-800 bg-zinc-900 p-6 shadow-sm">
                     <div className="flex items-center justify-between gap-4">
                       <div className="flex items-center gap-2">
                         <Star className="h-5 w-5 text-amber-400 fill-amber-400" />
-                        <h2 className="text-lg font-bold text-gray-900">Customer Satisfaction</h2>
+                        <h2 className="text-lg font-bold text-white">Customer Satisfaction</h2>
                       </div>
-                      <span className="text-sm text-gray-400">This month</span>
+                      <span className="text-sm text-zinc-500">This month</span>
                     </div>
 
                     {satisfactionLoading ? (
-                      <div className="mt-6 flex items-center gap-2 text-sm text-gray-400">
-                        <span className="h-4 w-4 animate-spin rounded-full border-2 border-gray-200 border-t-amber-400" />
-                        Loading ratings…
+                      <div className="mt-6 flex items-center gap-2 text-sm text-zinc-500">
+                        <span className="h-4 w-4 animate-spin rounded-full border-2 border-zinc-800 border-t-amber-400" />
+                        Loading ratingsâ€¦
                       </div>
                     ) : !satisfactionData ? (
-                      <div className="mt-6 rounded-2xl bg-gray-50 px-4 py-6 text-center text-sm text-gray-400">
+                      <div className="mt-6 rounded-2xl bg-zinc-950 px-4 py-6 text-center text-sm text-zinc-500">
                         No ratings yet this month. Ratings appear after customers complete the post-chat feedback poll.
                       </div>
                     ) : (
                       <div className="mt-5 grid gap-5 sm:grid-cols-[auto_1fr]">
                         {/* Score display */}
                         <div className="flex flex-col items-center justify-center gap-1 rounded-2xl bg-amber-50 px-6 py-4">
-                          <span className="text-5xl font-extrabold text-gray-900">{satisfactionData.avgRating}</span>
-                          <span className="text-sm font-medium text-gray-400">out of 5</span>
+                          <span className="text-5xl font-extrabold text-white">{satisfactionData.avgRating}</span>
+                          <span className="text-sm font-medium text-zinc-500">out of 5</span>
                           <div className="mt-1 flex gap-0.5">
                             {[1, 2, 3, 4, 5].map((star) => (
                               <Star
@@ -1338,7 +1338,7 @@ export default function DashboardPage() {
                               />
                             ))}
                           </div>
-                          <span className="mt-1 text-xs text-gray-400">
+                          <span className="mt-1 text-xs text-zinc-500">
                             Based on {satisfactionData.totalRatings} review{satisfactionData.totalRatings !== 1 ? 's' : ''}
                           </span>
                         </div>
@@ -1350,15 +1350,15 @@ export default function DashboardPage() {
                             const pct = satisfactionData.totalRatings > 0 ? (count / satisfactionData.totalRatings) * 100 : 0;
                             return (
                               <div key={r} className="flex items-center gap-2 text-sm">
-                                <span className="w-3 shrink-0 text-right text-gray-500">{r}</span>
+                                <span className="w-3 shrink-0 text-right text-zinc-500">{r}</span>
                                 <Star className="h-3.5 w-3.5 shrink-0 fill-amber-400 text-amber-400" />
-                                <div className="h-2 flex-1 overflow-hidden rounded-full bg-gray-100">
+                                <div className="h-2 flex-1 overflow-hidden rounded-full bg-zinc-800">
                                   <div
                                     className="h-full rounded-full bg-amber-400 transition-all duration-500"
                                     style={{ width: `${pct}%` }}
                                   />
                                 </div>
-                                <span className="w-5 shrink-0 text-right text-xs text-gray-400">{count}</span>
+                                <span className="w-5 shrink-0 text-right text-xs text-zinc-500">{count}</span>
                               </div>
                             );
                           })}
@@ -1368,11 +1368,11 @@ export default function DashboardPage() {
                   </div>
 
                   <div className="grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
-                    <div className="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm">
+                    <div className="rounded-3xl border border-zinc-800 bg-zinc-900 p-6 shadow-sm">
                       <div className="flex items-center justify-between gap-4">
                         <div>
-                          <h2 className="text-lg font-bold text-gray-900">Recent conversations</h2>
-                          <p className="mt-1 text-sm text-gray-500">Your latest 5 customer chats.</p>
+                          <h2 className="text-lg font-bold text-white">Recent conversations</h2>
+                          <p className="mt-1 text-sm text-zinc-500">Your latest 5 customer chats.</p>
                         </div>
                         <button
                           type="button"
@@ -1384,14 +1384,14 @@ export default function DashboardPage() {
                         </button>
                       </div>
 
-                      <div className="mt-6 overflow-hidden rounded-2xl border border-gray-200">
+                      <div className="mt-6 overflow-hidden rounded-2xl border border-zinc-800">
                         {conversations.length === 0 ? (
-                          <div className="px-6 py-10 text-center text-sm text-gray-500">
+                          <div className="px-6 py-10 text-center text-sm text-zinc-500">
                             No conversations yet. Your AI conversations will appear here once customers start chatting.
                           </div>
                         ) : (
                           <table className="min-w-full text-left text-sm">
-                            <thead className="bg-gray-50 text-gray-500">
+                            <thead className="bg-zinc-950 text-zinc-500">
                               <tr>
                                 <th className="px-4 py-3 font-semibold">Time</th>
                                 <th className="px-4 py-3 font-semibold">Preview</th>
@@ -1400,11 +1400,11 @@ export default function DashboardPage() {
                             </thead>
                             <tbody className="divide-y divide-slate-100">
                               {conversations.slice(0, 5).map((conversation) => (
-                                <tr key={conversation.id} className="bg-white">
-                                  <td className="px-4 py-3 text-gray-600">{formatDate(conversation.created_at)}</td>
-                                  <td className="px-4 py-3 text-gray-900">{getConversationPreview(conversation)}</td>
+                                <tr key={conversation.id} className="bg-zinc-900">
+                                  <td className="px-4 py-3 text-zinc-400">{formatDate(conversation.created_at)}</td>
+                                  <td className="px-4 py-3 text-white">{getConversationPreview(conversation)}</td>
                                   <td className="px-4 py-3">
-                                    <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${conversation.lead_captured ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-600'}`}>
+                                    <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${conversation.lead_captured ? 'bg-emerald-100 text-emerald-700' : 'bg-zinc-800 text-zinc-400'}`}>
                                       {conversation.lead_captured ? 'Yes' : 'No'}
                                     </span>
                                   </td>
@@ -1416,54 +1416,54 @@ export default function DashboardPage() {
                       </div>
                     </div>
 
-                    <div className="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm">
+                    <div className="rounded-3xl border border-zinc-800 bg-zinc-900 p-6 shadow-sm">
                       <div className="flex items-center justify-between gap-4">
                         <div>
-                          <h2 className="text-lg font-bold text-gray-900">Your Widget Code</h2>
-                          <p className="mt-1 text-sm text-gray-500">Copy this into your website before the closing body tag.</p>
+                          <h2 className="text-lg font-bold text-white">Your Widget Code</h2>
+                          <p className="mt-1 text-sm text-zinc-500">Copy this into your website before the closing body tag.</p>
                         </div>
                         <button
                           type="button"
                           onClick={() => {
                             void handleCopyWidgetCode();
                           }}
-                          className="inline-flex items-center gap-2 rounded-full border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-700 transition hover:bg-gray-50"
+                          className="inline-flex items-center gap-2 rounded-full border border-zinc-800 px-4 py-2 text-sm font-semibold text-zinc-300 transition hover:bg-zinc-950"
                         >
                           <Copy className="h-4 w-4" />
                           Copy
                         </button>
                       </div>
 
-                      <pre className="mt-6 overflow-x-auto rounded-2xl bg-gray-100 p-4 text-xs leading-6 text-gray-800">
+                      <pre className="mt-6 overflow-x-auto rounded-2xl bg-zinc-800 p-4 text-xs leading-6 text-zinc-200">
                         <code>{widgetCode}</code>
                       </pre>
                     </div>
                   </div>
 
                   {/* QR Code */}
-                  <div className="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm">
+                  <div className="rounded-3xl border border-zinc-800 bg-zinc-900 p-6 shadow-sm">
                     <div className="flex items-center gap-2">
                       <QrCode className="h-5 w-5 text-blue-600" />
-                      <h2 className="text-lg font-bold text-gray-900">Your Business QR Code</h2>
+                      <h2 className="text-lg font-bold text-white">Your Business QR Code</h2>
                     </div>
-                    <p className="mt-1 text-sm text-gray-500">
+                    <p className="mt-1 text-sm text-zinc-500">
                       Print this and place it on your desk, door, or receipts. Customers scan it to instantly chat with your AI.
                     </p>
 
                     <div className="mt-6 flex flex-col gap-6 sm:flex-row sm:items-start">
-                      <div ref={qrRef} className="flex shrink-0 flex-col items-center gap-3 rounded-2xl border-2 border-gray-200 bg-white p-5">
+                      <div ref={qrRef} className="flex shrink-0 flex-col items-center gap-3 rounded-2xl border-2 border-zinc-800 bg-zinc-900 p-5">
                         <QRCode
                           value={`https://cypai.app/chat/${business.id}`}
                           size={160}
                           fgColor="#0f172a"
                         />
-                        <p className="text-center text-xs font-semibold text-gray-600">{business.business_name}</p>
+                        <p className="text-center text-xs font-semibold text-zinc-400">{business.business_name}</p>
                       </div>
 
                       <div className="flex flex-col justify-center gap-3">
                         <div>
-                          <p className="font-semibold text-gray-900">{business.business_name}</p>
-                          <p className="text-sm text-gray-500">Scan to chat with our AI assistant</p>
+                          <p className="font-semibold text-white">{business.business_name}</p>
+                          <p className="text-sm text-zinc-500">Scan to chat with our AI assistant</p>
                         </div>
                         <div className="flex flex-col gap-2">
                           <button
@@ -1477,7 +1477,7 @@ export default function DashboardPage() {
                           <button
                             type="button"
                             onClick={handlePrintQR}
-                            className="inline-flex items-center justify-center gap-2 rounded-full border border-gray-200 px-5 py-2.5 text-sm font-semibold text-gray-700 transition hover:bg-gray-50"
+                            className="inline-flex items-center justify-center gap-2 rounded-full border border-zinc-800 px-5 py-2.5 text-sm font-semibold text-zinc-300 transition hover:bg-zinc-950"
                           >
                             <Printer className="h-4 w-4" />
                             Print QR Code
@@ -1487,7 +1487,7 @@ export default function DashboardPage() {
                     </div>
 
                     <div className="mt-5 rounded-2xl bg-blue-50 px-4 py-3 text-sm text-blue-700">
-                      💡 <strong>Tip:</strong> Print and laminate this QR code. Place it on your front desk, car windows, and receipts to get more leads.
+                      ðŸ’¡ <strong>Tip:</strong> Print and laminate this QR code. Place it on your front desk, car windows, and receipts to get more leads.
                     </div>
                   </div>
                 </section>
@@ -1496,14 +1496,14 @@ export default function DashboardPage() {
               {activeTab === 'conversations' ? (
                 <section className="grid gap-6 lg:grid-cols-[360px_minmax(0,1fr)]">
                   <div data-testid="dashboard-conversations-panel" />
-                  <div className="overflow-hidden rounded-3xl border border-gray-200 bg-white shadow-sm">
-                    <div className="border-b border-gray-200 px-5 py-4">
-                      <h2 className="text-lg font-bold text-gray-900">Conversations</h2>
-                      <p className="mt-1 text-sm text-gray-500">All customer conversations for this business.</p>
+                  <div className="overflow-hidden rounded-3xl border border-zinc-800 bg-zinc-900 shadow-sm">
+                    <div className="border-b border-zinc-800 px-5 py-4">
+                      <h2 className="text-lg font-bold text-white">Conversations</h2>
+                      <p className="mt-1 text-sm text-zinc-500">All customer conversations for this business.</p>
                     </div>
 
                     {conversations.length === 0 ? (
-                      <div className="px-5 py-10 text-sm text-gray-500">No conversations yet. Your AI inbox will populate automatically.</div>
+                      <div className="px-5 py-10 text-sm text-zinc-500">No conversations yet. Your AI inbox will populate automatically.</div>
                     ) : (
                       <div className="max-h-[70vh] overflow-y-auto">
                         {conversations.map((conversation) => (
@@ -1511,52 +1511,52 @@ export default function DashboardPage() {
                             key={conversation.id}
                             type="button"
                             onClick={() => setSelectedConversationId(conversation.id)}
-                            className={`w-full border-b border-gray-100 px-5 py-4 text-left transition last:border-b-0 hover:bg-gray-50 ${selectedConversationId === conversation.id ? 'bg-blue-50' : 'bg-white'}`}
+                            className={`w-full border-b border-zinc-800 px-5 py-4 text-left transition last:border-b-0 hover:bg-zinc-950 ${selectedConversationId === conversation.id ? 'bg-blue-50' : 'bg-zinc-900'}`}
                           >
                             <div className="flex items-center justify-between gap-2">
-                              <p className="truncate text-sm font-semibold text-gray-900">
+                              <p className="truncate text-sm font-semibold text-white">
                                 {conversation.customer_name || 'Unknown visitor'}
                               </p>
-                              <span className="text-xs text-gray-500">{formatDate(conversation.created_at)}</span>
+                              <span className="text-xs text-zinc-500">{formatDate(conversation.created_at)}</span>
                             </div>
-                            <p className="mt-1 truncate text-sm text-gray-600">{getConversationPreview(conversation)}</p>
+                            <p className="mt-1 truncate text-sm text-zinc-400">{getConversationPreview(conversation)}</p>
                           </button>
                         ))}
                       </div>
                     )}
                   </div>
 
-                  <div className="overflow-hidden rounded-3xl border border-gray-200 bg-white shadow-sm">
+                  <div className="overflow-hidden rounded-3xl border border-zinc-800 bg-zinc-900 shadow-sm">
                     {currentConversation ? (
                       <>
-                        <div className="border-b border-gray-200 px-6 py-4">
+                        <div className="border-b border-zinc-800 px-6 py-4">
                           <div className="flex items-center justify-between gap-4">
                             <div>
-                              <h3 className="text-lg font-bold text-gray-900">{currentConversation.customer_name || 'Unknown visitor'}</h3>
-                              <p className="mt-1 text-sm text-gray-500">{currentConversation.customer_phone || 'Phone not captured yet'}</p>
+                              <h3 className="text-lg font-bold text-white">{currentConversation.customer_name || 'Unknown visitor'}</h3>
+                              <p className="mt-1 text-sm text-zinc-500">{currentConversation.customer_phone || 'Phone not captured yet'}</p>
                             </div>
-                            <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${currentConversation.lead_captured ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-600'}`}>
+                            <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${currentConversation.lead_captured ? 'bg-emerald-100 text-emerald-700' : 'bg-zinc-800 text-zinc-400'}`}>
                               {currentConversation.lead_captured ? 'Lead captured' : 'No lead yet'}
                             </span>
                           </div>
                         </div>
 
-                        <div className="max-h-[70vh] space-y-4 overflow-y-auto bg-gray-50 p-6">
+                        <div className="max-h-[70vh] space-y-4 overflow-y-auto bg-zinc-950 p-6">
                           {(currentConversation.messages || []).length > 0 ? (
                             currentConversation.messages?.map((message, index) => (
                               <div key={`${currentConversation.id}-${index}`} className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                                <div className={`max-w-[75%] rounded-2xl px-4 py-3 text-sm leading-6 ${message.role === 'user' ? 'rounded-br-sm bg-blue-600 text-white' : 'rounded-bl-sm bg-white text-gray-700 shadow-sm'}`}>
+                                <div className={`max-w-[75%] rounded-2xl px-4 py-3 text-sm leading-6 ${message.role === 'user' ? 'rounded-br-sm bg-blue-600 text-white' : 'rounded-bl-sm bg-zinc-900 text-zinc-300 shadow-sm'}`}>
                                   {message.content}
                                 </div>
                               </div>
                             ))
                           ) : (
-                            <div className="text-sm text-gray-500">No messages stored for this conversation.</div>
+                            <div className="text-sm text-zinc-500">No messages stored for this conversation.</div>
                           )}
                         </div>
                       </>
                     ) : (
-                      <div className="flex h-full min-h-[300px] items-center justify-center text-sm text-gray-500">
+                      <div className="flex h-full min-h-[300px] items-center justify-center text-sm text-zinc-500">
                         Select a conversation to view the full transcript.
                       </div>
                     )}
@@ -1579,10 +1579,10 @@ export default function DashboardPage() {
                     </p>
                     <textarea
                       rows={3}
-                      placeholder="Type your message… e.g. 🚗 Weekend special! SUV 20% off this Friday–Sunday. Reply to book!"
+                      placeholder="Type your messageâ€¦ e.g. ðŸš— Weekend special! SUV 20% off this Fridayâ€“Sunday. Reply to book!"
                       value={broadcastMessage}
                       onChange={(e) => setBroadcastMessage(e.target.value)}
-                      className="mt-4 w-full resize-none rounded-2xl border border-white/30 bg-white p-3 text-sm text-white placeholder-green-200 outline-none focus:border-white/60 focus:ring-0"
+                      className="mt-4 w-full resize-none rounded-2xl border border-white/30 bg-zinc-900 p-3 text-sm text-white placeholder-green-200 outline-none focus:border-white/60 focus:ring-0"
                     />
                     <div className="mt-3 flex items-center justify-between gap-4">
                       <span className="text-sm text-green-100">
@@ -1592,18 +1592,18 @@ export default function DashboardPage() {
                         type="button"
                         onClick={() => void handleBroadcast()}
                         disabled={!broadcastMessage.trim() || broadcastSending}
-                        className="inline-flex items-center gap-2 rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-emerald-700 shadow transition hover:bg-green-50 disabled:opacity-50"
+                        className="inline-flex items-center gap-2 rounded-full bg-zinc-900 px-5 py-2.5 text-sm font-semibold text-emerald-700 shadow transition hover:bg-green-50 disabled:opacity-50"
                       >
                         <Send className="h-4 w-4" />
-                        {broadcastSending ? 'Preparing…' : 'Send Broadcast →'}
+                        {broadcastSending ? 'Preparingâ€¦' : 'Send Broadcast â†’'}
                       </button>
                     </div>
                   </div>
 
                   <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                     <div>
-                      <h2 className="text-2xl font-extrabold text-gray-900">Leads</h2>
-                      <p className="mt-1 text-sm text-gray-500">All customers captured by your AI assistant.</p>
+                      <h2 className="text-2xl font-extrabold text-white">Leads</h2>
+                      <p className="mt-1 text-sm text-zinc-500">All customers captured by your AI assistant.</p>
                     </div>
                     <button
                       type="button"
@@ -1611,22 +1611,22 @@ export default function DashboardPage() {
                         exportLeadsCsv(leads);
                         setToast({ message: 'Leads exported to CSV.', tone: 'success' });
                       }}
-                      className="inline-flex items-center justify-center gap-2 rounded-full border border-gray-200 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 transition hover:bg-gray-50"
+                      className="inline-flex items-center justify-center gap-2 rounded-full border border-zinc-800 bg-zinc-900 px-4 py-2.5 text-sm font-semibold text-zinc-300 transition hover:bg-zinc-950"
                     >
                       <Download className="h-4 w-4" />
                       Export CSV
                     </button>
                   </div>
 
-                  <div className="overflow-hidden rounded-3xl border border-gray-200 bg-white shadow-sm">
+                  <div className="overflow-hidden rounded-3xl border border-zinc-800 bg-zinc-900 shadow-sm">
                     {leads.length === 0 ? (
-                      <div className="px-6 py-16 text-center text-sm text-gray-500">
+                      <div className="px-6 py-16 text-center text-sm text-zinc-500">
                         No leads yet. Your AI will capture leads automatically when customers chat.
                       </div>
                     ) : (
                       <div className="overflow-x-auto">
                         <table className="min-w-full text-left text-sm">
-                          <thead className="bg-gray-50 text-gray-500">
+                          <thead className="bg-zinc-950 text-zinc-500">
                             <tr>
                               <th className="px-4 py-3 font-semibold">Date</th>
                               <th className="px-4 py-3 font-semibold">Customer Name</th>
@@ -1637,13 +1637,13 @@ export default function DashboardPage() {
                           </thead>
                           <tbody className="divide-y divide-slate-100">
                             {leads.map((lead) => (
-                              <tr key={lead.id} className="bg-white">
-                                <td className="px-4 py-3 text-gray-600">{formatDate(lead.created_at)}</td>
-                                <td className="px-4 py-3 font-semibold text-gray-900">{lead.customer_name || 'Unknown'}</td>
-                                <td className="px-4 py-3 text-gray-600">{lead.customer_phone || '-'}</td>
-                                <td className="max-w-sm px-4 py-3 text-gray-600">{getConversationPreview(lead)}</td>
+                              <tr key={lead.id} className="bg-zinc-900">
+                                <td className="px-4 py-3 text-zinc-400">{formatDate(lead.created_at)}</td>
+                                <td className="px-4 py-3 font-semibold text-white">{lead.customer_name || 'Unknown'}</td>
+                                <td className="px-4 py-3 text-zinc-400">{lead.customer_phone || '-'}</td>
+                                <td className="max-w-sm px-4 py-3 text-zinc-400">{getConversationPreview(lead)}</td>
                                 <td className="px-4 py-3">
-                                  <label className="inline-flex items-center gap-2 text-sm font-medium text-gray-700">
+                                  <label className="inline-flex items-center gap-2 text-sm font-medium text-zinc-300">
                                     <input
                                       type="checkbox"
                                       checked={Boolean(lead.lead_contacted)}
@@ -1651,7 +1651,7 @@ export default function DashboardPage() {
                                       onChange={(event) => {
                                         void handleLeadContacted(lead.id, event.target.checked);
                                       }}
-                                      className="h-4 w-4 rounded border-gray-300 accent-blue-600"
+                                      className="h-4 w-4 rounded border-zinc-700 accent-blue-600"
                                       data-testid={`lead-contacted-${lead.id}`}
                                     />
                                     Mark Contacted
@@ -1666,24 +1666,24 @@ export default function DashboardPage() {
                   </div>
 
                   {/* Broadcast History */}
-                  <div className="overflow-hidden rounded-3xl border border-gray-200 bg-white shadow-sm">
-                    <div className="border-b border-gray-100 px-6 py-4">
-                      <h3 className="font-bold text-gray-900">Broadcast History</h3>
-                      <p className="mt-0.5 text-sm text-gray-500">Last 5 broadcasts sent to your leads.</p>
+                  <div className="overflow-hidden rounded-3xl border border-zinc-800 bg-zinc-900 shadow-sm">
+                    <div className="border-b border-zinc-800 px-6 py-4">
+                      <h3 className="font-bold text-white">Broadcast History</h3>
+                      <p className="mt-0.5 text-sm text-zinc-500">Last 5 broadcasts sent to your leads.</p>
                     </div>
                     {broadcastHistoryLoading ? (
                       <div className="flex h-24 items-center justify-center">
                         <div className="h-6 w-6 animate-spin rounded-full border-4 border-blue-600 border-t-transparent" />
                       </div>
                     ) : broadcastHistory.length === 0 ? (
-                      <div className="px-6 py-8 text-center text-sm text-gray-500">No broadcasts sent yet.</div>
+                      <div className="px-6 py-8 text-center text-sm text-zinc-500">No broadcasts sent yet.</div>
                     ) : (
                       <div className="divide-y divide-slate-100">
                         {broadcastHistory.map((item) => (
                           <div key={item.id} className="flex items-start justify-between gap-4 px-6 py-4">
                             <div className="min-w-0 flex-1">
-                              <p className="truncate text-sm text-gray-800">{item.message}</p>
-                              <p className="mt-1 text-xs text-gray-400">{formatDate(item.created_at)}</p>
+                              <p className="truncate text-sm text-zinc-200">{item.message}</p>
+                              <p className="mt-1 text-xs text-zinc-500">{formatDate(item.created_at)}</p>
                             </div>
                             <span className="shrink-0 rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-semibold text-emerald-700">
                               {item.sent_to_count} lead{item.sent_to_count !== 1 ? 's' : ''}
@@ -1697,31 +1697,31 @@ export default function DashboardPage() {
                   {/* Broadcast Modal */}
                   {broadcastModal ? (
                     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-                      <div className="relative w-full max-w-lg rounded-3xl bg-white p-6 shadow-2xl">
+                      <div className="relative w-full max-w-lg rounded-3xl bg-zinc-900 p-6 shadow-2xl">
                         <button
                           type="button"
                           aria-label="Close"
                           onClick={() => { setBroadcastModal(null); setBroadcastMessage(''); }}
-                          className="absolute right-4 top-4 rounded-full p-2 text-gray-400 hover:bg-gray-100"
+                          className="absolute right-4 top-4 rounded-full p-2 text-zinc-500 hover:bg-zinc-800"
                         >
                           <X className="h-5 w-5" />
                         </button>
-                        <h3 className="flex items-center gap-2 text-lg font-bold text-gray-900">
+                        <h3 className="flex items-center gap-2 text-lg font-bold text-white">
                           <MessageSquare className="h-5 w-5 text-emerald-600" />
                           Send Broadcast via WhatsApp
                         </h3>
-                        <p className="mt-1 text-sm text-gray-500">
+                        <p className="mt-1 text-sm text-zinc-500">
                           Click each button to open WhatsApp and send your message. Counter updates as you go.
                         </p>
 
-                        <div className="mt-4 rounded-2xl bg-gray-50 px-4 py-3 text-sm text-gray-700">
+                        <div className="mt-4 rounded-2xl bg-zinc-950 px-4 py-3 text-sm text-zinc-300">
                           <span className="font-semibold">Message:</span> {broadcastMessage}
                         </div>
 
                         <div className="mt-3 flex items-center justify-between text-sm font-semibold">
-                          <span className="text-gray-600">Sent: {broadcastSentCount}/{broadcastModal.length}</span>
+                          <span className="text-zinc-400">Sent: {broadcastSentCount}/{broadcastModal.length}</span>
                           {broadcastSentCount === broadcastModal.length && broadcastModal.length > 0 && (
-                            <span className="text-emerald-600">✅ Broadcast complete!</span>
+                            <span className="text-emerald-600">âœ… Broadcast complete!</span>
                           )}
                         </div>
 
@@ -1739,14 +1739,14 @@ export default function DashboardPage() {
                                 className={`flex items-center justify-between rounded-2xl border px-4 py-3 text-sm font-semibold transition ${
                                   sent
                                     ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
-                                    : 'border-gray-200 bg-white text-gray-800 hover:border-green-300 hover:bg-green-50'
+                                    : 'border-zinc-800 bg-zinc-900 text-zinc-200 hover:border-green-300 hover:bg-green-50'
                                 }`}
                               >
-                                <span>{lead.name} · {lead.phone}</span>
+                                <span>{lead.name} Â· {lead.phone}</span>
                                 {sent ? (
                                   <Check className="h-4 w-4 text-emerald-600" />
                                 ) : (
-                                  <span className="text-[#25D366]">Open WhatsApp →</span>
+                                  <span className="text-[#25D366]">Open WhatsApp â†’</span>
                                 )}
                               </a>
                             );
@@ -1756,7 +1756,7 @@ export default function DashboardPage() {
                         <button
                           type="button"
                           onClick={() => { setBroadcastModal(null); setBroadcastMessage(''); }}
-                          className="mt-5 w-full rounded-full border border-gray-200 py-2.5 text-sm font-semibold text-gray-600 transition hover:bg-gray-50"
+                          className="mt-5 w-full rounded-full border border-zinc-800 py-2.5 text-sm font-semibold text-zinc-400 transition hover:bg-zinc-950"
                         >
                           Close
                         </button>
@@ -1776,16 +1776,16 @@ export default function DashboardPage() {
               {activeTab === 'settings' ? (
                 <section className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_380px]">
                   <div data-testid="dashboard-settings-panel" />
-                  <form onSubmit={handleSaveSettings} className="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm">
+                  <form onSubmit={handleSaveSettings} className="rounded-3xl border border-zinc-800 bg-zinc-900 p-6 shadow-sm">
                     <div className="flex items-start justify-between gap-4">
                       <div>
-                        <h2 className="text-2xl font-extrabold text-gray-900">Settings</h2>
-                        <p className="mt-1 text-sm text-gray-500">Update your business profile, AI behavior, and chat widget appearance.</p>
+                        <h2 className="text-2xl font-extrabold text-white">Settings</h2>
+                        <p className="mt-1 text-sm text-zinc-500">Update your business profile, AI behavior, and chat widget appearance.</p>
                       </div>
                       <button
                         type="submit"
                         disabled={saveLoading}
-                        className="inline-flex items-center justify-center rounded-full bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
+                        className="inline-flex items-center justify-center rounded-full bg-zinc-900 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
                       >
                         {saveLoading ? 'Saving...' : 'Save'}
                       </button>
@@ -1793,22 +1793,22 @@ export default function DashboardPage() {
 
                     <div className="mt-6 grid gap-5 md:grid-cols-2">
                       <div>
-                        <label htmlFor="business-name" className="mb-2 block text-sm font-semibold text-gray-700">Business Name</label>
+                        <label htmlFor="business-name" className="mb-2 block text-sm font-semibold text-zinc-300">Business Name</label>
                         <input
                           id="business-name"
                           value={settingsForm.businessName}
                           onChange={(event) => setSettingsForm((current) => ({ ...current, businessName: event.target.value }))}
-                          className="h-12 w-full rounded-2xl border border-gray-300 px-4 text-sm outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
+                          className="h-12 w-full rounded-2xl border border-zinc-700 px-4 text-sm outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
                         />
                       </div>
 
                       <div>
-                        <label htmlFor="business-type" className="mb-2 block text-sm font-semibold text-gray-700">Business Type</label>
+                        <label htmlFor="business-type" className="mb-2 block text-sm font-semibold text-zinc-300">Business Type</label>
                         <select
                           id="business-type"
                           value={settingsForm.businessType}
                           onChange={(event) => setSettingsForm((current) => ({ ...current, businessType: event.target.value }))}
-                          className="h-12 w-full rounded-2xl border border-gray-300 px-4 text-sm outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
+                          className="h-12 w-full rounded-2xl border border-zinc-700 px-4 text-sm outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
                         >
                           {businessTypeOptions.map((option) => (
                             <option key={option.value} value={option.value}>
@@ -1820,8 +1820,8 @@ export default function DashboardPage() {
                     </div>
 
                     <div className="mt-5">
-                      <label htmlFor="primary-color" className="mb-2 block text-sm font-semibold text-gray-700">Primary Color</label>
-                      <div className="flex items-center gap-3 rounded-2xl border border-gray-300 px-4 py-3">
+                      <label htmlFor="primary-color" className="mb-2 block text-sm font-semibold text-zinc-300">Primary Color</label>
+                      <div className="flex items-center gap-3 rounded-2xl border border-zinc-700 px-4 py-3">
                         <input
                           id="primary-color"
                           type="color"
@@ -1829,33 +1829,33 @@ export default function DashboardPage() {
                           onChange={(event) => setSettingsForm((current) => ({ ...current, primaryColor: event.target.value }))}
                           className="h-10 w-14 cursor-pointer rounded-xl border-0 bg-transparent p-0"
                         />
-                        <span className="h-8 w-8 rounded-full border border-gray-200" style={{ backgroundColor: settingsForm.primaryColor }} />
-                        <span className="text-sm font-medium text-gray-700">{settingsForm.primaryColor}</span>
+                        <span className="h-8 w-8 rounded-full border border-zinc-800" style={{ backgroundColor: settingsForm.primaryColor }} />
+                        <span className="text-sm font-medium text-zinc-300">{settingsForm.primaryColor}</span>
                       </div>
                     </div>
 
                     <div className="mt-5">
-                      <label htmlFor="ai-instructions" className="mb-2 block text-sm font-semibold text-gray-700">AI Instructions</label>
+                      <label htmlFor="ai-instructions" className="mb-2 block text-sm font-semibold text-zinc-300">AI Instructions</label>
                       <textarea
                         id="ai-instructions"
                         rows={6}
                         value={settingsForm.aiInstructions}
                         onChange={(event) => setSettingsForm((current) => ({ ...current, aiInstructions: event.target.value }))}
                         placeholder="Add specific info about your business..."
-                        className="w-full rounded-2xl border border-gray-300 px-4 py-3 text-sm outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
+                        className="w-full rounded-2xl border border-zinc-700 px-4 py-3 text-sm outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
                       />
                     </div>
 
                     <div className="mt-5">
                       <div className="mb-3 flex items-center justify-between gap-4">
                         <div>
-                          <h3 className="text-sm font-semibold text-gray-900">Custom FAQs</h3>
-                          <p className="text-sm text-gray-500">Add question and answer pairs to guide your AI responses.</p>
+                          <h3 className="text-sm font-semibold text-white">Custom FAQs</h3>
+                          <p className="text-sm text-zinc-500">Add question and answer pairs to guide your AI responses.</p>
                         </div>
                         <button
                           type="button"
                           onClick={addFaq}
-                          className="inline-flex items-center gap-2 rounded-full border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-700 transition hover:bg-gray-50"
+                          className="inline-flex items-center gap-2 rounded-full border border-zinc-800 px-4 py-2 text-sm font-semibold text-zinc-300 transition hover:bg-zinc-950"
                         >
                           <Plus className="h-4 w-4" />
                           Add FAQ
@@ -1864,13 +1864,13 @@ export default function DashboardPage() {
 
                       <div className="space-y-4">
                         {settingsForm.customFaqs.map((faq, index) => (
-                          <div key={`${index}-${faq.question}`} className="rounded-2xl border border-gray-200 p-4">
+                          <div key={`${index}-${faq.question}`} className="rounded-2xl border border-zinc-800 p-4">
                             <div className="mb-3 flex items-center justify-between gap-3">
-                              <p className="text-sm font-semibold text-gray-900">FAQ {index + 1}</p>
+                              <p className="text-sm font-semibold text-white">FAQ {index + 1}</p>
                               <button
                                 type="button"
                                 onClick={() => removeFaq(index)}
-                                className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-gray-200 text-gray-500 transition hover:bg-gray-50"
+                                className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-zinc-800 text-zinc-500 transition hover:bg-zinc-950"
                                 aria-label={`Remove FAQ ${index + 1}`}
                               >
                                 <X className="h-4 w-4" />
@@ -1881,14 +1881,14 @@ export default function DashboardPage() {
                                 value={faq.question}
                                 onChange={(event) => updateFaq(index, 'question', event.target.value)}
                                 placeholder="Question"
-                                className="h-11 rounded-2xl border border-gray-300 px-4 text-sm outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
+                                className="h-11 rounded-2xl border border-zinc-700 px-4 text-sm outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
                               />
                               <textarea
                                 rows={3}
                                 value={faq.answer}
                                 onChange={(event) => updateFaq(index, 'answer', event.target.value)}
                                 placeholder="Answer"
-                                className="rounded-2xl border border-gray-300 px-4 py-3 text-sm outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
+                                className="rounded-2xl border border-zinc-700 px-4 py-3 text-sm outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
                               />
                             </div>
                           </div>
@@ -1898,10 +1898,10 @@ export default function DashboardPage() {
                   </form>
 
                   <div data-testid="dashboard-subscription-panel" />
-                  <div className="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm">
-                    <h3 className="text-lg font-bold text-gray-900">Live widget preview</h3>
-                    <p className="mt-1 text-sm text-gray-500">Preview how your chat bubble and welcome message will look.</p>
-                    <div className="mt-5 h-[560px] overflow-hidden rounded-3xl border border-gray-200 bg-gray-50">
+                  <div className="rounded-3xl border border-zinc-800 bg-zinc-900 p-6 shadow-sm">
+                    <h3 className="text-lg font-bold text-white">Live widget preview</h3>
+                    <p className="mt-1 text-sm text-zinc-500">Preview how your chat bubble and welcome message will look.</p>
+                    <div className="mt-5 h-[560px] overflow-hidden rounded-3xl border border-zinc-800 bg-zinc-950">
                       <ChatWidget
                         businessId={business.id}
                         businessName={settingsForm.businessName || business.business_name}
@@ -1921,13 +1921,13 @@ export default function DashboardPage() {
                     {/* Trial banner */}
                     {business.plan === 'trial' ? (
                       <div className="mb-6 rounded-2xl border border-amber-200 bg-amber-50 px-5 py-4 text-sm font-medium text-amber-900">
-                        ⚠️ You&apos;re on a free trial. Choose a plan below to continue after 7 days.
+                        âš ï¸ You&apos;re on a free trial. Choose a plan below to continue after 7 days.
                       </div>
                     ) : null}
 
                     <div className="text-center mb-10">
-                      <h2 className="text-2xl font-bold text-gray-900">Choose Your Plan</h2>
-                      <p className="text-gray-500 mt-2">Upgrade or downgrade anytime. 7-day free trial on all plans.</p>
+                      <h2 className="text-2xl font-bold text-white">Choose Your Plan</h2>
+                      <p className="text-zinc-500 mt-2">Upgrade or downgrade anytime. 7-day free trial on all plans.</p>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch">
@@ -1969,7 +1969,7 @@ export default function DashboardPage() {
                           ],
                           cta: 'Upgrade to Pro',
                           popular: true,
-                          hint: '💡 Most businesses start here',
+                          hint: 'ðŸ’¡ Most businesses start here',
                         },
                         {
                           id: 'business' as const,
@@ -1990,7 +1990,7 @@ export default function DashboardPage() {
                           ],
                           cta: 'Upgrade to Business',
                           popular: false,
-                          hint: '🏆 Best for established businesses',
+                          hint: 'ðŸ† Best for established businesses',
                         },
                       ] as Array<{
                         id: 'starter' | 'pro' | 'business';
@@ -2006,10 +2006,10 @@ export default function DashboardPage() {
                         return (
                           <div
                             key={plan.id}
-                            className={`relative flex flex-col h-full rounded-2xl p-6 bg-white ${
+                            className={`relative flex flex-col h-full rounded-2xl p-6 bg-zinc-900 ${
                               plan.popular
                                 ? 'border-2 border-blue-600 shadow-[0_0_0_1px_rgba(37,99,235,0.1)]'
-                                : 'border border-gray-200'
+                                : 'border border-zinc-800'
                             }`}
                           >
                             {/* Most Popular badge */}
@@ -2026,22 +2026,22 @@ export default function DashboardPage() {
                               </span>
                             ) : null}
 
-                            <h3 className="text-xl font-bold text-gray-900">{plan.name}</h3>
-                            <p className="mt-1 text-sm text-gray-500">{plan.description}</p>
+                            <h3 className="text-xl font-bold text-white">{plan.name}</h3>
+                            <p className="mt-1 text-sm text-zinc-500">{plan.description}</p>
 
                             <p className="mt-4">
-                              <span className="text-4xl font-bold text-gray-900">${plan.price}</span>
-                              <span className="text-lg text-gray-500">/mo</span>
+                              <span className="text-4xl font-bold text-white">${plan.price}</span>
+                              <span className="text-lg text-zinc-500">/mo</span>
                             </p>
 
                             {plan.hint ? (
                               <p className="mt-1 text-sm text-blue-600 font-medium">{plan.hint}</p>
                             ) : null}
 
-                            <ul className="flex-1 mt-4 space-y-2 text-sm text-gray-700">
+                            <ul className="flex-1 mt-4 space-y-2 text-sm text-zinc-300">
                               {plan.features.map((feature) => (
                                 <li key={feature} className="flex items-start gap-2">
-                                  <span className="text-green-500 font-bold mt-0.5">✓</span>
+                                  <span className="text-green-500 font-bold mt-0.5">âœ“</span>
                                   {feature}
                                 </li>
                               ))}
@@ -2055,20 +2055,20 @@ export default function DashboardPage() {
                               }}
                               className={`mt-6 w-full py-3 px-6 rounded-xl font-semibold text-sm transition-all duration-200 ${
                                 isCurrent
-                                  ? 'border border-gray-200 text-gray-400 cursor-not-allowed'
+                                  ? 'border border-zinc-800 text-zinc-500 cursor-not-allowed'
                                   : plan.popular
                                     ? 'bg-blue-600 text-white hover:bg-blue-700'
-                                    : 'border border-gray-300 text-gray-700 hover:bg-gray-50'
+                                    : 'border border-zinc-700 text-zinc-300 hover:bg-zinc-950'
                               }`}
                             >
-                              {isCurrent ? '✓ Your current plan' : plan.cta}
+                              {isCurrent ? 'âœ“ Your current plan' : plan.cta}
                             </button>
                           </div>
                         );
                       })}
                     </div>
 
-                    <p className="text-center text-sm text-gray-400 mt-8">
+                    <p className="text-center text-sm text-zinc-500 mt-8">
                       All plans include a 7-day free trial. Cancel anytime. Payments via PayPal.
                     </p>
                   </div>
@@ -2080,8 +2080,8 @@ export default function DashboardPage() {
                   {business.plan !== 'business' ? (
                     <div className="rounded-3xl border-2 border-dashed border-purple-200 bg-purple-50 p-10 text-center">
                       <ShieldCheck className="mx-auto mb-4 h-12 w-12 text-purple-400" />
-                      <h3 className="text-xl font-extrabold text-gray-900">Agent Audit</h3>
-                      <p className="mx-auto mt-2 max-w-sm text-sm text-gray-600">
+                      <h3 className="text-xl font-extrabold text-white">Agent Audit</h3>
+                      <p className="mx-auto mt-2 max-w-sm text-sm text-zinc-400">
                         AI-powered compliance monitoring is a Business plan exclusive. Monitor safety scores, flag risky conversations, and generate compliance reports.
                       </p>
                       <button
@@ -2090,7 +2090,7 @@ export default function DashboardPage() {
                         className="mt-6 inline-flex items-center gap-2 rounded-full bg-purple-600 px-6 py-3 text-sm font-semibold text-white shadow hover:bg-purple-700"
                       >
                         <CreditCard className="h-4 w-4" />
-                        Upgrade to Business — $149/mo
+                        Upgrade to Business â€” $149/mo
                       </button>
                     </div>
                   ) : auditLoading ? (
@@ -2128,10 +2128,10 @@ export default function DashboardPage() {
                         <div>
                           <p className="font-bold">
                             {auditSummary?.complianceStatus === 'good'
-                              ? 'All Clear — No critical issues detected this week'
+                              ? 'All Clear â€” No critical issues detected this week'
                               : auditSummary?.complianceStatus === 'warning'
-                                ? 'Attention — Some conversations need review'
-                                : 'Critical — Immediate action required'}
+                                ? 'Attention â€” Some conversations need review'
+                                : 'Critical â€” Immediate action required'}
                           </p>
                           <p className="mt-0.5 text-sm opacity-80">
                             {auditSummary?.weeklyStats.totalConversations ?? 0} conversation{(auditSummary?.weeklyStats.totalConversations ?? 0) !== 1 ? 's' : ''} analysed this week
@@ -2179,8 +2179,8 @@ export default function DashboardPage() {
                       </div>
 
                       {/* Safety Score Trend */}
-                      <div className="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm">
-                        <h3 className="mb-4 text-base font-bold text-gray-900">Safety Score Trend (7 days)</h3>
+                      <div className="rounded-3xl border border-zinc-800 bg-zinc-900 p-6 shadow-sm">
+                        <h3 className="mb-4 text-base font-bold text-white">Safety Score Trend (7 days)</h3>
                         <ResponsiveContainer width="100%" height={200}>
                           <LineChart data={chartData} margin={{ top: 4, right: 8, bottom: 4, left: 0 }}>
                             <XAxis dataKey="day" tick={{ fontSize: 11 }} />
@@ -2196,16 +2196,16 @@ export default function DashboardPage() {
                             />
                           </LineChart>
                         </ResponsiveContainer>
-                        <p className="mt-2 text-center text-xs text-gray-500">
-                          {chartTrend === 'improving' ? '↑ Improving trend' : chartTrend === 'declining' ? '↓ Declining trend' : '→ Stable'}
+                        <p className="mt-2 text-center text-xs text-zinc-500">
+                          {chartTrend === 'improving' ? 'â†‘ Improving trend' : chartTrend === 'declining' ? 'â†“ Declining trend' : 'â†’ Stable'}
                         </p>
                       </div>
 
                       {/* Flagged Conversations */}
                       {(auditSummary?.flaggedConversations.length ?? 0) > 0 && (
-                        <div className="overflow-hidden rounded-3xl border border-gray-200 bg-white shadow-sm">
+                        <div className="overflow-hidden rounded-3xl border border-zinc-800 bg-zinc-900 shadow-sm">
                           <div className="flex items-center justify-between px-6 py-5">
-                            <h3 className="flex items-center gap-2 text-base font-bold text-gray-900">
+                            <h3 className="flex items-center gap-2 text-base font-bold text-white">
                               <Flag className="h-4 w-4 text-red-500" />
                               Flagged Conversations
                             </h3>
@@ -2217,8 +2217,8 @@ export default function DashboardPage() {
                             {auditSummary?.flaggedConversations.map((conv) => (
                               <div key={conv.id} className="flex flex-col gap-2 px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
                                 <div className="min-w-0 flex-1">
-                                  <p className="truncate text-sm text-gray-700">{conv.firstMessage.slice(0, 70)}{conv.firstMessage.length > 70 ? '…' : ''}</p>
-                                  <p className="mt-1 text-xs text-gray-400">{formatDate(conv.createdAt)} · {conv.flagReason}</p>
+                                  <p className="truncate text-sm text-zinc-300">{conv.firstMessage.slice(0, 70)}{conv.firstMessage.length > 70 ? 'â€¦' : ''}</p>
+                                  <p className="mt-1 text-xs text-zinc-500">{formatDate(conv.createdAt)} Â· {conv.flagReason}</p>
                                 </div>
                                 <div className="flex shrink-0 items-center gap-2">
                                   {conv.safetyScore !== null && (
@@ -2235,7 +2235,7 @@ export default function DashboardPage() {
                                     </span>
                                   )}
                                   {conv.reviewed ? (
-                                    <span className="rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-semibold text-gray-500">Reviewed</span>
+                                    <span className="rounded-full bg-zinc-800 px-2.5 py-0.5 text-xs font-semibold text-zinc-500">Reviewed</span>
                                   ) : (
                                     <button
                                       type="button"
@@ -2255,11 +2255,11 @@ export default function DashboardPage() {
 
                       {/* Top Issues */}
                       {(auditSummary?.topIssues.length ?? 0) > 0 && (
-                        <div className="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm">
-                          <h3 className="mb-4 text-base font-bold text-gray-900">Top Issues This Week</h3>
+                        <div className="rounded-3xl border border-zinc-800 bg-zinc-900 p-6 shadow-sm">
+                          <h3 className="mb-4 text-base font-bold text-white">Top Issues This Week</h3>
                           <ul className="space-y-2">
                             {auditSummary?.topIssues.map((issue, idx) => (
-                              <li key={idx} className="flex items-start gap-2 text-sm text-gray-700">
+                              <li key={idx} className="flex items-start gap-2 text-sm text-zinc-300">
                                 <Flag className="mt-0.5 h-4 w-4 shrink-0 text-amber-500" />
                                 {issue}
                               </li>
@@ -2269,14 +2269,14 @@ export default function DashboardPage() {
                       )}
 
                       {/* Generate Compliance Report */}
-                      <div className="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm">
+                      <div className="rounded-3xl border border-zinc-800 bg-zinc-900 p-6 shadow-sm">
                         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                           <div>
-                            <h3 className="flex items-center gap-2 text-base font-bold text-gray-900">
+                            <h3 className="flex items-center gap-2 text-base font-bold text-white">
                               <FileText className="h-5 w-5 text-blue-500" />
                               Compliance Report
                             </h3>
-                            <p className="mt-1 text-sm text-gray-500">Generate an AI-powered 30-day compliance summary for your records.</p>
+                            <p className="mt-1 text-sm text-zinc-500">Generate an AI-powered 30-day compliance summary for your records.</p>
                           </div>
                           <button
                             type="button"
@@ -2289,16 +2289,16 @@ export default function DashboardPage() {
                             ) : (
                               <FileText className="h-4 w-4" />
                             )}
-                            {reportLoading ? 'Generating…' : 'Generate Report'}
+                            {reportLoading ? 'Generatingâ€¦' : 'Generate Report'}
                           </button>
                         </div>
                         {reportData && (
                           <div className="mt-6 space-y-4">
-                            <div className="rounded-2xl bg-gray-50 p-5">
-                              <p className="text-xs font-semibold uppercase tracking-widest text-gray-400">
-                                {reportData.periodStart} – {reportData.periodEnd}
+                            <div className="rounded-2xl bg-zinc-950 p-5">
+                              <p className="text-xs font-semibold uppercase tracking-widest text-zinc-500">
+                                {reportData.periodStart} â€“ {reportData.periodEnd}
                               </p>
-                              <p className="mt-3 text-sm leading-relaxed text-gray-700">{reportData.aiSummary}</p>
+                              <p className="mt-3 text-sm leading-relaxed text-zinc-300">{reportData.aiSummary}</p>
                               <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
                                 {[
                                   { label: 'Conversations', value: String(reportData.totalConversations) },
@@ -2306,9 +2306,9 @@ export default function DashboardPage() {
                                   { label: 'Avg Safety', value: reportData.avgSafetyScore != null ? String(reportData.avgSafetyScore) : '--' },
                                   { label: 'Data Events', value: String(reportData.sensitiveDataIncidents) },
                                 ].map(({ label, value }) => (
-                                  <div key={label} className="rounded-xl bg-white p-3 text-center shadow-sm">
-                                    <p className="text-2xl font-extrabold text-gray-900">{value}</p>
-                                    <p className="text-xs text-gray-500">{label}</p>
+                                  <div key={label} className="rounded-xl bg-zinc-900 p-3 text-center shadow-sm">
+                                    <p className="text-2xl font-extrabold text-white">{value}</p>
+                                    <p className="text-xs text-zinc-500">{label}</p>
                                   </div>
                                 ))}
                               </div>
@@ -2328,22 +2328,22 @@ export default function DashboardPage() {
                       {/* Review Modal */}
                       {reviewedConv ? (
                         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-                          <div className="relative w-full max-w-lg rounded-3xl bg-white p-6 shadow-2xl">
+                          <div className="relative w-full max-w-lg rounded-3xl bg-zinc-900 p-6 shadow-2xl">
                             <button
                               type="button"
                               onClick={() => setAuditReviewId(null)}
                               aria-label="Close"
-                              className="absolute right-4 top-4 rounded-full p-2 text-gray-400 hover:bg-gray-100"
+                              className="absolute right-4 top-4 rounded-full p-2 text-zinc-500 hover:bg-zinc-800"
                             >
                               <X className="h-5 w-5" />
                             </button>
-                            <h3 className="flex items-center gap-2 text-lg font-bold text-gray-900">
+                            <h3 className="flex items-center gap-2 text-lg font-bold text-white">
                               <ShieldAlert className="h-5 w-5 text-red-500" />
                               Flagged Conversation
                             </h3>
-                            <div className="mt-4 max-h-40 overflow-y-auto rounded-2xl bg-gray-50 p-4">
-                              <p className="mb-1 text-xs text-gray-400">First message:</p>
-                              <p className="text-sm text-gray-800">{reviewedConv.firstMessage}</p>
+                            <div className="mt-4 max-h-40 overflow-y-auto rounded-2xl bg-zinc-950 p-4">
+                              <p className="mb-1 text-xs text-zinc-500">First message:</p>
+                              <p className="text-sm text-zinc-200">{reviewedConv.firstMessage}</p>
                             </div>
                             <div className="mt-4 rounded-2xl bg-amber-50 p-4">
                               <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-amber-600">AI Audit Findings</p>
@@ -2356,7 +2356,7 @@ export default function DashboardPage() {
                               <button
                                 type="button"
                                 onClick={() => setAuditReviewId(null)}
-                                className="rounded-full px-4 py-2 text-sm font-semibold text-gray-500 hover:bg-gray-100"
+                                className="rounded-full px-4 py-2 text-sm font-semibold text-zinc-500 hover:bg-zinc-800"
                               >
                                 Close
                               </button>
@@ -2418,18 +2418,18 @@ export default function DashboardPage() {
         {/* Upgrade lock modal */}
         {upgradeLockTab ? (
           <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 p-4">
-            <div className="relative w-full max-w-sm rounded-3xl bg-white p-8 text-center shadow-2xl">
+            <div className="relative w-full max-w-sm rounded-3xl bg-zinc-900 p-8 text-center shadow-2xl">
               <button
                 type="button"
                 aria-label="Close"
                 onClick={() => setUpgradeLockTab(null)}
-                className="absolute right-4 top-4 rounded-full p-2 text-gray-400 hover:bg-gray-100"
+                className="absolute right-4 top-4 rounded-full p-2 text-zinc-500 hover:bg-zinc-800"
               >
                 <X className="h-5 w-5" />
               </button>
-              <div className="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-100 text-2xl">🔒</div>
-              <h3 className="mt-4 text-xl font-extrabold text-gray-900">Feature Locked</h3>
-              <p className="mt-2 text-sm text-gray-600">
+              <div className="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-100 text-2xl">ðŸ”’</div>
+              <h3 className="mt-4 text-xl font-extrabold text-white">Feature Locked</h3>
+              <p className="mt-2 text-sm text-zinc-400">
                 This feature requires a higher plan. Upgrade to unlock CRM, Follow-ups, Analytics, and more.
               </p>
               <button
@@ -2437,7 +2437,7 @@ export default function DashboardPage() {
                 onClick={() => { setActiveTab('subscription'); setUpgradeLockTab(null); }}
                 className="mt-6 w-full rounded-2xl bg-blue-600 py-3 text-sm font-semibold text-white hover:bg-blue-700"
               >
-                Upgrade Now →
+                Upgrade Now â†’
               </button>
             </div>
           </div>
@@ -2452,7 +2452,7 @@ export default function DashboardPage() {
                 onClick={() => setActiveTab('crm')}
                 className="flex items-center gap-2 rounded-full bg-black px-4 py-2 text-sm font-medium text-white shadow-lg transition-all hover:bg-[#1a1a1a]"
               >
-                👥 {newLeadsCount} New Lead{newLeadsCount !== 1 ? 's' : ''}
+                ðŸ‘¥ {newLeadsCount} New Lead{newLeadsCount !== 1 ? 's' : ''}
               </button>
             )}
             {pendingBookingsCount > 0 && (
@@ -2461,13 +2461,13 @@ export default function DashboardPage() {
                 onClick={() => setActiveTab('bookings')}
                 className="flex items-center gap-2 rounded-full bg-orange-500 px-4 py-2 text-sm font-medium text-white shadow-lg transition-all hover:bg-orange-600"
               >
-                📅 {pendingBookingsCount} Pending Booking{pendingBookingsCount !== 1 ? 's' : ''}
+                ðŸ“… {pendingBookingsCount} Pending Booking{pendingBookingsCount !== 1 ? 's' : ''}
               </button>
             )}
           </div>
         )}
 
-      <nav className="fixed bottom-0 left-0 right-0 z-50 flex border-t border-gray-200 bg-white lg:hidden">
+      <nav className="fixed bottom-0 left-0 right-0 z-50 flex border-t border-zinc-800 bg-zinc-900 lg:hidden">
         {mobileTabs.map((tab) => (
           <button
             key={tab.id}
@@ -2484,8 +2484,8 @@ export default function DashboardPage() {
             }}
             className={`flex flex-1 flex-col items-center gap-1 py-2 text-xs ${
               activeTab === tab.id
-                ? 'text-[#0a0a0a]'
-                : 'text-gray-500'
+                ? 'text-zinc-100'
+                : 'text-zinc-500'
             }`}
             data-testid={`dashboard-mobile-tab-${tab.id}`}
           >
@@ -2509,18 +2509,19 @@ function StatCard({
   badgeClassName?: string;
 }) {
   return (
-    <div className="rounded-3xl border border-gray-200 bg-white p-5 shadow-sm">
-      <p className="text-sm font-medium text-gray-500">{label}</p>
+    <div className="rounded-3xl border border-zinc-800 bg-zinc-900 p-5 shadow-sm">
+      <p className="text-sm font-medium text-zinc-500">{label}</p>
       {badgeClassName ? (
         <span className={`mt-4 inline-flex rounded-full px-3 py-1.5 text-sm font-semibold ${badgeClassName}`}>
           {value}
         </span>
       ) : (
-        <p className="mt-4 text-3xl font-extrabold text-gray-900">{value}</p>
+        <p className="mt-4 text-3xl font-extrabold text-white">{value}</p>
       )}
     </div>
   );
 }
+
 
 
 

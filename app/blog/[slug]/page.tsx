@@ -74,26 +74,26 @@ export default async function BlogPostPage({ params }: PageProps) {
   }
 
   return (
-    <main className="min-h-screen bg-slate-50 text-slate-900">
+    <main className="min-h-screen bg-zinc-950 text-zinc-100">
       <article className="mx-auto max-w-4xl px-6 py-16 sm:px-10">
-        <Link href="/blog" className="text-sm font-semibold text-blue-700 hover:text-blue-800">
+        <Link href="/blog" className="text-sm font-semibold text-blue-400 hover:text-blue-300">
           Back to blog
         </Link>
-        <p className="mt-6 inline-flex rounded-full bg-blue-100 px-4 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-blue-700">
+        <p className="mt-6 inline-flex rounded-full border border-blue-500/20 bg-blue-600/10 px-4 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-blue-400">
           {post.sectionTitle}
         </p>
         <h1 className="mt-4 text-4xl font-extrabold leading-tight sm:text-5xl">{post.title}</h1>
-        <p className="mt-4 text-sm text-slate-500">
+        <p className="mt-4 text-sm text-zinc-500">
           {formatDate(post.publishedAt)} • {post.readingMinutes} min read
         </p>
-        <p className="mt-8 text-xl leading-8 text-slate-700">{post.excerpt}</p>
+        <p className="mt-8 text-xl leading-8 text-zinc-300">{post.excerpt}</p>
 
         <div className="mt-10 space-y-10">
           {post.sections.map((section) => (
             <section key={section.heading} className="space-y-5">
-              <h2 className="text-2xl font-bold text-slate-900">{section.heading}</h2>
+              <h2 className="text-2xl font-bold text-white">{section.heading}</h2>
               {section.paragraphs.map((paragraph, index) => (
-                <p key={`${section.heading}-${index}`} className="text-lg leading-8 text-slate-700">
+                <p key={`${section.heading}-${index}`} className="text-lg leading-8 text-zinc-300">
                   {paragraph}
                 </p>
               ))}
@@ -101,12 +101,12 @@ export default async function BlogPostPage({ params }: PageProps) {
           ))}
         </div>
 
-        <section className="mt-14 rounded-3xl border border-blue-200 bg-blue-50 p-8">
-          <h2 className="text-2xl font-extrabold text-slate-900">{post.cta.heading}</h2>
-          <p className="mt-4 text-lg leading-8 text-slate-700">{post.cta.body}</p>
+        <section className="mt-14 rounded-2xl border border-blue-500/20 bg-blue-600/10 p-8">
+          <h2 className="text-2xl font-extrabold text-white">{post.cta.heading}</h2>
+          <p className="mt-4 text-lg leading-8 text-zinc-300">{post.cta.body}</p>
           <Link
             href={post.cta.buttonHref}
-            className="mt-6 inline-flex rounded-full bg-blue-700 px-6 py-3 text-sm font-semibold text-white transition hover:bg-blue-800"
+            className="mt-6 inline-flex rounded-xl bg-blue-600 px-6 py-3 text-sm font-semibold text-white transition-all hover:-translate-y-0.5 hover:bg-blue-500 hover:shadow-lg hover:shadow-blue-500/25"
           >
             {post.cta.buttonLabel}
           </Link>

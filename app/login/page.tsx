@@ -52,25 +52,22 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4 py-12">
+    <div className="flex min-h-screen items-center justify-center bg-zinc-950 px-4 py-12 text-zinc-100">
       <div className="w-full max-w-md">
-        {/* Logo */}
         <div className="mb-8 text-center">
-          <Link href="/" className="inline-block text-3xl font-extrabold text-gray-900">
+          <Link href="/" className="inline-block text-3xl font-extrabold text-white">
             🤖 CypAI
           </Link>
         </div>
 
-        {/* Card */}
-        <div className="rounded-2xl border border-gray-200 bg-white p-8 shadow-sm">
-          <h1 className="text-2xl font-extrabold text-gray-900">Welcome back</h1>
-          <p className="mt-1.5 text-sm text-gray-500">
+        <div className="rounded-2xl border border-zinc-800 bg-zinc-900 p-8 shadow-xl shadow-black/30">
+          <h1 className="text-2xl font-extrabold text-white">Welcome back</h1>
+          <p className="mt-1.5 text-sm text-zinc-400">
             Enter your email to access your dashboard
           </p>
 
-          {/* Success */}
           {welcomeMsg && (
-            <div className="mt-5 flex items-center gap-2.5 rounded-xl bg-green-50 px-4 py-3 text-sm font-semibold text-green-700">
+            <div className="mt-5 flex items-center gap-2.5 rounded-xl border border-green-500/20 bg-green-500/10 px-4 py-3 text-sm font-semibold text-green-300">
               <span className="text-lg">🎉</span>
               {welcomeMsg}
             </div>
@@ -78,7 +75,7 @@ export default function LoginPage() {
 
           <form onSubmit={handleSubmit} className="mt-6 space-y-4" noValidate>
             <div>
-              <label htmlFor="email" className="mb-1.5 block text-sm font-semibold text-gray-700">
+              <label htmlFor="email" className="mb-1.5 block text-sm font-semibold text-zinc-300">
                 Business Email
               </label>
               <input
@@ -93,19 +90,19 @@ export default function LoginPage() {
                 }}
                 placeholder="you@business.com"
                 disabled={loading || !!welcomeMsg}
-                className={`h-12 w-full rounded-xl border px-4 text-sm text-gray-900 outline-none transition focus:ring-2 disabled:opacity-60 ${
+                className={`h-12 w-full rounded-xl border px-4 text-sm text-zinc-100 outline-none transition focus:ring-2 disabled:opacity-60 ${
                   error
-                    ? 'border-red-400 bg-red-50 focus:border-red-400 focus:ring-red-400/10'
-                    : 'border-gray-200 focus:border-blue-400 focus:ring-blue-400/10'
+                    ? 'border-red-500/70 bg-red-500/10 focus:border-red-400 focus:ring-red-400/10'
+                    : 'border-zinc-700 bg-zinc-950 focus:border-blue-400 focus:ring-blue-400/10'
                 }`}
               />
               {error && (
-                <p className="mt-2 text-sm font-medium text-red-600">{error}</p>
+                <p className="mt-2 text-sm font-medium text-red-400">{error}</p>
               )}
               {error.includes('No account') && (
                 <Link
                   href="/#pricing"
-                  className="mt-1.5 inline-block text-sm font-semibold text-blue-600 hover:underline"
+                  className="mt-1.5 inline-block text-sm font-semibold text-blue-400 hover:underline"
                 >
                   Don&apos;t have an account? Start your free trial →
                 </Link>
@@ -115,7 +112,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading || !email.trim() || !!welcomeMsg}
-              className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-blue-600 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 disabled:opacity-50"
+              className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-blue-600 text-sm font-semibold text-white transition-all hover:-translate-y-0.5 hover:bg-blue-500 hover:shadow-lg hover:shadow-blue-500/25 disabled:opacity-50"
             >
               {loading ? (
                 <>
@@ -128,24 +125,22 @@ export default function LoginPage() {
             </button>
           </form>
 
-          {/* Divider */}
           <div className="my-6 flex items-center gap-3">
-            <span className="h-px flex-1 bg-slate-200" />
-            <span className="text-xs font-semibold text-gray-400">or</span>
-            <span className="h-px flex-1 bg-slate-200" />
+            <span className="h-px flex-1 bg-zinc-800" />
+            <span className="text-xs font-semibold text-zinc-500">or</span>
+            <span className="h-px flex-1 bg-zinc-800" />
           </div>
 
           <Link
             href="/#pricing"
-            className="block w-full rounded-xl border-2 border-gray-200 py-3 text-center text-sm font-semibold text-gray-700 transition hover:border-blue-300 hover:text-blue-700"
+            className="block w-full rounded-xl border border-zinc-700 bg-zinc-800 py-3 text-center text-sm font-semibold text-zinc-100 transition hover:border-zinc-600 hover:bg-zinc-700"
           >
             New to CypAI? Start your free 7-day trial →
           </Link>
         </div>
 
-        {/* Back link */}
-        <p className="mt-6 text-center text-xs text-gray-400">
-          <Link href="/" className="transition hover:text-gray-600">← Back to homepage</Link>
+        <p className="mt-6 text-center text-xs text-zinc-500">
+          <Link href="/" className="transition hover:text-zinc-300">← Back to homepage</Link>
         </p>
       </div>
     </div>

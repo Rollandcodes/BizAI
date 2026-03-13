@@ -80,7 +80,7 @@ export default function SuccessPage() {
     : '/dashboard';
 
   return (
-    <main className="relative flex min-h-screen flex-col items-center justify-start bg-gradient-to-b from-slate-50 to-white px-4 py-16">
+    <main className="relative flex min-h-screen flex-col items-center justify-start bg-zinc-950 px-4 py-16 text-zinc-100">
       {showConfetti && <Confetti />}
 
       <div className="w-full max-w-lg">
@@ -96,19 +96,19 @@ export default function SuccessPage() {
 
         {/* Heading */}
         <div className="mb-8 text-center">
-          <h1 className="text-3xl font-extrabold text-slate-900 md:text-4xl">🎉 You&apos;re all set!</h1>
-          <p className="mt-2 text-lg font-semibold text-slate-600">
+          <h1 className="text-3xl font-extrabold text-white md:text-4xl">🎉 You&apos;re all set!</h1>
+          <p className="mt-2 text-lg font-semibold text-zinc-300">
             Welcome to CypAI,{' '}
-            <span className="text-blue-600">{businessName}</span>!
+            <span className="text-blue-400">{businessName}</span>
           </p>
         </div>
 
         {/* Status card */}
-        <div className="mb-6 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-          <div className="border-b border-slate-100 px-6 py-4">
-            <p className="text-[11px] font-semibold uppercase tracking-widest text-slate-400">Setup Progress</p>
+        <div className="mb-6 overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-900 shadow-xl shadow-black/30">
+          <div className="border-b border-zinc-800 px-6 py-4">
+            <p className="text-[11px] font-semibold uppercase tracking-widest text-zinc-500">Setup Progress</p>
           </div>
-          <ul className="divide-y divide-slate-50">
+          <ul className="divide-y divide-zinc-800">
             {[
               { done: true,  label: 'Payment confirmed' },
               { done: false, label: 'AI setup in progress (within 24 hrs)' },
@@ -118,21 +118,21 @@ export default function SuccessPage() {
                 <span className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-xs ${done ? 'bg-emerald-100 text-emerald-600' : 'bg-amber-50 text-amber-500'}`}>
                   {done ? '✅' : '⏳'}
                 </span>
-                <span className={`text-sm font-medium ${done ? 'text-slate-800' : 'text-slate-500'}`}>{label}</span>
+                <span className={`text-sm font-medium ${done ? 'text-zinc-100' : 'text-zinc-400'}`}>{label}</span>
               </li>
             ))}
           </ul>
         </div>
 
         {/* Message box */}
-        <div className="mb-6 rounded-2xl border border-slate-200 bg-white px-6 py-5 text-sm leading-relaxed text-slate-600 shadow-sm">
+        <div className="mb-6 rounded-2xl border border-zinc-800 bg-zinc-900 px-6 py-5 text-sm leading-relaxed text-zinc-400 shadow-xl shadow-black/30">
           <p>
             We&apos;ve received your payment and will have your AI assistant configured within 24 hours.
           </p>
           {email && (
             <p className="mt-3">
               You&apos;ll receive an email at{' '}
-              <span className="font-semibold text-slate-800">{email}</span> with:
+              <span className="font-semibold text-zinc-100">{email}</span> with:
             </p>
           )}
           {!email && <p className="mt-3">You&apos;ll receive an email shortly with:</p>}
@@ -141,11 +141,11 @@ export default function SuccessPage() {
             <li className="list-disc">Dashboard login link</li>
             <li className="list-disc">Setup instructions</li>
           </ul>
-          <p className="mt-4 font-semibold text-slate-700">Questions? We&apos;re here:</p>
+          <p className="mt-4 font-semibold text-zinc-200">Questions? We&apos;re here:</p>
           <div className="mt-3 flex flex-wrap gap-3">
             <a
               href="mailto:cypai.app@cypai.app"
-              className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+              className="inline-flex items-center gap-1.5 rounded-lg border border-zinc-700 px-4 py-2 text-sm font-semibold text-zinc-200 transition hover:bg-zinc-800"
             >
               📧 Email Us
             </a>
@@ -167,7 +167,7 @@ export default function SuccessPage() {
         >
           Go to Your Dashboard →
         </a>
-        <p className="mt-3 text-center text-xs text-slate-400">
+          <p className="mt-3 text-center text-xs text-zinc-500">
           Bookmark your dashboard link for easy access
         </p>
       </div>
