@@ -239,6 +239,7 @@ export default function CRMTab({
           />
         </div>
         <select
+          aria-label="Filter contacts by status"
           value={filterStatus}
           onChange={(e) => setFilterStatus(e.target.value as ContactStatus | 'all')}
           className="h-10 rounded-2xl border border-slate-200 bg-white px-3 text-sm outline-none focus:border-blue-500"
@@ -394,10 +395,11 @@ export default function CRMTab({
 
               {/* Status */}
               <div>
-                <label className="mb-1.5 block text-sm font-semibold text-slate-700">
+                <label htmlFor="crm-contact-status" className="mb-1.5 block text-sm font-semibold text-slate-700">
                   Status
                 </label>
                 <select
+                  id="crm-contact-status"
                   value={panelStatus}
                   onChange={(e) => setPanelStatus(e.target.value as ContactStatus)}
                   className="h-10 w-full rounded-2xl border border-slate-200 px-3 text-sm outline-none focus:border-blue-500"

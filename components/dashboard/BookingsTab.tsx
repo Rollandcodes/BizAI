@@ -397,8 +397,8 @@ export default function BookingsTab({
               <input type="tel" placeholder="Phone number" value={addForm.customer_phone} onChange={(e) => setAddForm((p) => ({ ...p, customer_phone: e.target.value }))} className="h-11 w-full rounded-2xl border border-slate-200 px-4 text-sm outline-none focus:border-blue-500" />
               <input type="text" placeholder="Service / item" value={addForm.service_type} onChange={(e) => setAddForm((p) => ({ ...p, service_type: e.target.value }))} className="h-11 w-full rounded-2xl border border-slate-200 px-4 text-sm outline-none focus:border-blue-500" />
               <div className="grid grid-cols-2 gap-3">
-                <input type="date" value={addForm.booking_date} onChange={(e) => setAddForm((p) => ({ ...p, booking_date: e.target.value }))} className="h-11 w-full rounded-2xl border border-slate-200 px-4 text-sm outline-none focus:border-blue-500" />
-                <input type="time" value={addForm.booking_time} onChange={(e) => setAddForm((p) => ({ ...p, booking_time: e.target.value }))} className="h-11 w-full rounded-2xl border border-slate-200 px-4 text-sm outline-none focus:border-blue-500" />
+                <input type="date" aria-label="Booking date" value={addForm.booking_date} onChange={(e) => setAddForm((p) => ({ ...p, booking_date: e.target.value }))} className="h-11 w-full rounded-2xl border border-slate-200 px-4 text-sm outline-none focus:border-blue-500" />
+                <input type="time" aria-label="Booking time" value={addForm.booking_time} onChange={(e) => setAddForm((p) => ({ ...p, booking_time: e.target.value }))} className="h-11 w-full rounded-2xl border border-slate-200 px-4 text-sm outline-none focus:border-blue-500" />
               </div>
               <textarea rows={2} placeholder="Notes" value={addForm.notes} onChange={(e) => setAddForm((p) => ({ ...p, notes: e.target.value }))} className="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-blue-500" />
             </div>

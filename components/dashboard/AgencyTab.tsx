@@ -308,6 +308,7 @@ export default function AgencyTab({ ownerEmail }: { ownerEmail: string }) {
                 className="h-11 w-full rounded-2xl border border-slate-200 px-4 text-sm outline-none focus:border-blue-500"
               />
               <select
+                aria-label="Business type"
                 value={addForm.business_type}
                 onChange={(e) => setAddForm((p) => ({ ...p, business_type: e.target.value }))}
                 className="h-11 w-full rounded-2xl border border-slate-200 px-4 text-sm outline-none focus:border-blue-500"
@@ -317,6 +318,7 @@ export default function AgencyTab({ ownerEmail }: { ownerEmail: string }) {
                 ))}
               </select>
               <select
+                aria-label="Plan"
                 value={addForm.plan}
                 onChange={(e) => setAddForm((p) => ({ ...p, plan: e.target.value }))}
                 className="h-11 w-full rounded-2xl border border-slate-200 px-4 text-sm outline-none focus:border-blue-500"

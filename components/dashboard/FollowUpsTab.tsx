@@ -197,10 +197,11 @@ export default function FollowUpsTab({
           </div>
 
           <div>
-            <label className="mb-1.5 block text-sm font-semibold text-slate-700">
+            <label htmlFor="followups-custom-message" className="mb-1.5 block text-sm font-semibold text-slate-700">
               Customize Message
             </label>
             <textarea
+              id="followups-custom-message"
               rows={5}
               value={customMessage}
               onChange={(e) => setCustomMessage(e.target.value)}
