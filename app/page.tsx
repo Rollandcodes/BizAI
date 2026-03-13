@@ -167,11 +167,11 @@ export default function HomePage() {
 
   return (
     <div
-      className="min-h-screen bg-white text-[#0a0a0a]"
-      style={{ fontFamily: "-apple-system, BlinkMacSystemFont, 'Inter', sans-serif" }}
+      className="min-h-screen bg-[radial-gradient(circle_at_top,_#f8fbff_0%,_#f4f7fb_28%,_#eef2f7_58%,_#e8edf4_100%)] text-slate-950"
+      style={{ fontFamily: "var(--font-jakarta), var(--font-sans), sans-serif" }}
     >
       {!barClosed && (
-        <div className="relative bg-black px-4 py-2.5 text-center text-xs text-white">
+        <div className="relative bg-gradient-to-r from-slate-950 via-slate-900 to-slate-800 px-4 py-2.5 text-center text-xs text-white">
           🎉 7-day free trial on all plans — No credit card required →{' '}
           <Link href="/signup?plan=pro" className="font-semibold underline">
             Start Free Today
@@ -187,14 +187,14 @@ export default function HomePage() {
       )}
 
       <nav
-        className={`sticky top-0 z-50 border-b border-gray-100 bg-white ${
-          scrolled ? 'backdrop-blur-sm' : ''
+        className={`sticky top-0 z-50 border-b border-slate-200/70 bg-white/90 ${
+          scrolled ? 'backdrop-blur-md shadow-[0_8px_30px_rgba(15,23,42,0.08)]' : ''
         }`}
       >
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
-          <Link href="/" className="flex items-center gap-2 text-base font-semibold text-[#0a0a0a]">
-            <span>🤖</span>
-            <span>CypAI</span>
+          <Link href="/" className="flex items-center gap-2 text-base font-bold tracking-tight text-slate-900">
+            <span className="text-lg">🤖</span>
+            <span className="bg-gradient-to-r from-slate-950 to-sky-700 bg-clip-text text-transparent">CypAI</span>
           </Link>
 
           <div className="hidden items-center gap-8 md:flex">
@@ -204,25 +204,25 @@ export default function HomePage() {
               ['/demo', 'Demo'],
               ['/contact', 'Company'],
             ].map(([href, label]) => (
-              <a key={href} href={href} className="text-sm text-gray-500 transition hover:text-[#0a0a0a]">
+              <a key={href} href={href} className="text-sm text-slate-500 transition hover:text-slate-900">
                 {label}
               </a>
             ))}
           </div>
 
           <div className="flex items-center gap-3">
-            <Link href="/login" className="hidden text-sm text-gray-600 hover:text-[#0a0a0a] sm:block">
+            <Link href="/login" className="hidden text-sm text-slate-600 hover:text-slate-900 sm:block">
               Log In
             </Link>
             <Link
               href="/signup?plan=pro"
-              className="rounded-full bg-black px-5 py-2 text-sm font-medium text-white transition hover:bg-[#1a1a1a]"
+              className="rounded-full bg-slate-900 px-5 py-2 text-sm font-semibold text-white transition hover:bg-slate-800"
             >
               Start Free Trial
             </Link>
             <button
               onClick={() => setMenuOpen((prev) => !prev)}
-              className="rounded-full p-2 text-gray-600 hover:bg-gray-100 md:hidden"
+              className="rounded-full p-2 text-slate-600 hover:bg-slate-100 md:hidden"
               aria-label="Toggle menu"
             >
               {menuOpen ? '✕' : '☰'}
@@ -231,7 +231,7 @@ export default function HomePage() {
         </div>
 
         {menuOpen && (
-          <div className="border-t border-gray-100 px-4 pb-4 pt-2 md:hidden">
+          <div className="border-t border-slate-200 px-4 pb-4 pt-2 md:hidden">
             {[
               ['#features', 'Features'],
               ['/pricing', 'Pricing'],
@@ -243,7 +243,7 @@ export default function HomePage() {
                 key={href}
                 href={href}
                 onClick={() => setMenuOpen(false)}
-                className="block rounded-xl px-3 py-2.5 text-sm text-gray-700 hover:bg-gray-50"
+                className="block rounded-xl px-3 py-2.5 text-sm text-slate-700 hover:bg-slate-100"
               >
                 {label}
               </a>
@@ -252,35 +252,37 @@ export default function HomePage() {
         )}
       </nav>
 
-      <section className="bg-white py-24 lg:py-32">
+      <section className="relative overflow-hidden py-24 lg:py-32">
+        <div className="pointer-events-none absolute -top-24 left-1/2 h-[420px] w-[420px] -translate-x-1/2 rounded-full bg-sky-300/25 blur-3xl" />
+        <div className="pointer-events-none absolute right-0 top-12 h-[280px] w-[280px] rounded-full bg-cyan-200/25 blur-3xl" />
         <div className="mx-auto max-w-6xl px-4 text-center sm:px-6">
-          <span className="text-xs font-medium uppercase tracking-widest text-gray-400">
+          <span className="rounded-full border border-slate-300 bg-white/80 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.22em] text-slate-600 shadow-sm">
             AI PLATFORM FOR CYPRUS BUSINESSES
           </span>
-          <h1 className="mx-auto mt-6 max-w-5xl text-5xl font-black leading-none tracking-tight text-[#0a0a0a] sm:text-6xl lg:text-8xl">
+          <h1 className="mx-auto mt-6 max-w-5xl text-5xl font-black leading-[0.95] tracking-tight text-slate-950 sm:text-6xl lg:text-8xl">
             The AI Platform For Local Businesses
           </h1>
-          <p className="mx-auto mt-8 max-w-xl text-lg leading-relaxed text-gray-500">
+          <p className="mx-auto mt-8 max-w-xl text-lg leading-relaxed text-slate-600">
             Replace your scattered tools with one smart AI that handles chat, leads, bookings, and
             follow-ups — 24/7.
           </p>
           <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
             <Link
               href="/signup?plan=pro"
-              className="rounded-full bg-black px-8 py-3.5 text-sm font-semibold text-white transition hover:bg-[#1a1a1a]"
+              className="rounded-full bg-slate-900 px-8 py-3.5 text-sm font-semibold text-white shadow-[0_12px_30px_rgba(15,23,42,0.2)] transition hover:bg-slate-800"
             >
               Start Free Trial
             </Link>
             <Link
               href="/demo"
-              className="rounded-full border border-gray-300 px-8 py-3.5 text-sm font-semibold text-gray-700 transition hover:border-gray-400"
+              className="rounded-full border border-slate-300 bg-white/80 px-8 py-3.5 text-sm font-semibold text-slate-700 transition hover:border-slate-400"
             >
               See Live Demo
             </Link>
           </div>
-          <p className="mt-10 text-xs uppercase tracking-widest text-gray-400">Trusted by businesses in</p>
+          <p className="mt-10 text-xs uppercase tracking-widest text-slate-500">Trusted by businesses in</p>
 
-          <div className="mt-6 overflow-hidden border-y border-gray-100 py-4">
+          <div className="mt-6 overflow-hidden border-y border-slate-200/80 py-4">
             <div className="animate-marquee items-center gap-3">
               {[
                 '📍 Kyrenia',
@@ -298,7 +300,7 @@ export default function HomePage() {
               ].map((city, index) => (
                 <span
                   key={`${city}-${index}`}
-                  className="rounded-full border border-gray-200 bg-white px-4 py-2 text-sm text-gray-600"
+                  className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm text-slate-600 shadow-sm"
                 >
                   {city}
                 </span>
@@ -308,7 +310,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="bg-gray-50 py-24 lg:py-32">
+      <section className="bg-[linear-gradient(180deg,_rgba(241,245,249,0.75)_0%,_rgba(248,250,252,0.9)_100%)] py-24 lg:py-32">
         <div className="mx-auto grid max-w-6xl gap-5 px-4 sm:grid-cols-3 sm:px-6">
           {[
             ['#features', '🧠', 'An AI Agent', 'Empowered by Technology'],
@@ -318,14 +320,14 @@ export default function HomePage() {
             <a
               href={href}
               key={title}
-              className="group flex min-h-[240px] flex-col rounded-2xl bg-gray-50 p-8 transition hover:bg-gray-100"
+              className="group flex min-h-[240px] flex-col rounded-2xl border border-slate-200/80 bg-white/85 p-8 shadow-sm transition hover:-translate-y-1 hover:shadow-xl"
             >
-              <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-white text-3xl">
+              <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-100 text-3xl">
                 {icon}
               </div>
-              <p className="mt-7 text-xs font-medium uppercase tracking-widest text-gray-400">{label}</p>
-              <h3 className="mt-2 text-xl font-bold text-[#0a0a0a]">{title}</h3>
-              <span className="mt-auto text-xl text-gray-500 transition group-hover:translate-x-1">→</span>
+              <p className="mt-7 text-xs font-medium uppercase tracking-widest text-slate-500">{label}</p>
+              <h3 className="mt-2 text-xl font-bold text-slate-900">{title}</h3>
+              <span className="mt-auto text-xl text-slate-500 transition group-hover:translate-x-1">→</span>
             </a>
           ))}
         </div>
@@ -335,8 +337,8 @@ export default function HomePage() {
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
           <div className="grid gap-10 lg:grid-cols-[1fr_1.2fr]">
             <div>
-              <p className="text-xs font-medium uppercase tracking-widest text-gray-400">Core Features</p>
-              <h2 className="mt-3 text-4xl font-black leading-tight text-[#0a0a0a]">Built to run every customer interaction</h2>
+              <p className="text-xs font-medium uppercase tracking-widest text-slate-500">Core Features</p>
+              <h2 className="mt-3 text-4xl font-black leading-tight text-slate-900">Built to run every customer interaction</h2>
 
               <div className="mt-8 space-y-5">
                 {featureTabs.map((tab, index) => (
@@ -344,17 +346,17 @@ export default function HomePage() {
                     key={tab.title}
                     onClick={() => setActiveFeature(index)}
                     className={`w-full border-l-2 pl-4 text-left transition ${
-                      activeFeature === index ? 'border-black' : 'border-transparent'
+                      activeFeature === index ? 'border-sky-700' : 'border-transparent'
                     }`}
                   >
                     <h3
                       className={`text-base ${
-                        activeFeature === index ? 'font-semibold text-[#0a0a0a]' : 'font-medium text-gray-400'
+                        activeFeature === index ? 'font-semibold text-slate-900' : 'font-medium text-slate-400'
                       }`}
                     >
                       {tab.title}
                     </h3>
-                    <p className={`mt-1 text-sm leading-relaxed ${activeFeature === index ? 'text-gray-600' : 'text-gray-400'}`}>
+                    <p className={`mt-1 text-sm leading-relaxed ${activeFeature === index ? 'text-slate-600' : 'text-slate-400'}`}>
                       {tab.description}
                     </p>
                   </button>
@@ -362,23 +364,23 @@ export default function HomePage() {
               </div>
             </div>
 
-            <div className="rounded-2xl border border-gray-200 bg-gray-50 p-6">
-              <p className="text-xs font-medium uppercase tracking-widest text-gray-400">Live Preview</p>
-              <h3 className="mt-3 text-2xl font-bold text-[#0a0a0a]">{activeFeatureData.previewTitle}</h3>
-              <p className="mt-3 max-w-xl text-sm leading-relaxed text-gray-600">{activeFeatureData.previewBody}</p>
+            <div className="rounded-2xl border border-slate-200 bg-white/90 p-6 shadow-sm">
+              <p className="text-xs font-medium uppercase tracking-widest text-slate-500">Live Preview</p>
+              <h3 className="mt-3 text-2xl font-bold text-slate-900">{activeFeatureData.previewTitle}</h3>
+              <p className="mt-3 max-w-xl text-sm leading-relaxed text-slate-600">{activeFeatureData.previewBody}</p>
 
               <div className="mt-8 grid gap-4 sm:grid-cols-2">
-                <div className="rounded-xl border border-gray-200 bg-white p-4">
-                  <p className="text-xs text-gray-400">Response time</p>
-                  <p className="mt-1 text-2xl font-black text-[#0a0a0a]">&lt; 3s</p>
+                <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                  <p className="text-xs text-slate-500">Response time</p>
+                  <p className="mt-1 text-2xl font-black text-slate-900">&lt; 3s</p>
                 </div>
-                <div className="rounded-xl border border-gray-200 bg-white p-4">
-                  <p className="text-xs text-gray-400">Handled automatically</p>
-                  <p className="mt-1 text-2xl font-black text-[#0a0a0a]">92%</p>
+                <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                  <p className="text-xs text-slate-500">Handled automatically</p>
+                  <p className="mt-1 text-2xl font-black text-slate-900">92%</p>
                 </div>
-                <div className="rounded-xl border border-gray-200 bg-white p-4 sm:col-span-2">
-                  <p className="text-xs text-gray-400">Recent activity</p>
-                  <div className="mt-3 space-y-2 text-sm text-gray-600">
+                <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 sm:col-span-2">
+                  <p className="text-xs text-slate-500">Recent activity</p>
+                  <div className="mt-3 space-y-2 text-sm text-slate-600">
                     <p>• New inquiry captured from website</p>
                     <p>• Booking request confirmed via WhatsApp</p>
                     <p>• Follow-up reminder sent automatically</p>
@@ -390,10 +392,10 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section id="platform" className="bg-gray-50 py-24 lg:py-32">
+      <section id="platform" className="bg-[linear-gradient(180deg,_rgba(241,245,249,0.8)_0%,_rgba(248,250,252,0.95)_100%)] py-20 lg:py-28">
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
-          <p className="text-center text-xs font-medium uppercase tracking-widest text-gray-400">Simple Process</p>
-          <h2 className="mt-3 text-center text-4xl font-black leading-tight text-[#0a0a0a]">Up and Running in 15 Minutes</h2>
+          <p className="text-center text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Simple Process</p>
+          <h2 className="mt-3 text-center text-4xl font-black leading-tight text-slate-900">Up and Running in 15 Minutes</h2>
 
           <div className="mt-14 grid gap-10 lg:grid-cols-[1fr_1fr]">
             <div className="space-y-8">
@@ -403,21 +405,21 @@ export default function HomePage() {
                 ['03', '🚀', 'Grow Your Business', 'AI handles customers 24/7. You wake up to captured leads and confirmed bookings.'],
               ].map(([num, icon, title, desc]) => (
                 <div key={num} className="grid grid-cols-[56px_1fr] gap-4">
-                  <div className="pt-1 text-sm font-medium text-gray-400">{num}</div>
+                  <div className="pt-1 text-sm font-semibold text-slate-500">{num}</div>
                   <div>
                     <div className="flex items-center gap-2">
                       <span className="text-xl">{icon}</span>
-                      <h3 className="text-xl font-bold text-[#0a0a0a]">{title}</h3>
+                      <h3 className="text-xl font-bold text-slate-900">{title}</h3>
                     </div>
-                    <p className="mt-2 text-sm leading-relaxed text-gray-600">{desc}</p>
+                    <p className="mt-2 text-sm leading-relaxed text-slate-600">{desc}</p>
                   </div>
                 </div>
               ))}
             </div>
 
-            <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-              <p className="text-xs font-medium uppercase tracking-widest text-gray-400">Dashboard Overview</p>
-              <h3 className="mt-2 text-2xl font-bold text-[#0a0a0a]">Real-time business snapshot</h3>
+            <div className="rounded-2xl border border-slate-200 bg-white/95 p-6 shadow-sm">
+              <p className="text-xs font-medium uppercase tracking-widest text-slate-500">Dashboard Overview</p>
+              <h3 className="mt-2 text-2xl font-bold text-slate-900">Real-time business snapshot</h3>
               <div className="mt-6 grid gap-3 sm:grid-cols-2">
                 {[
                   ['247', 'conversations this month', '↑12%'],
@@ -425,10 +427,10 @@ export default function HomePage() {
                   ['34', 'bookings confirmed', '↑15%'],
                   ['38%', 'conversion rate', '↑3%'],
                 ].map(([value, label, delta]) => (
-                  <div key={label} className="rounded-xl border border-gray-200 bg-gray-50 p-4">
-                    <p className="text-2xl font-black text-[#0a0a0a]">{value}</p>
-                    <p className="mt-1 text-xs text-gray-500">{label}</p>
-                    <p className="mt-2 text-xs font-medium text-[#0a0a0a]">{delta}</p>
+                  <div key={label} className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                    <p className="text-2xl font-black text-slate-900">{value}</p>
+                    <p className="mt-1 text-xs text-slate-500">{label}</p>
+                    <p className="mt-2 text-xs font-semibold text-slate-800">{delta}</p>
                   </div>
                 ))}
               </div>
@@ -437,7 +439,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="bg-white py-12">
+      <section className="bg-white py-10">
         <div className="mx-auto flex max-w-6xl flex-wrap justify-center gap-3 px-4 sm:px-6">
           {[
             'Never miss a lead',
@@ -449,19 +451,19 @@ export default function HomePage() {
             'No coding needed',
             'Auto lead capture',
           ].map((pill) => (
-            <span key={pill} className="rounded-full bg-gray-100 px-4 py-2 text-sm font-medium text-gray-800">
+            <span key={pill} className="rounded-full border border-slate-200 bg-slate-50 px-4 py-2 text-sm font-medium text-slate-700">
               {pill}
             </span>
           ))}
         </div>
       </section>
 
-      <section id="dashboard" className="bg-gray-50 py-24 lg:py-32">
+      <section id="dashboard" className="bg-[linear-gradient(180deg,_rgba(248,250,252,0.95)_0%,_rgba(241,245,249,0.9)_100%)] py-20 lg:py-28">
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
           <div className="grid gap-10 lg:grid-cols-[1fr_1.2fr]">
             <div>
-              <p className="text-xs font-medium uppercase tracking-widest text-gray-400">Platform</p>
-              <h2 className="mt-3 text-4xl font-black leading-tight text-[#0a0a0a]">One dashboard for everything</h2>
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Platform</p>
+              <h2 className="mt-3 text-4xl font-black leading-tight text-slate-900">One dashboard for everything</h2>
 
               <div className="mt-8 space-y-4">
                 {platformItems.map((item, index) => (
@@ -469,44 +471,44 @@ export default function HomePage() {
                     key={item.title}
                     onClick={() => setActivePlatform(index)}
                     className={`w-full border-l-2 pl-4 text-left ${
-                      activePlatform === index ? 'border-black' : 'border-transparent'
+                      activePlatform === index ? 'border-sky-700' : 'border-transparent'
                     }`}
                   >
                     <div className="flex items-center gap-2">
                       <span>{item.icon}</span>
-                      <h3 className={`text-base ${activePlatform === index ? 'font-semibold text-[#0a0a0a]' : 'text-gray-500'}`}>
+                      <h3 className={`text-base ${activePlatform === index ? 'font-semibold text-slate-900' : 'text-slate-500'}`}>
                         {item.title}
                       </h3>
                     </div>
-                    <p className="mt-1 text-sm text-gray-500">{item.description}</p>
+                    <p className="mt-1 text-sm text-slate-500">{item.description}</p>
                   </button>
                 ))}
               </div>
             </div>
 
-            <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-lg">
-              <div className="border-b border-gray-200 px-5 py-4">
-                <p className="text-sm font-semibold text-[#0a0a0a]">CypAI Dashboard</p>
-                <div className="mt-2 flex flex-wrap gap-2 text-xs text-gray-500">
+            <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-lg">
+              <div className="border-b border-slate-200 px-5 py-4">
+                <p className="text-sm font-semibold text-slate-900">CypAI Dashboard</p>
+                <div className="mt-2 flex flex-wrap gap-2 text-xs text-slate-500">
                   {['Overview', 'Conversations', 'CRM', 'Bookings'].map((tab) => (
-                    <span key={tab} className="rounded-full bg-gray-100 px-3 py-1">
+                    <span key={tab} className="rounded-full bg-slate-100 px-3 py-1">
                       {tab}
                     </span>
                   ))}
                 </div>
               </div>
               <div className="p-6">
-                <h3 className="text-xl font-bold text-[#0a0a0a]">{activePlatformData.title}</h3>
-                <p className="mt-2 text-sm text-gray-600">{activePlatformData.description}</p>
+                <h3 className="text-xl font-bold text-slate-900">{activePlatformData.title}</h3>
+                <p className="mt-2 text-sm text-slate-600">{activePlatformData.description}</p>
 
                 <div className="mt-6 grid gap-3 sm:grid-cols-2">
-                  <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
-                    <p className="text-xs text-gray-400">Today</p>
-                    <p className="mt-1 text-lg font-black text-[#0a0a0a]">57 conversations</p>
+                  <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                    <p className="text-xs text-slate-500">Today</p>
+                    <p className="mt-1 text-lg font-black text-slate-900">57 conversations</p>
                   </div>
-                  <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
-                    <p className="text-xs text-gray-400">Auto-resolved</p>
-                    <p className="mt-1 text-lg font-black text-[#0a0a0a]">84%</p>
+                  <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                    <p className="text-xs text-slate-500">Auto-resolved</p>
+                    <p className="mt-1 text-lg font-black text-slate-900">84%</p>
                   </div>
                 </div>
               </div>
@@ -515,10 +517,10 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section id="company" className="bg-white py-24 lg:py-32">
+      <section id="company" className="bg-white py-20 lg:py-28">
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
-          <p className="text-center text-xs font-medium uppercase tracking-widest text-gray-400">Testimonials</p>
-          <h2 className="mt-3 text-center text-4xl font-black leading-tight text-[#0a0a0a]">Trusted by Cyprus businesses</h2>
+          <p className="text-center text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Testimonials</p>
+          <h2 className="mt-3 text-center text-4xl font-black leading-tight text-slate-900">Trusted by Cyprus businesses</h2>
 
           <div className="mt-12 md:hidden">
             <TestimonialCard item={testimonials[testimonialIndex]} />
@@ -535,13 +537,13 @@ export default function HomePage() {
               onClick={() =>
                 setTestimonialIndex((prev) => (prev - 1 + testimonials.length) % testimonials.length)
               }
-              className="rounded-full border border-gray-300 px-4 py-2 text-sm text-gray-700 hover:border-gray-400"
+              className="rounded-full border border-slate-300 px-4 py-2 text-sm text-slate-700 hover:border-slate-400"
             >
               ←
             </button>
             <button
               onClick={() => setTestimonialIndex((prev) => (prev + 1) % testimonials.length)}
-              className="rounded-full border border-gray-300 px-4 py-2 text-sm text-gray-700 hover:border-gray-400"
+              className="rounded-full border border-slate-300 px-4 py-2 text-sm text-slate-700 hover:border-slate-400"
             >
               →
             </button>
@@ -549,10 +551,10 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section id="pricing" className="bg-gray-50 py-24 lg:py-32">
+      <section id="pricing" className="bg-[linear-gradient(180deg,_rgba(241,245,249,0.85)_0%,_rgba(248,250,252,0.95)_100%)] py-20 lg:py-28">
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
-          <p className="text-center text-xs font-medium uppercase tracking-widest text-gray-400">Pricing</p>
-          <h2 className="mt-3 text-center text-4xl font-black leading-tight text-[#0a0a0a]">Simple, transparent pricing</h2>
+          <p className="text-center text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Pricing</p>
+          <h2 className="mt-3 text-center text-4xl font-black leading-tight text-slate-900">Simple, transparent pricing</h2>
 
           <div className="mt-14 grid gap-6 md:grid-cols-3">
             {[
@@ -602,19 +604,19 @@ export default function HomePage() {
             ].map((card) => (
               <div
                 key={card.name}
-                className={`rounded-2xl bg-white p-8 ${card.popular ? 'border-2 border-black' : 'border border-gray-200'}`}
+                className={`rounded-2xl bg-white p-8 shadow-sm ${card.popular ? 'border-2 border-slate-900' : 'border border-slate-200'}`}
               >
                 {card.popular ? (
-                  <span className="inline-block rounded-full bg-black px-3 py-1 text-xs font-medium uppercase tracking-wide text-white">
+                  <span className="inline-block rounded-full bg-slate-900 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-white">
                     Most Popular
                   </span>
                 ) : null}
-                <p className="mt-3 text-xs font-medium uppercase tracking-widest text-gray-400">{card.name}</p>
-                <p className="mt-3 text-5xl font-black text-[#0a0a0a]">{card.price}</p>
-                <p className="mt-1 text-sm text-gray-500">/mo</p>
-                <p className="mt-4 text-sm text-gray-600">{card.desc}</p>
+                <p className="mt-3 text-xs font-semibold uppercase tracking-widest text-slate-500">{card.name}</p>
+                <p className="mt-3 text-5xl font-black text-slate-900">{card.price}</p>
+                <p className="mt-1 text-sm text-slate-500">/mo</p>
+                <p className="mt-4 text-sm text-slate-600">{card.desc}</p>
 
-                <ul className="mt-6 space-y-2 text-sm text-gray-600">
+                <ul className="mt-6 space-y-2 text-sm text-slate-600">
                   {card.features.map((feature) => (
                     <li key={feature} className="flex items-start gap-2">
                       <span className="font-bold text-[#0a0a0a]">✓</span>
@@ -627,8 +629,8 @@ export default function HomePage() {
                   href={`/signup?plan=${card.plan}`}
                   className={`mt-8 block rounded-full px-5 py-3 text-center text-sm font-semibold transition ${
                     card.popular
-                      ? 'bg-black text-white hover:bg-[#1a1a1a]'
-                      : 'border border-gray-300 text-gray-700 hover:border-gray-400'
+                      ? 'bg-slate-900 text-white hover:bg-slate-800'
+                      : 'border border-slate-300 text-slate-700 hover:border-slate-400'
                   }`}
                 >
                   Start Free Trial
@@ -639,24 +641,21 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="bg-black py-24 text-center text-white lg:py-32">
+      <section className="bg-gradient-to-r from-slate-950 via-slate-900 to-slate-800 py-24 text-center text-white lg:py-32">
         <div className="mx-auto max-w-4xl px-4 sm:px-6">
           <h2 className="text-4xl font-black leading-tight sm:text-5xl">Ready to Never Miss a Customer Again?</h2>
-          <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-gray-400">
+          <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-slate-300">
             Join local businesses in Cyprus already using AI to handle customers while they sleep.
           </p>
           <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
-            <Link
-              href="/signup?plan=pro"
-              className="rounded-full bg-white px-8 py-3.5 text-sm font-semibold text-black transition hover:bg-gray-100"
-            >
+            <Link href="/signup?plan=pro" className="rounded-full bg-white px-8 py-3.5 text-sm font-semibold text-slate-900 transition hover:bg-slate-100">
               Start Free Trial
             </Link>
             <a
               href="https://wa.me/905338425559?text=Hi! I want to learn more about CypAI"
               target="_blank"
               rel="noopener noreferrer"
-              className="rounded-full border border-gray-600 px-8 py-3.5 text-sm font-semibold text-white transition hover:border-gray-400"
+              className="rounded-full border border-slate-500 px-8 py-3.5 text-sm font-semibold text-white transition hover:border-slate-300"
             >
               Chat on WhatsApp
             </a>
@@ -664,50 +663,50 @@ export default function HomePage() {
         </div>
       </section>
 
-      <footer className="bg-white py-16">
+      <footer className="bg-slate-50 py-16">
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
           <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
             <div>
-              <div className="flex items-center gap-2 text-lg font-semibold text-[#0a0a0a]">
+              <div className="flex items-center gap-2 text-lg font-semibold text-slate-900">
                 <span>🤖</span>
                 <span>CypAI</span>
               </div>
-              <p className="mt-3 text-sm leading-relaxed text-gray-500">
+              <p className="mt-3 text-sm leading-relaxed text-slate-600">
                 AI platform for local businesses to manage chat, leads, bookings, and growth in one place.
               </p>
               <p className="mt-4 text-xl">🇬🇧 🇹🇷 🇸🇦 🇷🇺 🇬🇷</p>
             </div>
 
             <div>
-              <p className="text-xs font-medium uppercase tracking-widest text-gray-400">Product</p>
-              <ul className="mt-4 space-y-2 text-sm text-gray-600">
-                <li><a href="#features" className="hover:text-[#0a0a0a]">Features</a></li>
-                <li><a href="#pricing" className="hover:text-[#0a0a0a]">Pricing</a></li>
-                <li><Link href="/demo" className="hover:text-[#0a0a0a]">Live Demo</Link></li>
-                <li><Link href="/dashboard" className="hover:text-[#0a0a0a]">Dashboard</Link></li>
+              <p className="text-xs font-medium uppercase tracking-widest text-slate-500">Product</p>
+              <ul className="mt-4 space-y-2 text-sm text-slate-600">
+                <li><a href="#features" className="hover:text-slate-900">Features</a></li>
+                <li><a href="#pricing" className="hover:text-slate-900">Pricing</a></li>
+                <li><Link href="/demo" className="hover:text-slate-900">Live Demo</Link></li>
+                <li><Link href="/dashboard" className="hover:text-slate-900">Dashboard</Link></li>
               </ul>
             </div>
 
             <div>
-              <p className="text-xs font-medium uppercase tracking-widest text-gray-400">Company</p>
-              <ul className="mt-4 space-y-2 text-sm text-gray-600">
-                <li><a href="#company" className="hover:text-[#0a0a0a]">Company</a></li>
-                <li><Link href="/privacy" className="hover:text-[#0a0a0a]">Privacy Policy</Link></li>
-                <li><Link href="/terms" className="hover:text-[#0a0a0a]">Terms</Link></li>
-                <li><Link href="/login" className="hover:text-[#0a0a0a]">Log In</Link></li>
+              <p className="text-xs font-medium uppercase tracking-widest text-slate-500">Company</p>
+              <ul className="mt-4 space-y-2 text-sm text-slate-600">
+                <li><a href="#company" className="hover:text-slate-900">Company</a></li>
+                <li><Link href="/privacy" className="hover:text-slate-900">Privacy Policy</Link></li>
+                <li><Link href="/terms" className="hover:text-slate-900">Terms</Link></li>
+                <li><Link href="/login" className="hover:text-slate-900">Log In</Link></li>
               </ul>
             </div>
 
             <div>
-              <p className="text-xs font-medium uppercase tracking-widest text-gray-400">Contact</p>
-              <ul className="mt-4 space-y-2 text-sm text-gray-600">
+              <p className="text-xs font-medium uppercase tracking-widest text-slate-500">Contact</p>
+              <ul className="mt-4 space-y-2 text-sm text-slate-600">
                 <li>
-                  <a href="mailto:cypai.app@cypai.app" className="hover:text-[#0a0a0a]">
+                  <a href="mailto:cypai.app@cypai.app" className="hover:text-slate-900">
                     cypai.app@cypai.app
                   </a>
                 </li>
                 <li>
-                  <a href="https://wa.me/905338425559" target="_blank" rel="noopener noreferrer" className="hover:text-[#0a0a0a]">
+                  <a href="https://wa.me/905338425559" target="_blank" rel="noopener noreferrer" className="hover:text-slate-900">
                     +90 533 842 5559
                   </a>
                 </li>
@@ -715,7 +714,7 @@ export default function HomePage() {
             </div>
           </div>
 
-          <div className="mt-12 flex flex-col gap-2 border-t border-gray-100 pt-6 text-sm text-gray-500 sm:flex-row sm:items-center sm:justify-between">
+          <div className="mt-12 flex flex-col gap-2 border-t border-slate-200 pt-6 text-sm text-slate-500 sm:flex-row sm:items-center sm:justify-between">
             <p>© 2026 CypAI</p>
             <p>Made for Northern Cyprus 🇨🇾</p>
           </div>
@@ -739,19 +738,19 @@ export default function HomePage() {
 
 function TestimonialCard({ item }: { item: Testimonial }) {
   return (
-    <article className="rounded-2xl border border-gray-200 bg-white p-6">
-      <p className="text-xs font-medium uppercase tracking-widest text-gray-400">{item.company}</p>
-      <p className="mt-4 text-lg italic leading-relaxed text-gray-700">“{item.quote}”</p>
+    <article className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+      <p className="text-xs font-medium uppercase tracking-widest text-slate-500">{item.company}</p>
+      <p className="mt-4 text-lg italic leading-relaxed text-slate-700">“{item.quote}”</p>
       <div className="mt-6 flex items-center gap-3">
-        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-100 text-sm font-semibold text-[#0a0a0a]">
+        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 text-sm font-semibold text-slate-900">
           {item.name.charAt(0)}
         </div>
         <div>
-          <p className="text-sm font-semibold text-[#0a0a0a]">{item.name}</p>
-          <p className="text-xs text-gray-500">{item.role}</p>
+          <p className="text-sm font-semibold text-slate-900">{item.name}</p>
+          <p className="text-xs text-slate-500">{item.role}</p>
         </div>
       </div>
-      <span className="mt-5 inline-block rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-700">
+      <span className="mt-5 inline-block rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-700">
         {item.result}
       </span>
     </article>
