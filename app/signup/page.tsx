@@ -106,12 +106,12 @@ function SignupForm() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-slate-50">
+    <div className="flex min-h-screen flex-col bg-slate-50 dark:bg-gray-950">
       {/* Top bar */}
-      <header className="border-b border-slate-200 bg-white px-4 py-4">
+      <header className="border-b border-slate-200 bg-white px-4 py-4 dark:border-gray-700 dark:bg-gray-900">
         <div className="mx-auto flex max-w-lg items-center justify-between">
-          <a href="/" className="text-lg font-extrabold text-slate-900">🤖 CypAI</a>
-          <a href="/" className="text-sm font-semibold text-slate-500 transition hover:text-slate-800">← Back</a>
+          <a href="/" className="text-lg font-extrabold text-slate-900 dark:text-gray-50">🤖 CypAI</a>
+          <a href="/" className="text-sm font-semibold text-slate-500 transition hover:text-slate-800 dark:text-gray-400 dark:hover:text-gray-100">← Back</a>
         </div>
       </header>
 
@@ -138,7 +138,7 @@ function SignupForm() {
           </div>
 
           {/* Card */}
-          <div className="rounded-2xl border border-slate-200 bg-white p-7 shadow-sm">
+          <div className="rounded-2xl border border-slate-200 bg-white p-7 shadow-sm dark:border-gray-700 dark:bg-gray-900">
 
             {/* Plan badge */}
             <div className="mb-5 flex items-center gap-2">
@@ -148,94 +148,106 @@ function SignupForm() {
               </span>
             </div>
 
-            <h1 className="text-2xl font-extrabold text-slate-900">Set up your AI assistant</h1>
-            <p className="mt-1.5 text-sm text-slate-500">Takes 2 minutes. Live in 24 hours.</p>
+            <h1 className="text-2xl font-extrabold text-slate-900 dark:text-gray-50">Set up your AI assistant</h1>
+            <p className="mt-1.5 text-sm text-slate-500 dark:text-gray-400">Takes 2 minutes. Live in 24 hours.</p>
 
-            <form onSubmit={handleSubmit} noValidate className="mt-7 space-y-5">
+            <form onSubmit={handleSubmit} noValidate className="mt-7 grid grid-cols-1 gap-5 md:grid-cols-2">
 
               {/* Business Name */}
-              <Field
-                label="Business Name"
-                required
-                error={errors.businessName}
-              >
-                <input
-                  type="text"
-                  value={form.businessName}
-                  onChange={(e) => set('businessName', e.target.value)}
-                  placeholder="e.g. DriveEasy Car Rentals"
-                  className={inputCls(!!errors.businessName)}
-                />
-              </Field>
+              <div>
+                <Field
+                  label="Business Name"
+                  required
+                  error={errors.businessName}
+                >
+                  <input
+                    type="text"
+                    value={form.businessName}
+                    onChange={(e) => set('businessName', e.target.value)}
+                    placeholder="e.g. DriveEasy Car Rentals"
+                    className={inputCls(!!errors.businessName)}
+                  />
+                </Field>
+              </div>
 
               {/* Your Name */}
-              <Field label="Your Name" required error={errors.yourName}>
-                <input
-                  type="text"
-                  value={form.yourName}
-                  onChange={(e) => set('yourName', e.target.value)}
-                  placeholder="e.g. Ahmed Yilmaz"
-                  className={inputCls(!!errors.yourName)}
-                />
-              </Field>
+              <div>
+                <Field label="Your Name" required error={errors.yourName}>
+                  <input
+                    type="text"
+                    value={form.yourName}
+                    onChange={(e) => set('yourName', e.target.value)}
+                    placeholder="e.g. Ahmed Yilmaz"
+                    className={inputCls(!!errors.yourName)}
+                  />
+                </Field>
+              </div>
 
               {/* Email */}
-              <Field label="Email Address" required error={errors.email}>
-                <input
-                  type="email"
-                  value={form.email}
-                  onChange={(e) => set('email', e.target.value)}
-                  placeholder="cypai.app@cypai.app"
-                  className={inputCls(!!errors.email)}
-                />
-              </Field>
+              <div>
+                <Field label="Email Address" required error={errors.email}>
+                  <input
+                    type="email"
+                    value={form.email}
+                    onChange={(e) => set('email', e.target.value)}
+                    placeholder="cypai.app@cypai.app"
+                    className={inputCls(!!errors.email)}
+                  />
+                </Field>
+              </div>
 
               {/* WhatsApp */}
-              <Field label="WhatsApp Number" required error={errors.whatsapp}>
-                <input
-                  type="tel"
-                  value={form.whatsapp}
-                  onChange={(e) => set('whatsapp', e.target.value)}
-                  placeholder="+90 533 XXX XXXX"
-                  className={inputCls(!!errors.whatsapp)}
-                />
-              </Field>
+              <div>
+                <Field label="WhatsApp Number" required error={errors.whatsapp}>
+                  <input
+                    type="tel"
+                    value={form.whatsapp}
+                    onChange={(e) => set('whatsapp', e.target.value)}
+                    placeholder="+90 533 XXX XXXX"
+                    className={inputCls(!!errors.whatsapp)}
+                  />
+                </Field>
+              </div>
 
               {/* Business Type */}
-              <Field label="Business Type" required error={errors.businessType} htmlFor="business-type">
-                <select
-                  id="business-type"
-                  aria-label="Business Type"
-                  value={form.businessType}
-                  onChange={(e) => set('businessType', e.target.value)}
-                  className={selectCls(!!errors.businessType)}
-                >
-                  <option value="" disabled>Select your business type…</option>
-                  {BUSINESS_TYPES.map((t) => (
-                    <option key={t} value={t}>{t}</option>
-                  ))}
-                </select>
-              </Field>
+              <div>
+                <Field label="Business Type" required error={errors.businessType} htmlFor="business-type">
+                  <select
+                    id="business-type"
+                    aria-label="Business Type"
+                    value={form.businessType}
+                    onChange={(e) => set('businessType', e.target.value)}
+                    className={selectCls(!!errors.businessType)}
+                  >
+                    <option value="" disabled>Select your business type…</option>
+                    {BUSINESS_TYPES.map((t) => (
+                      <option key={t} value={t}>{t}</option>
+                    ))}
+                  </select>
+                </Field>
+              </div>
 
               {/* Website */}
-              <Field label="Business Website" sublabel="Optional" error={errors.website}>
-                <input
-                  type="url"
-                  value={form.website}
-                  onChange={(e) => set('website', e.target.value)}
-                  placeholder="https://yourbusiness.com"
-                  className={inputCls(false)}
-                />
-              </Field>
+              <div>
+                <Field label="Business Website" sublabel="Optional" error={errors.website}>
+                  <input
+                    type="url"
+                    value={form.website}
+                    onChange={(e) => set('website', e.target.value)}
+                    placeholder="https://yourbusiness.com"
+                    className={inputCls(false)}
+                  />
+                </Field>
+              </div>
 
               {/* What's included */}
-              <div className="rounded-xl border border-slate-100 bg-slate-50 px-4 py-3.5">
-                <p className="mb-2.5 text-[11px] font-semibold uppercase tracking-widest text-slate-400">
+              <div className="rounded-xl border border-slate-100 bg-slate-50 px-4 py-3.5 dark:border-gray-700 dark:bg-gray-800 md:col-span-2">
+                <p className="mb-2.5 text-[11px] font-semibold uppercase tracking-widest text-slate-400 dark:text-gray-500">
                   {plan.name} Plan includes
                 </p>
                 <ul className="space-y-1.5">
                   {plan.features.map((f) => (
-                    <li key={f} className="flex items-center gap-2 text-xs font-medium text-slate-700">
+                    <li key={f} className="flex items-center gap-2 text-xs font-medium text-slate-700 dark:text-gray-300">
                       <Check className="h-3.5 w-3.5 shrink-0 text-blue-500" />
                       {f}
                     </li>
@@ -245,13 +257,13 @@ function SignupForm() {
 
               <button
                 type="submit"
-                className="flex w-full items-center justify-center rounded-xl bg-blue-600 py-3.5 text-sm font-bold text-white shadow-sm transition hover:bg-blue-700 active:scale-[0.99]"
+                className="flex w-full items-center justify-center rounded-xl bg-blue-600 py-3.5 text-sm font-bold text-white shadow-sm transition hover:bg-blue-700 active:scale-[0.99] md:col-span-2"
               >
                 Continue to Payment →
               </button>
             </form>
 
-            <p className="mt-5 text-center text-xs text-slate-400">
+            <p className="mt-5 text-center text-xs text-slate-400 dark:text-gray-500">
               🔒 Your information is secure and never shared
             </p>
           </div>
@@ -265,20 +277,19 @@ function SignupForm() {
 
 function inputCls(hasError: boolean) {
   return [
-    'w-full rounded-xl border px-4 py-2.5 text-sm text-slate-900 outline-none transition',
-    'placeholder:text-slate-400',
+    'w-full rounded-xl border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-900 outline-none transition placeholder:text-gray-400 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:placeholder:text-gray-500',
     hasError
       ? 'border-red-400 bg-red-50 focus:border-red-500 focus:ring-2 focus:ring-red-500/15'
-      : 'border-slate-200 bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10',
+      : 'focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10',
   ].join(' ');
 }
 
 function selectCls(hasError: boolean) {
   return [
-    'w-full appearance-none rounded-xl border px-4 py-2.5 text-sm text-slate-900 outline-none transition',
+    'w-full appearance-none rounded-xl border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-900 outline-none transition dark:border-gray-600 dark:bg-gray-800 dark:text-white',
     hasError
       ? 'border-red-400 bg-red-50 focus:border-red-500 focus:ring-2 focus:ring-red-500/15'
-      : 'border-slate-200 bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10',
+      : 'focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10',
   ].join(' ');
 }
 
@@ -299,10 +310,10 @@ function Field({
 }) {
   return (
     <div className="flex flex-col gap-1.5">
-      <label htmlFor={htmlFor} className="flex items-center gap-1.5 text-sm font-semibold text-slate-700">
+      <label htmlFor={htmlFor} className="flex items-center gap-1.5 text-sm font-semibold text-slate-700 dark:text-gray-300">
         {label}
         {required && <span className="text-red-500">*</span>}
-        {sublabel && <span className="font-normal text-slate-400">({sublabel})</span>}
+        {sublabel && <span className="font-normal text-slate-400 dark:text-gray-500">({sublabel})</span>}
       </label>
       {children}
       {error && <p className="text-xs font-medium text-red-500">{error}</p>}

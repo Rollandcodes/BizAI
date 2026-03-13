@@ -56,6 +56,9 @@ import AnalyticsTab from '@/components/dashboard/AnalyticsTab';
 import AgencyTab from '@/components/dashboard/AgencyTab';
 import { PLANS } from '@/lib/plans';
 import { Analytics } from '@/lib/analytics';
+import ThemeToggle from '@/components/ThemeToggle';
+import LanguageSwitcher from '@/components/LanguageSwitcher';
+import { useUiTranslations } from '@/components/LanguageProvider';
 
 type CustomFaq = {
   question: string;
@@ -189,7 +192,7 @@ function emptyPayload(): DashboardPayload {
 
 function getPlanBadgeClasses(plan: BusinessRecord['plan']) {
   const styles: Record<BusinessRecord['plan'], string> = {
-    trial: 'bg-slate-100 text-slate-700',
+    trial: 'bg-slate-100 dark:bg-gray-950 text-slate-700',
     basic: 'bg-green-100 text-green-700',
     starter: 'bg-green-100 text-green-700',
     pro: 'bg-blue-100 text-blue-700',
@@ -259,16 +262,16 @@ function SkeletonBlock({ className = '' }: { className?: string }) {
 function DashboardSkeleton() {
   return (
     <div className="space-y-6">
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         {Array.from({ length: 4 }).map((_, index) => (
-          <div key={index} className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+          <div key={index} className="rounded-3xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-5 shadow-sm">
             <SkeletonBlock className="h-5 w-24" />
             <SkeletonBlock className="mt-4 h-9 w-20" />
           </div>
         ))}
       </div>
       <div className="grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
-        <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+        <div className="rounded-3xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-6 shadow-sm">
           <SkeletonBlock className="h-5 w-32" />
           <div className="mt-6 space-y-3">
             {Array.from({ length: 5 }).map((_, index) => (
@@ -276,7 +279,7 @@ function DashboardSkeleton() {
             ))}
           </div>
         </div>
-        <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+        <div className="rounded-3xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-6 shadow-sm">
           <SkeletonBlock className="h-5 w-28" />
           <SkeletonBlock className="mt-6 h-40 w-full" />
         </div>
@@ -303,14 +306,14 @@ function AccessGate({
       className="flex min-h-screen items-center justify-center bg-[radial-gradient(circle_at_top,rgba(37,99,235,0.12),transparent_40%),#e2e8f0] px-4"
       data-testid="dashboard-access-gate"
     >
-      <div className="w-full max-w-md rounded-3xl border border-slate-200 bg-white p-8 shadow-[0_24px_80px_rgba(15,23,42,0.12)]">
+      <div className="w-full max-w-md rounded-3xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-8 shadow-[0_24px_80px_rgba(15,23,42,0.12)]">
         <div className="mb-8 flex items-center gap-3">
           <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-900 text-white">
             <Bot className="h-6 w-6" />
           </div>
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-blue-600">CypAI Dashboard</p>
-            <h1 className="text-2xl font-extrabold text-slate-900">Enter your business email to access dashboard</h1>
+            <h1 className="text-2xl font-extrabold text-gray-900 dark:text-gray-50">Enter your business email to access dashboard</h1>
           </div>
         </div>
 
@@ -320,7 +323,7 @@ function AccessGate({
             value={email}
             onChange={(event) => onEmailChange(event.target.value)}
             placeholder="owner@business.com"
-            className="h-12 w-full rounded-2xl border border-slate-300 px-4 text-sm text-slate-900 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
+            className="h-12 w-full rounded-2xl border border-slate-300 px-4 text-sm text-gray-900 dark:text-gray-50 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
             onKeyDown={(event) => {
               if (event.key === 'Enter') {
                 event.preventDefault();
@@ -377,7 +380,7 @@ function UpgradeCheckoutButtons({
   const [{ isPending }] = usePayPalScriptReducer();
 
   if (isPending) {
-    return <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">Loading PayPal checkout...</div>;
+    return <div className="rounded-2xl border border-gray-200 dark:border-gray-700 bg-slate-50 px-4 py-3 text-sm text-gray-600 dark:text-gray-400">Loading PayPal checkout...</div>;
   }
 
   return (
@@ -429,6 +432,7 @@ function UpgradeCheckoutButtons({
 export default function DashboardPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const t = useUiTranslations();
 
   const [lookupEmail, setLookupEmail] = useState('');
   const [businessId, setBusinessId] = useState('');
@@ -499,6 +503,7 @@ export default function DashboardPage() {
 
   // ── Upgrade lock state ─────────────────────────────────────────────────
   const [upgradeLockTab, setUpgradeLockTab] = useState<TabKey | null>(null);
+  const [isTabletSidebarOpen, setIsTabletSidebarOpen] = useState(false);
 
   // ── Broadcast state ──────────────────────────────────────────────────────
   type BroadcastLead = { id: string; name: string; phone: string };
@@ -1101,9 +1106,26 @@ export default function DashboardPage() {
     score: Math.min(100, Math.max(0, Math.round(chartBase + (chartTrend === 'improving' ? (i - 3) * 1.5 : chartTrend === 'declining' ? (3 - i) * 1.5 : 0) + Math.sin(i) * 2))),
   }));
   const showOnboardingWizard = Boolean(business && business.onboarding_complete !== true && !onboardingDismissed);
+  const mobileTabs: Array<{ id: TabKey; label: string; icon: string }> = [
+    { id: 'overview', label: t('dashboard.overview'), icon: '📊' },
+    { id: 'conversations', label: t('dashboard.conversations'), icon: '💬' },
+    { id: 'crm', label: t('dashboard.crm'), icon: '👥' },
+    { id: 'bookings', label: t('dashboard.bookings'), icon: '📅' },
+    { id: 'settings', label: t('dashboard.settings'), icon: '⚙️' },
+  ];
+  const getDashboardLabel = (key: TabKey, fallback: string) => {
+    if (key === 'overview') return t('dashboard.overview');
+    if (key === 'conversations') return t('dashboard.conversations');
+    if (key === 'crm') return t('dashboard.crm');
+    if (key === 'bookings') return t('dashboard.bookings');
+    if (key === 'followups') return t('dashboard.followups');
+    if (key === 'analytics') return t('dashboard.analytics');
+    if (key === 'settings') return t('dashboard.settings');
+    return fallback;
+  };
 
   return (
-    <div className="min-h-screen bg-slate-100 text-slate-900 lg:flex">
+    <div className="min-h-screen bg-slate-100 dark:bg-gray-950 text-gray-900 dark:text-gray-50 dark:bg-gray-950 dark:text-white lg:flex">
       {toast ? <Toast toast={toast} /> : null}
       {showOnboardingWizard && business ? (
         <OnboardingWizard
@@ -1114,6 +1136,63 @@ export default function DashboardPage() {
             setToast({ message: 'Onboarding complete! Your dashboard is ready.', tone: 'success' });
           }}
         />
+      ) : null}
+
+      {isTabletSidebarOpen ? (
+        <div className="fixed inset-0 z-50 hidden md:block lg:hidden">
+          <button
+            type="button"
+            className="absolute inset-0 bg-black/40"
+            onClick={() => setIsTabletSidebarOpen(false)}
+            aria-label="Close sidebar"
+          />
+          <aside className="relative h-full w-72 bg-[#0f172a] text-white shadow-2xl">
+            <div className="flex h-20 items-center justify-between px-6 text-xl font-extrabold">
+              CypAI
+              <button
+                type="button"
+                className="rounded-full p-2 text-white/80 hover:bg-white dark:bg-gray-900/10 hover:text-white"
+                onClick={() => setIsTabletSidebarOpen(false)}
+                aria-label="Close menu"
+              >
+                ✕
+              </button>
+            </div>
+            <nav className="space-y-1 overflow-y-auto px-4 py-4">
+              {tabItems.map(({ key, label, Icon, plans }) => {
+                const active = activeTab === key;
+                const normalizedPlan: SidebarPlan =
+                  business.plan === 'basic' ? 'starter' : (business.plan as SidebarPlan);
+                const isLocked = !plans.includes(normalizedPlan);
+
+                return (
+                  <button
+                    key={`tablet-${key}`}
+                    type="button"
+                    onClick={() => {
+                      if (isLocked) {
+                        setUpgradeLockTab(key);
+                      } else {
+                        setActiveTab(key);
+                        setIsTabletSidebarOpen(false);
+                      }
+                    }}
+                    className={`flex w-full items-center gap-3 rounded-full px-4 py-3 text-sm font-semibold transition ${
+                      active
+                        ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/20'
+                        : isLocked
+                          ? 'text-gray-600 dark:text-gray-400 hover:bg-white dark:bg-gray-900/5'
+                          : 'text-slate-300 hover:bg-white dark:bg-gray-900/5 hover:text-white'
+                    }`}
+                  >
+                    <Icon className="h-4 w-4" />
+                    {getDashboardLabel(key, label)}
+                  </button>
+                );
+              })}
+            </nav>
+          </aside>
+        </div>
       ) : null}
 
       <aside className="hidden w-60 shrink-0 flex-col bg-[#0f172a] text-white lg:flex">
@@ -1142,8 +1221,8 @@ export default function DashboardPage() {
                   active
                     ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/20'
                     : isLocked
-                      ? 'text-slate-600 hover:bg-white/5'
-                      : 'text-slate-300 hover:bg-white/5 hover:text-white'
+                      ? 'text-gray-600 dark:text-gray-400 hover:bg-white dark:bg-gray-900/5'
+                      : 'text-slate-300 hover:bg-white dark:bg-gray-900/5 hover:text-white'
                 }`}
               >
                 <span className="relative inline-flex">
@@ -1157,20 +1236,20 @@ export default function DashboardPage() {
                     </span>
                   )}
                 </span>
-                {label}
+                {getDashboardLabel(key, label)}
               </button>
             );
           })}
         </nav>
 
-        <div className="mx-4 h-px bg-white/10" />
+        <div className="mx-4 h-px bg-white dark:bg-gray-900/10" />
 
         <div className="p-4">
           <p className="mb-2 truncate px-4 text-xs font-medium text-slate-400">{business?.owner_email}</p>
           <button
             type="button"
             onClick={handleLogout}
-            className="flex w-full items-center gap-3 rounded-full px-4 py-3 text-sm font-semibold text-slate-300 transition hover:bg-white/5 hover:text-white"
+            className="flex w-full items-center gap-3 rounded-full px-4 py-3 text-sm font-semibold text-slate-300 transition hover:bg-white dark:bg-gray-900/5 hover:text-white"
           >
             <LogOut className="h-4 w-4" />
             Logout
@@ -1179,12 +1258,19 @@ export default function DashboardPage() {
       </aside>
 
       <div className="flex min-h-screen flex-1 flex-col">
-        <header className="border-b border-slate-200 bg-white px-4 py-4 sm:px-6 lg:px-8">
+        <header className="border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-4 py-4 dark:border-gray-700 dark:bg-gray-900 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between gap-4">
             <div>
               <div className="flex items-center gap-3">
-                <h1 className="text-2xl font-extrabold text-slate-900">
-                  Good morning, {business?.business_name || 'CypAI'} 👋
+                <button
+                  type="button"
+                  className="hidden rounded-full border border-gray-200 dark:border-gray-700 px-3 py-1.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 dark:border-gray-700 dark:text-gray-200 dark:hover:bg-gray-800 md:inline-flex lg:hidden"
+                  onClick={() => setIsTabletSidebarOpen(true)}
+                >
+                  Menu
+                </button>
+                <h1 className="text-2xl font-extrabold text-gray-900 dark:text-gray-50 dark:text-gray-50">
+                  {t('dashboard.welcome')}, {business?.business_name || 'CypAI'} 👋
                 </h1>
                 <span className={`hidden rounded-full px-3 py-1 text-xs font-semibold sm:inline-flex ${getPlanBadgeClasses(business.plan)}`}>
                   {currentPlanName}
@@ -1196,14 +1282,16 @@ export default function DashboardPage() {
                 ) : null}
               </div>
             </div>
-            <div className="flex items-center gap-3">
-              <span className="hidden rounded-full bg-slate-100 px-3 py-1.5 text-sm font-medium text-slate-600 sm:inline-flex">
+            <div className="flex items-center gap-2">
+              <LanguageSwitcher />
+              <ThemeToggle />
+              <span className="hidden rounded-full bg-slate-100 dark:bg-gray-950 px-3 py-1.5 text-sm font-medium text-gray-600 dark:text-gray-400 sm:inline-flex">
                 {business?.owner_email}
               </span>
               <button
                 type="button"
                 onClick={handleLogout}
-                className="inline-flex items-center gap-2 rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 lg:hidden"
+                className="inline-flex items-center gap-2 rounded-full border border-gray-200 dark:border-gray-700 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 lg:hidden"
               >
                 <LogOut className="h-4 w-4" />
                 Logout
@@ -1220,7 +1308,7 @@ export default function DashboardPage() {
               {activeTab === 'overview' ? (
                 <section className="space-y-6">
                   <div data-testid="dashboard-overview-panel" />
-                  <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+                  <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
                     <StatCard label="Total Conversations" value={String(stats?.totalConversations ?? 0)} />
                     <StatCard label="Leads Captured" value={String(stats?.leadsCaptured ?? 0)} />
                     <StatCard label="This Month's Messages" value={String(stats?.monthlyMessages ?? 0)} />
@@ -1232,18 +1320,18 @@ export default function DashboardPage() {
                   </div>
 
                   {/* Customer Satisfaction */}
-                  <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+                  <div className="rounded-3xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-6 shadow-sm">
                     <div className="flex items-center justify-between gap-4">
                       <div className="flex items-center gap-2">
                         <Star className="h-5 w-5 text-amber-400 fill-amber-400" />
-                        <h2 className="text-lg font-bold text-slate-900">Customer Satisfaction</h2>
+                        <h2 className="text-lg font-bold text-gray-900 dark:text-gray-50">Customer Satisfaction</h2>
                       </div>
                       <span className="text-sm text-slate-400">This month</span>
                     </div>
 
                     {satisfactionLoading ? (
                       <div className="mt-6 flex items-center gap-2 text-sm text-slate-400">
-                        <span className="h-4 w-4 animate-spin rounded-full border-2 border-slate-200 border-t-amber-400" />
+                        <span className="h-4 w-4 animate-spin rounded-full border-2 border-gray-200 dark:border-gray-700 border-t-amber-400" />
                         Loading ratings…
                       </div>
                     ) : !satisfactionData ? (
@@ -1254,7 +1342,7 @@ export default function DashboardPage() {
                       <div className="mt-5 grid gap-5 sm:grid-cols-[auto_1fr]">
                         {/* Score display */}
                         <div className="flex flex-col items-center justify-center gap-1 rounded-2xl bg-amber-50 px-6 py-4">
-                          <span className="text-5xl font-extrabold text-slate-900">{satisfactionData.avgRating}</span>
+                          <span className="text-5xl font-extrabold text-gray-900 dark:text-gray-50">{satisfactionData.avgRating}</span>
                           <span className="text-sm font-medium text-slate-400">out of 5</span>
                           <div className="mt-1 flex gap-0.5">
                             {[1, 2, 3, 4, 5].map((star) => (
@@ -1276,9 +1364,9 @@ export default function DashboardPage() {
                             const pct = satisfactionData.totalRatings > 0 ? (count / satisfactionData.totalRatings) * 100 : 0;
                             return (
                               <div key={r} className="flex items-center gap-2 text-sm">
-                                <span className="w-3 shrink-0 text-right text-slate-500">{r}</span>
+                                <span className="w-3 shrink-0 text-right text-gray-500 dark:text-gray-400">{r}</span>
                                 <Star className="h-3.5 w-3.5 shrink-0 fill-amber-400 text-amber-400" />
-                                <div className="h-2 flex-1 overflow-hidden rounded-full bg-slate-100">
+                                <div className="h-2 flex-1 overflow-hidden rounded-full bg-slate-100 dark:bg-gray-950">
                                   <div
                                     className="h-full rounded-full bg-amber-400 transition-all duration-500"
                                     style={{ width: `${pct}%` }}
@@ -1294,11 +1382,11 @@ export default function DashboardPage() {
                   </div>
 
                   <div className="grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
-                    <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+                    <div className="rounded-3xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-6 shadow-sm">
                       <div className="flex items-center justify-between gap-4">
                         <div>
-                          <h2 className="text-lg font-bold text-slate-900">Recent conversations</h2>
-                          <p className="mt-1 text-sm text-slate-500">Your latest 5 customer chats.</p>
+                          <h2 className="text-lg font-bold text-gray-900 dark:text-gray-50">Recent conversations</h2>
+                          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Your latest 5 customer chats.</p>
                         </div>
                         <button
                           type="button"
@@ -1310,14 +1398,14 @@ export default function DashboardPage() {
                         </button>
                       </div>
 
-                      <div className="mt-6 overflow-hidden rounded-2xl border border-slate-200">
+                      <div className="mt-6 overflow-hidden rounded-2xl border border-gray-200 dark:border-gray-700">
                         {conversations.length === 0 ? (
-                          <div className="px-6 py-10 text-center text-sm text-slate-500">
+                          <div className="px-6 py-10 text-center text-sm text-gray-500 dark:text-gray-400">
                             No conversations yet. Your AI conversations will appear here once customers start chatting.
                           </div>
                         ) : (
                           <table className="min-w-full text-left text-sm">
-                            <thead className="bg-slate-50 text-slate-500">
+                            <thead className="bg-slate-50 text-gray-500 dark:text-gray-400">
                               <tr>
                                 <th className="px-4 py-3 font-semibold">Time</th>
                                 <th className="px-4 py-3 font-semibold">Preview</th>
@@ -1326,11 +1414,11 @@ export default function DashboardPage() {
                             </thead>
                             <tbody className="divide-y divide-slate-100">
                               {conversations.slice(0, 5).map((conversation) => (
-                                <tr key={conversation.id} className="bg-white">
-                                  <td className="px-4 py-3 text-slate-600">{formatDate(conversation.created_at)}</td>
-                                  <td className="px-4 py-3 text-slate-900">{getConversationPreview(conversation)}</td>
+                                <tr key={conversation.id} className="bg-white dark:bg-gray-900">
+                                  <td className="px-4 py-3 text-gray-600 dark:text-gray-400">{formatDate(conversation.created_at)}</td>
+                                  <td className="px-4 py-3 text-gray-900 dark:text-gray-50">{getConversationPreview(conversation)}</td>
                                   <td className="px-4 py-3">
-                                    <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${conversation.lead_captured ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-600'}`}>
+                                    <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${conversation.lead_captured ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 dark:bg-gray-950 text-gray-600 dark:text-gray-400'}`}>
                                       {conversation.lead_captured ? 'Yes' : 'No'}
                                     </span>
                                   </td>
@@ -1342,54 +1430,54 @@ export default function DashboardPage() {
                       </div>
                     </div>
 
-                    <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+                    <div className="rounded-3xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-6 shadow-sm">
                       <div className="flex items-center justify-between gap-4">
                         <div>
-                          <h2 className="text-lg font-bold text-slate-900">Your Widget Code</h2>
-                          <p className="mt-1 text-sm text-slate-500">Copy this into your website before the closing body tag.</p>
+                          <h2 className="text-lg font-bold text-gray-900 dark:text-gray-50">Your Widget Code</h2>
+                          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Copy this into your website before the closing body tag.</p>
                         </div>
                         <button
                           type="button"
                           onClick={() => {
                             void handleCopyWidgetCode();
                           }}
-                          className="inline-flex items-center gap-2 rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+                          className="inline-flex items-center gap-2 rounded-full border border-gray-200 dark:border-gray-700 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
                         >
                           <Copy className="h-4 w-4" />
                           Copy
                         </button>
                       </div>
 
-                      <pre className="mt-6 overflow-x-auto rounded-2xl bg-slate-100 p-4 text-xs leading-6 text-slate-800">
+                      <pre className="mt-6 overflow-x-auto rounded-2xl bg-slate-100 dark:bg-gray-950 p-4 text-xs leading-6 text-slate-800">
                         <code>{widgetCode}</code>
                       </pre>
                     </div>
                   </div>
 
                   {/* QR Code */}
-                  <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+                  <div className="rounded-3xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-6 shadow-sm">
                     <div className="flex items-center gap-2">
                       <QrCode className="h-5 w-5 text-blue-600" />
-                      <h2 className="text-lg font-bold text-slate-900">Your Business QR Code</h2>
+                      <h2 className="text-lg font-bold text-gray-900 dark:text-gray-50">Your Business QR Code</h2>
                     </div>
-                    <p className="mt-1 text-sm text-slate-500">
+                    <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
                       Print this and place it on your desk, door, or receipts. Customers scan it to instantly chat with your AI.
                     </p>
 
                     <div className="mt-6 flex flex-col gap-6 sm:flex-row sm:items-start">
-                      <div ref={qrRef} className="flex shrink-0 flex-col items-center gap-3 rounded-2xl border-2 border-slate-200 bg-white p-5">
+                      <div ref={qrRef} className="flex shrink-0 flex-col items-center gap-3 rounded-2xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-5">
                         <QRCode
                           value={`https://cypai.app/chat/${business.id}`}
                           size={160}
                           fgColor="#0f172a"
                         />
-                        <p className="text-center text-xs font-semibold text-slate-600">{business.business_name}</p>
+                        <p className="text-center text-xs font-semibold text-gray-600 dark:text-gray-400">{business.business_name}</p>
                       </div>
 
                       <div className="flex flex-col justify-center gap-3">
                         <div>
-                          <p className="font-semibold text-slate-900">{business.business_name}</p>
-                          <p className="text-sm text-slate-500">Scan to chat with our AI assistant</p>
+                          <p className="font-semibold text-gray-900 dark:text-gray-50">{business.business_name}</p>
+                          <p className="text-sm text-gray-500 dark:text-gray-400">Scan to chat with our AI assistant</p>
                         </div>
                         <div className="flex flex-col gap-2">
                           <button
@@ -1403,7 +1491,7 @@ export default function DashboardPage() {
                           <button
                             type="button"
                             onClick={handlePrintQR}
-                            className="inline-flex items-center justify-center gap-2 rounded-full border border-slate-200 px-5 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+                            className="inline-flex items-center justify-center gap-2 rounded-full border border-gray-200 dark:border-gray-700 px-5 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
                           >
                             <Printer className="h-4 w-4" />
                             Print QR Code
@@ -1420,16 +1508,16 @@ export default function DashboardPage() {
               ) : null}
 
               {activeTab === 'conversations' ? (
-                <section className="grid gap-6 xl:grid-cols-[360px_minmax(0,1fr)]">
+                <section className="grid gap-6 lg:grid-cols-[360px_minmax(0,1fr)]">
                   <div data-testid="dashboard-conversations-panel" />
-                  <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
-                    <div className="border-b border-slate-200 px-5 py-4">
-                      <h2 className="text-lg font-bold text-slate-900">Conversations</h2>
-                      <p className="mt-1 text-sm text-slate-500">All customer conversations for this business.</p>
+                  <div className="overflow-hidden rounded-3xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm">
+                    <div className="border-b border-gray-200 dark:border-gray-700 px-5 py-4">
+                      <h2 className="text-lg font-bold text-gray-900 dark:text-gray-50">Conversations</h2>
+                      <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">All customer conversations for this business.</p>
                     </div>
 
                     {conversations.length === 0 ? (
-                      <div className="px-5 py-10 text-sm text-slate-500">No conversations yet. Your AI inbox will populate automatically.</div>
+                      <div className="px-5 py-10 text-sm text-gray-500 dark:text-gray-400">No conversations yet. Your AI inbox will populate automatically.</div>
                     ) : (
                       <div className="max-h-[70vh] overflow-y-auto">
                         {conversations.map((conversation) => (
@@ -1437,31 +1525,31 @@ export default function DashboardPage() {
                             key={conversation.id}
                             type="button"
                             onClick={() => setSelectedConversationId(conversation.id)}
-                            className={`w-full border-b border-slate-100 px-5 py-4 text-left transition last:border-b-0 hover:bg-slate-50 ${selectedConversationId === conversation.id ? 'bg-blue-50' : 'bg-white'}`}
+                            className={`w-full border-b border-slate-100 px-5 py-4 text-left transition last:border-b-0 hover:bg-slate-50 ${selectedConversationId === conversation.id ? 'bg-blue-50' : 'bg-white dark:bg-gray-900'}`}
                           >
                             <div className="flex items-center justify-between gap-2">
-                              <p className="truncate text-sm font-semibold text-slate-900">
+                              <p className="truncate text-sm font-semibold text-gray-900 dark:text-gray-50">
                                 {conversation.customer_name || 'Unknown visitor'}
                               </p>
-                              <span className="text-xs text-slate-500">{formatDate(conversation.created_at)}</span>
+                              <span className="text-xs text-gray-500 dark:text-gray-400">{formatDate(conversation.created_at)}</span>
                             </div>
-                            <p className="mt-1 truncate text-sm text-slate-600">{getConversationPreview(conversation)}</p>
+                            <p className="mt-1 truncate text-sm text-gray-600 dark:text-gray-400">{getConversationPreview(conversation)}</p>
                           </button>
                         ))}
                       </div>
                     )}
                   </div>
 
-                  <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
+                  <div className="overflow-hidden rounded-3xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm">
                     {currentConversation ? (
                       <>
-                        <div className="border-b border-slate-200 px-6 py-4">
+                        <div className="border-b border-gray-200 dark:border-gray-700 px-6 py-4">
                           <div className="flex items-center justify-between gap-4">
                             <div>
-                              <h3 className="text-lg font-bold text-slate-900">{currentConversation.customer_name || 'Unknown visitor'}</h3>
-                              <p className="mt-1 text-sm text-slate-500">{currentConversation.customer_phone || 'Phone not captured yet'}</p>
+                              <h3 className="text-lg font-bold text-gray-900 dark:text-gray-50">{currentConversation.customer_name || 'Unknown visitor'}</h3>
+                              <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">{currentConversation.customer_phone || 'Phone not captured yet'}</p>
                             </div>
-                            <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${currentConversation.lead_captured ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-600'}`}>
+                            <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${currentConversation.lead_captured ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 dark:bg-gray-950 text-gray-600 dark:text-gray-400'}`}>
                               {currentConversation.lead_captured ? 'Lead captured' : 'No lead yet'}
                             </span>
                           </div>
@@ -1471,18 +1559,18 @@ export default function DashboardPage() {
                           {(currentConversation.messages || []).length > 0 ? (
                             currentConversation.messages?.map((message, index) => (
                               <div key={`${currentConversation.id}-${index}`} className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                                <div className={`max-w-[75%] rounded-2xl px-4 py-3 text-sm leading-6 ${message.role === 'user' ? 'rounded-br-sm bg-blue-600 text-white' : 'rounded-bl-sm bg-white text-slate-700 shadow-sm'}`}>
+                                <div className={`max-w-[75%] rounded-2xl px-4 py-3 text-sm leading-6 ${message.role === 'user' ? 'rounded-br-sm bg-blue-600 text-white' : 'rounded-bl-sm bg-white dark:bg-gray-900 text-slate-700 shadow-sm'}`}>
                                   {message.content}
                                 </div>
                               </div>
                             ))
                           ) : (
-                            <div className="text-sm text-slate-500">No messages stored for this conversation.</div>
+                            <div className="text-sm text-gray-500 dark:text-gray-400">No messages stored for this conversation.</div>
                           )}
                         </div>
                       </>
                     ) : (
-                      <div className="flex h-full min-h-[300px] items-center justify-center text-sm text-slate-500">
+                      <div className="flex h-full min-h-[300px] items-center justify-center text-sm text-gray-500 dark:text-gray-400">
                         Select a conversation to view the full transcript.
                       </div>
                     )}
@@ -1508,7 +1596,7 @@ export default function DashboardPage() {
                       placeholder="Type your message… e.g. 🚗 Weekend special! SUV 20% off this Friday–Sunday. Reply to book!"
                       value={broadcastMessage}
                       onChange={(e) => setBroadcastMessage(e.target.value)}
-                      className="mt-4 w-full resize-none rounded-2xl border border-white/30 bg-white/20 p-3 text-sm text-white placeholder-green-200 outline-none focus:border-white/60 focus:ring-0"
+                      className="mt-4 w-full resize-none rounded-2xl border border-white/30 bg-white dark:bg-gray-900/20 p-3 text-sm text-white placeholder-green-200 outline-none focus:border-white/60 focus:ring-0"
                     />
                     <div className="mt-3 flex items-center justify-between gap-4">
                       <span className="text-sm text-green-100">
@@ -1518,7 +1606,7 @@ export default function DashboardPage() {
                         type="button"
                         onClick={() => void handleBroadcast()}
                         disabled={!broadcastMessage.trim() || broadcastSending}
-                        className="inline-flex items-center gap-2 rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-emerald-700 shadow transition hover:bg-green-50 disabled:opacity-50"
+                        className="inline-flex items-center gap-2 rounded-full bg-white dark:bg-gray-900 px-5 py-2.5 text-sm font-semibold text-emerald-700 shadow transition hover:bg-green-50 disabled:opacity-50"
                       >
                         <Send className="h-4 w-4" />
                         {broadcastSending ? 'Preparing…' : 'Send Broadcast →'}
@@ -1528,8 +1616,8 @@ export default function DashboardPage() {
 
                   <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                     <div>
-                      <h2 className="text-2xl font-extrabold text-slate-900">Leads</h2>
-                      <p className="mt-1 text-sm text-slate-500">All customers captured by your AI assistant.</p>
+                      <h2 className="text-2xl font-extrabold text-gray-900 dark:text-gray-50">Leads</h2>
+                      <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">All customers captured by your AI assistant.</p>
                     </div>
                     <button
                       type="button"
@@ -1537,22 +1625,22 @@ export default function DashboardPage() {
                         exportLeadsCsv(leads);
                         setToast({ message: 'Leads exported to CSV.', tone: 'success' });
                       }}
-                      className="inline-flex items-center justify-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+                      className="inline-flex items-center justify-center gap-2 rounded-full border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
                     >
                       <Download className="h-4 w-4" />
                       Export CSV
                     </button>
                   </div>
 
-                  <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
+                  <div className="overflow-hidden rounded-3xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm">
                     {leads.length === 0 ? (
-                      <div className="px-6 py-16 text-center text-sm text-slate-500">
+                      <div className="px-6 py-16 text-center text-sm text-gray-500 dark:text-gray-400">
                         No leads yet. Your AI will capture leads automatically when customers chat.
                       </div>
                     ) : (
                       <div className="overflow-x-auto">
                         <table className="min-w-full text-left text-sm">
-                          <thead className="bg-slate-50 text-slate-500">
+                          <thead className="bg-slate-50 text-gray-500 dark:text-gray-400">
                             <tr>
                               <th className="px-4 py-3 font-semibold">Date</th>
                               <th className="px-4 py-3 font-semibold">Customer Name</th>
@@ -1563,11 +1651,11 @@ export default function DashboardPage() {
                           </thead>
                           <tbody className="divide-y divide-slate-100">
                             {leads.map((lead) => (
-                              <tr key={lead.id} className="bg-white">
-                                <td className="px-4 py-3 text-slate-600">{formatDate(lead.created_at)}</td>
-                                <td className="px-4 py-3 font-semibold text-slate-900">{lead.customer_name || 'Unknown'}</td>
-                                <td className="px-4 py-3 text-slate-600">{lead.customer_phone || '-'}</td>
-                                <td className="max-w-sm px-4 py-3 text-slate-600">{getConversationPreview(lead)}</td>
+                              <tr key={lead.id} className="bg-white dark:bg-gray-900">
+                                <td className="px-4 py-3 text-gray-600 dark:text-gray-400">{formatDate(lead.created_at)}</td>
+                                <td className="px-4 py-3 font-semibold text-gray-900 dark:text-gray-50">{lead.customer_name || 'Unknown'}</td>
+                                <td className="px-4 py-3 text-gray-600 dark:text-gray-400">{lead.customer_phone || '-'}</td>
+                                <td className="max-w-sm px-4 py-3 text-gray-600 dark:text-gray-400">{getConversationPreview(lead)}</td>
                                 <td className="px-4 py-3">
                                   <label className="inline-flex items-center gap-2 text-sm font-medium text-slate-700">
                                     <input
@@ -1592,17 +1680,17 @@ export default function DashboardPage() {
                   </div>
 
                   {/* Broadcast History */}
-                  <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
+                  <div className="overflow-hidden rounded-3xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm">
                     <div className="border-b border-slate-100 px-6 py-4">
-                      <h3 className="font-bold text-slate-900">Broadcast History</h3>
-                      <p className="mt-0.5 text-sm text-slate-500">Last 5 broadcasts sent to your leads.</p>
+                      <h3 className="font-bold text-gray-900 dark:text-gray-50">Broadcast History</h3>
+                      <p className="mt-0.5 text-sm text-gray-500 dark:text-gray-400">Last 5 broadcasts sent to your leads.</p>
                     </div>
                     {broadcastHistoryLoading ? (
                       <div className="flex h-24 items-center justify-center">
                         <div className="h-6 w-6 animate-spin rounded-full border-4 border-blue-600 border-t-transparent" />
                       </div>
                     ) : broadcastHistory.length === 0 ? (
-                      <div className="px-6 py-8 text-center text-sm text-slate-500">No broadcasts sent yet.</div>
+                      <div className="px-6 py-8 text-center text-sm text-gray-500 dark:text-gray-400">No broadcasts sent yet.</div>
                     ) : (
                       <div className="divide-y divide-slate-100">
                         {broadcastHistory.map((item) => (
@@ -1623,20 +1711,20 @@ export default function DashboardPage() {
                   {/* Broadcast Modal */}
                   {broadcastModal ? (
                     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-                      <div className="relative w-full max-w-lg rounded-3xl bg-white p-6 shadow-2xl">
+                      <div className="relative w-full max-w-lg rounded-3xl bg-white dark:bg-gray-900 p-6 shadow-2xl">
                         <button
                           type="button"
                           aria-label="Close"
                           onClick={() => { setBroadcastModal(null); setBroadcastMessage(''); }}
-                          className="absolute right-4 top-4 rounded-full p-2 text-slate-400 hover:bg-slate-100"
+                          className="absolute right-4 top-4 rounded-full p-2 text-slate-400 hover:bg-slate-100 dark:bg-gray-950"
                         >
                           <X className="h-5 w-5" />
                         </button>
-                        <h3 className="flex items-center gap-2 text-lg font-bold text-slate-900">
+                        <h3 className="flex items-center gap-2 text-lg font-bold text-gray-900 dark:text-gray-50">
                           <MessageSquare className="h-5 w-5 text-emerald-600" />
                           Send Broadcast via WhatsApp
                         </h3>
-                        <p className="mt-1 text-sm text-slate-500">
+                        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
                           Click each button to open WhatsApp and send your message. Counter updates as you go.
                         </p>
 
@@ -1645,7 +1733,7 @@ export default function DashboardPage() {
                         </div>
 
                         <div className="mt-3 flex items-center justify-between text-sm font-semibold">
-                          <span className="text-slate-600">Sent: {broadcastSentCount}/{broadcastModal.length}</span>
+                          <span className="text-gray-600 dark:text-gray-400">Sent: {broadcastSentCount}/{broadcastModal.length}</span>
                           {broadcastSentCount === broadcastModal.length && broadcastModal.length > 0 && (
                             <span className="text-emerald-600">✅ Broadcast complete!</span>
                           )}
@@ -1665,7 +1753,7 @@ export default function DashboardPage() {
                                 className={`flex items-center justify-between rounded-2xl border px-4 py-3 text-sm font-semibold transition ${
                                   sent
                                     ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
-                                    : 'border-slate-200 bg-white text-slate-800 hover:border-green-300 hover:bg-green-50'
+                                    : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-slate-800 hover:border-green-300 hover:bg-green-50'
                                 }`}
                               >
                                 <span>{lead.name} · {lead.phone}</span>
@@ -1682,7 +1770,7 @@ export default function DashboardPage() {
                         <button
                           type="button"
                           onClick={() => { setBroadcastModal(null); setBroadcastMessage(''); }}
-                          className="mt-5 w-full rounded-full border border-slate-200 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50"
+                          className="mt-5 w-full rounded-full border border-gray-200 dark:border-gray-700 py-2.5 text-sm font-semibold text-gray-600 dark:text-gray-400 transition hover:bg-slate-50"
                         >
                           Close
                         </button>
@@ -1702,11 +1790,11 @@ export default function DashboardPage() {
               {activeTab === 'settings' ? (
                 <section className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_380px]">
                   <div data-testid="dashboard-settings-panel" />
-                  <form onSubmit={handleSaveSettings} className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+                  <form onSubmit={handleSaveSettings} className="rounded-3xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-6 shadow-sm">
                     <div className="flex items-start justify-between gap-4">
                       <div>
-                        <h2 className="text-2xl font-extrabold text-slate-900">Settings</h2>
-                        <p className="mt-1 text-sm text-slate-500">Update your business profile, AI behavior, and chat widget appearance.</p>
+                        <h2 className="text-2xl font-extrabold text-gray-900 dark:text-gray-50">Settings</h2>
+                        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Update your business profile, AI behavior, and chat widget appearance.</p>
                       </div>
                       <button
                         type="submit"
@@ -1755,7 +1843,7 @@ export default function DashboardPage() {
                           onChange={(event) => setSettingsForm((current) => ({ ...current, primaryColor: event.target.value }))}
                           className="h-10 w-14 cursor-pointer rounded-xl border-0 bg-transparent p-0"
                         />
-                        <span className="h-8 w-8 rounded-full border border-slate-200" style={{ backgroundColor: settingsForm.primaryColor }} />
+                        <span className="h-8 w-8 rounded-full border border-gray-200 dark:border-gray-700" style={{ backgroundColor: settingsForm.primaryColor }} />
                         <span className="text-sm font-medium text-slate-700">{settingsForm.primaryColor}</span>
                       </div>
                     </div>
@@ -1775,13 +1863,13 @@ export default function DashboardPage() {
                     <div className="mt-5">
                       <div className="mb-3 flex items-center justify-between gap-4">
                         <div>
-                          <h3 className="text-sm font-semibold text-slate-900">Custom FAQs</h3>
-                          <p className="text-sm text-slate-500">Add question and answer pairs to guide your AI responses.</p>
+                          <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-50">Custom FAQs</h3>
+                          <p className="text-sm text-gray-500 dark:text-gray-400">Add question and answer pairs to guide your AI responses.</p>
                         </div>
                         <button
                           type="button"
                           onClick={addFaq}
-                          className="inline-flex items-center gap-2 rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+                          className="inline-flex items-center gap-2 rounded-full border border-gray-200 dark:border-gray-700 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
                         >
                           <Plus className="h-4 w-4" />
                           Add FAQ
@@ -1790,13 +1878,13 @@ export default function DashboardPage() {
 
                       <div className="space-y-4">
                         {settingsForm.customFaqs.map((faq, index) => (
-                          <div key={`${index}-${faq.question}`} className="rounded-2xl border border-slate-200 p-4">
+                          <div key={`${index}-${faq.question}`} className="rounded-2xl border border-gray-200 dark:border-gray-700 p-4">
                             <div className="mb-3 flex items-center justify-between gap-3">
-                              <p className="text-sm font-semibold text-slate-900">FAQ {index + 1}</p>
+                              <p className="text-sm font-semibold text-gray-900 dark:text-gray-50">FAQ {index + 1}</p>
                               <button
                                 type="button"
                                 onClick={() => removeFaq(index)}
-                                className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-slate-200 text-slate-500 transition hover:bg-slate-50"
+                                className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 transition hover:bg-slate-50"
                                 aria-label={`Remove FAQ ${index + 1}`}
                               >
                                 <X className="h-4 w-4" />
@@ -1824,10 +1912,10 @@ export default function DashboardPage() {
                   </form>
 
                   <div data-testid="dashboard-subscription-panel" />
-                  <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-                    <h3 className="text-lg font-bold text-slate-900">Live widget preview</h3>
-                    <p className="mt-1 text-sm text-slate-500">Preview how your chat bubble and welcome message will look.</p>
-                    <div className="mt-5 h-[560px] overflow-hidden rounded-3xl border border-slate-200 bg-slate-50">
+                  <div className="rounded-3xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-6 shadow-sm">
+                    <h3 className="text-lg font-bold text-gray-900 dark:text-gray-50">Live widget preview</h3>
+                    <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Preview how your chat bubble and welcome message will look.</p>
+                    <div className="mt-5 h-[560px] overflow-hidden rounded-3xl border border-gray-200 dark:border-gray-700 bg-slate-50">
                       <ChatWidget
                         businessId={business.id}
                         businessName={settingsForm.businessName || business.business_name}
@@ -1932,7 +2020,7 @@ export default function DashboardPage() {
                         return (
                           <div
                             key={plan.id}
-                            className={`relative flex flex-col h-full rounded-2xl p-6 bg-white ${
+                            className={`relative flex flex-col h-full rounded-2xl p-6 bg-white dark:bg-gray-900 ${
                               plan.popular
                                 ? 'border-2 border-blue-600 shadow-[0_0_0_1px_rgba(37,99,235,0.1)]'
                                 : 'border border-gray-200'
@@ -2006,8 +2094,8 @@ export default function DashboardPage() {
                   {business.plan !== 'business' ? (
                     <div className="rounded-3xl border-2 border-dashed border-purple-200 bg-purple-50 p-10 text-center">
                       <ShieldCheck className="mx-auto mb-4 h-12 w-12 text-purple-400" />
-                      <h3 className="text-xl font-extrabold text-slate-900">Agent Audit</h3>
-                      <p className="mx-auto mt-2 max-w-sm text-sm text-slate-600">
+                      <h3 className="text-xl font-extrabold text-gray-900 dark:text-gray-50">Agent Audit</h3>
+                      <p className="mx-auto mt-2 max-w-sm text-sm text-gray-600 dark:text-gray-400">
                         AI-powered compliance monitoring is a Business plan exclusive. Monitor safety scores, flag risky conversations, and generate compliance reports.
                       </p>
                       <button
@@ -2105,8 +2193,8 @@ export default function DashboardPage() {
                       </div>
 
                       {/* Safety Score Trend */}
-                      <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-                        <h3 className="mb-4 text-base font-bold text-slate-900">Safety Score Trend (7 days)</h3>
+                      <div className="rounded-3xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-6 shadow-sm">
+                        <h3 className="mb-4 text-base font-bold text-gray-900 dark:text-gray-50">Safety Score Trend (7 days)</h3>
                         <ResponsiveContainer width="100%" height={200}>
                           <LineChart data={chartData} margin={{ top: 4, right: 8, bottom: 4, left: 0 }}>
                             <XAxis dataKey="day" tick={{ fontSize: 11 }} />
@@ -2122,16 +2210,16 @@ export default function DashboardPage() {
                             />
                           </LineChart>
                         </ResponsiveContainer>
-                        <p className="mt-2 text-center text-xs text-slate-500">
+                        <p className="mt-2 text-center text-xs text-gray-500 dark:text-gray-400">
                           {chartTrend === 'improving' ? '↑ Improving trend' : chartTrend === 'declining' ? '↓ Declining trend' : '→ Stable'}
                         </p>
                       </div>
 
                       {/* Flagged Conversations */}
                       {(auditSummary?.flaggedConversations.length ?? 0) > 0 && (
-                        <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
+                        <div className="overflow-hidden rounded-3xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm">
                           <div className="flex items-center justify-between px-6 py-5">
-                            <h3 className="flex items-center gap-2 text-base font-bold text-slate-900">
+                            <h3 className="flex items-center gap-2 text-base font-bold text-gray-900 dark:text-gray-50">
                               <Flag className="h-4 w-4 text-red-500" />
                               Flagged Conversations
                             </h3>
@@ -2161,7 +2249,7 @@ export default function DashboardPage() {
                                     </span>
                                   )}
                                   {conv.reviewed ? (
-                                    <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-semibold text-slate-500">Reviewed</span>
+                                    <span className="rounded-full bg-slate-100 dark:bg-gray-950 px-2.5 py-0.5 text-xs font-semibold text-gray-500 dark:text-gray-400">Reviewed</span>
                                   ) : (
                                     <button
                                       type="button"
@@ -2181,8 +2269,8 @@ export default function DashboardPage() {
 
                       {/* Top Issues */}
                       {(auditSummary?.topIssues.length ?? 0) > 0 && (
-                        <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-                          <h3 className="mb-4 text-base font-bold text-slate-900">Top Issues This Week</h3>
+                        <div className="rounded-3xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-6 shadow-sm">
+                          <h3 className="mb-4 text-base font-bold text-gray-900 dark:text-gray-50">Top Issues This Week</h3>
                           <ul className="space-y-2">
                             {auditSummary?.topIssues.map((issue, idx) => (
                               <li key={idx} className="flex items-start gap-2 text-sm text-slate-700">
@@ -2195,14 +2283,14 @@ export default function DashboardPage() {
                       )}
 
                       {/* Generate Compliance Report */}
-                      <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+                      <div className="rounded-3xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-6 shadow-sm">
                         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                           <div>
-                            <h3 className="flex items-center gap-2 text-base font-bold text-slate-900">
+                            <h3 className="flex items-center gap-2 text-base font-bold text-gray-900 dark:text-gray-50">
                               <FileText className="h-5 w-5 text-blue-500" />
                               Compliance Report
                             </h3>
-                            <p className="mt-1 text-sm text-slate-500">Generate an AI-powered 30-day compliance summary for your records.</p>
+                            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Generate an AI-powered 30-day compliance summary for your records.</p>
                           </div>
                           <button
                             type="button"
@@ -2232,9 +2320,9 @@ export default function DashboardPage() {
                                   { label: 'Avg Safety', value: reportData.avgSafetyScore != null ? String(reportData.avgSafetyScore) : '--' },
                                   { label: 'Data Events', value: String(reportData.sensitiveDataIncidents) },
                                 ].map(({ label, value }) => (
-                                  <div key={label} className="rounded-xl bg-white p-3 text-center shadow-sm">
-                                    <p className="text-2xl font-extrabold text-slate-900">{value}</p>
-                                    <p className="text-xs text-slate-500">{label}</p>
+                                  <div key={label} className="rounded-xl bg-white dark:bg-gray-900 p-3 text-center shadow-sm">
+                                    <p className="text-2xl font-extrabold text-gray-900 dark:text-gray-50">{value}</p>
+                                    <p className="text-xs text-gray-500 dark:text-gray-400">{label}</p>
                                   </div>
                                 ))}
                               </div>
@@ -2254,16 +2342,16 @@ export default function DashboardPage() {
                       {/* Review Modal */}
                       {reviewedConv ? (
                         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-                          <div className="relative w-full max-w-lg rounded-3xl bg-white p-6 shadow-2xl">
+                          <div className="relative w-full max-w-lg rounded-3xl bg-white dark:bg-gray-900 p-6 shadow-2xl">
                             <button
                               type="button"
                               onClick={() => setAuditReviewId(null)}
                               aria-label="Close"
-                              className="absolute right-4 top-4 rounded-full p-2 text-slate-400 hover:bg-slate-100"
+                              className="absolute right-4 top-4 rounded-full p-2 text-slate-400 hover:bg-slate-100 dark:bg-gray-950"
                             >
                               <X className="h-5 w-5" />
                             </button>
-                            <h3 className="flex items-center gap-2 text-lg font-bold text-slate-900">
+                            <h3 className="flex items-center gap-2 text-lg font-bold text-gray-900 dark:text-gray-50">
                               <ShieldAlert className="h-5 w-5 text-red-500" />
                               Flagged Conversation
                             </h3>
@@ -2282,7 +2370,7 @@ export default function DashboardPage() {
                               <button
                                 type="button"
                                 onClick={() => setAuditReviewId(null)}
-                                className="rounded-full px-4 py-2 text-sm font-semibold text-slate-500 hover:bg-slate-100"
+                                className="rounded-full px-4 py-2 text-sm font-semibold text-gray-500 dark:text-gray-400 hover:bg-slate-100 dark:bg-gray-950"
                               >
                                 Close
                               </button>
@@ -2344,18 +2432,18 @@ export default function DashboardPage() {
         {/* Upgrade lock modal */}
         {upgradeLockTab ? (
           <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 p-4">
-            <div className="relative w-full max-w-sm rounded-3xl bg-white p-8 text-center shadow-2xl">
+            <div className="relative w-full max-w-sm rounded-3xl bg-white dark:bg-gray-900 p-8 text-center shadow-2xl">
               <button
                 type="button"
                 aria-label="Close"
                 onClick={() => setUpgradeLockTab(null)}
-                className="absolute right-4 top-4 rounded-full p-2 text-slate-400 hover:bg-slate-100"
+                className="absolute right-4 top-4 rounded-full p-2 text-slate-400 hover:bg-slate-100 dark:bg-gray-950"
               >
                 <X className="h-5 w-5" />
               </button>
               <div className="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-100 text-2xl">🔒</div>
-              <h3 className="mt-4 text-xl font-extrabold text-slate-900">Feature Locked</h3>
-              <p className="mt-2 text-sm text-slate-600">
+              <h3 className="mt-4 text-xl font-extrabold text-gray-900 dark:text-gray-50">Feature Locked</h3>
+              <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
                 This feature requires a higher plan. Upgrade to unlock CRM, Follow-ups, Analytics, and more.
               </p>
               <button
@@ -2393,46 +2481,32 @@ export default function DashboardPage() {
           </div>
         )}
 
-      <nav className="fixed inset-x-0 bottom-0 z-50 border-t border-slate-200 bg-white/95 px-2 py-2 backdrop-blur lg:hidden">
-        <div className="flex overflow-x-auto gap-1 scrollbar-none">
-          {tabItems
-            .filter(({ key }) => ['overview', 'conversations', 'crm', 'bookings', 'followups', 'settings', 'subscription'].includes(key))
-            .map(({ key, label, Icon, plans }) => {
-              const active = activeTab === key;
+      <nav className="fixed bottom-0 left-0 right-0 z-50 flex border-t border-gray-200 bg-white dark:bg-gray-900 dark:border-gray-700 dark:bg-gray-900 lg:hidden">
+        {mobileTabs.map((tab) => (
+          <button
+            key={tab.id}
+            type="button"
+            onClick={() => {
+              const tabConfig = tabItems.find((item) => item.key === tab.id);
               const normalizedPlan: SidebarPlan =
                 business?.plan === 'basic' ? 'starter' : ((business?.plan ?? 'trial') as SidebarPlan);
-              const isLocked = !plans.includes(normalizedPlan);
-
-              return (
-                <button
-                  key={key}
-                  type="button"
-                  onClick={() => {
-                    if (isLocked) {
-                      setUpgradeLockTab(key);
-                    } else {
-                      setActiveTab(key);
-                    }
-                  }}
-                  data-testid={`dashboard-mobile-tab-${key}`}
-                  className={`flex shrink-0 flex-col items-center justify-center rounded-2xl px-3 py-2 text-[11px] font-semibold transition ${
-                    active ? 'bg-blue-600 text-white' : isLocked ? 'text-slate-400' : 'text-slate-500 hover:bg-slate-100'
-                  }`}
-                >
-                  <span className="relative inline-flex">
-                    <Icon className="mb-1 h-4 w-4" />
-                    {isLocked && <span className="absolute -right-2 -top-1 text-[8px]">🔒</span>}
-                    {!isLocked && key === 'bookings' && pendingBookingsCount > 0 && (
-                      <span className="absolute -right-2 -top-1 flex h-3.5 min-w-[0.875rem] items-center justify-center rounded-full bg-red-500 px-0.5 text-[8px] font-bold leading-none text-white">
-                        {pendingBookingsCount}
-                      </span>
-                    )}
-                  </span>
-                  {label}
-                </button>
-              );
-          })}
-        </div>
+              if (tabConfig && !tabConfig.plans.includes(normalizedPlan)) {
+                setUpgradeLockTab(tab.id);
+                return;
+              }
+              setActiveTab(tab.id);
+            }}
+            className={`flex flex-1 flex-col items-center gap-1 py-2 text-xs ${
+              activeTab === tab.id
+                ? 'text-blue-600'
+                : 'text-gray-500 dark:text-gray-400'
+            }`}
+            data-testid={`dashboard-mobile-tab-${tab.id}`}
+          >
+            <span className="text-lg leading-none">{tab.icon}</span>
+            <span>{tab.label}</span>
+          </button>
+        ))}
       </nav>
       </div>
     </div>
@@ -2449,15 +2523,18 @@ function StatCard({
   badgeClassName?: string;
 }) {
   return (
-    <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
-      <p className="text-sm font-medium text-slate-500">{label}</p>
+    <div className="rounded-3xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-5 shadow-sm">
+      <p className="text-sm font-medium text-gray-500 dark:text-gray-400">{label}</p>
       {badgeClassName ? (
         <span className={`mt-4 inline-flex rounded-full px-3 py-1.5 text-sm font-semibold ${badgeClassName}`}>
           {value}
         </span>
       ) : (
-        <p className="mt-4 text-3xl font-extrabold text-slate-900">{value}</p>
+        <p className="mt-4 text-3xl font-extrabold text-gray-900 dark:text-gray-50">{value}</p>
       )}
     </div>
   );
 }
+
+
+

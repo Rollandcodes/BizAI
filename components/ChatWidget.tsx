@@ -28,6 +28,7 @@ function ChatWidget({
   embedded = false,
 }: ChatWidgetProps) {
   const [isOpen, setIsOpen] = useState(embedded);
+  const [isMobile, setIsMobile] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
     {
       id: 'welcome',
@@ -41,6 +42,7 @@ function ChatWidget({
   const [sessionId] = useState<string>(() => crypto.randomUUID());
   const [feedbackState, setFeedbackState] = useState<'idle' | 'prompt' | 'done'>('idle');
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const chatRef = useRef<HTMLDivElement>(null);
   const inactivityTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const scrollToBottom = useCallback(() => {
@@ -57,6 +59,44 @@ function ChatWidget({
       setIsOpen(true);
     }
   }, [businessType, embedded]);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 640);
+    };
+
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  useEffect(() => {
+    let startY = 0;
+    const panel = chatRef.current;
+
+    if (!panel || !isMobile || embedded) {
+      return;
+    }
+
+    const onTouchStart = (event: TouchEvent) => {
+      startY = event.touches[0]?.clientY ?? 0;
+    };
+
+    const onTouchEnd = (event: TouchEvent) => {
+      const endY = event.changedTouches[0]?.clientY ?? 0;
+      if (endY - startY > 100) {
+        setIsOpen(false);
+      }
+    };
+
+    panel.addEventListener('touchstart', onTouchStart, { passive: true });
+    panel.addEventListener('touchend', onTouchEnd, { passive: true });
+
+    return () => {
+      panel.removeEventListener('touchstart', onTouchStart);
+      panel.removeEventListener('touchend', onTouchEnd);
+    };
+  }, [isMobile, embedded]);
 
   // Inactivity timer: show feedback poll after 5 min of no messages
   useEffect(() => {
@@ -162,10 +202,13 @@ function ChatWidget({
       {/* Chat Panel */}
       {isOpen && (
         <div
+          ref={chatRef}
           className={
             embedded
-              ? 'flex h-full w-full flex-col overflow-hidden bg-white'
-              : 'fixed bottom-24 right-6 z-50 flex h-[480px] w-80 flex-col overflow-hidden rounded-2xl shadow-2xl sm:w-96'
+              ? 'flex h-full w-full flex-col overflow-hidden bg-white dark:bg-gray-900'
+              : isMobile
+                ? 'fixed inset-0 z-50 flex h-[100vh] w-[100vw] flex-col bg-white dark:bg-gray-900'
+                : 'fixed bottom-4 right-4 z-50 flex w-96 max-h-[600px] flex-col overflow-hidden rounded-2xl bg-white shadow-2xl dark:bg-gray-900'
           }
           style={{ '--bizai-color': primaryColor } as React.CSSProperties}
         >
@@ -193,7 +236,7 @@ function ChatWidget({
           </div>
 
           {/* Messages */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-white">
+          <div className="flex-1 overflow-y-auto space-y-3 bg-white p-4 dark:bg-gray-900">
             {messages.map((message) => (
               <div
                 key={message.id}
@@ -203,7 +246,7 @@ function ChatWidget({
                   className={
                     message.sender === 'user'
                       ? 'max-w-[75%] px-3 py-2 rounded-2xl text-sm leading-relaxed bg-[var(--bizai-color)] text-white'
-                      : 'max-w-[75%] px-3 py-2 rounded-2xl text-sm leading-relaxed bg-[#f3f4f6] text-[#111827]'
+                      : 'max-w-[75%] rounded-2xl bg-gray-100 px-3 py-2 text-sm leading-relaxed text-gray-900 dark:bg-gray-800 dark:text-gray-100'
                   }
                 >
                   {message.text}
@@ -215,7 +258,7 @@ function ChatWidget({
             {feedbackState === 'prompt' && (
               <div className="flex flex-col gap-2">
                 <div className="flex justify-start">
-                  <div className="max-w-[85%] px-3 py-2 rounded-2xl text-sm leading-relaxed bg-[#f3f4f6] text-[#111827]">
+                  <div className="max-w-[85%] rounded-2xl bg-gray-100 px-3 py-2 text-sm leading-relaxed text-gray-900 dark:bg-gray-800 dark:text-gray-100">
                     Before you go — how was your experience today? Your feedback helps us improve! 😊
                   </div>
                 </div>
@@ -225,7 +268,7 @@ function ChatWidget({
                       key={emoji}
                       type="button"
                       onClick={() => void submitFeedback(idx + 1)}
-                      className="flex flex-col items-center gap-0.5 rounded-xl px-2 py-1.5 text-xl transition hover:bg-slate-100 active:scale-95"
+                      className="flex flex-col items-center gap-0.5 rounded-xl px-2 py-1.5 text-xl transition hover:bg-slate-100 active:scale-95 dark:hover:bg-gray-800"
                       title={`Rate ${idx + 1} out of 5`}
                     >
                       <span>{emoji}</span>
@@ -240,12 +283,12 @@ function ChatWidget({
             {feedbackState === 'done' && (
               <div className="flex flex-col gap-1.5">
                 <div className="flex justify-start">
-                  <div className="max-w-[85%] px-3 py-2 rounded-2xl text-sm leading-relaxed bg-[#f3f4f6] text-[#111827]">
+                  <div className="max-w-[85%] rounded-2xl bg-gray-100 px-3 py-2 text-sm leading-relaxed text-gray-900 dark:bg-gray-800 dark:text-gray-100">
                     Thank you! ⭐ We appreciate your feedback.
                   </div>
                 </div>
                 <div className="flex justify-start">
-                  <div className="max-w-[85%] px-3 py-2 rounded-2xl text-sm leading-relaxed bg-[#f3f4f6] text-[#111827]">
+                  <div className="max-w-[85%] rounded-2xl bg-gray-100 px-3 py-2 text-sm leading-relaxed text-gray-900 dark:bg-gray-800 dark:text-gray-100">
                     Feel free to contact us anytime.
                   </div>
                 </div>
@@ -255,7 +298,7 @@ function ChatWidget({
             {/* Typing indicator */}
             {isLoading && (
               <div className="flex justify-start">
-                <div className="bg-gray-100 px-4 py-3 rounded-2xl flex gap-1 items-center">
+                <div className="flex items-center gap-1 rounded-2xl bg-gray-100 px-4 py-3 dark:bg-gray-800">
                   <span className="h-2 w-2 rounded-full bg-gray-400 animate-bounce [animation-delay:0ms]" />
                   <span className="h-2 w-2 rounded-full bg-gray-400 animate-bounce [animation-delay:150ms]" />
                   <span className="h-2 w-2 rounded-full bg-gray-400 animate-bounce [animation-delay:300ms]" />
@@ -266,13 +309,13 @@ function ChatWidget({
           </div>
 
           {/* Input */}
-          <form onSubmit={sendMessage} className="flex gap-2 p-3 bg-white border-t border-gray-100">
+          <form onSubmit={sendMessage} className="flex gap-2 border-t border-gray-200 bg-white p-3 dark:border-gray-700 dark:bg-gray-900">
             <input
               type="text"
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
               placeholder="Type a message..."
-              className="flex-1 px-3 py-2 text-sm border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-[var(--bizai-color)]"
+              className="flex-1 rounded-full border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[var(--bizai-color)] dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:placeholder:text-gray-500"
             />
             <button
               type="submit"

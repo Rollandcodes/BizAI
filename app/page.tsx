@@ -2,6 +2,9 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import ThemeToggle from '@/components/ThemeToggle'
+import LanguageSwitcher from '@/components/LanguageSwitcher'
+import { useUiTranslations } from '@/components/LanguageProvider'
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -50,6 +53,7 @@ const FAQS: FaqItem[] = [
 // ─── Component ───────────────────────────────────────────────────────────────
 
 export default function HomePage() {
+  const t = useUiTranslations()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [bannerDismissed, setBannerDismissed] = useState(false)
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null)
@@ -98,46 +102,48 @@ export default function HomePage() {
       )}
 
       {/* ── Navbar ────────────────────────────────────────────────────────── */}
-      <nav className="sticky top-0 bg-white shadow-sm z-50">
+      <nav className="sticky top-0 z-50 border-b border-gray-200 dark:border-gray-700 bg-white/95 shadow-sm backdrop-blur dark:border-gray-700 dark:bg-gray-900/95">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
-            <Link href="/" className="text-xl font-bold text-slate-900">
+            <Link href="/" className="text-xl font-bold text-gray-900 dark:text-gray-50">
               🤖 CypAI
             </Link>
 
             {/* Desktop nav links */}
             <div className="hidden md:flex items-center gap-8">
-              <a href="#features" className="text-slate-600 hover:text-slate-900 text-sm font-medium">
-                Features
+              <a href="#features" className="text-sm font-medium text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white">
+                {t('nav.features')}
               </a>
-              <a href="#pricing" className="text-slate-600 hover:text-slate-900 text-sm font-medium">
-                Pricing
+              <a href="#pricing" className="text-sm font-medium text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white">
+                {t('nav.pricing')}
               </a>
-              <Link href="/demo" className="text-slate-600 hover:text-slate-900 text-sm font-medium">
-                Demo
+              <Link href="/demo" className="text-sm font-medium text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white">
+                {t('nav.demo')}
               </Link>
-              <Link href="/blog" className="text-slate-600 hover:text-slate-900 text-sm font-medium">
+              <Link href="/blog" className="text-slate-600 hover:text-gray-900 dark:text-gray-50 text-sm font-medium">
                 Blog
               </Link>
             </div>
 
             {/* Desktop right actions */}
-            <div className="hidden md:flex items-center gap-4">
-              <Link href="/login" className="text-slate-500 hover:text-slate-700 text-sm font-medium">
-                Login
+            <div className="hidden md:flex items-center gap-2">
+              <LanguageSwitcher />
+              <ThemeToggle />
+              <Link href="/login" className="text-sm font-medium text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white">
+                {t('nav.login')}
               </Link>
               <Link
                 href="/signup?plan=pro"
                 className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold px-4 py-2 rounded-xl transition-colors"
               >
-                Start Free Trial
+                {t('nav.startTrial')}
               </Link>
             </div>
 
             {/* Mobile hamburger */}
             <button
-              className="md:hidden text-slate-700 text-2xl"
+              className="md:hidden text-2xl text-gray-700 dark:text-gray-200"
               onClick={() => setIsMenuOpen(prev => !prev)}
               aria-label="Toggle menu"
             >
@@ -148,57 +154,60 @@ export default function HomePage() {
 
         {/* Mobile dropdown */}
         {isMenuOpen && (
-          <div className="md:hidden bg-white border-t border-gray-100 px-4 py-4 flex flex-col gap-4">
-            <a href="#features" className="text-slate-700 font-medium" onClick={() => setIsMenuOpen(false)}>
-              Features
+          <div className="md:hidden border-t border-gray-100 bg-white px-4 py-4 dark:border-gray-700 dark:bg-gray-900">
+            <div className="mb-3 flex items-center gap-2">
+              <LanguageSwitcher />
+              <ThemeToggle />
+            </div>
+            <a href="#features" className="mb-3 block font-medium text-gray-700 dark:text-gray-200" onClick={() => setIsMenuOpen(false)}>
+              {t('nav.features')}
             </a>
-            <a href="#pricing" className="text-slate-700 font-medium" onClick={() => setIsMenuOpen(false)}>
-              Pricing
+            <a href="#pricing" className="mb-3 block font-medium text-gray-700 dark:text-gray-200" onClick={() => setIsMenuOpen(false)}>
+              {t('nav.pricing')}
             </a>
-            <Link href="/demo" className="text-slate-700 font-medium" onClick={() => setIsMenuOpen(false)}>
-              Demo
+            <Link href="/demo" className="mb-3 block font-medium text-gray-700 dark:text-gray-200" onClick={() => setIsMenuOpen(false)}>
+              {t('nav.demo')}
             </Link>
-            <Link href="/blog" className="text-slate-700 font-medium" onClick={() => setIsMenuOpen(false)}>
+            <Link href="/blog" className="mb-3 block font-medium text-gray-700 dark:text-gray-200" onClick={() => setIsMenuOpen(false)}>
               Blog
             </Link>
-            <hr className="border-gray-200" />
-            <Link href="/login" className="text-slate-500 font-medium" onClick={() => setIsMenuOpen(false)}>
-              Login
+            <hr className="border-gray-200 dark:border-gray-700" />
+            <Link href="/login" className="mb-3 mt-3 block font-medium text-gray-500 dark:text-gray-400" onClick={() => setIsMenuOpen(false)}>
+              {t('nav.login')}
             </Link>
             <Link
               href="/signup?plan=pro"
               className="bg-blue-600 text-white font-semibold px-4 py-2 rounded-xl text-center"
               onClick={() => setIsMenuOpen(false)}
             >
-              Start Free Trial
+              {t('nav.startTrial')}
             </Link>
           </div>
         )}
       </nav>
 
       {/* ── Hero ──────────────────────────────────────────────────────────── */}
-      <section className="bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 py-16 lg:py-24">
+      <section className="bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 py-12 sm:py-16 lg:py-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
 
             {/* Left column */}
             <div>
-              <div className="inline-flex items-center gap-2 bg-blue-600/20 border border-blue-500/30 rounded-full px-4 py-1.5 text-blue-300 text-sm font-medium mb-6">
-                🇨🇾 Built for Local Businesses Worldwide
+              <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-blue-500/30 bg-blue-600/20 px-4 py-1.5 text-sm font-medium text-blue-300">
+                🇨🇾 {t('hero.badge')}
               </div>
 
-              <h1 className="text-5xl font-bold text-white leading-tight mb-4">
-                The Complete AI Platform<br />for Local Businesses
+              <h1 className="mb-4 text-3xl font-bold leading-tight text-white sm:text-4xl lg:text-5xl xl:text-6xl">
+                {t('hero.title')}
               </h1>
 
-              <p className="text-xl text-slate-300 mb-6 leading-relaxed">
-                AI Chat + CRM + Bookings + Analytics + Follow-ups. In English, Turkish, Arabic,
-                Russian and Greek. Setup in 15 minutes. Works on your website and WhatsApp — 24/7.
+              <p className="mb-6 text-sm leading-relaxed text-slate-300 sm:text-base lg:text-lg">
+                {t('hero.subtitle')}
               </p>
 
               {/* Trust points */}
               <div className="flex flex-wrap gap-x-6 gap-y-2 mb-8">
-                {['Setup in 15 minutes', 'No technical skills needed', '7-day free trial', 'Cancel anytime'].map(point => (
+                {[t('hero.trust1'), t('hero.trust2'), t('hero.trust3'), 'Cancel anytime'].map(point => (
                   <span key={point} className="text-slate-300 text-sm flex items-center gap-1.5">
                     <span className="text-green-400 font-bold">✓</span> {point}
                   </span>
@@ -211,17 +220,17 @@ export default function HomePage() {
                   href="/signup?plan=pro"
                   className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-8 py-4 rounded-xl text-lg transition-colors"
                 >
-                  Start Free Trial →
+                  {t('hero.cta')} →
                 </Link>
                 <Link
                   href="/demo"
                   className="border border-slate-600 text-slate-300 hover:border-slate-400 hover:text-white font-semibold px-8 py-4 rounded-xl text-lg transition-colors"
                 >
-                  See Live Demo
+                  {t('hero.demo')}
                 </Link>
               </div>
 
-              <p className="text-slate-500 text-sm">
+              <p className="text-gray-600 dark:text-gray-400 text-sm">
                 No credit card required for trial • Cancel anytime • Secure payment
               </p>
             </div>
@@ -296,11 +305,11 @@ export default function HomePage() {
 
           {/* Stats bar */}
           <div className="border-t border-white/10 pt-8 mt-16 grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-            {[
-              { value: '24/7', label: 'Always online' },
-              { value: '5', label: 'Languages spoken' },
-              { value: '15min', label: 'Setup time' },
-              { value: '$0', label: 'To start (7-day trial)' },
+              {[
+              { value: '24/7', label: t('stats.always') },
+              { value: '5', label: t('stats.languages') },
+              { value: '15min', label: t('stats.setup') },
+              { value: '$0', label: `${t('stats.free')} (7-day trial)` },
             ].map(stat => (
               <div key={stat.label}>
                 <div className="text-3xl font-bold text-white mb-1">{stat.value}</div>
@@ -312,14 +321,14 @@ export default function HomePage() {
       </section>
 
       {/* ── Social proof bar ──────────────────────────────────────────────── */}
-      <section className="bg-gray-50 py-8">
+      <section className="bg-gray-50 dark:bg-gray-800 py-8">
         <div className="max-w-5xl mx-auto px-4 text-center">
-          <p className="text-slate-500 text-sm font-medium mb-4">Trusted by businesses in</p>
+          <p className="text-gray-600 dark:text-gray-400 text-sm font-medium mb-4">Trusted by businesses in</p>
           <div className="flex flex-wrap justify-center gap-3">
             {['📍 Kyrenia', '📍 Nicosia', '📍 Famagusta', '📍 Güzelyurt', '📍 Lefke', '📍 Worldwide'].map(loc => (
               <span
                 key={loc}
-                className="bg-white border border-gray-200 text-slate-600 text-sm font-medium px-4 py-1.5 rounded-full shadow-sm"
+                className="bg-white border border-gray-200 dark:border-gray-700 dark:bg-gray-900 dark:border-gray-700 text-slate-600 text-sm font-medium px-4 py-1.5 rounded-full shadow-sm"
               >
                 {loc}
               </span>
@@ -329,17 +338,17 @@ export default function HomePage() {
       </section>
 
       {/* ── Features ──────────────────────────────────────────────────────── */}
-      <section id="features" className="bg-white py-20">
+      <section id="features" className="bg-white py-12 sm:py-16 lg:py-24 dark:bg-gray-950">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Header */}
           <div className="text-center mb-14">
             <span className="inline-block bg-blue-50 text-blue-600 text-sm font-semibold px-4 py-1.5 rounded-full mb-4">
               Everything you need
             </span>
-            <h2 className="text-4xl font-bold text-slate-900 mb-4">
+            <h2 className="mb-4 text-2xl font-bold text-gray-900 dark:text-gray-50 sm:text-3xl lg:text-4xl">
               One Platform. Every Tool Your<br className="hidden sm:block" /> Business Needs.
             </h2>
-            <p className="text-lg text-slate-500 max-w-2xl mx-auto">
+            <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
               Stop using 5 different apps. CypAI combines AI chat, CRM, bookings, and analytics in one simple dashboard.
             </p>
           </div>
@@ -390,11 +399,11 @@ export default function HomePage() {
             ].map(feature => (
               <div
                 key={feature.title}
-                className="bg-white border border-gray-200 rounded-2xl p-6 hover:shadow-md transition-shadow"
+                className="bg-white border border-gray-200 dark:border-gray-700 dark:bg-gray-900 dark:border-gray-700 rounded-2xl p-6 hover:shadow-md transition-shadow"
               >
                 <div className="text-3xl mb-3">{feature.icon}</div>
-                <h3 className="font-bold text-slate-900 mb-2">{feature.title}</h3>
-                <p className="text-slate-500 text-sm leading-relaxed">{feature.desc}</p>
+                <h3 className="font-bold text-gray-900 dark:text-gray-50 mb-2">{feature.title}</h3>
+                <p className="text-gray-600 dark:text-gray-400 text-sm leading-relaxed">{feature.desc}</p>
               </div>
             ))}
           </div>
@@ -402,11 +411,11 @@ export default function HomePage() {
       </section>
 
       {/* ── How it works ──────────────────────────────────────────────────── */}
-      <section className="bg-gray-50 py-20">
+      <section className="bg-gray-50 dark:bg-gray-800 py-12 sm:py-16 lg:py-24 dark:bg-gray-900">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-14">
-            <h2 className="text-4xl font-bold text-slate-900 mb-3">Up and Running in 15 Minutes</h2>
-            <p className="text-lg text-slate-500">No technical skills required</p>
+            <h2 className="mb-3 text-2xl font-bold text-gray-900 dark:text-gray-50 sm:text-3xl lg:text-4xl">Up and Running in 15 Minutes</h2>
+            <p className="text-sm text-gray-600 dark:text-gray-400 sm:text-base">No technical skills required</p>
           </div>
 
           <div className="flex flex-nowrap overflow-x-auto gap-6 pb-4 md:grid md:grid-cols-5 md:overflow-visible">
@@ -421,8 +430,8 @@ export default function HomePage() {
                 <div className="w-10 h-10 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold text-sm mb-3 flex-shrink-0">
                   {step.num}
                 </div>
-                <h3 className="font-bold text-slate-900 mb-1 text-sm">{step.title}</h3>
-                <p className="text-slate-500 text-xs leading-relaxed">{step.desc}</p>
+                <h3 className="font-bold text-gray-900 dark:text-gray-50 mb-1 text-sm">{step.title}</h3>
+                <p className="text-gray-600 dark:text-gray-400 text-xs leading-relaxed">{step.desc}</p>
               </div>
             ))}
           </div>
@@ -430,21 +439,21 @@ export default function HomePage() {
       </section>
 
       {/* ── Comparison table ──────────────────────────────────────────────── */}
-      <section className="bg-white py-20">
+      <section className="bg-white py-12 sm:py-16 lg:py-24 dark:bg-gray-950">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold text-slate-900 mb-4">CypAI vs Basic Chatbots</h2>
-            <p className="text-lg text-slate-500">See why businesses choose CypAI over simple chatbot tools</p>
+            <h2 className="mb-4 text-2xl font-bold text-gray-900 dark:text-gray-50 sm:text-3xl lg:text-4xl">CypAI vs Basic Chatbots</h2>
+            <p className="text-sm text-gray-600 dark:text-gray-400 sm:text-base">See why businesses choose CypAI over simple chatbot tools</p>
           </div>
 
-          <div className="overflow-hidden rounded-2xl border border-gray-200 shadow-sm">
-            <table className="w-full text-sm">
+          <div className="overflow-hidden rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm">
+            <table className="w-full text-sm min-w-[640px]">
               <thead>
                 <tr>
-                  <th className="bg-gray-50 text-slate-700 font-semibold text-left px-6 py-4 border-b border-gray-200">
+                  <th className="bg-gray-50 dark:bg-gray-800 text-slate-700 font-semibold text-left px-6 py-4 border-b border-gray-200 dark:border-gray-700">
                     Feature
                   </th>
-                  <th className="text-center px-6 py-5 border-b border-gray-200 relative bg-blue-600">
+                  <th className="text-center px-6 py-5 border-b border-gray-200 dark:border-gray-700 relative bg-blue-600">
                     <div className="absolute -top-3 left-1/2 -translate-x-1/2">
                       <span className="bg-white text-blue-600 text-xs font-bold px-3 py-0.5 rounded-full shadow-sm">
                         Most Popular
@@ -452,7 +461,7 @@ export default function HomePage() {
                     </div>
                     <span className="text-white font-bold">CypAI</span>
                   </th>
-                  <th className="bg-gray-50 text-slate-600 font-semibold text-center px-6 py-4 border-b border-gray-200">
+                  <th className="bg-gray-50 dark:bg-gray-800 text-slate-600 font-semibold text-center px-6 py-4 border-b border-gray-200 dark:border-gray-700">
                     Basic Chatbot
                   </th>
                 </tr>
@@ -470,7 +479,7 @@ export default function HomePage() {
                   { feature: 'Support', cypai: 'Priority', other: 'Email only' },
                   { feature: 'Price', cypai: 'From $29/mo', other: '$50–200/mo' },
                 ].map((row, i) => (
-                  <tr key={row.feature} className={i % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                  <tr key={row.feature} className={i % 2 === 0 ? 'bg-white' : 'bg-gray-50 dark:bg-gray-800'}>
                     <td className="px-6 py-3 text-slate-700 font-medium">{row.feature}</td>
                     <td className="px-6 py-3 text-center font-medium bg-blue-50">
                       <span className={row.cypai === '✅' ? 'text-green-500 text-lg font-bold' : row.cypai === '❌' ? 'text-red-400 text-lg' : 'text-blue-700'}>
@@ -491,25 +500,25 @@ export default function HomePage() {
       </section>
 
       {/* ── Pricing ───────────────────────────────────────────────────────── */}
-      <section id="pricing" className="bg-gray-50 py-20">
+      <section id="pricing" className="bg-gray-50 dark:bg-gray-800 py-12 sm:py-16 lg:py-24 dark:bg-gray-900">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <span className="inline-block bg-blue-50 text-blue-600 text-sm font-semibold px-4 py-1.5 rounded-full mb-4">
-              Simple, transparent pricing
+              {t('pricing.title')}
             </span>
-            <h2 className="text-4xl font-bold text-slate-900 mb-4">Choose Your Plan</h2>
-            <p className="text-lg text-slate-500">
+            <h2 className="mb-4 text-2xl font-bold text-gray-900 dark:text-gray-50 sm:text-3xl lg:text-4xl">Choose Your Plan</h2>
+            <p className="text-sm text-gray-600 dark:text-gray-400 sm:text-base">
               7-day free trial on all plans. Cancel anytime. No contracts.
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8 items-start">
+          <div className="grid grid-cols-1 gap-8 lg:grid-cols-3 items-start">
             {/* Starter */}
-            <div className="bg-white border border-gray-200 rounded-2xl p-8">
-              <h3 className="text-xl font-bold text-slate-900 mb-1">Starter</h3>
-              <p className="text-slate-500 text-sm mb-4">Perfect for small local businesses</p>
-              <div className="text-4xl font-bold text-slate-900 mb-6">
-                $29<span className="text-lg font-normal text-slate-500">/mo</span>
+            <div className="bg-white border border-gray-200 dark:border-gray-700 dark:bg-gray-900 dark:border-gray-700 rounded-2xl p-8">
+              <h3 className="mb-1 text-xl font-bold text-gray-900 dark:text-gray-50 sm:text-2xl">Starter</h3>
+              <p className="text-gray-600 dark:text-gray-400 text-sm mb-4">Perfect for small local businesses</p>
+              <div className="text-4xl font-bold text-gray-900 dark:text-gray-50 mb-6">
+                $29<span className="text-lg font-normal text-gray-600 dark:text-gray-400">/mo</span>
               </div>
               <ul className="space-y-2.5 mb-8">
                 {[
@@ -531,7 +540,7 @@ export default function HomePage() {
                 href="/signup?plan=starter"
                 className="block w-full text-center border border-gray-300 hover:border-blue-400 text-slate-700 hover:text-blue-600 font-semibold py-3 rounded-xl transition-colors"
               >
-                Start Free Trial
+                {t('pricing.startTrial')}
               </Link>
             </div>
 
@@ -539,13 +548,13 @@ export default function HomePage() {
             <div className="relative bg-white border-2 border-blue-600 rounded-2xl p-8 shadow-xl shadow-blue-100">
               <div className="absolute -top-4 left-1/2 -translate-x-1/2">
                 <span className="bg-blue-600 text-white text-xs font-bold px-4 py-1.5 rounded-full">
-                  MOST POPULAR
+                  {t('pricing.popular')}
                 </span>
               </div>
-              <h3 className="text-xl font-bold text-slate-900 mb-1">Pro</h3>
-              <p className="text-slate-500 text-sm mb-4">For growing businesses</p>
-              <div className="text-4xl font-bold text-slate-900 mb-6">
-                $79<span className="text-lg font-normal text-slate-500">/mo</span>
+              <h3 className="mb-1 text-xl font-bold text-gray-900 dark:text-gray-50 sm:text-2xl">Pro</h3>
+              <p className="text-gray-600 dark:text-gray-400 text-sm mb-4">For growing businesses</p>
+              <div className="text-4xl font-bold text-gray-900 dark:text-gray-50 mb-6">
+                $79<span className="text-lg font-normal text-gray-600 dark:text-gray-400">/mo</span>
               </div>
               <ul className="space-y-2.5 mb-8">
                 {[
@@ -571,16 +580,16 @@ export default function HomePage() {
                 href="/signup?plan=pro"
                 className="block w-full text-center bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl transition-colors"
               >
-                Start Free Trial
+                {t('pricing.startTrial')}
               </Link>
             </div>
 
             {/* Business */}
-            <div className="bg-white border border-gray-200 rounded-2xl p-8">
-              <h3 className="text-xl font-bold text-slate-900 mb-1">Business</h3>
-              <p className="text-slate-500 text-sm mb-4">Full suite for serious businesses</p>
-              <div className="text-4xl font-bold text-slate-900 mb-6">
-                $149<span className="text-lg font-normal text-slate-500">/mo</span>
+            <div className="bg-white border border-gray-200 dark:border-gray-700 dark:bg-gray-900 dark:border-gray-700 rounded-2xl p-8">
+              <h3 className="mb-1 text-xl font-bold text-gray-900 dark:text-gray-50 sm:text-2xl">Business</h3>
+              <p className="text-gray-600 dark:text-gray-400 text-sm mb-4">Full suite for serious businesses</p>
+              <div className="text-4xl font-bold text-gray-900 dark:text-gray-50 mb-6">
+                $149<span className="text-lg font-normal text-gray-600 dark:text-gray-400">/mo</span>
               </div>
               <ul className="space-y-2.5 mb-8">
                 {[
@@ -604,7 +613,7 @@ export default function HomePage() {
                 href="/signup?plan=business"
                 className="block w-full text-center border border-gray-300 hover:border-blue-400 text-slate-700 hover:text-blue-600 font-semibold py-3 rounded-xl transition-colors"
               >
-                Start Free Trial
+                {t('pricing.startTrial')}
               </Link>
             </div>
           </div>
@@ -616,11 +625,11 @@ export default function HomePage() {
       </section>
 
       {/* ── Niche section ─────────────────────────────────────────────────── */}
-      <section className="bg-white py-20">
+      <section className="bg-white py-12 sm:py-16 lg:py-24 dark:bg-gray-950">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold text-slate-900 mb-4">Built for Your Industry</h2>
-            <p className="text-lg text-slate-500">
+            <h2 className="mb-4 text-2xl font-bold text-gray-900 dark:text-gray-50 sm:text-3xl lg:text-4xl">Built for Your Industry</h2>
+            <p className="text-sm text-gray-600 dark:text-gray-400 sm:text-base">
               Pre-configured AI for the most common local business types
             </p>
           </div>
@@ -660,13 +669,13 @@ export default function HomePage() {
             ].map(niche => (
               <div
                 key={niche.title}
-                className="border border-gray-200 rounded-2xl p-6 hover:shadow-md transition-shadow"
+                className="border border-gray-200 dark:border-gray-700 rounded-2xl p-6 hover:shadow-md transition-shadow"
               >
                 <div className="text-3xl mb-3">{niche.icon}</div>
-                <h3 className="font-bold text-slate-900 mb-3">{niche.title}</h3>
+                <h3 className="font-bold text-gray-900 dark:text-gray-50 mb-3">{niche.title}</h3>
                 <ul className="space-y-1.5 mb-4">
                   {niche.uses.map(u => (
-                    <li key={u} className="text-slate-500 text-sm flex items-start gap-2">
+                    <li key={u} className="text-gray-600 dark:text-gray-400 text-sm flex items-start gap-2">
                       <span className="text-blue-400 mt-0.5">→</span> {u}
                     </li>
                   ))}
@@ -681,13 +690,13 @@ export default function HomePage() {
       </section>
 
       {/* ── Testimonials ──────────────────────────────────────────────────── */}
-      <section className="bg-gray-50 py-20">
+      <section className="bg-gray-50 dark:bg-gray-800 py-12 sm:py-16 lg:py-24 dark:bg-gray-900">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold text-slate-900">What Businesses Are Saying</h2>
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-50 sm:text-3xl lg:text-4xl">What Businesses Are Saying</h2>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
             {[
               {
                 stars: 5,
@@ -713,13 +722,13 @@ export default function HomePage() {
             ].map(t => (
               <div
                 key={t.author}
-                className="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm"
+                className="bg-white border border-gray-100 dark:bg-gray-900 dark:border-gray-700 rounded-2xl p-6 shadow-sm"
               >
                 <div className="text-yellow-400 text-lg mb-3">{'★'.repeat(t.stars)}</div>
                 <p className="text-slate-700 mb-4 leading-relaxed">&ldquo;{t.quote}&rdquo;</p>
                 <div className="mb-3">
-                  <div className="font-semibold text-slate-900 text-sm">— {t.author}</div>
-                  <div className="text-slate-500 text-xs">{t.business}</div>
+                  <div className="font-semibold text-gray-900 dark:text-gray-50 text-sm">— {t.author}</div>
+                  <div className="text-gray-600 dark:text-gray-400 text-xs">{t.business}</div>
                 </div>
                 <span className="inline-block bg-green-50 text-green-700 text-xs font-medium px-3 py-1 rounded-full">
                   {t.badge}
@@ -731,21 +740,21 @@ export default function HomePage() {
       </section>
 
       {/* ── FAQ ───────────────────────────────────────────────────────────── */}
-      <section id="faq" className="bg-white py-20">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section id="faq" className="bg-white py-12 sm:py-16 lg:py-24 dark:bg-gray-950">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold text-slate-900">Frequently Asked Questions</h2>
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-50 sm:text-3xl lg:text-4xl">Frequently Asked Questions</h2>
           </div>
 
           <div className="space-y-3">
             {FAQS.map((faq, i) => (
-              <div key={i} className="border border-gray-200 rounded-xl overflow-hidden">
+              <div key={i} className="border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden">
                 <button
-                  className="w-full flex items-center justify-between px-6 py-4 text-left hover:bg-gray-50 transition-colors"
+                  className="w-full flex items-center justify-between px-6 py-4 text-left hover:bg-gray-50 dark:bg-gray-800 transition-colors"
                   onClick={() => toggleFaq(i)}
                   aria-expanded={openFaqIndex === i}
                 >
-                  <span className="font-semibold text-slate-900 text-sm pr-4">{faq.q}</span>
+                  <span className="font-semibold text-gray-900 dark:text-gray-50 text-sm pr-4">{faq.q}</span>
                   <span className="text-blue-600 font-bold text-xl flex-shrink-0">
                     {openFaqIndex === i ? '−' : '+'}
                   </span>
@@ -762,10 +771,10 @@ export default function HomePage() {
       </section>
 
       {/* ── Final CTA ─────────────────────────────────────────────────────── */}
-      <section className="bg-blue-600 py-20 text-white text-center">
+      <section className="bg-blue-600 py-12 sm:py-16 lg:py-24 text-center text-white">
         <div className="max-w-3xl mx-auto px-4">
-          <h2 className="text-4xl font-bold mb-4">Ready to Never Miss a Customer Again?</h2>
-          <p className="text-blue-100 text-xl mb-8">
+          <h2 className="mb-4 text-2xl font-bold sm:text-3xl lg:text-4xl">Ready to Never Miss a Customer Again?</h2>
+          <p className="mb-8 text-sm text-blue-100 sm:text-base lg:text-lg">
             Join local businesses already using AI to capture leads while they sleep.
           </p>
           <div className="flex flex-wrap justify-center gap-4 mb-8">
@@ -828,7 +837,7 @@ export default function HomePage() {
 
             {/* Col 2 — Product */}
             <div>
-              <h4 className="text-white font-semibold mb-4 text-sm">Product</h4>
+              <h4 className="text-white font-semibold mb-4 text-sm">{t('footer.product')}</h4>
               <ul className="space-y-2 text-sm">
                 <li><a href="#features" className="hover:text-white transition-colors">Features</a></li>
                 <li><a href="#pricing" className="hover:text-white transition-colors">Pricing</a></li>
@@ -841,7 +850,7 @@ export default function HomePage() {
 
             {/* Col 3 — Company */}
             <div>
-              <h4 className="text-white font-semibold mb-4 text-sm">Company</h4>
+              <h4 className="text-white font-semibold mb-4 text-sm">{t('footer.company')}</h4>
               <ul className="space-y-2 text-sm">
                 <li><Link href="/contact" className="hover:text-white transition-colors">Contact Us</Link></li>
                 <li><Link href="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link></li>
@@ -852,8 +861,8 @@ export default function HomePage() {
             </div>
           </div>
 
-          <div className="border-t border-slate-800 pt-6 text-xs text-slate-500 flex flex-col md:flex-row items-center justify-between gap-2">
-            <span>© 2026 CypAI. All rights reserved.</span>
+          <div className="border-t border-slate-800 pt-6 text-xs text-gray-600 dark:text-gray-400 flex flex-col md:flex-row items-center justify-between gap-2">
+            <span>© 2026 CypAI. {t('footer.rights')}</span>
             <span className="text-center">
               Serving businesses across Northern Cyprus — Kyrenia · Nicosia · Famagusta · Güzelyurt · Lefke · and worldwide 🌍
             </span>
@@ -874,3 +883,5 @@ export default function HomePage() {
     </>
   )
 }
+
+

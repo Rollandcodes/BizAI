@@ -1,0 +1,51 @@
+{
+  "nav": {
+    "features": "Ozellikler",
+    "pricing": "Fiyatlar",
+    "demo": "Canli Demo",
+    "contact": "Iletisim",
+    "login": "Giris",
+    "startTrial": "Ucretsiz Basla"
+  },
+  "hero": {
+    "badge": "Kibris Isletmeleri Icin",
+    "title": "Hicbir Musteriyi Kacirmayan AI Asistaniniz",
+    "subtitle": "Arac kiralama, kuafor, otel ve restoranlar icin 7/24 AI asistan. WhatsApp ve web sitenizi 5 dilde yonetiyor.",
+    "cta": "Ucretsiz Dene",
+    "demo": "Demo Izle",
+    "trust1": "15 dakikada kurulum",
+    "trust2": "Teknik bilgi gerekmez",
+    "trust3": "7 gunluk ucretsiz deneme"
+  },
+  "stats": {
+    "always": "Her zaman online",
+    "languages": "Dil destegi",
+    "setup": "Kurulum suresi",
+    "free": "Baslamak icin"
+  },
+  "pricing": {
+    "title": "Basit ve Seffaf Fiyatlar",
+    "subtitle": "Tum planlarda 7 gunluk deneme. Istediginizde iptal edin.",
+    "popular": "EN POPULER",
+    "perMonth": "/ay",
+    "startTrial": "Ucretsiz Basla",
+    "choosePlan": "Plan Sec"
+  },
+  "footer": {
+    "madeIn": "Kuzey Kibris icin yapildi",
+    "rights": "Tum haklari saklidir",
+    "product": "Urun",
+    "company": "Sirket"
+  },
+  "dashboard": {
+    "overview": "Genel Bakis",
+    "conversations": "Konusmalar",
+    "crm": "CRM ve Leads",
+    "bookings": "Rezervasyonlar",
+    "followups": "Takipler",
+    "analytics": "Analitik",
+    "settings": "Ayarlar",
+    "logout": "Cikis",
+    "welcome": "Tekrar hosgeldiniz"
+  }
+}
