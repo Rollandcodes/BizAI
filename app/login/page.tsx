@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 
-const DASHBOARD_STORAGE_KEY = 'cypai_dashboard_email';
+const DASHBOARD_STORAGE_KEY = 'cypai-dashboard-email';
 
 export default function LoginPage() {
   const router = useRouter();
