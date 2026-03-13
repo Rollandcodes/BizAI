@@ -52,6 +52,25 @@ test('demo supports niche switching and chat replies', async ({ page }) => {
   await expect(page.getByText('Mocked hotel reply for: What are your prices?')).toBeVisible();
 });
 
+test('demo shows degraded mode badge when chat API returns fallback response', async ({ page }) => {
+  await page.route('**/api/chat', async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        message: 'I am temporarily in fallback mode right now. Please leave your phone number and we will contact you directly.',
+        degraded: true,
+      }),
+    });
+  });
+
+  await page.goto('/demo');
+  await page.getByRole('button', { name: 'What are your prices?' }).click();
+
+  await expect(page.getByTestId('demo-degraded-badge')).toBeVisible();
+  await expect(page.getByText('Fallback mode active: AI provider issue detected.')).toBeVisible();
+});
+
 test('blog listing opens an article and shows the article CTA', async ({ page }) => {
   await page.goto('/blog');
 

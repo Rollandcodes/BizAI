@@ -52,6 +52,7 @@ export default function DemoPage() {
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [degradedMode, setDegradedMode] = useState(false)
   const endRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -64,6 +65,7 @@ export default function DemoPage() {
     setMessages([{ role: 'assistant', content: selected?.welcome || 'How can I help you?' }])
     setInput('')
     setError('')
+    setDegradedMode(false)
   }
 
   async function sendMessage(raw: string) {
@@ -89,12 +91,14 @@ export default function DemoPage() {
         throw new Error('CHAT_API_ERROR')
       }
 
-      const data = (await res.json()) as { message?: string }
+      const data = (await res.json()) as { message?: string; degraded?: boolean }
+      setDegradedMode(Boolean(data.degraded))
       setMessages([
         ...updated,
         { role: 'assistant', content: data.message || 'How else can I help you?' },
       ])
     } catch {
+      setDegradedMode(false)
       setMessages(previousMessages)
       setError('Sorry, the AI is temporarily unavailable. WhatsApp us directly: +90 533 842 5559')
     } finally {
@@ -141,6 +145,12 @@ export default function DemoPage() {
             <p className="text-sm font-semibold text-zinc-200">CypAI Assistant</p>
             <p className="text-xs text-zinc-500">Live demo for {NICHES.find((item) => item.id === niche)?.label}</p>
           </div>
+
+          {degradedMode ? (
+            <div className="border-b border-amber-200 bg-amber-50 px-4 py-2 text-xs font-semibold text-amber-700" data-testid="demo-degraded-badge">
+              Fallback mode active: AI provider issue detected.
+            </div>
+          ) : null}
 
           <div className="h-[420px] space-y-3 overflow-y-auto bg-zinc-950 p-4">
             {messages.map((msg, idx) => (

@@ -39,6 +39,7 @@ function ChatWidget({
   ]);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [degradedMode, setDegradedMode] = useState(false);
   const [sessionId] = useState<string>(() => crypto.randomUUID());
   const [feedbackState, setFeedbackState] = useState<'idle' | 'prompt' | 'done'>('idle');
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -165,9 +166,11 @@ function ChatWidget({
         reply?: string;
         response?: string;
         leadCaptured?: boolean;
+        degraded?: boolean;
       };
 
       const assistantText = data.message ?? data.reply ?? data.response ?? 'Sorry, something went wrong.';
+      setDegradedMode(Boolean(data.degraded));
       if (data.leadCaptured || assistantText.includes('[LEAD_CAPTURED]')) {
         Analytics.leadCaptured(businessType);
       }
@@ -183,6 +186,7 @@ function ChatWidget({
       ]);
     } catch (error) {
       console.error('Chat error:', error);
+      setDegradedMode(false);
       setMessages((prev) => [
         ...prev,
         {
@@ -234,6 +238,12 @@ function ChatWidget({
               </svg>
             </button>
           </div>
+
+          {degradedMode ? (
+            <div className="border-b border-amber-200 bg-amber-50 px-4 py-2 text-xs font-semibold text-amber-700" data-testid="chat-degraded-badge">
+              Fallback mode active: AI provider issue detected.
+            </div>
+          ) : null}
 
           {/* Messages */}
           <div className="flex-1 overflow-y-auto space-y-3 bg-white p-4">
