@@ -1110,7 +1110,10 @@ export default function DashboardPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-100 text-gray-900 lg:flex">
+    <div
+      className="min-h-screen bg-gray-50 text-[#0a0a0a] lg:flex"
+      style={{ fontFamily: "-apple-system, BlinkMacSystemFont, 'Inter', sans-serif" }}
+    >
       {toast ? <Toast toast={toast} /> : null}
       {showOnboardingWizard && business ? (
         <OnboardingWizard
@@ -1131,12 +1134,12 @@ export default function DashboardPage() {
             onClick={() => setIsTabletSidebarOpen(false)}
             aria-label="Close sidebar"
           />
-          <aside className="relative h-full w-72 bg-[#0f172a] text-white shadow-2xl">
-            <div className="flex h-20 items-center justify-between px-6 text-xl font-extrabold">
+          <aside className="relative h-full w-72 border-r border-gray-200 bg-white text-[#0a0a0a] shadow-2xl">
+            <div className="flex h-20 items-center justify-between px-6 text-xl font-black tracking-tight">
               CypAI
               <button
                 type="button"
-                className="rounded-full p-2 text-white/80 hover:bg-white hover:text-white"
+                className="rounded-full p-2 text-gray-500 hover:bg-gray-100 hover:text-[#0a0a0a]"
                 onClick={() => setIsTabletSidebarOpen(false)}
                 aria-label="Close menu"
               >
@@ -1164,10 +1167,10 @@ export default function DashboardPage() {
                     }}
                     className={`flex w-full items-center gap-3 rounded-full px-4 py-3 text-sm font-semibold transition ${
                       active
-                        ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/20'
+                        ? 'bg-black text-white'
                         : isLocked
-                          ? 'text-gray-600 hover:bg-white'
-                          : 'text-slate-300 hover:bg-white hover:text-white'
+                          ? 'text-gray-400 hover:bg-gray-50'
+                          : 'text-gray-600 hover:bg-gray-100 hover:text-[#0a0a0a]'
                     }`}
                   >
                     <Icon className="h-4 w-4" />
@@ -1180,8 +1183,8 @@ export default function DashboardPage() {
         </div>
       ) : null}
 
-      <aside className="hidden w-60 shrink-0 flex-col bg-[#0f172a] text-white lg:flex">
-        <div className="flex h-20 items-center px-6 text-xl font-extrabold">CypAI</div>
+      <aside className="hidden w-60 shrink-0 flex-col border-r border-gray-200 bg-white text-[#0a0a0a] lg:flex">
+        <div className="flex h-20 items-center px-6 text-xl font-black tracking-tight">CypAI</div>
 
         <nav className="flex-1 space-y-1 overflow-y-auto px-4 py-4">
           {tabItems.map(({ key, label, Icon, plans }) => {
@@ -1204,10 +1207,10 @@ export default function DashboardPage() {
                 data-testid={`dashboard-tab-${key}`}
                 className={`flex w-full items-center gap-3 rounded-full px-4 py-3 text-sm font-semibold transition ${
                   active
-                    ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/20'
+                    ? 'bg-black text-white'
                     : isLocked
-                      ? 'text-gray-600 hover:bg-white'
-                      : 'text-slate-300 hover:bg-white hover:text-white'
+                      ? 'text-gray-400 hover:bg-gray-50'
+                      : 'text-gray-600 hover:bg-gray-100 hover:text-[#0a0a0a]'
                 }`}
               >
                 <span className="relative inline-flex">
@@ -1227,14 +1230,14 @@ export default function DashboardPage() {
           })}
         </nav>
 
-        <div className="mx-4 h-px bg-white" />
+        <div className="mx-4 h-px bg-gray-100" />
 
         <div className="p-4">
           <p className="mb-2 truncate px-4 text-xs font-medium text-gray-400">{business?.owner_email}</p>
           <button
             type="button"
             onClick={handleLogout}
-            className="flex w-full items-center gap-3 rounded-full px-4 py-3 text-sm font-semibold text-slate-300 transition hover:bg-white hover:text-white"
+            className="flex w-full items-center gap-3 rounded-full px-4 py-3 text-sm font-semibold text-gray-600 transition hover:bg-gray-100 hover:text-[#0a0a0a]"
           >
             <LogOut className="h-4 w-4" />
             Logout
@@ -1243,7 +1246,7 @@ export default function DashboardPage() {
       </aside>
 
       <div className="flex min-h-screen flex-1 flex-col">
-        <header className="border-b border-gray-200 bg-white px-4 py-4 sm:px-6 lg:px-8">
+        <header className="border-b border-gray-100 bg-white px-4 py-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between gap-4">
             <div>
               <div className="flex items-center gap-3">
@@ -1254,14 +1257,14 @@ export default function DashboardPage() {
                 >
                   Menu
                 </button>
-                <h1 className="text-2xl font-extrabold text-gray-900">
+                <h1 className="text-3xl font-black leading-none tracking-tight text-[#0a0a0a]">
                   Welcome back, {business?.business_name || 'CypAI'} 👋
                 </h1>
                 <span className={`hidden rounded-full px-3 py-1 text-xs font-semibold sm:inline-flex ${getPlanBadgeClasses(business.plan)}`}>
                   {currentPlanName}
                 </span>
                 {(business.plan === 'trial' || business.plan === 'starter' || business.plan === 'basic') ? (
-                  <Link href="/#pricing" className="hidden text-xs font-semibold text-blue-600 hover:underline sm:inline-flex">
+                  <Link href="/#pricing" className="hidden text-xs font-semibold uppercase tracking-wide text-gray-500 hover:text-[#0a0a0a] sm:inline-flex">
                     Upgrade ↑
                   </Link>
                 ) : null}
@@ -1466,7 +1469,7 @@ export default function DashboardPage() {
                           <button
                             type="button"
                             onClick={() => void handleDownloadQR()}
-                            className="inline-flex items-center justify-center gap-2 rounded-full bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700"
+                            className="inline-flex items-center justify-center gap-2 rounded-full bg-black px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-[#1a1a1a]"
                           >
                             <Download className="h-4 w-4" />
                             Download QR Code (PNG)
@@ -2279,7 +2282,7 @@ export default function DashboardPage() {
                             type="button"
                             onClick={() => void handleGenerateReport()}
                             disabled={reportLoading}
-                            className="flex shrink-0 items-center gap-2 rounded-full bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow hover:bg-blue-700 disabled:opacity-50"
+                            className="flex shrink-0 items-center gap-2 rounded-full bg-black px-5 py-2.5 text-sm font-semibold text-white shadow hover:bg-[#1a1a1a] disabled:opacity-50"
                           >
                             {reportLoading ? (
                               <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
@@ -2447,7 +2450,7 @@ export default function DashboardPage() {
               <button
                 type="button"
                 onClick={() => setActiveTab('crm')}
-                className="flex items-center gap-2 rounded-full bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-lg transition-all hover:bg-blue-700"
+                className="flex items-center gap-2 rounded-full bg-black px-4 py-2 text-sm font-medium text-white shadow-lg transition-all hover:bg-[#1a1a1a]"
               >
                 👥 {newLeadsCount} New Lead{newLeadsCount !== 1 ? 's' : ''}
               </button>
@@ -2481,7 +2484,7 @@ export default function DashboardPage() {
             }}
             className={`flex flex-1 flex-col items-center gap-1 py-2 text-xs ${
               activeTab === tab.id
-                ? 'text-blue-600'
+                ? 'text-[#0a0a0a]'
                 : 'text-gray-500'
             }`}
             data-testid={`dashboard-mobile-tab-${tab.id}`}

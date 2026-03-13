@@ -200,9 +200,9 @@ export default function HomePage() {
           <div className="hidden items-center gap-8 md:flex">
             {[
               ['#features', 'Features'],
-              ['#pricing', 'Pricing'],
+              ['/pricing', 'Pricing'],
               ['/demo', 'Demo'],
-              ['#company', 'Company'],
+              ['/contact', 'Company'],
             ].map(([href, label]) => (
               <a key={href} href={href} className="text-sm text-gray-500 transition hover:text-[#0a0a0a]">
                 {label}
@@ -234,9 +234,9 @@ export default function HomePage() {
           <div className="border-t border-gray-100 px-4 pb-4 pt-2 md:hidden">
             {[
               ['#features', 'Features'],
-              ['#pricing', 'Pricing'],
+              ['/pricing', 'Pricing'],
               ['/demo', 'Demo'],
-              ['#company', 'Company'],
+              ['/contact', 'Company'],
               ['/login', 'Log In'],
             ].map(([href, label]) => (
               <a
