@@ -24,6 +24,14 @@ type Testimonial = {
   result: string
 }
 
+type BlogPreview = {
+  title: string
+  slug: string
+  excerpt: string
+  category: string
+  readTime: string
+}
+
 const featureTabs: FeatureTab[] = [
   {
     title: 'AI Chat & WhatsApp',
@@ -135,6 +143,33 @@ const testimonials: Testimonial[] = [
   },
 ]
 
+const blogHighlights: BlogPreview[] = [
+  {
+    title: 'How Car Rental Businesses in Cyprus Are Using AI to Get More Bookings',
+    slug: 'how-car-rental-businesses-in-cyprus-are-using-ai-to-get-more-bookings',
+    excerpt:
+      'A practical breakdown of automated WhatsApp replies, quote workflows, and follow-up systems that increase bookings.',
+    category: 'Car Rental',
+    readTime: '6 min read',
+  },
+  {
+    title: 'Why Your Kyrenia Business Loses Customers at Night (And How to Fix It)',
+    slug: 'why-your-kyrenia-business-loses-customers-at-night-and-how-to-fix-it',
+    excerpt:
+      'See the hidden cost of missed after-hours inquiries and the exact AI setup to capture every lead while you sleep.',
+    category: 'Lead Capture',
+    readTime: '7 min read',
+  },
+  {
+    title: 'WhatsApp AI for Small Businesses: Complete Guide 2026',
+    slug: 'whatsapp-ai-for-small-businesses-complete-guide-2026',
+    excerpt:
+      'A complete, non-technical playbook for deploying WhatsApp AI from first message to confirmed booking.',
+    category: 'WhatsApp AI',
+    readTime: '8 min read',
+  },
+]
+
 export default function HomePage() {
   const [menuOpen, setMenuOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
@@ -201,6 +236,7 @@ export default function HomePage() {
             {[
               ['#features', 'Features'],
               ['/pricing', 'Pricing'],
+              ['/blog', 'Blog'],
               ['/demo', 'Demo'],
               ['/contact', 'Company'],
             ].map(([href, label]) => (
@@ -235,6 +271,7 @@ export default function HomePage() {
             {[
               ['#features', 'Features'],
               ['/pricing', 'Pricing'],
+              ['/blog', 'Blog'],
               ['/demo', 'Demo'],
               ['/contact', 'Company'],
               ['/login', 'Log In'],
@@ -551,6 +588,46 @@ export default function HomePage() {
         </div>
       </section>
 
+      <section id="blog" className="bg-white py-20 lg:py-28">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Blog</p>
+              <h2 className="mt-3 text-4xl font-black leading-tight text-slate-900">Learn what actually works</h2>
+              <p className="mt-3 max-w-2xl text-sm leading-relaxed text-slate-600">
+                Read actionable playbooks built from real conversations, missed-lead patterns, and growth experiments from local Cyprus businesses.
+              </p>
+            </div>
+            <Link
+              href="/blog"
+              className="inline-flex rounded-full border border-slate-300 px-5 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-slate-400"
+            >
+              View all articles
+            </Link>
+          </div>
+
+          <div className="mt-12 grid gap-6 md:grid-cols-3">
+            {blogHighlights.map((post) => (
+              <article key={post.slug} className="rounded-2xl border border-slate-200 bg-slate-50 p-6 shadow-sm">
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-sky-700">{post.category}</p>
+                <h3 className="mt-3 text-xl font-bold leading-snug text-slate-900">
+                  <Link href={`/blog/${post.slug}`} className="transition hover:text-sky-700">
+                    {post.title}
+                  </Link>
+                </h3>
+                <p className="mt-4 text-sm leading-relaxed text-slate-600">{post.excerpt}</p>
+                <div className="mt-6 flex items-center justify-between text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">
+                  <span>{post.readTime}</span>
+                  <Link href={`/blog/${post.slug}`} className="text-slate-700 hover:text-sky-700">
+                    Read more
+                  </Link>
+                </div>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+
       <section id="pricing" className="bg-[linear-gradient(180deg,_rgba(241,245,249,0.85)_0%,_rgba(248,250,252,0.95)_100%)] py-20 lg:py-28">
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
           <p className="text-center text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Pricing</p>
@@ -682,6 +759,7 @@ export default function HomePage() {
               <ul className="mt-4 space-y-2 text-sm text-slate-600">
                 <li><a href="#features" className="hover:text-slate-900">Features</a></li>
                 <li><a href="#pricing" className="hover:text-slate-900">Pricing</a></li>
+                <li><Link href="/blog" className="hover:text-slate-900">Blog</Link></li>
                 <li><Link href="/demo" className="hover:text-slate-900">Live Demo</Link></li>
                 <li><Link href="/dashboard" className="hover:text-slate-900">Dashboard</Link></li>
               </ul>
