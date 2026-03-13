@@ -60,7 +60,7 @@ export default function SuccessPage() {
 
   useEffect(() => {
     try {
-      const raw = localStorage.getItem('cypai_user');
+      const raw = localStorage.getItem('bizai_user') ?? localStorage.getItem('cypai_user');
       if (raw) {
         const parsed = JSON.parse(raw) as BizUser;
         setUser(parsed);

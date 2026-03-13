@@ -74,10 +74,20 @@ function SignupForm() {
     e.preventDefault();
     if (!validate()) return;
     Analytics.signupStarted(planId);
-    localStorage.setItem(
-      'cypai_signup',
-      JSON.stringify({ ...form, plan: planId }),
-    );
+    const signupPayload = {
+      businessName: form.businessName.trim(),
+      business_name: form.businessName.trim(),
+      yourName: form.yourName.trim(),
+      name: form.yourName.trim(),
+      email: form.email.trim(),
+      whatsapp: form.whatsapp.trim(),
+      phone: form.whatsapp.trim(),
+      businessType: form.businessType,
+      website: form.website.trim(),
+      plan: planId,
+    };
+    localStorage.setItem('bizai_signup', JSON.stringify(signupPayload));
+    localStorage.setItem('cypai_signup', JSON.stringify(signupPayload));
     router.push(`/payment?plan=${planId}`);
   }
 
