@@ -3,9 +3,10 @@
 import { Suspense, useEffect, useRef, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Check, Loader2 } from 'lucide-react';
-import { FUNDING, PayPalButtons, usePayPalScriptReducer } from '@paypal/react-paypal-js';
+import { PayPalScriptProvider } from '@paypal/react-paypal-js';
 import { PLANS } from '@/lib/plans';
 import { Analytics } from '@/lib/analytics';
+import EmbeddedCardForm from '@/components/EmbeddedCardForm';
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
@@ -19,141 +20,6 @@ type SignupData = {
   plan: string;
 };
 
-// ── PayPal button wrapper (needs SDK loaded check) ─────────────────────────
-
-function PayPalSection({
-  planId,
-  signupData,
-  onSuccess,
-  onError,
-}: {
-  planId: string;
-  signupData: SignupData;
-  onSuccess: (businessId: string) => void;
-  onError: (msg: string) => void;
-}) {
-  const [{ isPending, isRejected }] = usePayPalScriptReducer();
-
-  if (isPending) {
-    return (
-      <div className="flex flex-col items-center py-8 gap-3">
-        <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
-        <p className="text-gray-500 text-sm">Loading secure payment...</p>
-      </div>
-    );
-  }
-
-  if (isRejected) {
-    return (
-      <div className="space-y-4">
-        <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-center">
-          <p className="text-red-600 font-semibold mb-1">⚠️ PayPal unavailable</p>
-          <p className="text-red-500 text-sm">Please pay via WhatsApp instead</p>
-        </div>
-        <a
-          href={`https://wa.me/905338425559?text=Hi!%20I%20want%20to%20sign%20up%20for%20CypAI%20${encodeURIComponent((PLANS[planId] ?? PLANS.pro).name)}%20Plan.%20My%20business:%20${encodeURIComponent(signupData.businessName)},%20Email:%20${encodeURIComponent(signupData.email)}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="w-full flex items-center justify-center gap-2 bg-green-500 hover:bg-green-600 text-white font-bold py-4 rounded-xl transition-colors"
-        >
-          💬 Pay via WhatsApp
-        </a>
-      </div>
-    );
-  }
-
-  const createOrder = async () => {
-    const res = await fetch('/api/paypal/create-order', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        planId,
-        customerEmail: signupData.email,
-      }),
-    });
-    const data = (await res.json()) as { id?: string; error?: string };
-    if (data.error || !data.id) {
-      throw new Error(data.error || 'Failed to create order');
-    }
-    return data.id;
-  };
-
-  const onApprove = async (data: { orderID?: string }) => {
-    const res = await fetch('/api/paypal/capture-order', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        orderID: data.orderID,
-        planId,
-        signupData,
-      }),
-    });
-    const result = (await res.json()) as {
-      success?: boolean;
-      businessId?: string;
-      user?: { id?: string; email?: string; businessName?: string; plan?: string };
-      error?: string;
-      warning?: string;
-    };
-    if (result.success) {
-      if (result.user) {
-        localStorage.setItem('cypai_user', JSON.stringify(result.user));
-      }
-      onSuccess(result.businessId || result.user?.id || '');
-    } else {
-      onError(result.error || 'Payment could not be completed.');
-    }
-  };
-
-  const onPayPalError = (err: unknown) => {
-    console.error('PayPal error:', err);
-    onError('Payment failed. Try again or contact us on WhatsApp: +90 533 842 5559');
-  };
-
-  return (
-    <div className="space-y-3">
-      <PayPalButtons
-        style={{ layout: 'vertical', color: 'blue', shape: 'rect', label: 'paypal', height: 50, tagline: false }}
-        createOrder={createOrder}
-        onApprove={onApprove}
-        onError={onPayPalError}
-        onCancel={() => {
-          console.log('Payment cancelled');
-        }}
-      />
-
-      <PayPalButtons
-        style={{ layout: 'vertical', color: 'black', shape: 'rect', label: 'pay', height: 45, tagline: false }}
-        fundingSource={FUNDING.CARD}
-        createOrder={createOrder}
-        onApprove={onApprove}
-        onError={onPayPalError}
-        onCancel={() => {
-          console.log('Payment cancelled');
-        }}
-      />
-
-      <div className="relative">
-        <div className="absolute inset-0 flex items-center">
-          <div className="w-full border-t border-gray-200" />
-        </div>
-        <div className="relative flex justify-center">
-          <span className="bg-white px-3 text-gray-400 text-xs">or</span>
-        </div>
-      </div>
-
-      <a
-        href={`https://wa.me/905338425559?text=Hi!%20I%20want%20to%20sign%20up%20for%20CypAI%20${encodeURIComponent((PLANS[planId] ?? PLANS.pro).name)}%20Plan.%20My%20business:%20${encodeURIComponent(signupData.businessName)},%20Email:%20${encodeURIComponent(signupData.email)}`}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="w-full flex items-center justify-center gap-2 border border-green-300 text-green-600 font-medium py-3 rounded-xl hover:bg-green-50 transition-colors text-sm"
-      >
-        💬 Pay manually via WhatsApp
-      </a>
-    </div>
-  );
-}
-
 // ── Main page content ──────────────────────────────────────────────────────
 
 function PaymentContent() {
@@ -163,6 +29,8 @@ function PaymentContent() {
   const plan = PLANS[planId] ?? PLANS.pro;
 
   const [signupData, setSignupData] = useState<SignupData | null>(null);
+  const [clientToken, setClientToken] = useState('');
+  const [tokenLoading, setTokenLoading] = useState(true);
   const [processing, setProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const hasTrackedPaymentStart = useRef(false);
@@ -182,13 +50,40 @@ function PaymentContent() {
     Analytics.paymentStarted(planId, Number(plan.price));
   }, [plan.price, planId]);
 
-  function handleSuccess(businessId: string) {
+  useEffect(() => {
+    async function fetchClientToken() {
+      try {
+        const response = await fetch('/api/paypal/client-token');
+        const data = (await response.json()) as { clientToken?: string; error?: string };
+
+        if (!response.ok || !data.clientToken) {
+          throw new Error(data.error || 'Unable to load secure payment form');
+        }
+
+        setClientToken(data.clientToken);
+      } catch (tokenError) {
+        console.error('Client token error:', tokenError);
+        setError('Unable to load the secure payment form right now.');
+      } finally {
+        setTokenLoading(false);
+      }
+    }
+
+    void fetchClientToken();
+  }, []);
+
+  function handleSuccess(user: { id?: string; email?: string; businessName?: string; plan?: string }) {
     setProcessing(true);
     Analytics.paymentCompleted(planId, Number(plan.price));
-    if (signupData && businessId) {
+    if (signupData) {
       localStorage.setItem(
         'cypai_user',
-        JSON.stringify({ ...signupData, businessId, plan: planId }),
+        JSON.stringify({
+          ...signupData,
+          ...user,
+          businessId: user.id,
+          plan: planId,
+        }),
       );
     }
     router.push('/success');
@@ -329,28 +224,48 @@ function PaymentContent() {
               ) : (
                 <div className="mt-6">
                   <p className="mb-4 text-[11px] font-semibold uppercase tracking-widest text-slate-400">
-                    Pay securely with PayPal
+                    Pay securely without leaving CypAI
                   </p>
                   {signupData ? (
                     <>
-                      <PayPalSection
-                        planId={planId}
-                        signupData={signupData}
-                        onSuccess={handleSuccess}
-                        onError={handleError}
-                      />
-                      {/* WhatsApp fallback */}
-                      <div className="mt-4 pt-4 border-t border-slate-100 text-center">
-                        <p className="text-xs text-gray-400 mb-2">Prefer to pay manually?</p>
-                        <a
-                          href={`https://wa.me/905338425559?text=Hi!%20I%20want%20to%20sign%20up%20for%20CypAI%20${encodeURIComponent(plan.name)}%20Plan%20(%24${plan.price}%2Fmo).%20My%20business%3A%20${encodeURIComponent(signupData.businessName)}%2C%20Email%3A%20${encodeURIComponent(signupData.email)}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-green-600 text-sm font-medium hover:underline flex items-center justify-center gap-1"
+                      {tokenLoading ? (
+                        <div className="flex flex-col items-center py-8">
+                          <div className="mb-3 h-10 w-10 animate-spin rounded-full border-4 border-blue-600 border-t-transparent" />
+                          <p className="text-sm text-gray-500">Loading secure payment...</p>
+                        </div>
+                      ) : clientToken ? (
+                        <PayPalScriptProvider
+                          options={{
+                            clientId: process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID!,
+                            currency: 'USD',
+                            intent: 'capture',
+                            components: 'hosted-fields',
+                            dataClientToken: clientToken,
+                          }}
                         >
-                          💬 Contact us on WhatsApp to arrange payment
-                        </a>
-                      </div>
+                          <EmbeddedCardForm
+                            planId={planId}
+                            planPrice={`$${plan.price}`}
+                            customerEmail={signupData.email || ''}
+                            businessName={signupData.businessName || ''}
+                            signupData={signupData}
+                            onSuccess={handleSuccess}
+                            onError={handleError}
+                          />
+                        </PayPalScriptProvider>
+                      ) : (
+                        <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-center">
+                          <p className="mb-2 font-medium text-red-600">⚠️ Payment form unavailable</p>
+                          <a
+                            href={`https://wa.me/905338425559?text=Hi!%20I%20want%20to%20sign%20up%20for%20CypAI%20${encodeURIComponent(plan.name)}%20Plan`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="font-medium text-green-600 hover:underline"
+                          >
+                            💬 Contact us on WhatsApp instead
+                          </a>
+                        </div>
+                      )}
                     </>
                   ) : (
                     <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-4 text-sm text-amber-800">
