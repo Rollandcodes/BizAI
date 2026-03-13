@@ -400,6 +400,7 @@ export default function Home() {
             <a href="#features" className="transition hover:text-slate-900">Features</a>
             <a href="#pricing" className="transition hover:text-slate-900">Pricing</a>
             <a href="#faq" className="transition hover:text-slate-900">FAQ</a>
+            <a href="/blog" className="transition hover:text-slate-900">Blog</a>
             <a href="/demo" className="transition hover:text-slate-900">Demo</a>
             <a href="/dashboard" className="font-semibold text-blue-600 transition hover:text-blue-700">Dashboard</a>
           </nav>
@@ -417,7 +418,7 @@ export default function Home() {
         {mobileMenuOpen && (
           <div className="border-t border-slate-100 bg-white px-4 pb-5 pt-3 md:hidden">
             <nav className="flex flex-col gap-1 text-sm font-semibold text-slate-700">
-              {[{ label: 'Features', href: '#features' }, { label: 'Pricing', href: '#pricing' }, { label: 'FAQ', href: '#faq' }, { label: 'Demo', href: '/demo' }, { label: 'Dashboard', href: '/dashboard' }].map(({ label, href }) => (
+              {[{ label: 'Features', href: '#features' }, { label: 'Pricing', href: '#pricing' }, { label: 'FAQ', href: '#faq' }, { label: 'Blog', href: '/blog' }, { label: 'Demo', href: '/demo' }, { label: 'Dashboard', href: '/dashboard' }].map(({ label, href }) => (
                 <a key={label} href={href} onClick={() => setMobileMenuOpen(false)} className="rounded-lg px-3 py-2.5 transition hover:bg-slate-50">{label}</a>
               ))}
               <div className="mt-3 flex gap-2">
@@ -771,6 +772,7 @@ export default function Home() {
                 <ul className="space-y-2 text-sm">
                   <li><a href="#features" className="hover:text-white transition-colors">Features</a></li>
                   <li><a href="#pricing" className="hover:text-white transition-colors">Pricing</a></li>
+                  <li><a href="/blog" className="hover:text-white transition-colors">Blog</a></li>
                   <li><a href="/demo" className="hover:text-white transition-colors">Live Demo</a></li>
                   <li><a href="/dashboard" className="hover:text-white transition-colors">Dashboard</a></li>
                   <li><a href="#faq" className="hover:text-white transition-colors">FAQ</a></li>
