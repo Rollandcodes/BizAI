@@ -54,6 +54,15 @@ export interface Business {
   business_type?: BusinessType;
   system_prompt?: string;
   widget_color: string;
+  widget_position?: 'bottom-right' | 'bottom-left';
+  welcome_message?: string;
+  business_hours?: Record<string, { open: string; close: string; closed: boolean }>;
+  languages?: string[];
+  custom_faqs?: Array<{ question: string; answer: string }>;
+  pricing_info?: string;
+  common_questions_text?: string;
+  additional_info?: string;
+  onboarding_complete?: boolean;
   plan: BusinessPlan;
   plan_expires_at?: string;
   paypal_subscription_id?: string;

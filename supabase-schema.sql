@@ -36,6 +36,15 @@ CREATE TABLE IF NOT EXISTS public.businesses (
 ALTER TABLE public.businesses ADD COLUMN IF NOT EXISTS owner_name TEXT;
 ALTER TABLE public.businesses ADD COLUMN IF NOT EXISTS whatsapp TEXT;
 ALTER TABLE public.businesses ADD COLUMN IF NOT EXISTS website TEXT;
+ALTER TABLE public.businesses ADD COLUMN IF NOT EXISTS business_hours JSONB DEFAULT '{}'::jsonb;
+ALTER TABLE public.businesses ADD COLUMN IF NOT EXISTS languages JSONB DEFAULT '[]'::jsonb;
+ALTER TABLE public.businesses ADD COLUMN IF NOT EXISTS custom_faqs JSONB DEFAULT '[]'::jsonb;
+ALTER TABLE public.businesses ADD COLUMN IF NOT EXISTS widget_position TEXT DEFAULT 'bottom-right';
+ALTER TABLE public.businesses ADD COLUMN IF NOT EXISTS welcome_message TEXT DEFAULT 'Hi! 👋 How can I help you today?';
+ALTER TABLE public.businesses ADD COLUMN IF NOT EXISTS pricing_info TEXT;
+ALTER TABLE public.businesses ADD COLUMN IF NOT EXISTS common_questions_text TEXT;
+ALTER TABLE public.businesses ADD COLUMN IF NOT EXISTS additional_info TEXT;
+ALTER TABLE public.businesses ADD COLUMN IF NOT EXISTS onboarding_complete BOOLEAN DEFAULT false;
 
 -- Create index for faster lookups
 CREATE INDEX IF NOT EXISTS idx_businesses_owner_email ON public.businesses(owner_email);

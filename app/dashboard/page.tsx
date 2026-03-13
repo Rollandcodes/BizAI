@@ -46,6 +46,7 @@ import {
 import QRCode from 'react-qr-code';
 import { supabase } from '@/lib/supabase';
 import ChatWidget from '@/components/ChatWidget';
+import OnboardingWizard from '@/components/OnboardingWizard';
 import { PLANS } from '@/lib/plans';
 import { Analytics } from '@/lib/analytics';
 
@@ -74,8 +75,19 @@ type BusinessRecord = {
   owner_email: string;
   business_name: string;
   business_type?: string | null;
+  owner_name?: string | null;
+  whatsapp?: string | null;
+  website?: string | null;
   widget_color?: string | null;
-  plan: 'trial' | 'starter' | 'pro' | 'business';
+  widget_position?: string | null;
+  welcome_message?: string | null;
+  business_hours?: Record<string, { open: string; close: string; closed: boolean }> | null;
+  languages?: string[] | null;
+  pricing_info?: string | null;
+  common_questions_text?: string | null;
+  additional_info?: string | null;
+  onboarding_complete?: boolean | null;
+  plan: 'trial' | 'basic' | 'starter' | 'pro' | 'business';
   plan_expires_at?: string | null;
   customInstructions?: string;
   customFaqs?: CustomFaq[];
@@ -147,6 +159,7 @@ const tabItems: Array<{ key: TabKey; label: string; Icon: LucideIcon }> = [
 
 const messageLimits: Record<BusinessRecord['plan'], number | null> = {
   trial: 100,
+  basic: 500,
   starter: 500,
   pro: null,
   business: null,
@@ -164,6 +177,7 @@ function emptyPayload(): DashboardPayload {
 function getPlanBadgeClasses(plan: BusinessRecord['plan']) {
   const styles: Record<BusinessRecord['plan'], string> = {
     trial: 'bg-slate-100 text-slate-700',
+    basic: 'bg-green-100 text-green-700',
     starter: 'bg-green-100 text-green-700',
     pro: 'bg-blue-100 text-blue-700',
     business: 'bg-purple-100 text-purple-700',
@@ -175,6 +189,7 @@ function getPlanBadgeClasses(plan: BusinessRecord['plan']) {
 function getPlanDisplayName(plan: BusinessRecord['plan']) {
   const names: Record<BusinessRecord['plan'], string> = {
     trial: 'Trial',
+    basic: 'Starter',
     starter: 'Starter',
     pro: 'Pro',
     business: 'Business',
@@ -413,6 +428,7 @@ export default function DashboardPage() {
   const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null);
   const [updatingLeadIds, setUpdatingLeadIds] = useState<Set<string>>(new Set());
   const [toast, setToast] = useState<ToastState | null>(null);
+  const [onboardingDismissed, setOnboardingDismissed] = useState(false);
   const [selectedUpgradePlan, setSelectedUpgradePlan] = useState<'starter' | 'pro' | 'business'>('pro');
   const [paymentError, setPaymentError] = useState('');
   const [settingsForm, setSettingsForm] = useState<SettingsFormState>({
@@ -506,13 +522,14 @@ export default function DashboardPage() {
   const currentConversation = conversations.find((item) => item.id === selectedConversationId) || null;
   const planLimit = business ? messageLimits[business.plan] : null;
   const currentPlanName = business ? getPlanDisplayName(business.plan) : 'Trial';
-  const currentPlanPrice = business && business.plan !== 'trial' ? PLANS[business.plan]?.price || '0.00' : '0.00';
+  const normalizedPlanKey = business?.plan === 'basic' ? 'starter' : business?.plan;
+  const currentPlanPrice = business && business.plan !== 'trial' ? PLANS[normalizedPlanKey || 'pro']?.price || '0.00' : '0.00';
   const widgetCode = useMemo(() => {
     if (!business) {
       return '';
     }
 
-    return `<script>\n  window.CypAIConfig = { businessId: "${business.id}" }\n</script>\n<script src="https://biz-ai-u4n3.vercel.app/widget.js"></script>`;
+    return `<script src="https://cypai.app/widget.js" data-business-id="${business.id}"></script>`;
   }, [business]);
 
   useEffect(() => {
@@ -553,7 +570,7 @@ export default function DashboardPage() {
       customFaqs: business.customFaqs && business.customFaqs.length > 0 ? business.customFaqs : [{ question: '', answer: '' }],
     });
 
-    const eligiblePlan = business.plan === 'trial' ? 'starter' : business.plan;
+    const eligiblePlan = business.plan === 'trial' || business.plan === 'basic' ? 'starter' : business.plan;
     setSelectedUpgradePlan((eligiblePlan as 'starter' | 'pro' | 'business') || 'pro');
 
     // Eagerly load bookings so the sidebar badge count is ready on all tabs
@@ -1065,10 +1082,21 @@ export default function DashboardPage() {
     day,
     score: Math.min(100, Math.max(0, Math.round(chartBase + (chartTrend === 'improving' ? (i - 3) * 1.5 : chartTrend === 'declining' ? (3 - i) * 1.5 : 0) + Math.sin(i) * 2))),
   }));
+  const showOnboardingWizard = Boolean(business && business.onboarding_complete !== true && !onboardingDismissed);
 
   return (
     <div className="min-h-screen bg-slate-100 text-slate-900 lg:flex">
       {toast ? <Toast toast={toast} /> : null}
+      {showOnboardingWizard && business ? (
+        <OnboardingWizard
+          business={business}
+          onComplete={async () => {
+            setOnboardingDismissed(true);
+            await refreshDashboard();
+            setToast({ message: 'Onboarding complete! Your dashboard is ready.', tone: 'success' });
+          }}
+        />
+      ) : null}
 
       <aside className="hidden w-60 shrink-0 flex-col bg-[#0f172a] text-white lg:flex">
         <div className="flex h-20 items-center px-6 text-xl font-extrabold">CypAI</div>
@@ -1127,7 +1155,7 @@ export default function DashboardPage() {
                 <span className={`hidden rounded-full px-3 py-1 text-xs font-semibold sm:inline-flex ${getPlanBadgeClasses(business.plan)}`}>
                   {currentPlanName}
                 </span>
-                {(business.plan === 'trial' || business.plan === 'starter') ? (
+                {(business.plan === 'trial' || business.plan === 'starter' || business.plan === 'basic') ? (
                   <Link href="/#pricing" className="hidden text-xs font-semibold text-blue-600 hover:underline sm:inline-flex">
                     Upgrade ↑
                   </Link>
@@ -1317,7 +1345,7 @@ export default function DashboardPage() {
                     <div className="mt-6 flex flex-col gap-6 sm:flex-row sm:items-start">
                       <div ref={qrRef} className="flex shrink-0 flex-col items-center gap-3 rounded-2xl border-2 border-slate-200 bg-white p-5">
                         <QRCode
-                          value={`https://biz-ai-u4n3.vercel.app/chat/${business.id}`}
+                          value={`https://cypai.app/chat/${business.id}`}
                           size={160}
                           fgColor="#0f172a"
                         />
