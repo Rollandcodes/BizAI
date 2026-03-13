@@ -102,7 +102,7 @@ test('dashboard tabs switch across conversations, leads, settings, and subscript
 
   await page.getByTestId('dashboard-tab-settings').click();
   await expect(page.getByText('Update your business profile, AI behavior, and chat widget appearance.')).toBeVisible();
-  await expect(page.getByDisplayValue('DriveEasy Rentals')).toBeVisible();
+  await expect(page.getByLabel('Business Name')).toHaveValue('DriveEasy Rentals');
 
   await page.getByTestId('dashboard-tab-subscription').click();
   await expect(page.getByText('Upgrade your subscription')).toBeVisible();
