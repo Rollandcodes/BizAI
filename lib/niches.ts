@@ -12,10 +12,21 @@ export interface NicheConfig {
   systemPrompt: string;
   welcomeMessage: string;
   faqs: FAQ[];
+  languages: string[];
   leadFields: string[];
   primaryColor: string;
   suggestedPrice: number;
 }
+
+const LANGUAGE_RULE = `LANGUAGE RULE — CRITICAL:
+Detect the language the customer writes in and ALWAYS respond in that exact language.
+Supported languages:
+- English → respond in English
+- Turkish (Türkçe) → respond in Turkish
+- Arabic (العربية) → respond in Arabic
+- Russian (Русский) → respond in Russian
+- Greek (Ελληνικά) → respond in Greek
+Never mix languages in the same response.`;
 
 // ============================================================================
 // Car Rental Configuration
@@ -34,7 +45,8 @@ Always be helpful and professional. Try to collect the customer's name, phone nu
 When you have collected the customer's name, phone, pickup date, return date, and car preference, say EXACTLY:
 'Great! I have all your details. Let me confirm your booking request with our team right away. You'll receive a confirmation shortly. 📋'
 Then output a special marker: [BOOKING_READY]
-followed by a JSON summary on a new line: {"name":"...","phone":"...","pickupDate":"YYYY-MM-DD","returnDate":"YYYY-MM-DD","carType":"...","totalDays":N}`,
+followed by a JSON summary on a new line: {"name":"...","phone":"...","pickupDate":"YYYY-MM-DD","returnDate":"YYYY-MM-DD","carType":"...","totalDays":N}
+${LANGUAGE_RULE}`,
   // Note: The [BOOKING_READY] marker and JSON are stripped before the message is shown to the customer.
   
   welcomeMessage: "Hello! 🚗 Looking to rent a car? I can help you find the perfect vehicle for your trip. What are your travel dates?",
@@ -61,6 +73,8 @@ followed by a JSON summary on a new line: {"name":"...","phone":"...","pickupDat
       answer: "Absolutely! We offer infant car seats, booster seats, and combination seats. Reserve them when booking or call ahead to ensure availability.",
     },
   ],
+
+  languages: ['en', 'tr', 'ar', 'ru', 'el'],
   
   leadFields: ["name", "phone", "pickupDate", "returnDate", "carType"],
   primaryColor: "#1f2937",
@@ -79,7 +93,8 @@ const BARBERSHOP: NicheConfig = {
 - Barber information and specialties
 - Walk-in policy and wait times
 
-Be welcoming and helpful. Always collect the customer's name and phone number for appointment bookings and confirm their preferred date and service.`,
+Be welcoming and helpful. Always collect the customer's name and phone number for appointment bookings and confirm their preferred date and service.
+${LANGUAGE_RULE}`,
   
   welcomeMessage: "Hey! 💈 Welcome to {businessName}! Want to book an appointment or have any questions? I'm here to help!",
   
@@ -105,6 +120,8 @@ Be welcoming and helpful. Always collect the customer's name and phone number fo
       answer: "You can book appointments right here through our chat! Just let me know your preferred date, time, and service, and I'll confirm availability for you.",
     },
   ],
+
+  languages: ['en', 'tr', 'ar', 'ru', 'el'],
   
   leadFields: ["name", "phone", "preferredDate", "service"],
   primaryColor: "#dc2626",
@@ -124,7 +141,8 @@ const STUDENT_ACCOMMODATION: NicheConfig = {
 - House rules and community features
 - Support for international students
 
-Be warm, understanding, and helpful. Collect the student's name, phone number, university, preferred room type, and desired move-in date for accommodation inquiries.`,
+Be warm, understanding, and helpful. Collect the student's name, phone number, university, preferred room type, and desired move-in date for accommodation inquiries.
+${LANGUAGE_RULE}`,
   
   welcomeMessage: "Welcome! 🏠 Looking for accommodation near your university? I can help you find the perfect room that fits your needs and budget!",
   
@@ -150,6 +168,8 @@ Be warm, understanding, and helpful. Collect the student's name, phone number, u
       answer: "Move-in is simple: sign the lease, pay the deposit, receive your keys and welcome folder. We help with transport tips and provide orientation to the property. You can move in on your start date!",
     },
   ],
+
+  languages: ['en', 'tr', 'ar', 'ru', 'el'],
   
   leadFields: ["name", "phone", "university", "moveInDate", "roomType"],
   primaryColor: "#0284c7",

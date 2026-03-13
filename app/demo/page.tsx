@@ -314,6 +314,9 @@ export default function DemoPage() {
           Chat with our AI assistant configured for different local businesses.<br />
           This is powered by real AI — just like yours would be.
         </p>
+        <p className="mt-4 text-sm font-medium text-slate-500">
+          Languages: English, Turkish, Arabic, Russian & Greek
+        </p>
       </div>
 
       <div className="mx-auto mt-6 max-w-xl px-4 pb-6">

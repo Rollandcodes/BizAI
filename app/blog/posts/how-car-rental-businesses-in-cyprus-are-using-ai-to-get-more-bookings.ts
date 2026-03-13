@@ -50,7 +50,7 @@ export const howCarRentalBusinessesInCyprusAreUsingAiToGetMoreBookings: BlogPost
       heading: 'Why multilingual support is now a baseline, not a premium feature',
       paragraphs: [
         'Tourism traffic in Northern Cyprus is mixed across languages and expectations. A customer may write in English, switch to Turkish, and ask technical insurance details in another language style. If your team can only reply fluently in one language at all hours, conversion drops. The customer does not wait for shift changes.',
-        'AI systems that can handle multiple languages without awkward translation delays have become a baseline operational advantage. With CypAI, teams set language preferences during onboarding and then let the assistant keep tone and clarity across English, Turkish, Arabic, and Russian interactions. That creates a smoother customer experience and prevents silent drop-off from misunderstood replies.',
+        'AI systems that can handle multiple languages without awkward translation delays have become a baseline operational advantage. With CypAI, teams set language preferences during onboarding and then let the assistant keep tone and clarity across English, Turkish, Arabic, Russian, and Greek interactions. That creates a smoother customer experience and prevents silent drop-off from misunderstood replies.',
       ],
     },
     {

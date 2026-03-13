@@ -26,10 +26,10 @@ test('pricing section shows Most Popular label on Pro card', async ({ page }) =>
 
 test('faq expands and shows answer content', async ({ page }) => {
   await page.goto('/');
-  const questionButton = page.locator('button').filter({ hasText: 'Which languages does the AI support?' }).first();
+  const questionButton = page.locator('button').filter({ hasText: 'Which languages does the AI speak?' }).first();
   await expect(questionButton).toBeVisible();
   await questionButton.click();
-  await expect(page.getByText('BizAI speaks English, Turkish, Arabic, and Russian fluently.')).toBeVisible();
+  await expect(page.getByText('Your AI agent speaks English, Turkish, Arabic, Russian, and Greek', { exact: false })).toBeVisible();
 });
 
 test('mobile responsive breakpoints render key sections', async ({ page }) => {

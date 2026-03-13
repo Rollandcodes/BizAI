@@ -45,7 +45,7 @@ const FAQ_ITEMS = [
   {
     id: 'faq-2',
     q: 'Which languages does the AI speak?',
-    a: 'Your AI agent speaks English, Turkish, Arabic, and Russian — automatically detecting which language your customer is using and responding in the same language.',
+    a: 'Your AI agent speaks English, Turkish, Arabic, Russian, and Greek — automatically detecting which language your customer is using and responding in the same language.',
   },
   {
     id: 'faq-3',
@@ -93,7 +93,7 @@ const TESTIMONIALS = [
     name: 'Anastasia K.',
     business: 'Bellapais Accommodation',
     location: 'Bellapais, TRNC',
-    text: "Our guests speak English, Russian, and Arabic. CypAI answers all of them instantly in their language. We haven't missed a single inquiry since setup.",
+    text: "Our guests speak English, Russian, Arabic, and Greek. CypAI answers all of them instantly in their language. We haven't missed a single inquiry since setup.",
     result: 'Zero missed inquiries in 3 months',
     avatar: '🏠',
     stars: 5,
@@ -135,8 +135,8 @@ const FEATURES = [
   },
   {
     icon: '🌍',
-    title: '4 Languages Automatically',
-    desc: 'Detects and responds in English, Turkish, Arabic, or Russian — whichever your customer writes in first.',
+    title: '5 Languages Automatically',
+    desc: 'Detects and responds in English, Turkish, Arabic, Russian, or Greek — automatically.',
   },
   {
     icon: '📅',
@@ -449,8 +449,15 @@ export default function Home() {
                   <span className="text-blue-400">Never Misses a Customer</span>
                 </h1>
                 <p className="text-xl text-slate-300 mb-4 leading-relaxed">
-                  24/7 AI assistant for car rentals, barbershops, hotels, and restaurants. Handles WhatsApp + website chat automatically — in English, Turkish, Arabic, and Russian.
+                  24/7 AI assistant for car rentals, barbershops, hotels, and restaurants. Handles WhatsApp + website chat automatically — in English, Turkish, Arabic, Russian & Greek.
                 </p>
+                <div className="mb-5 flex flex-wrap gap-2 text-sm font-medium text-blue-200">
+                  <span className="rounded-full border border-blue-400/30 bg-blue-500/10 px-3 py-1">🇬🇧 English</span>
+                  <span className="rounded-full border border-blue-400/30 bg-blue-500/10 px-3 py-1">🇹🇷 Turkish</span>
+                  <span className="rounded-full border border-blue-400/30 bg-blue-500/10 px-3 py-1">🇸🇦 Arabic</span>
+                  <span className="rounded-full border border-blue-400/30 bg-blue-500/10 px-3 py-1">🇷🇺 Russian</span>
+                  <span className="rounded-full border border-blue-400/30 bg-blue-500/10 px-3 py-1">🇬🇷 Greek</span>
+                </div>
                 <div className="flex flex-wrap gap-3 mb-8 text-sm text-slate-400">
                   <span className="flex items-center gap-1">✓ Setup in 15 minutes</span>
                   <span className="flex items-center gap-1">✓ No technical skills needed</span>
@@ -532,7 +539,7 @@ export default function Home() {
                 <p className="text-slate-400 text-sm">Always online</p>
               </div>
               <div>
-                <p className="text-3xl font-bold text-white">4</p>
+                <p className="text-3xl font-bold text-white">5</p>
                 <p className="text-slate-400 text-sm">Languages spoken</p>
               </div>
               <div>

@@ -55,7 +55,13 @@ type WizardData = {
 const STEP_STORAGE_PREFIX = 'cypai-onboarding-step-';
 const TOTAL_STEPS = 5;
 const weekDays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-const languageOptions = ['English', 'Turkish', 'Arabic', 'Russian'];
+const languages = [
+  { code: 'en', label: 'English', flag: '🇬🇧' },
+  { code: 'tr', label: 'Turkish', flag: '🇹🇷' },
+  { code: 'ar', label: 'Arabic', flag: '🇸🇦' },
+  { code: 'ru', label: 'Russian', flag: '🇷🇺' },
+  { code: 'el', label: 'Greek (Ελληνικά)', flag: '🇬🇷' },
+];
 const businessTypeOptions = [
   { value: 'car_rental', label: 'Car Rental' },
   { value: 'barbershop', label: 'Barbershop' },
@@ -395,10 +401,11 @@ export default function OnboardingWizard({
               <div>
                 <h4 className="text-sm font-semibold text-slate-900">Languages Spoken</h4>
                 <div className="mt-3 flex flex-wrap gap-3">
-                  {languageOptions.map((language) => (
-                    <label key={language} className="inline-flex items-center gap-2 rounded-full border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700">
-                      <input type="checkbox" checked={data.languages.includes(language)} onChange={() => toggleLanguage(language)} className="h-4 w-4 rounded border-slate-300 accent-blue-600" />
-                      {language}
+                  {languages.map((language) => (
+                    <label key={language.code} className="inline-flex items-center gap-2 rounded-full border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700">
+                      <input type="checkbox" checked={data.languages.includes(language.label)} onChange={() => toggleLanguage(language.label)} className="h-4 w-4 rounded border-slate-300 accent-blue-600" />
+                      <span>{language.flag}</span>
+                      {language.label}
                     </label>
                   ))}
                 </div>
