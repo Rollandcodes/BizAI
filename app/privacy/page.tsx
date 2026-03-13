@@ -104,7 +104,7 @@ export default function PrivacyPage() {
                 For any privacy-related questions, data deletion requests, or concerns, contact us at:
               </p>
               <div className="mt-4 rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm">
-                <p>📧 <a href="mailto:bizaicyprus123@gmail.com" className="font-semibold text-blue-600 hover:underline">bizaicyprus123@gmail.com</a></p>
+                <p>📧 <a href="mailto:cypai.app@cypai.app" className="font-semibold text-blue-600 hover:underline">cypai.app@cypai.app</a></p>
                 <p className="mt-1.5">📍 Nicosia, Northern Cyprus</p>
               </div>
             </section>

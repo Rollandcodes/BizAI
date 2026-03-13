@@ -144,7 +144,7 @@ export default function SuccessPage() {
           <p className="mt-4 font-semibold text-slate-700">Questions? We&apos;re here:</p>
           <div className="mt-3 flex flex-wrap gap-3">
             <a
-              href="mailto:bizaicyprus123@gmail.com"
+              href="mailto:cypai.app@cypai.app"
               className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
             >
               📧 Email Us

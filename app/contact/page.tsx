@@ -3,7 +3,7 @@
 import { useState, type FormEvent } from 'react';
 import Link from 'next/link';
 
-const CONTACT_EMAIL = 'bizaicyprus123@gmail.com';
+const CONTACT_EMAIL = 'cypai.app@cypai.app';
 const WA_LINK = 'https://wa.me/905338425559?text=Hi%2C%20I%27m%20interested%20in%20CypAI';
 const WA_NUMBER = '+90 533 842 5559';
 

@@ -161,7 +161,7 @@ function SignupForm() {
                   type="email"
                   value={form.email}
                   onChange={(e) => set('email', e.target.value)}
-                  placeholder="bizaicyprus123@gmail.com"
+                  placeholder="cypai.app@cypai.app"
                   className={inputCls(!!errors.email)}
                 />
               </Field>

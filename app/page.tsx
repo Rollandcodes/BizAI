@@ -17,7 +17,7 @@ import { Analytics } from '@/lib/analytics';
 const WA_LINK =
   'https://wa.me/905338425559?text=Hi%2C%20I%27m%20interested%20in%20CypAI';
 const WA_NUMBER = '+90 533 842 5559';
-const CONTACT_EMAIL = 'bizaicyprus123@gmail.com';
+const CONTACT_EMAIL = 'cypai.app@cypai.app';
 
 const DEMO_SYSTEM_PROMPT =
   'You are a friendly AI assistant for DriveEasy Car Rentals in Northern Cyprus. Help customers with: vehicle availability (Economy $25/day, Compact $35/day, SUV $55/day, Van $75/day), booking process, requirements (valid license, passport, credit card deposit), pickup locations (Nicosia, Kyrenia, Famagusta, Airport). Always try to collect customer name and phone number for bookings. Keep responses short and friendly. Use emojis occasionally.';
