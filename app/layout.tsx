@@ -63,9 +63,8 @@ export default function RootLayout({
   return (
     <html lang="en" className={cn("font-sans", geist.variable)}>
       <head>
-        <meta name="viewport" 
-          content="width=device-width, 
-          initial-scale=1"/>
+        <meta charSet="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
       </head>
       <body className={`${font.className} 
         bg-white text-gray-900 antialiased`}>

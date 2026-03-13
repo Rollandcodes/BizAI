@@ -41,7 +41,7 @@ export default async function ChatPage({ params }: Props) {
   if (!business) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center bg-zinc-950 px-6 text-center">
-        <p className="text-2xl">ðŸ¤–</p>
+        <p className="text-2xl">🤖</p>
         <h1 className="mt-3 text-lg font-bold text-white">Chat not found</h1>
         <p className="mt-1 text-sm text-zinc-500">This QR code may be outdated. Please contact the business directly.</p>
       </div>
@@ -58,13 +58,13 @@ export default async function ChatPage({ params }: Props) {
         style={{ backgroundColor: primaryColor }}
       >
         <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-zinc-900/20 text-lg">
-          ðŸ¤–
+          🤖
         </div>
         <div className="min-w-0">
           <p className="truncate text-sm font-bold text-white">{business.business_name}</p>
           <div className="flex items-center gap-1.5">
             <span className="h-2 w-2 rounded-full bg-emerald-300" />
-            <span className="text-xs font-medium text-white/80">Online Â· AI Assistant</span>
+            <span className="text-xs font-medium text-white/80">Online · AI Assistant</span>
           </div>
         </div>
       </div>

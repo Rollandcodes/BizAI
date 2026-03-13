@@ -29,7 +29,7 @@ export default function ContactPage() {
 
   function handleSubmit(e: FormEvent) {
     e.preventDefault()
-    const subject = encodeURIComponent(`CypAI Inquiry from ${form.name} â€” ${form.businessName}`)
+    const subject = encodeURIComponent(`CypAI Inquiry from ${form.name} — ${form.businessName}`)
     const body = encodeURIComponent(
       `Name: ${form.name}\nEmail: ${form.email}\nBusiness: ${form.businessName}\n\nMessage:\n${form.message}`
     )
@@ -42,7 +42,7 @@ export default function ContactPage() {
       <nav className="sticky top-0 z-40 border-b border-zinc-800 bg-zinc-950/90 backdrop-blur">
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
           <Link href="/" className="flex items-center gap-2 text-base font-semibold text-white">
-            <span>ðŸ¤–</span>
+            <span>🤖</span>
             <span>CypAI</span>
           </Link>
           <div className="flex items-center gap-3">
@@ -163,7 +163,7 @@ export default function ContactPage() {
                 <a href={WA_LINK} target="_blank" rel="noreferrer" className="mt-2 block text-sm font-semibold text-white">
                   {WA_NUMBER}
                 </a>
-                <p className="mt-2 text-sm text-zinc-400">Nicosia, Northern Cyprus ðŸ‡¨ðŸ‡¾</p>
+                <p className="mt-2 text-sm text-zinc-400">Nicosia, Northern Cyprus 🇨🇾</p>
               </div>
 
               <div className="rounded-2xl border border-zinc-800 bg-zinc-900 p-6">

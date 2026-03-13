@@ -451,7 +451,7 @@ export default function DashboardPage() {
     customFaqs: [{ question: '', answer: '' }],
   });
 
-  // â”€â”€ Audit Tab State â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Audit Tab State ──────────────────────────────────────────────────────
   type AuditFlaggedConv = {
     id: string;
     createdAt: string;
@@ -493,14 +493,14 @@ export default function DashboardPage() {
   const [reportData, setReportData] = useState<AuditReport | null>(null);
   const [markingReviewed, setMarkingReviewed] = useState<Set<string>>(new Set());
 
-  // â”€â”€ QR Code state â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── QR Code state ────────────────────────────────────────────────────────
   const qrRef = useRef<HTMLDivElement>(null);
 
-  // â”€â”€ Upgrade lock state â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Upgrade lock state ─────────────────────────────────────────────────
   const [upgradeLockTab, setUpgradeLockTab] = useState<TabKey | null>(null);
   const [isTabletSidebarOpen, setIsTabletSidebarOpen] = useState(false);
 
-  // â”€â”€ Broadcast state â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Broadcast state ──────────────────────────────────────────────────────
   type BroadcastLead = { id: string; name: string; phone: string };
   type BroadcastHistoryItem = {
     id: string;
@@ -516,17 +516,17 @@ export default function DashboardPage() {
   const [broadcastHistory, setBroadcastHistory] = useState<BroadcastHistoryItem[]>([]);
   const [broadcastHistoryLoading, setBroadcastHistoryLoading] = useState(false);
 
-  // â”€â”€ Bookings Tab State â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Bookings Tab State ───────────────────────────────────────────────────
   const [bookings, setBookings] = useState<BookingRecord[]>([]);
   const [bookingsLoading, setBookingsLoading] = useState(false);
   const [bookingsInitialized, setBookingsInitialized] = useState(false);
   const [updatingBookingIds, setUpdatingBookingIds] = useState<Set<string>>(new Set());
 
-  // â”€â”€ Customer Satisfaction State â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Customer Satisfaction State ──────────────────────────────────────────
   const [satisfactionData, setSatisfactionData] = useState<{
     avgRating: number;
     totalRatings: number;
-    distribution: number[]; // index 0 = rating 1 stars â€¦ index 4 = rating 5 stars
+    distribution: number[]; // index 0 = rating 1 stars … index 4 = rating 5 stars
   } | null>(null);
   const [satisfactionLoading, setSatisfactionLoading] = useState(false);
   const hasTrackedInitialTab = useRef(false);
@@ -736,7 +736,7 @@ export default function DashboardPage() {
     const svgData = svgEl ? new XMLSerializer().serializeToString(svgEl) : '';
     const win = window.open('', '_blank', 'width=480,height=600');
     if (!win) return;
-    win.document.write(`<!DOCTYPE html><html><head><title>QR Code â€“ ${business.business_name}</title><style>
+    win.document.write(`<!DOCTYPE html><html><head><title>QR Code – ${business.business_name}</title><style>
       body{margin:0;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;font-family:sans-serif;background:#fff;padding:32px;box-sizing:border-box}
       svg{width:200px;height:200px}
       h2{margin:16px 0 4px;font-size:18px;color:#0f172a}
@@ -824,7 +824,7 @@ export default function DashboardPage() {
       setBookings((prev) =>
         prev.map((b) => (b.id === id ? { ...b, status: 'confirmed' as const } : b))
       );
-      setToast({ message: 'Booking confirmed! Opening WhatsAppâ€¦', tone: 'success' });
+      setToast({ message: 'Booking confirmed! Opening WhatsApp…', tone: 'success' });
     } catch {
       setToast({ message: 'Failed to confirm booking.', tone: 'error' });
     } finally {
@@ -839,7 +839,7 @@ export default function DashboardPage() {
       setBookings((prev) =>
         prev.map((b) => (b.id === id ? { ...b, status: 'declined' as const } : b))
       );
-      setToast({ message: 'Booking declined. Opening WhatsAppâ€¦', tone: 'success' });
+      setToast({ message: 'Booking declined. Opening WhatsApp…', tone: 'success' });
     } catch {
       setToast({ message: 'Failed to decline booking.', tone: 'error' });
     } finally {
@@ -1010,7 +1010,7 @@ export default function DashboardPage() {
     }));
   }
 
-  // â”€â”€ Audit handlers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Audit handlers ───────────────────────────────────────────────────────
   async function loadAuditSummary() {
     if (!business) return;
     setAuditLoading(true);
@@ -1102,11 +1102,11 @@ export default function DashboardPage() {
   }));
   const showOnboardingWizard = Boolean(business && business.onboarding_complete !== true && !onboardingDismissed);
   const mobileTabs: Array<{ id: TabKey; label: string; icon: string }> = [
-    { id: 'overview', label: 'Overview', icon: 'ðŸ“Š' },
-    { id: 'conversations', label: 'Chats', icon: 'ðŸ’¬' },
-    { id: 'crm', label: 'CRM', icon: 'ðŸ‘¥' },
-    { id: 'bookings', label: 'Book', icon: 'ðŸ“…' },
-    { id: 'settings', label: 'Settings', icon: 'âš™ï¸' },
+    { id: 'overview', label: 'Overview', icon: '📊' },
+    { id: 'conversations', label: 'Chats', icon: '💬' },
+    { id: 'crm', label: 'CRM', icon: '👥' },
+    { id: 'bookings', label: 'Book', icon: '📅' },
+    { id: 'settings', label: 'Settings', icon: '⚙️' },
   ];
 
   return (
@@ -1143,7 +1143,7 @@ export default function DashboardPage() {
                 onClick={() => setIsTabletSidebarOpen(false)}
                 aria-label="Close menu"
               >
-                âœ•
+                ✕
               </button>
             </div>
             <nav className="space-y-1 overflow-y-auto px-4 py-4">
@@ -1216,7 +1216,7 @@ export default function DashboardPage() {
                 <span className="relative inline-flex">
                   <Icon className="h-4 w-4" />
                   {isLocked && (
-                    <span className="absolute -right-2 -top-2 text-[9px] leading-none">ðŸ”’</span>
+                    <span className="absolute -right-2 -top-2 text-[9px] leading-none">🔒</span>
                   )}
                   {!isLocked && key === 'bookings' && pendingBookingsCount > 0 && (
                     <span className="absolute -right-2 -top-2 flex h-4 min-w-[1rem] items-center justify-center rounded-full bg-red-500 px-1 text-[9px] font-bold leading-none text-white">
@@ -1258,14 +1258,14 @@ export default function DashboardPage() {
                   Menu
                 </button>
                 <h1 className="text-3xl font-black leading-none tracking-tight text-zinc-100">
-                  Welcome back, {business?.business_name || 'CypAI'} ðŸ‘‹
+                  Welcome back, {business?.business_name || 'CypAI'} 👋
                 </h1>
                 <span className={`hidden rounded-full px-3 py-1 text-xs font-semibold sm:inline-flex ${getPlanBadgeClasses(business.plan)}`}>
                   {currentPlanName}
                 </span>
                 {(business.plan === 'trial' || business.plan === 'starter' || business.plan === 'basic') ? (
                   <Link href="/#pricing" className="hidden text-xs font-semibold uppercase tracking-wide text-zinc-500 hover:text-zinc-100 sm:inline-flex">
-                    Upgrade â†‘
+                    Upgrade ↑
                   </Link>
                 ) : null}
               </div>
@@ -1318,7 +1318,7 @@ export default function DashboardPage() {
                     {satisfactionLoading ? (
                       <div className="mt-6 flex items-center gap-2 text-sm text-zinc-500">
                         <span className="h-4 w-4 animate-spin rounded-full border-2 border-zinc-800 border-t-amber-400" />
-                        Loading ratingsâ€¦
+                        Loading ratings…
                       </div>
                     ) : !satisfactionData ? (
                       <div className="mt-6 rounded-2xl bg-zinc-950 px-4 py-6 text-center text-sm text-zinc-500">
@@ -1487,7 +1487,7 @@ export default function DashboardPage() {
                     </div>
 
                     <div className="mt-5 rounded-2xl bg-blue-50 px-4 py-3 text-sm text-blue-700">
-                      ðŸ’¡ <strong>Tip:</strong> Print and laminate this QR code. Place it on your front desk, car windows, and receipts to get more leads.
+                      💡 <strong>Tip:</strong> Print and laminate this QR code. Place it on your front desk, car windows, and receipts to get more leads.
                     </div>
                   </div>
                 </section>
@@ -1579,7 +1579,7 @@ export default function DashboardPage() {
                     </p>
                     <textarea
                       rows={3}
-                      placeholder="Type your messageâ€¦ e.g. ðŸš— Weekend special! SUV 20% off this Fridayâ€“Sunday. Reply to book!"
+                      placeholder="Type your message… e.g. 🚗 Weekend special! SUV 20% off this Friday–Sunday. Reply to book!"
                       value={broadcastMessage}
                       onChange={(e) => setBroadcastMessage(e.target.value)}
                       className="mt-4 w-full resize-none rounded-2xl border border-white/30 bg-zinc-900 p-3 text-sm text-white placeholder-green-200 outline-none focus:border-white/60 focus:ring-0"
@@ -1595,7 +1595,7 @@ export default function DashboardPage() {
                         className="inline-flex items-center gap-2 rounded-full bg-zinc-900 px-5 py-2.5 text-sm font-semibold text-emerald-700 shadow transition hover:bg-green-50 disabled:opacity-50"
                       >
                         <Send className="h-4 w-4" />
-                        {broadcastSending ? 'Preparingâ€¦' : 'Send Broadcast â†’'}
+                        {broadcastSending ? 'Preparing…' : 'Send Broadcast →'}
                       </button>
                     </div>
                   </div>
@@ -1721,7 +1721,7 @@ export default function DashboardPage() {
                         <div className="mt-3 flex items-center justify-between text-sm font-semibold">
                           <span className="text-zinc-400">Sent: {broadcastSentCount}/{broadcastModal.length}</span>
                           {broadcastSentCount === broadcastModal.length && broadcastModal.length > 0 && (
-                            <span className="text-emerald-600">âœ… Broadcast complete!</span>
+                            <span className="text-emerald-600">✅ Broadcast complete!</span>
                           )}
                         </div>
 
@@ -1742,11 +1742,11 @@ export default function DashboardPage() {
                                     : 'border-zinc-800 bg-zinc-900 text-zinc-200 hover:border-green-300 hover:bg-green-50'
                                 }`}
                               >
-                                <span>{lead.name} Â· {lead.phone}</span>
+                                <span>{lead.name} · {lead.phone}</span>
                                 {sent ? (
                                   <Check className="h-4 w-4 text-emerald-600" />
                                 ) : (
-                                  <span className="text-[#25D366]">Open WhatsApp â†’</span>
+                                  <span className="text-[#25D366]">Open WhatsApp →</span>
                                 )}
                               </a>
                             );
@@ -1921,7 +1921,7 @@ export default function DashboardPage() {
                     {/* Trial banner */}
                     {business.plan === 'trial' ? (
                       <div className="mb-6 rounded-2xl border border-amber-200 bg-amber-50 px-5 py-4 text-sm font-medium text-amber-900">
-                        âš ï¸ You&apos;re on a free trial. Choose a plan below to continue after 7 days.
+                        ⚠️ You&apos;re on a free trial. Choose a plan below to continue after 7 days.
                       </div>
                     ) : null}
 
@@ -1969,7 +1969,7 @@ export default function DashboardPage() {
                           ],
                           cta: 'Upgrade to Pro',
                           popular: true,
-                          hint: 'ðŸ’¡ Most businesses start here',
+                          hint: '💡 Most businesses start here',
                         },
                         {
                           id: 'business' as const,
@@ -1990,7 +1990,7 @@ export default function DashboardPage() {
                           ],
                           cta: 'Upgrade to Business',
                           popular: false,
-                          hint: 'ðŸ† Best for established businesses',
+                          hint: '🏆 Best for established businesses',
                         },
                       ] as Array<{
                         id: 'starter' | 'pro' | 'business';
@@ -2041,7 +2041,7 @@ export default function DashboardPage() {
                             <ul className="flex-1 mt-4 space-y-2 text-sm text-zinc-300">
                               {plan.features.map((feature) => (
                                 <li key={feature} className="flex items-start gap-2">
-                                  <span className="text-green-500 font-bold mt-0.5">âœ“</span>
+                                  <span className="text-green-500 font-bold mt-0.5">✓</span>
                                   {feature}
                                 </li>
                               ))}
@@ -2061,7 +2061,7 @@ export default function DashboardPage() {
                                     : 'border border-zinc-700 text-zinc-300 hover:bg-zinc-950'
                               }`}
                             >
-                              {isCurrent ? 'âœ“ Your current plan' : plan.cta}
+                              {isCurrent ? '✓ Your current plan' : plan.cta}
                             </button>
                           </div>
                         );
@@ -2090,7 +2090,7 @@ export default function DashboardPage() {
                         className="mt-6 inline-flex items-center gap-2 rounded-full bg-purple-600 px-6 py-3 text-sm font-semibold text-white shadow hover:bg-purple-700"
                       >
                         <CreditCard className="h-4 w-4" />
-                        Upgrade to Business â€” $149/mo
+                        Upgrade to Business — $149/mo
                       </button>
                     </div>
                   ) : auditLoading ? (
@@ -2128,10 +2128,10 @@ export default function DashboardPage() {
                         <div>
                           <p className="font-bold">
                             {auditSummary?.complianceStatus === 'good'
-                              ? 'All Clear â€” No critical issues detected this week'
+                              ? 'All Clear — No critical issues detected this week'
                               : auditSummary?.complianceStatus === 'warning'
-                                ? 'Attention â€” Some conversations need review'
-                                : 'Critical â€” Immediate action required'}
+                                ? 'Attention — Some conversations need review'
+                                : 'Critical — Immediate action required'}
                           </p>
                           <p className="mt-0.5 text-sm opacity-80">
                             {auditSummary?.weeklyStats.totalConversations ?? 0} conversation{(auditSummary?.weeklyStats.totalConversations ?? 0) !== 1 ? 's' : ''} analysed this week
@@ -2197,7 +2197,7 @@ export default function DashboardPage() {
                           </LineChart>
                         </ResponsiveContainer>
                         <p className="mt-2 text-center text-xs text-zinc-500">
-                          {chartTrend === 'improving' ? 'â†‘ Improving trend' : chartTrend === 'declining' ? 'â†“ Declining trend' : 'â†’ Stable'}
+                          {chartTrend === 'improving' ? '↑ Improving trend' : chartTrend === 'declining' ? '↓ Declining trend' : '→ Stable'}
                         </p>
                       </div>
 
@@ -2217,8 +2217,8 @@ export default function DashboardPage() {
                             {auditSummary?.flaggedConversations.map((conv) => (
                               <div key={conv.id} className="flex flex-col gap-2 px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
                                 <div className="min-w-0 flex-1">
-                                  <p className="truncate text-sm text-zinc-300">{conv.firstMessage.slice(0, 70)}{conv.firstMessage.length > 70 ? 'â€¦' : ''}</p>
-                                  <p className="mt-1 text-xs text-zinc-500">{formatDate(conv.createdAt)} Â· {conv.flagReason}</p>
+                                  <p className="truncate text-sm text-zinc-300">{conv.firstMessage.slice(0, 70)}{conv.firstMessage.length > 70 ? '…' : ''}</p>
+                                  <p className="mt-1 text-xs text-zinc-500">{formatDate(conv.createdAt)} · {conv.flagReason}</p>
                                 </div>
                                 <div className="flex shrink-0 items-center gap-2">
                                   {conv.safetyScore !== null && (
@@ -2289,14 +2289,14 @@ export default function DashboardPage() {
                             ) : (
                               <FileText className="h-4 w-4" />
                             )}
-                            {reportLoading ? 'Generatingâ€¦' : 'Generate Report'}
+                            {reportLoading ? 'Generating…' : 'Generate Report'}
                           </button>
                         </div>
                         {reportData && (
                           <div className="mt-6 space-y-4">
                             <div className="rounded-2xl bg-zinc-950 p-5">
                               <p className="text-xs font-semibold uppercase tracking-widest text-zinc-500">
-                                {reportData.periodStart} â€“ {reportData.periodEnd}
+                                {reportData.periodStart} – {reportData.periodEnd}
                               </p>
                               <p className="mt-3 text-sm leading-relaxed text-zinc-300">{reportData.aiSummary}</p>
                               <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
@@ -2427,7 +2427,7 @@ export default function DashboardPage() {
               >
                 <X className="h-5 w-5" />
               </button>
-              <div className="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-100 text-2xl">ðŸ”’</div>
+              <div className="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-100 text-2xl">🔒</div>
               <h3 className="mt-4 text-xl font-extrabold text-white">Feature Locked</h3>
               <p className="mt-2 text-sm text-zinc-400">
                 This feature requires a higher plan. Upgrade to unlock CRM, Follow-ups, Analytics, and more.
@@ -2437,7 +2437,7 @@ export default function DashboardPage() {
                 onClick={() => { setActiveTab('subscription'); setUpgradeLockTab(null); }}
                 className="mt-6 w-full rounded-2xl bg-blue-600 py-3 text-sm font-semibold text-white hover:bg-blue-700"
               >
-                Upgrade Now â†’
+                Upgrade Now →
               </button>
             </div>
           </div>
@@ -2452,7 +2452,7 @@ export default function DashboardPage() {
                 onClick={() => setActiveTab('crm')}
                 className="flex items-center gap-2 rounded-full bg-black px-4 py-2 text-sm font-medium text-white shadow-lg transition-all hover:bg-[#1a1a1a]"
               >
-                ðŸ‘¥ {newLeadsCount} New Lead{newLeadsCount !== 1 ? 's' : ''}
+                👥 {newLeadsCount} New Lead{newLeadsCount !== 1 ? 's' : ''}
               </button>
             )}
             {pendingBookingsCount > 0 && (
@@ -2461,7 +2461,7 @@ export default function DashboardPage() {
                 onClick={() => setActiveTab('bookings')}
                 className="flex items-center gap-2 rounded-full bg-orange-500 px-4 py-2 text-sm font-medium text-white shadow-lg transition-all hover:bg-orange-600"
               >
-                ðŸ“… {pendingBookingsCount} Pending Booking{pendingBookingsCount !== 1 ? 's' : ''}
+                📅 {pendingBookingsCount} Pending Booking{pendingBookingsCount !== 1 ? 's' : ''}
               </button>
             )}
           </div>
