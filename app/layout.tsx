@@ -34,6 +34,16 @@ export const metadata: Metadata = {
   alternates: {
     canonical: 'https://www.cypai.app',
   },
+  icons: {
+    icon: [
+      { url: '/images/cypai-logo.png', type: 'image/png' },
+    ],
+    apple: [
+      { url: '/images/cypai-logo.png', type: 'image/png' },
+    ],
+    shortcut: ['/images/cypai-logo.png'],
+  },
+  manifest: '/manifest.json',
 }
 
 const structuredData = {

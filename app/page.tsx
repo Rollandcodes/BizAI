@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 
 type FAQ = { q: string; a: string }
 
@@ -144,9 +145,15 @@ export default function HomePage() {
         }`}
       >
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-          <Link href="/" className="flex items-center gap-2">
-            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600 text-sm">🤖</span>
-            <span className="text-lg font-bold text-white">CypAI</span>
+          <Link href="/" className="flex items-center" aria-label="CypAI Home">
+            <Image
+              src="/images/cypai-logo.png"
+              alt="CypAI"
+              width={200}
+              height={60}
+              priority
+              className="h-9 w-auto sm:h-11"
+            />
           </Link>
 
           <nav className="hidden items-center gap-8 md:flex">
