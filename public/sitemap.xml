@@ -1,4 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-<sitemap><loc>https://www.cypai.app/sitemap-0.xml</loc></sitemap>
-</sitemapindex>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:news="http://www.google.com/schemas/sitemap-news/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:mobile="http://www.google.com/schemas/sitemap-mobile/1.0" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1" xmlns:video="http://www.google.com/schemas/sitemap-video/1.1">
+<url><loc>https://www.cypai.app/affiliate</loc><lastmod>2026-03-14T12:32:15.354Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://www.cypai.app/blog/ai-customer-service-for-northern-cyprus-businesses-a-practical-guide</loc><lastmod>2026-03-14T12:32:15.354Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://www.cypai.app/blog/how-car-rental-businesses-in-cyprus-are-using-ai-to-get-more-bookings</loc><lastmod>2026-03-14T12:32:15.354Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://www.cypai.app/blog/how-to-never-miss-a-customer-inquiry-again</loc><lastmod>2026-03-14T12:32:15.354Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://www.cypai.app/blog/whatsapp-ai-for-small-businesses-complete-guide-2026</loc><lastmod>2026-03-14T12:32:15.354Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://www.cypai.app/blog/why-your-kyrenia-business-loses-customers-at-night-and-how-to-fix-it</loc><lastmod>2026-03-14T12:32:15.354Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://www.cypai.app/blog</loc><lastmod>2026-03-14T12:32:15.354Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://www.cypai.app/contact</loc><lastmod>2026-03-14T12:32:15.354Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://www.cypai.app/demo/glowy-waves</loc><lastmod>2026-03-14T12:32:15.353Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://www.cypai.app/demo</loc><lastmod>2026-03-14T12:32:15.354Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://www.cypai.app</loc><lastmod>2026-03-14T12:32:15.354Z</lastmod><changefreq>daily</changefreq><priority>1</priority></url>
+<url><loc>https://www.cypai.app/pricing</loc><lastmod>2026-03-14T12:32:15.354Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://www.cypai.app/privacy</loc><lastmod>2026-03-14T12:32:15.354Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://www.cypai.app/terms</loc><lastmod>2026-03-14T12:32:15.354Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+</urlset>
