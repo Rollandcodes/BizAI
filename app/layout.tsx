@@ -14,6 +14,7 @@ const font = Plus_Jakarta_Sans({
 })
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://www.cypai.app'),
   title: 'CypAI - AI Customer Service for Cyprus Businesses',
   description:
     'AI-powered 24/7 customer service for car rentals, hotels, barbershops and restaurants in Northern Cyprus. Handles WhatsApp + website chat in English, Turkish, Arabic, Russian and Greek.',
@@ -25,11 +26,20 @@ export const metadata: Metadata = {
     url: 'https://www.cypai.app',
     siteName: 'CypAI',
     type: 'website',
+    images: [
+      {
+        url: '/images/cypai-logo.png',
+        width: 512,
+        height: 512,
+        alt: 'CypAI logo',
+      },
+    ],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'CypAI - AI for Cyprus Businesses',
     description: 'AI chat, CRM, bookings, and WhatsApp in one platform.',
+    images: ['/images/cypai-logo.png'],
   },
   alternates: {
     canonical: 'https://www.cypai.app',
