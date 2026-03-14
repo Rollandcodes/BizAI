@@ -119,6 +119,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
           website: signupData.website || '',
           plan: dbPlan,
           plan_expires_at: expiresAt.toISOString(),
+          paypal_order_id: orderID,
           paypal_subscription_id: orderID,
           widget_color: '#2563eb',
           referral_code: normalizedReferralCode,

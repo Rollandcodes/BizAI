@@ -33,6 +33,7 @@ CREATE TABLE IF NOT EXISTS public.businesses (
 );
 
 -- Migration: add columns introduced in v2 signup flow (safe to run multiple times)
+ALTER TABLE public.businesses ADD COLUMN IF NOT EXISTS paypal_order_id TEXT;
 ALTER TABLE public.businesses ADD COLUMN IF NOT EXISTS owner_name TEXT;
 ALTER TABLE public.businesses ADD COLUMN IF NOT EXISTS whatsapp TEXT;
 ALTER TABLE public.businesses ADD COLUMN IF NOT EXISTS website TEXT;
@@ -52,6 +53,8 @@ ALTER TABLE public.businesses ADD COLUMN IF NOT EXISTS affiliate_commission_cred
 CREATE INDEX IF NOT EXISTS idx_businesses_owner_email ON public.businesses(owner_email);
 CREATE INDEX IF NOT EXISTS idx_businesses_created_at ON public.businesses(created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_businesses_referral_code ON public.businesses(referral_code);
+CREATE INDEX IF NOT EXISTS idx_businesses_paypal_order_id ON public.businesses(paypal_order_id);
+CREATE INDEX IF NOT EXISTS idx_businesses_paypal_subscription_id ON public.businesses(paypal_subscription_id);
 
 -- ============================================================================
 -- Table: affiliates
@@ -71,6 +74,20 @@ CREATE TABLE IF NOT EXISTS public.affiliates (
 
 CREATE INDEX IF NOT EXISTS idx_affiliates_email ON public.affiliates(email);
 CREATE INDEX IF NOT EXISTS idx_affiliates_referral_code ON public.affiliates(referral_code);
+
+-- ============================================================================
+-- Table: paypal_webhook_events (idempotency + audit)
+-- ============================================================================
+CREATE TABLE IF NOT EXISTS public.paypal_webhook_events (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  event_id TEXT NOT NULL UNIQUE,
+  event_type TEXT NOT NULL,
+  payload JSONB NOT NULL DEFAULT '{}'::jsonb,
+  processed_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_paypal_webhook_events_processed_at
+  ON public.paypal_webhook_events(processed_at DESC);
 
 -- ============================================================================
 -- Table: conversations

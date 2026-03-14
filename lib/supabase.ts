@@ -67,6 +67,7 @@ export interface Business {
   affiliate_commission_credited?: boolean;
   plan: BusinessPlan;
   plan_expires_at?: string;
+  paypal_order_id?: string;
   paypal_subscription_id?: string;
   created_at: string;
 }

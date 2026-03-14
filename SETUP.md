@@ -25,8 +25,24 @@
    - `PAYPAL_CLIENT_ID`
    - `PAYPAL_CLIENT_SECRET`
    - `NEXT_PUBLIC_PAYPAL_CLIENT_ID` (same value as Client ID)
+   - `PAYPAL_BASE_URL` (`https://api-m.sandbox.paypal.com` for sandbox)
+   - `PAYPAL_WEBHOOK_ID` (from PayPal dashboard webhook config)
 
-## 4. Run the project locally
+## 4. Register PayPal webhook endpoint
+1. In PayPal Developer Dashboard, open your app and create a webhook.
+2. Set URL to:
+   - Local: `http://localhost:3000/api/paypal/webhook`
+   - Production: `https://www.cypai.app/api/paypal/webhook`
+3. Subscribe to at least:
+   - `BILLING.SUBSCRIPTION.CREATED`
+   - `BILLING.SUBSCRIPTION.ACTIVATED`
+   - `BILLING.SUBSCRIPTION.UPDATED`
+   - `BILLING.SUBSCRIPTION.CANCELLED`
+   - `PAYMENT.SALE.COMPLETED`
+4. Copy the generated webhook ID into `PAYPAL_WEBHOOK_ID`.
+5. Re-run [`supabase-schema.sql`](supabase-schema.sql) to create `paypal_webhook_events`.
+
+## 5. Run the project locally
 1. Install dependencies:
 
 ```bash
@@ -42,14 +58,14 @@ npm run dev
 
 4. Open http://localhost:3000.
 
-## 5. Deploy to Vercel (GitHub connect)
+## 6. Deploy to Vercel (GitHub connect)
 1. Push the repository to GitHub.
 2. Go to https://vercel.com and create a new project.
 3. Import your GitHub repository.
 4. In Vercel project settings, add all environment variables from [`.env.local`](.env.local).
 5. Deploy.
 
-## 6. Switch PayPal from sandbox to live
+## 7. Switch PayPal from sandbox to live
 Update the PayPal base URL in both API routes:
 1. [app/api/paypal/create-order/route.ts](app/api/paypal/create-order/route.ts)
 2. [app/api/paypal/capture-order/route.ts](app/api/paypal/capture-order/route.ts)
