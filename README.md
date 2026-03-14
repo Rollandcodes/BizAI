@@ -1,69 +1,161 @@
-# BizAI — AI Customer Service Assistant for Local Businesses
+# CypAI (BizAI)
 
-This is a [Next.js](https://nextjs.org) project for BizAI, focused on AI customer service for local businesses in Northern Cyprus.
+AI-powered customer support and lead capture platform for local businesses, built with Next.js, Supabase, OpenAI, and PayPal.
 
-## Getting Started
+## Overview
 
-First, run the development server:
+CypAI helps businesses respond instantly to customer questions across web chat and WhatsApp, capture leads, and manage conversations from a unified dashboard.
+
+It is designed for service businesses that need:
+
+- 24/7 automated responses
+- Multilingual customer communication
+- Lead capture and conversation tracking
+- Fast setup with embeddable widgets
+
+## Key Features
+
+- AI chat widget for business websites
+- Conversation and lead management dashboard
+- Industry-specific demo and onboarding flows
+- PayPal checkout and webhook handling
+- Graceful degraded mode for AI provider issues
+- E2E coverage with Playwright
+- SEO sitemap and robots generation via next-sitemap
+
+## Tech Stack
+
+- Next.js 16 (App Router)
+- React 19 + TypeScript
+- Supabase (database + auth patterns)
+- OpenAI API
+- PayPal APIs + webhook verification
+- Tailwind CSS
+- Playwright (E2E)
+
+## Project Structure
+
+- [app](app): App Router pages and API routes
+- [components](components): UI and feature components
+- [lib](lib): Shared utilities, API clients, and config helpers
+- [public](public): Static assets including sitemap and robots
+- [tests](tests): Playwright end-to-end test specs
+- [supabase-schema.sql](supabase-schema.sql): Database schema and migrations
+- [SETUP.md](SETUP.md): Full setup instructions
+
+## Prerequisites
+
+- Node.js 18+ (recommended 20+)
+- npm
+- Supabase project
+- OpenAI API key
+- PayPal developer app
+
+## Environment Variables
+
+Create `.env.local` in the project root with:
+
+```env
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_ANON_KEY=
+SUPABASE_SERVICE_ROLE_KEY=
+
+OPENAI_API_KEY=
+
+PAYPAL_CLIENT_ID=
+PAYPAL_CLIENT_SECRET=
+NEXT_PUBLIC_PAYPAL_CLIENT_ID=
+PAYPAL_BASE_URL=https://api-m.sandbox.paypal.com
+PAYPAL_WEBHOOK_ID=
+
+NEXT_PUBLIC_APP_URL=http://localhost:3000
+```
+
+## Local Development
+
+1. Install dependencies:
+
+```bash
+npm install
+```
+
+2. Start the app:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+3. Open `http://localhost:3000`
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Available Scripts
 
-## Recent Fixes
+- `npm run dev` - Start local development server
+- `npm run build` - Production build
+- `npm run start` - Run production server
+- `npm run lint` - Run ESLint
+- `npm run test:e2e` - Run Playwright E2E suite
+- `npm run deploy` - Deploy via Vercel CLI
+- `npm run postbuild` - Generate sitemap using next-sitemap
 
-- Fixed homepage encoding artifacts and moved critical pages to clean UTF-8 output.
-- Added explicit `<meta charSet="UTF-8" />` in root layout.
-- Added HTML charset response headers for `/`, `/dashboard`, and `/widget/:businessId`.
-- Restored FAQ answers and ensured all FAQ entries have question and answer content.
-- Implemented new `HeroV2` with interactive demo modal and analytics events:
-  - `hero_cta_click`
-  - `hero_demo_open`
-- Implemented new `PricingGrid` with monthly/yearly toggle, highlighted Pro plan, mobile swipe cards, and comparison table.
-- Added pricing analytics events:
-  - `pricing_plan_click`
-  - `pricing_trial_start`
-- Added accessibility improvements (CTA labels and visible keyboard focus states).
+## Database Setup
 
-## Run Tests
+Run [supabase-schema.sql](supabase-schema.sql) in Supabase SQL Editor to create required tables and indexes.
 
-Run production checks:
+## PayPal Setup
 
-```bash
-npm run build
-```
+- Create a sandbox app in PayPal Developer Dashboard
+- Configure webhook endpoint:
+  - Local: `http://localhost:3000/api/paypal/webhook`
+  - Production: `https://www.cypai.app/api/paypal/webhook`
+- Subscribe to:
+  - `BILLING.SUBSCRIPTION.CREATED`
+  - `BILLING.SUBSCRIPTION.ACTIVATED`
+  - `BILLING.SUBSCRIPTION.UPDATED`
+  - `BILLING.SUBSCRIPTION.CANCELLED`
+  - `PAYMENT.SALE.COMPLETED`
 
-Run Playwright smoke and E2E tests:
+## SEO Sitemap
+
+Sitemap is generated with next-sitemap using [next-sitemap.config.js](next-sitemap.config.js).
+
+Generated output:
+
+- [public/sitemap.xml](public/sitemap.xml)
+- [public/sitemap-0.xml](public/sitemap-0.xml)
+- [public/robots.txt](public/robots.txt)
+
+## Testing
+
+Run E2E tests:
 
 ```bash
 npm run test:e2e
 ```
 
-Test coverage includes:
+Current suite covers major user journeys, including:
 
-- Encoding smoke test (no mojibake artifacts like `â€”`, `ðŸ`, `Â·`)
-- Hero presence and CTA interaction
-- Demo modal open/visibility
-- Pricing "Most Popular" label
-- FAQ rendered answers (minimum 5)
-- Mobile breakpoints (320, 375, 414, 768, 1024)
+- Homepage and navigation
+- Signup/payment guards and flow
+- Dashboard tab behavior
+- Demo chat and degraded mode UI
+- Blog and widget states
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Deployment
 
-## Deploy on Vercel
+Recommended: Vercel (GitHub-connected CI and CD).
 
-Deploy via your connected GitHub repository or:
+1. Push to GitHub
+2. Import project in Vercel
+3. Add environment variables
+4. Deploy
 
-```bash
-npm run deploy
-```
+## Security Notes
+
+- Never expose service-role keys on the client
+- Keep webhook signature verification enabled
+- Rotate API keys regularly
+- Use production PayPal credentials only in production environments
+
+## License
+
+This project is licensed under the terms in [LICENSE](LICENSE).
