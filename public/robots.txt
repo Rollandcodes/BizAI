@@ -1,0 +1,9 @@
+# *
+User-agent: *
+Allow: /
+
+# Host
+Host: https://www.cypai.app
+
+# Sitemaps
+Sitemap: https://www.cypai.app/sitemap.xml
