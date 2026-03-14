@@ -1,0 +1,30 @@
+# CypAI
+> AI-powered customer service, lead generation, and booking automation for businesses in Cyprus and the MENA region.
+
+## Overview
+CypAI (https://www.cypai.app) is a specialized AI platform designed for local service industries (car rentals, hotels, barbershops, restaurants, clinics, and student housing). It helps businesses serve local and international customers through multilingual automation.
+
+## Core Capabilities
+- 24/7 AI chatbot for customer inquiries, pricing, and FAQs
+- WhatsApp integration for automated business messaging
+- Multilingual support in English, Turkish, Arabic, Russian, and Greek
+- Lead management (CRM) for capturing and tracking prospects
+- Booking automation for appointments and reservations
+- Dashboard analytics for conversations and conversion trends
+
+## Target Industries
+- Tourism and Hospitality: hotels, guesthouses, car rentals
+- Local Services: barbershops, salons, gyms, clinics
+- Food and Beverage: restaurants and cafes
+- Education and Housing: student accommodation and related services
+
+## Technical Access
+- Main URL: https://www.cypai.app
+- Platform Type: Web-based SoftwareApplication
+- Setup Time: ~15 minutes via script/widget integration
+- Service Reach: Cyprus and MENA, globally accessible
+
+## Contact & Support
+- Email: cypai.app@cypai.app
+- WhatsApp Support: +90 533 842 5559
+- Location: Northern Cyprus (Kyrenia, Nicosia, Famagusta)

@@ -26,6 +26,8 @@ export const metadata: Metadata = {
     url: 'https://www.cypai.app',
     siteName: 'CypAI',
     type: 'website',
+    locale: 'en_US',
+    alternateLocale: ['tr_TR', 'ar_AR', 'ru_RU', 'el_GR'],
     images: [
       {
         url: '/images/cypai-logo.png',
@@ -37,12 +39,21 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
+    site: '@cypai',
     title: 'CypAI - AI for Cyprus Businesses',
     description: 'AI chat, CRM, bookings, and WhatsApp in one platform.',
     images: ['/images/cypai-logo.png'],
   },
   alternates: {
     canonical: 'https://www.cypai.app',
+    languages: {
+      en: 'https://www.cypai.app',
+      tr: 'https://www.cypai.app',
+      ar: 'https://www.cypai.app',
+      ru: 'https://www.cypai.app',
+      el: 'https://www.cypai.app',
+      'x-default': 'https://www.cypai.app',
+    },
   },
   icons: {
     icon: [
@@ -59,22 +70,67 @@ export const metadata: Metadata = {
 
 const structuredData = {
   '@context': 'https://schema.org',
-  '@type': 'SoftwareApplication',
-  name: 'CypAI',
-  description: 'AI customer service platform for local businesses in Cyprus',
-  url: 'https://www.cypai.app',
-  applicationCategory: 'BusinessApplication',
-  operatingSystem: 'Web',
-  offers: [
-    { '@type': 'Offer', name: 'Starter', price: '29', priceCurrency: 'USD' },
-    { '@type': 'Offer', name: 'Pro', price: '79', priceCurrency: 'USD' },
-    { '@type': 'Offer', name: 'Business', price: '149', priceCurrency: 'USD' },
+  '@graph': [
+    {
+      '@type': 'SoftwareApplication',
+      '@id': 'https://www.cypai.app/#software',
+      name: 'CypAI',
+      description:
+        'AI-powered customer service, lead generation, and booking automation for Cyprus and MENA businesses.',
+      url: 'https://www.cypai.app',
+      applicationCategory: 'BusinessApplication',
+      operatingSystem: 'Web',
+      offers: [
+        { '@type': 'Offer', name: 'Starter', price: '29', priceCurrency: 'USD' },
+        { '@type': 'Offer', name: 'Pro', price: '79', priceCurrency: 'USD' },
+        { '@type': 'Offer', name: 'Business', price: '149', priceCurrency: 'USD' },
+      ],
+      featureList: [
+        'WhatsApp Integration',
+        'Multilingual AI Chat (English, Turkish, Arabic, Russian, Greek)',
+        'Booking System',
+        'Lead CRM',
+      ],
+      areaServed: [
+        { '@type': 'Country', name: 'Cyprus' },
+        { '@type': 'DefinedRegion', name: 'Middle East and North Africa (MENA)' },
+      ],
+      knowsLanguage: ['en', 'tr', 'ar', 'ru', 'el'],
+      softwareHelp: 'https://www.cypai.app/#faq',
+    },
+    {
+      '@type': 'LocalBusiness',
+      '@id': 'https://www.cypai.app/#organization',
+      name: 'CypAI',
+      image: 'https://www.cypai.app/images/cypai-logo.png',
+      url: 'https://www.cypai.app',
+      telephone: '+905338425559',
+      address: {
+        '@type': 'PostalAddress',
+        addressLocality: 'Kyrenia',
+        addressCountry: 'CY',
+      },
+      geo: {
+        '@type': 'GeoCoordinates',
+        latitude: 35.3414,
+        longitude: 33.3186,
+      },
+      areaServed: [
+        { '@type': 'Country', name: 'Cyprus' },
+        { '@type': 'DefinedRegion', name: 'Middle East' },
+      ],
+      knowsAbout: [
+        'Artificial Intelligence',
+        'Customer Service Automation',
+        'Lead generation',
+        'Booking systems',
+        'WhatsApp automation',
+      ],
+      sameAs: [
+        'https://www.linkedin.com/company/cypai',
+      ],
+    },
   ],
-  contactPoint: {
-    '@type': 'ContactPoint',
-    email: 'cypai.app@cypai.app',
-    contactType: 'customer service',
-  },
 }
 
 export default function RootLayout({
