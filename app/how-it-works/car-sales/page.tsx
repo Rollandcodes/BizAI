@@ -102,7 +102,7 @@ export default function CarSalesHowItWorksPage() {
           <ul className="mt-6 space-y-3">
             {examples.map((example) => (
               <li key={example} className="rounded-xl border border-zinc-800 bg-zinc-950 px-4 py-3 text-sm text-zinc-300">
-                "{example}"
+                &ldquo;{example}&rdquo;
               </li>
             ))}
           </ul>

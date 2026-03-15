@@ -219,7 +219,7 @@ export default function AlternativesIndexPage() {
       <section className="bg-zinc-900 py-16">
         <div className="mx-auto max-w-3xl px-6 text-center sm:px-10">
           <h2 className="text-3xl font-extrabold text-white sm:text-4xl">
-            Stop paying for features you don't use
+            Stop paying for features you don&apos;t use
           </h2>
           <p className="mx-auto mt-4 max-w-xl text-base leading-7 text-zinc-300">
             CypAI does exactly what a service business needs — lead capture, WhatsApp, multilingual AI, and a CRM — starting at $49/month.

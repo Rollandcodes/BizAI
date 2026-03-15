@@ -264,7 +264,7 @@ export default function AgencyTab({ ownerEmail }: { ownerEmail: string }) {
             </h3>
             <p className="mt-1 text-sm text-slate-500">{viewingClient.owner_email}</p>
             <div className="mt-4 rounded-2xl bg-amber-50 px-4 py-3 text-sm text-amber-800">
-              ⚠️ You are about to view this client's dashboard. Changes made will affect their account.
+              ⚠️ You are about to view this client&apos;s dashboard. Changes made will affect their account.
             </div>
             <a
               href={`/dashboard?email=${encodeURIComponent(viewingClient.owner_email)}`}

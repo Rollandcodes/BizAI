@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
-import { getOpenAIClient, buildSystemPrompt, extractLead, NICHE_PROMPTS } from "@/lib/ai";
+import { getOpenAIClient, buildSystemPrompt, extractLead } from "@/lib/ai";
 
 // ─── Config helpers ────────────────────────────────────────────────────────────
 function str(v: unknown): string {

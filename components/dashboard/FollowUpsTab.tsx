@@ -149,7 +149,7 @@ export default function FollowUpsTab({
         {notContacted3Days > 0 && (
           <div className="flex items-center justify-between rounded-2xl bg-amber-50 px-4 py-3 text-sm">
             <span className="text-amber-800">
-              📅 <strong>{notContacted3Days}</strong> leads haven't been contacted in 3+ days
+              📅 <strong>{notContacted3Days}</strong> leads haven&apos;t been contacted in 3+ days
             </span>
           </div>
         )}

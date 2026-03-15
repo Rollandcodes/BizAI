@@ -18,22 +18,19 @@ import { Suspense, useEffect, useMemo, useRef, useState, type FormEvent } from "
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
-  Bot, Building2, Calendar, Check, ChevronRight, Copy, CreditCard,
-  Download, Eye, FileText, Flag, LayoutDashboard, LogOut, MessageSquare,
-  Plus, Printer, QrCode, Send, Settings, ShieldAlert, ShieldCheck, Star,
+  Bot, Building2, Calendar, Copy, CreditCard,
+  Download, LayoutDashboard, LogOut, MessageSquare,
+  Plus, Send, Settings, ShieldCheck,
   TrendingUp, Users, X, type LucideIcon,
 } from "lucide-react";
-import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 import { PayPalButtons, usePayPalScriptReducer } from "@paypal/react-paypal-js";
-import QRCode from "react-qr-code";
 
 import { supabase } from "@/lib/supabase";
-import type { Business, Conversation, BookingRecord } from "@/lib/supabase";
+import type { Business, BookingRecord } from "@/lib/supabase";
 import { PLANS, planDisplayName, planBadgeClass, PLAN_MESSAGE_LIMITS } from "@/lib/plans";
 import { Analytics } from "@/lib/analytics";
 import { formatDate, formatDateTime, downloadCsv, parseMessages, conversationPreview } from "@/lib/utils";
 
-import ChatWidget from "@/components/ChatWidget";
 import OnboardingWizard from "@/components/OnboardingWizard";
 import CRMTab from "@/components/dashboard/CRMTab";
 import BookingsTab from "@/components/dashboard/BookingsTab";
@@ -233,7 +230,6 @@ function DashboardInner() {
   const [bookings,         setBookings]          = useState<BookingRecord[]>([]);
   const [bookingsLoading,  setBookingsLoading]   = useState(false);
   const [bookingsInited,   setBookingsInited]    = useState(false);
-  const [updatingBookingIds, setUpdatingBookingIds] = useState<Set<string>>(new Set());
   const [isTabletSidebarOpen, setIsTabletSidebarOpen] = useState(false);
   const [upgradeLockTab,   setUpgradeLockTab]    = useState<TabKey | null>(null);
   const [settingsForm,     setSettingsForm]      = useState<SettingsFormState>({
@@ -241,12 +237,6 @@ function DashboardInner() {
     primaryColor: "#2563eb", aiInstructions: "", customFaqs: [{ question: "", answer: "" }],
     pricingInfo: "", commonQuestionsText: "", additionalInfo: "",
   });
-  const [broadcastMessage, setBroadcastMessage] = useState("");
-  const [broadcastSending, setBroadcastSending] = useState(false);
-  const [satisfactionData, setSatisfactionData] = useState<{ avgRating: number; totalRatings: number; distribution: number[] } | null>(null);
-  const [whatsAppTestLoading, setWhatsAppTestLoading] = useState(false);
-  const [whatsAppTestMessage, setWhatsAppTestMessage] = useState("Test from CypAI dashboard. WhatsApp sync working.");
-  const qrRef = useRef<HTMLDivElement>(null);
   const hasTrackedTab = useRef(false);
 
   const business        = dashboard.business;
@@ -289,7 +279,7 @@ function DashboardInner() {
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
-    if (!business) { setBookings([]); setBookingsInited(false); setSatisfactionData(null); return; }
+    if (!business) { setBookings([]); setBookingsInited(false); return; }
     setSettingsForm({
       businessName:          business.business_name ?? "",
       businessType:          business.business_type ?? "other",
@@ -305,7 +295,6 @@ function DashboardInner() {
     const eligible = plan === "trial" || plan === "basic" ? "starter" : plan;
     setSelectedUpgradePlan((eligible as "starter"|"pro"|"business") ?? "pro");
     if (!bookingsInited && !bookingsLoading) void loadBookings(business.id);
-    void loadSatisfaction(business.id);
   }, [business]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
@@ -373,15 +362,6 @@ function DashboardInner() {
     } finally { setBookingsLoading(false); setBookingsInited(true); }
   }
 
-  async function loadSatisfaction(bId: string) {
-    const start = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString();
-    const { data } = await supabase.from("conversations").select("customer_rating").eq("business_id", bId).not("customer_rating","is",null).gte("created_at", start);
-    if (!data || !data.length) { setSatisfactionData(null); return; }
-    const ratings = (data as { customer_rating: number }[]).map(r => r.customer_rating);
-    const avg = ratings.reduce((a, b) => a + b, 0) / ratings.length;
-    setSatisfactionData({ avgRating: Math.round(avg * 10) / 10, totalRatings: ratings.length, distribution: [1,2,3,4,5].map(r => ratings.filter(v => v === r).length) });
-  }
-
   function showToast(msg: string, tone: "success"|"error") { setToast({ message: msg, tone }); }
 
   // ── Actions ──────────────────────────────────────────────────────────────
@@ -406,25 +386,6 @@ function DashboardInner() {
     }
   }
 
-  async function handleConfirmBooking(id: string) {
-    setUpdatingBookingIds(s => new Set(s).add(id));
-    try {
-      await supabase.from("bookings").update({ status: "confirmed" }).eq("id", id);
-      setBookings(b => b.map(x => x.id === id ? { ...x, status: "confirmed" as const } : x));
-      showToast("Booking confirmed!", "success");
-    } catch { showToast("Failed to confirm booking.", "error"); }
-    finally { setUpdatingBookingIds(s => { const n = new Set(s); n.delete(id); return n; }); }
-  }
-
-  async function handleDeclineBooking(id: string) {
-    setUpdatingBookingIds(s => new Set(s).add(id));
-    try {
-      await supabase.from("bookings").update({ status: "declined" }).eq("id", id);
-      setBookings(b => b.map(x => x.id === id ? { ...x, status: "declined" as const } : x));
-      showToast("Booking declined.", "success");
-    } catch { showToast("Failed to decline booking.", "error"); }
-    finally { setUpdatingBookingIds(s => { const n = new Set(s); n.delete(id); return n; }); }
-  }
 
   async function handleCopyWidgetCode() {
     if (!widgetCode) return;

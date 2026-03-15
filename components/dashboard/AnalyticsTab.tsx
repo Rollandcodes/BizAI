@@ -113,9 +113,10 @@ export default function AnalyticsTab({ businessId }: { businessId: string }) {
         .order('created_at', { ascending: true });
       if (since) convQuery = convQuery.gte('created_at', since);
 
-      let bookQuery = supabase
+      const bookQuery = supabase
         .from('bookings')
         .select('id, created_at')
+        .eq('business_id', businessId)
 
       const [{ data: convData }, { data: bookData }] = await Promise.all([convQuery, bookQuery]);
       setConversations((convData as ConvRow[]) ?? []);

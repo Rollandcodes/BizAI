@@ -72,7 +72,7 @@ export default function ForIndexPage() {
       <section className="bg-zinc-900 py-14">
         <div className="mx-auto max-w-3xl px-6 text-center sm:px-10">
           <h2 className="text-2xl font-extrabold text-white sm:text-3xl">
-            Don't see your city or business type?
+            Don&apos;t see your city or business type?
           </h2>
           <p className="mx-auto mt-4 max-w-xl text-base leading-7 text-zinc-300">
             CypAI works for any service business. Sign up and configure your AI assistant in 15 minutes.

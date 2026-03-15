@@ -1,6 +1,6 @@
 ﻿'use client';
 
-import { useEffect, useState } from 'react';
+import { startTransition, useEffect, useState } from 'react';
 import { Check } from 'lucide-react';
 import { Analytics } from '@/lib/analytics';
 
@@ -63,7 +63,7 @@ export default function SuccessPage() {
       const raw = localStorage.getItem('bizai_user') ?? localStorage.getItem('cypai_user');
       if (raw) {
         const parsed = JSON.parse(raw) as BizUser;
-        setUser(parsed);
+        startTransition(() => setUser(parsed));
         Analytics.signupCompleted(parsed.plan ?? 'unknown');
       }
     } catch {

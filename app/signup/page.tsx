@@ -1,7 +1,8 @@
 'use client';
 
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Suspense, useEffect, useRef, useState } from 'react';
+import Link from 'next/link';
+import { Suspense, startTransition, useEffect, useRef, useState } from 'react';
 import { Check } from 'lucide-react';
 import { PLANS } from '@/lib/plans';
 import { Analytics } from '@/lib/analytics';
@@ -64,7 +65,7 @@ function SignupForm() {
     const stored = typeof window !== 'undefined' ? localStorage.getItem(REF_STORAGE_KEY) || '' : '';
     const normalized = (refParam || stored).trim().toUpperCase();
     if (normalized) {
-      setReferralCode(normalized);
+      startTransition(() => setReferralCode(normalized));
       localStorage.setItem(REF_STORAGE_KEY, normalized);
     }
   }, [refParam]);
@@ -200,8 +201,8 @@ function SignupForm() {
     <div className="flex min-h-screen flex-col bg-zinc-950 text-zinc-100">
       <header className="border-b border-zinc-800 bg-zinc-950/90 px-4 py-4 backdrop-blur">
         <div className="mx-auto flex max-w-lg items-center justify-between">
-          <a href="/" className="text-lg font-extrabold text-white">🤖 CypAI</a>
-          <a href="/" className="text-sm font-semibold text-zinc-400 transition hover:text-zinc-200">← Back</a>
+          <Link href="/" className="text-lg font-extrabold text-white">🤖 CypAI</Link>
+          <Link href="/" className="text-sm font-semibold text-zinc-400 transition hover:text-zinc-200">← Back</Link>
         </div>
       </header>
 

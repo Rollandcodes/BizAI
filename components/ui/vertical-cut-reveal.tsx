@@ -2,6 +2,7 @@
 
 import {
   forwardRef,
+  startTransition,
   useCallback,
   useEffect,
   useImperativeHandle,
@@ -38,6 +39,16 @@ interface WordObject {
   needsSpace: boolean
 }
 
+// Defined outside the component so it is a stable reference and does not
+// break the memoisation of `elements`.
+function splitIntoCharacters(input: string): string[] {
+  if (typeof Intl !== "undefined" && "Segmenter" in Intl) {
+    const segmenter = new Intl.Segmenter("en", { granularity: "grapheme" })
+    return Array.from(segmenter.segment(input), ({ segment }) => segment)
+  }
+  return Array.from(input)
+}
+
 const VerticalCutReveal = forwardRef<VerticalCutRevealRef, TextProps>(
   (
     {
@@ -66,13 +77,6 @@ const VerticalCutReveal = forwardRef<VerticalCutRevealRef, TextProps>(
     const text = typeof children === "string" ? children : children?.toString() || ""
     const [isAnimating, setIsAnimating] = useState(false)
 
-    const splitIntoCharacters = (text: string): string[] => {
-      if (typeof Intl !== "undefined" && "Segmenter" in Intl) {
-        const segmenter = new Intl.Segmenter("en", { granularity: "grapheme" })
-        return Array.from(segmenter.segment(text), ({ segment }) => segment)
-      }
-      return Array.from(text)
-    }
 
     const elements = useMemo(() => {
       const words = text.split(" ")
@@ -93,7 +97,7 @@ const VerticalCutReveal = forwardRef<VerticalCutRevealRef, TextProps>(
       (index: number) => {
         const total =
           splitBy === "characters"
-            ? (elements as any[]).reduce(
+            ? (elements as WordObject[]).reduce(
                 (acc, word) =>
                   acc +
                   (typeof word === "string"
@@ -114,17 +118,17 @@ const VerticalCutReveal = forwardRef<VerticalCutRevealRef, TextProps>(
         }
         return Math.abs((staggerFrom as number) - index) * staggerDuration
       },
-      [elements.length, staggerFrom, staggerDuration, splitBy]
+      [elements, staggerFrom, staggerDuration, splitBy]
     )
 
     const startAnimation = useCallback(() => {
-      setIsAnimating(true)
+      startTransition(() => setIsAnimating(true))
       onStart?.()
     }, [onStart])
 
     useImperativeHandle(ref, () => ({
       startAnimation,
-      reset: () => setIsAnimating(false),
+      reset: () => startTransition(() => setIsAnimating(false)),
     }))
 
     useEffect(() => {

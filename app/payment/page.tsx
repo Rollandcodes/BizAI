@@ -1,6 +1,7 @@
 'use client';
 
-import { Suspense, useEffect, useRef, useState } from 'react';
+import { Suspense, startTransition, useEffect, useRef, useState } from 'react';
+import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Check } from 'lucide-react';
 import { PayPalButtons, usePayPalScriptReducer } from '@paypal/react-paypal-js';
@@ -211,7 +212,7 @@ function PaymentContent() {
   useEffect(() => {
     try {
       const raw = localStorage.getItem('bizai_signup') ?? localStorage.getItem('cypai_signup');
-      if (raw) setSignupData(JSON.parse(raw) as SignupData);
+      if (raw) startTransition(() => setSignupData(JSON.parse(raw) as SignupData));
     } catch {
       // localStorage unavailable or corrupt — proceed without pre-fill
     }
@@ -286,8 +287,8 @@ function PaymentContent() {
     <div className="flex min-h-screen flex-col bg-zinc-950 text-zinc-100">
       <header className="border-b border-zinc-800 bg-zinc-950/90 px-4 py-4 backdrop-blur">
         <div className="mx-auto flex max-w-5xl items-center justify-between">
-          <a href="/" className="text-lg font-extrabold text-white">🤖 CypAI</a>
-          <a href={`/signup?plan=${planId}`} className="text-sm font-semibold text-zinc-400 transition hover:text-zinc-200">← Back</a>
+          <Link href="/" className="text-lg font-extrabold text-white">🤖 CypAI</Link>
+          <Link href={`/signup?plan=${planId}`} className="text-sm font-semibold text-zinc-400 transition hover:text-zinc-200">← Back</Link>
         </div>
       </header>
 
