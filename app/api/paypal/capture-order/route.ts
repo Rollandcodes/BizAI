@@ -83,38 +83,75 @@ export async function POST(req: NextRequest) {
 
     // Map "starter" to "basic" for DB constraint compatibility
     const dbPlan = planId === "starter" ? "basic" : planId;
-    const referralCode = signupData?.referralCode?.trim().toUpperCase() ?? null;
 
-    const { data: business, error: upsertError } = await supabase
-      .from("businesses")
-      .upsert(
-        {
-          owner_email:            email,
-          owner_name:             signupData?.ownerName ?? signupData?.yourName ?? email,
-          business_name:          signupData?.businessName ?? email,
-          business_type:          signupData?.businessType ?? "other",
-          whatsapp:               signupData?.whatsapp ?? "",
-          website:                signupData?.website ?? "",
+    // Determine whether this is a brand-new signup or an existing customer upgrading.
+    // For upgrades (coming from the dashboard) signupData is absent — only businessEmail
+    // is sent. In that case we must NOT overwrite business_name / owner_name etc.
+    const isNewSignup = !!(signupData?.email);
+
+    let business: {
+      id: string; owner_email: string; business_name: string;
+      plan: string; referral_code: string | null;
+    } | null = null;
+
+    if (isNewSignup) {
+      // Brand-new customer — full upsert
+      const referralCode = signupData?.referralCode?.trim().toUpperCase() ?? null;
+      const { data, error: upsertError } = await supabase
+        .from("businesses")
+        .upsert(
+          {
+            owner_email:            email,
+            owner_name:             signupData?.ownerName ?? signupData?.yourName ?? email,
+            business_name:          signupData?.businessName ?? email,
+            business_type:          signupData?.businessType ?? "other",
+            whatsapp:               signupData?.whatsapp ?? "",
+            website:                signupData?.website ?? "",
+            plan:                   dbPlan,
+            plan_expires_at:        expiresAt.toISOString(),
+            paypal_order_id:        orderID,
+            paypal_subscription_id: orderID,
+            widget_color:           "#2563eb",
+            referral_code:          referralCode,
+          },
+          { onConflict: "owner_email" }
+        )
+        .select("id, owner_email, business_name, plan, referral_code")
+        .single();
+
+      if (upsertError || !data) {
+        console.error("[capture-order] new-signup upsert error:", upsertError);
+        return NextResponse.json({
+          success: true,
+          warning: "Payment received but account setup encountered an issue. Contact support if you cannot log in.",
+          user: { email, plan: planId },
+        });
+      }
+      business = data;
+    } else {
+      // Existing customer upgrading their plan — only update plan-related fields.
+      // Never overwrite business_name / owner_name / widget settings.
+      const { data, error: updateError } = await supabase
+        .from("businesses")
+        .update({
           plan:                   dbPlan,
           plan_expires_at:        expiresAt.toISOString(),
           paypal_order_id:        orderID,
           paypal_subscription_id: orderID,
-          widget_color:           "#2563eb",
-          referral_code:          referralCode,
-        },
-        { onConflict: "owner_email" }
-      )
-      .select("id, owner_email, business_name, plan, referral_code")
-      .single();
+        })
+        .eq("owner_email", email)
+        .select("id, owner_email, business_name, plan, referral_code")
+        .single();
 
-    if (upsertError || !business) {
-      console.error("[capture-order] upsert error:", upsertError);
-      // Payment succeeded but DB failed — return partial success
-      return NextResponse.json({
-        success: true,
-        warning: "Payment received. Account setup in progress.",
-        user: { email, plan: planId },
-      });
+      if (updateError || !data) {
+        console.error("[capture-order] upgrade update error:", updateError);
+        return NextResponse.json({
+          success: true,
+          warning: "Payment received. Plan upgrade is in progress — refresh your dashboard in a moment.",
+          user: { email, plan: planId },
+        });
+      }
+      business = data;
     }
 
     // Handle affiliate commission for Pro plan

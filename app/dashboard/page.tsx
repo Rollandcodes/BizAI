@@ -167,7 +167,19 @@ function AccessGate({ email, onEmailChange, onSubmit, loading, error }: {
         </div>
         {error && (
           <div className="mt-4 rounded-2xl border border-amber-700/40 bg-amber-900/20 px-4 py-3 text-sm text-amber-200">
-            {error} — <Link href="/signup" className="font-semibold underline">Sign up</Link>
+            {error.toLowerCase().includes("no account") ? (
+              <>
+                No account found.
+                <span className="mt-1 block text-xs text-amber-300">
+                  Already paid?{' '}
+                  <a href="https://wa.me/905338425559" target="_blank" rel="noopener noreferrer" className="font-semibold underline">Contact support</a>
+                  {' '}or{' '}
+                  <Link href="/signup" className="font-semibold underline">create a new account</Link>.
+                </span>
+              </>
+            ) : (
+              <>{error} — <Link href="/signup" className="font-semibold underline">Sign up</Link></>
+            )}
           </div>
         )}
       </div>
