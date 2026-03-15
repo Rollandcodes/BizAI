@@ -276,6 +276,20 @@ function formatDate(value?: string | null) {
   }).format(new Date(value));
 }
 
+function formatDateTime(value?: string | null) {
+  if (!value) {
+    return 'Not set';
+  }
+
+  return new Intl.DateTimeFormat('en-GB', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  }).format(new Date(value));
+}
+
 function getConversationPreview(conversation: ConversationRecord) {
   const firstUserMessage = conversation.messages?.find((message) => message.role === 'user');
   return firstUserMessage?.content || conversation.messages?.[0]?.content || 'No messages yet';
@@ -617,6 +631,7 @@ function DashboardInner() {
   const [automationLoading, setAutomationLoading] = useState(false);
   const [retryAutomationLoading, setRetryAutomationLoading] = useState(false);
   const [retryBatchAutomationLoading, setRetryBatchAutomationLoading] = useState(false);
+  const [retryRowLoadingIds, setRetryRowLoadingIds] = useState<Set<string>>(new Set());
   const [retryPolicySaving, setRetryPolicySaving] = useState(false);
   const [automationUnavailable, setAutomationUnavailable] = useState<string | null>(null);
   const hasTrackedInitialTab = useRef(false);
@@ -931,6 +946,39 @@ function DashboardInner() {
       setToast({ message, tone: 'error' });
     } finally {
       setRetryAutomationLoading(false);
+    }
+  }
+
+  async function retryAutomationById(queueId: string) {
+    setRetryRowLoadingIds((prev) => new Set(prev).add(queueId));
+    try {
+      const response = await fetch('/api/automation', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'retry_failed', queueId }),
+      });
+
+      const data = (await response.json()) as { ok?: boolean; error?: string; sent?: boolean; reason?: string };
+      if (!response.ok || !data.ok) {
+        throw new Error(data.error || 'Retry request failed');
+      }
+
+      if (data.sent) {
+        setToast({ message: 'Retry succeeded and email was sent.', tone: 'success' });
+      } else {
+        setToast({ message: `Retry attempted but still failed (${data.reason || 'unknown reason'}).`, tone: 'error' });
+      }
+
+      await loadAutomationOverview();
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Retry request failed';
+      setToast({ message, tone: 'error' });
+    } finally {
+      setRetryRowLoadingIds((prev) => {
+        const next = new Set(prev);
+        next.delete(queueId);
+        return next;
+      });
     }
   }
 
@@ -1777,6 +1825,71 @@ function DashboardInner() {
                         <p className="mt-4 text-sm text-zinc-500">
                           Latest failure: {latestAutomationFailure || 'No recent failures'}
                         </p>
+
+                        <div className="mt-4 overflow-hidden rounded-2xl border border-zinc-800">
+                          <div className="border-b border-zinc-800 bg-zinc-950/60 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-zinc-400">
+                            Recent automation activity (last 25)
+                          </div>
+                          <div className="overflow-x-auto">
+                            <table className="min-w-full text-left text-xs text-zinc-300">
+                              <thead className="bg-zinc-950 text-zinc-500">
+                                <tr>
+                                  <th className="px-3 py-2 font-semibold">Created</th>
+                                  <th className="px-3 py-2 font-semibold">Event</th>
+                                  <th className="px-3 py-2 font-semibold">Status</th>
+                                  <th className="px-3 py-2 font-semibold">Recipient</th>
+                                  <th className="px-3 py-2 font-semibold">Retries</th>
+                                  <th className="px-3 py-2 font-semibold">Last Error</th>
+                                  <th className="px-3 py-2 font-semibold">Action</th>
+                                </tr>
+                              </thead>
+                              <tbody className="divide-y divide-zinc-800">
+                                {automationRecent.length === 0 ? (
+                                  <tr>
+                                    <td colSpan={7} className="px-3 py-4 text-center text-zinc-500">
+                                      No recent automation records for this filter.
+                                    </td>
+                                  </tr>
+                                ) : (
+                                  automationRecent.map((row) => (
+                                    <tr key={row.id} className="bg-zinc-900/60">
+                                      <td className="px-3 py-2">{formatDateTime(row.created_at)}</td>
+                                      <td className="px-3 py-2">{row.event_type === 'abandoned_signup' ? 'Signup' : 'Payment'}</td>
+                                      <td className="px-3 py-2">
+                                        <span
+                                          className={`inline-flex rounded-full px-2 py-0.5 font-semibold ${
+                                            row.status === 'sent'
+                                              ? 'bg-emerald-900/40 text-emerald-200'
+                                              : row.status === 'failed'
+                                                ? 'bg-rose-900/40 text-rose-200'
+                                                : 'bg-zinc-800 text-zinc-300'
+                                          }`}
+                                        >
+                                          {row.status}
+                                        </span>
+                                      </td>
+                                      <td className="px-3 py-2">{row.recipient_email || '-'}</td>
+                                      <td className="px-3 py-2">{row.retry_count || 0}</td>
+                                      <td className="max-w-[240px] truncate px-3 py-2 text-zinc-500" title={row.last_error || ''}>
+                                        {row.last_error || '-'}
+                                      </td>
+                                      <td className="px-3 py-2">
+                                        <button
+                                          type="button"
+                                          onClick={() => void retryAutomationById(row.id)}
+                                          disabled={row.status !== 'failed' || retryRowLoadingIds.has(row.id)}
+                                          className="rounded-full border border-zinc-700 px-2.5 py-1 font-semibold text-zinc-200 transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-50"
+                                        >
+                                          {retryRowLoadingIds.has(row.id) ? 'Retrying...' : 'Retry'}
+                                        </button>
+                                      </td>
+                                    </tr>
+                                  ))
+                                )}
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
                       </>
                     )}
                   </div>
