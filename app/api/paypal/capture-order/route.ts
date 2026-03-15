@@ -5,6 +5,9 @@ const PLAN_EXPIRY_DAYS = 31;
 const AFFILIATE_COMMISSION = 15.8; // $15.80 per pro referral
 
 function admin() {
+  if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    throw new Error("Missing SUPABASE_SERVICE_ROLE_KEY");
+  }
   return createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -37,6 +40,16 @@ interface SignupData {
 
 export async function POST(req: NextRequest) {
   try {
+    if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Payments are temporarily unavailable. Please contact support.",
+        },
+        { status: 503 }
+      );
+    }
+
     const body = await req.json() as {
       orderID?: string;
       planId?: string;
@@ -122,10 +135,11 @@ export async function POST(req: NextRequest) {
       if (upsertError || !data) {
         console.error("[capture-order] new-signup upsert error:", upsertError);
         return NextResponse.json({
-          success: true,
-          warning: "Payment received but account setup encountered an issue. Contact support if you cannot log in.",
+          success: false,
+          paymentCaptured: true,
+          error: "Payment received, but account setup failed. Contact support now.",
           user: { email, plan: planId },
-        });
+        }, { status: 500 });
       }
       business = data;
     } else {
@@ -146,10 +160,11 @@ export async function POST(req: NextRequest) {
       if (updateError || !data) {
         console.error("[capture-order] upgrade update error:", updateError);
         return NextResponse.json({
-          success: true,
-          warning: "Payment received. Plan upgrade is in progress — refresh your dashboard in a moment.",
+          success: false,
+          paymentCaptured: true,
+          error: "Payment received, but plan activation failed. Contact support now.",
           user: { email, plan: planId },
-        });
+        }, { status: 500 });
       }
       business = data;
     }
