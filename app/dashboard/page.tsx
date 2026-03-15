@@ -532,7 +532,10 @@ function DashboardInner() {
                 {(stats?.monthlyMessages ?? 0).toLocaleString()} / {limit.toLocaleString()} messages used this month
               </p>
               <div className="h-2 w-full rounded-full bg-zinc-800">
-                <div className="h-2 rounded-full bg-blue-500 transition-all" style={{ width: `${Math.min(100, ((stats?.monthlyMessages ?? 0) / limit) * 100)}%` }} />
+                <div
+                  className="h-2 rounded-full bg-blue-500 transition-all"
+                  style={{ width: `${Math.min(100, ((stats?.monthlyMessages ?? 0) / limit) * 100)}%` }}
+                />
               </div>
             </div>
           )}
@@ -785,6 +788,7 @@ function DashboardInner() {
               {WIDGET_COLORS.map(color => (
                 <button key={color} type="button" aria-label={`Set widget color ${color}`} title={`Set widget color ${color}`} onClick={() => setSettingsForm(f => ({ ...f, primaryColor: color }))}
                   className={`h-10 w-10 rounded-full border-2 transition ${settingsForm.primaryColor === color ? "border-white scale-110" : "border-transparent"}`}
+                  /* Tailwind does not support dynamic bg colors, so style is required */
                   style={{ background: color }} />
               ))}
               <label htmlFor="settings-primary-color" className="sr-only">Pick custom widget color</label>
@@ -914,7 +918,7 @@ function DashboardInner() {
   }
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-100 lg:flex" style={{ fontFamily: "-apple-system, BlinkMacSystemFont, 'Inter', sans-serif" }}>
+    <div className="min-h-screen bg-zinc-950 text-zinc-100 lg:flex font-sans">
       {toast && <Toast toast={toast} />}
 
       {showOnboarding && (

@@ -119,6 +119,24 @@ CREATE INDEX IF NOT EXISTS idx_affiliates_email ON public.affiliates(email);
 CREATE INDEX IF NOT EXISTS idx_affiliates_referral_code ON public.affiliates(referral_code);
 
 -- ============================================================================
+-- Table: webhook_endpoints (iPaaS outbound integrations)
+-- ============================================================================
+CREATE TABLE IF NOT EXISTS public.webhook_endpoints (
+  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  tenant_id UUID REFERENCES public.organizations(id) ON DELETE CASCADE,
+  url TEXT NOT NULL,
+  event_type TEXT NOT NULL CHECK (event_type IN ('lead.created', 'booking.confirmed', 'booking.paid', 'review.requested')),
+  is_active BOOLEAN DEFAULT true,
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
+ALTER TABLE public.webhook_endpoints ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Tenants see own webhooks" ON public.webhook_endpoints;
+CREATE POLICY "Tenants see own webhooks" ON public.webhook_endpoints
+  USING (tenant_id = auth.uid());
+
+-- ============================================================================
 -- Table: paypal_webhook_events (idempotency + audit)
 -- ============================================================================
 CREATE TABLE IF NOT EXISTS public.paypal_webhook_events (
@@ -172,14 +190,35 @@ CREATE POLICY "Service role full access to marketing automation queue" ON public
   WITH CHECK (auth.role() = 'service_role');
 
 -- ============================================================================
--- Table: marketing_automation_policy
--- ============================================================================
 CREATE TABLE IF NOT EXISTS public.marketing_automation_policy (
   id TEXT PRIMARY KEY DEFAULT 'default',
   max_retries INTEGER NOT NULL DEFAULT 3 CHECK (max_retries >= 1 AND max_retries <= 10),
   retry_window_hours INTEGER NOT NULL DEFAULT 72 CHECK (retry_window_hours >= 1 AND retry_window_hours <= 168),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+
+-- ==========================================================================
+-- Table: booking_audit_logs
+-- ==========================================================================
+CREATE TABLE IF NOT EXISTS public.booking_audit_logs (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  booking_id UUID NOT NULL REFERENCES bookings(id) ON DELETE CASCADE,
+  action TEXT NOT NULL,
+  details JSONB,
+  timestamp TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- RLS: Only allow business owner to view their audit logs
+CREATE POLICY select_audit_logs ON booking_audit_logs
+  FOR SELECT USING (
+    EXISTS (
+      SELECT 1 FROM bookings b
+      WHERE b.id = booking_audit_logs.booking_id
+      AND b.business_id = auth.uid()
+    )
+  );
+
+ALTER TABLE booking_audit_logs ENABLE ROW LEVEL SECURITY;
 
 INSERT INTO public.marketing_automation_policy (id, max_retries, retry_window_hours)
 VALUES ('default', 3, 72)

@@ -57,8 +57,9 @@ export default function BookingsTab({
 }: {
   businessId: string;
   businessName: string;
-}) {
+}): JSX.Element {
   const [bookings, setBookings] = useState<Booking[]>([]);
+  const [auditLogs, setAuditLogs] = useState<Record<string, Array<{ action: string; details: any; timestamp: string }>>>({});
   const [loading, setLoading] = useState(true);
   const [view, setView] = useState<'calendar' | 'list'>('calendar');
   const [calMonth, setCalMonth] = useState(() => {
@@ -79,32 +80,42 @@ export default function BookingsTab({
   const [addSaving, setAddSaving] = useState(false);
 
   useEffect(() => {
-    void fetchBookings();
+    void fetchBookingHistory();
   }, [businessId]);
 
   async function fetchBookings() {
+    // replaced by fetchBookingHistory
+  }
+
+  async function fetchBookingHistory() {
     setLoading(true);
     try {
-      const { data } = await supabase
-        .from('bookings')
-        .select('*')
-        .eq('business_id', businessId)
-        .order('created_at', { ascending: false });
-      setBookings((data as Booking[]) ?? []);
+      const res = await fetch(`/api/booking-history?businessId=${businessId}`);
+      if (!res.ok) throw new Error('Failed to load booking history');
+      const { bookings, auditLogs } = await res.json();
+      setBookings(bookings ?? []);
+      // Group audit logs by booking_id
+      const grouped: Record<string, Array<{ action: string; details: any; timestamp: string }>> = {};
+      for (const log of auditLogs ?? []) {
+        if (!grouped[log.booking_id]) grouped[log.booking_id] = [];
+        grouped[log.booking_id].push(log);
+      }
+      setAuditLogs(grouped);
     } finally {
       setLoading(false);
     }
   }
+  }
 
   async function confirmBooking(b: Booking) {
-    setUpdating((s) => new Set(s).add(b.id));
+    setUpdating((s: Set<string>) => new Set(s).add(b.id));
     try {
       await supabase
         .from('bookings')
         .update({ status: 'confirmed', confirmed_at: new Date().toISOString() })
         .eq('id', b.id);
-      setBookings((prev) =>
-        prev.map((x) => (x.id === b.id ? { ...x, status: 'confirmed' as const } : x))
+      setBookings((prev: Booking[]) =>
+        prev.map((x: Booking) => (x.id === b.id ? { ...x, status: 'confirmed' as const } : x))
       );
       const name = b.customer_name;
       const date = b.booking_date ?? '';
@@ -113,19 +124,19 @@ export default function BookingsTab({
       const phone = (b.customer_phone ?? '').replace(/\D/g, '');
       if (phone) window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, '_blank');
     } finally {
-      setUpdating((s) => { const n = new Set(s); n.delete(b.id); return n; });
+      setUpdating((s: Set<string>) => { const n = new Set(s); n.delete(b.id); return n; });
     }
   }
 
   async function cancelBooking(b: Booking) {
-    setUpdating((s) => new Set(s).add(b.id));
+    setUpdating((s: Set<string>) => new Set(s).add(b.id));
     try {
       await supabase
         .from('bookings')
         .update({ status: 'cancelled', cancelled_at: new Date().toISOString() })
         .eq('id', b.id);
-      setBookings((prev) =>
-        prev.map((x) => (x.id === b.id ? { ...x, status: 'cancelled' as const } : x))
+      setBookings((prev: Booking[]) =>
+        prev.map((x: Booking) => (x.id === b.id ? { ...x, status: 'cancelled' as const } : x))
       );
       const name = b.customer_name;
       const date = b.booking_date ?? '';
@@ -133,7 +144,7 @@ export default function BookingsTab({
       const phone = (b.customer_phone ?? '').replace(/\D/g, '');
       if (phone) window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, '_blank');
     } finally {
-      setUpdating((s) => { const n = new Set(s); n.delete(b.id); return n; });
+      setUpdating((s: Set<string>) => { const n = new Set(s); n.delete(b.id); return n; });
     }
   }
 
@@ -155,7 +166,7 @@ export default function BookingsTab({
         })
         .select()
         .single();
-      if (data) setBookings((prev) => [data as Booking, ...prev]);
+      if (data) setBookings((prev: Booking[]) => [data as Booking, ...prev]);
       setAddForm({ customer_name: '', customer_phone: '', service_type: '', booking_date: '', booking_time: '', notes: '' });
       setShowAdd(false);
     } finally {
@@ -169,7 +180,7 @@ export default function BookingsTab({
     if (!b.booking_date) continue;
     const key = b.booking_date.slice(0, 10);
     if (!dayMap[key]) dayMap[key] = { date: key, counts: { pending: 0, confirmed: 0, cancelled: 0 } };
-    dayMap[key].counts[b.status]++;
+    dayMap[key].counts[b.status as BookingStatus]++;
   }
 
   const { year, month } = calMonth;
@@ -178,22 +189,22 @@ export default function BookingsTab({
 
   const calDays: Array<string | null> = [
     ...Array<null>(firstDow).fill(null),
-    ...Array.from({ length: daysInMonth }, (_, i) =>
+    ...Array.from({ length: daysInMonth }, (_, i: number) =>
       `${year}-${String(month + 1).padStart(2, '0')}-${String(i + 1).padStart(2, '0')}`
     ),
   ];
 
   const dayBookings = selectedDay
-    ? bookings.filter((b) => b.booking_date?.startsWith(selectedDay))
-    : bookings.filter((b) => b.status === 'pending');
+    ? bookings.filter((b: Booking) => b.booking_date?.startsWith(selectedDay))
+    : bookings.filter((b: Booking) => b.status === 'pending');
 
-  const pendingCount = bookings.filter((b) => b.status === 'pending').length;
-  const confirmedCount = bookings.filter((b) => b.status === 'confirmed').length;
+  const pendingCount = bookings.filter((b: Booking) => b.status === 'pending').length;
+  const confirmedCount = bookings.filter((b: Booking) => b.status === 'confirmed').length;
 
   const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
   function prevMonth() {
-    setCalMonth((p) => {
+    setCalMonth((p: { year: number; month: number }) => {
       if (p.month === 0) return { year: p.year - 1, month: 11 };
       return { year: p.year, month: p.month - 1 };
     });
@@ -201,7 +212,7 @@ export default function BookingsTab({
   }
 
   function nextMonth() {
-    setCalMonth((p) => {
+    setCalMonth((p: { year: number; month: number }) => {
       if (p.month === 11) return { year: p.year + 1, month: 0 };
       return { year: p.year, month: p.month + 1 };
     });
@@ -306,7 +317,25 @@ export default function BookingsTab({
                     {selectedDay ? 'No bookings on this day.' : 'No pending bookings.'}
                   </div>
                 ) : (
-                  dayBookings.map((b) => <BookingCard key={b.id} booking={b} onConfirm={confirmBooking} onCancel={cancelBooking} updating={updating.has(b.id)} />)
+                  dayBookings.map((b) => (
+                    <div key={b.id}>
+                      <BookingCard booking={b} onConfirm={confirmBooking} onCancel={cancelBooking} updating={updating.has(b.id)} />
+                      {auditLogs[b.id]?.length ? (
+                        <div className="mt-2 rounded-xl border border-slate-100 bg-slate-50 p-3 text-xs">
+                          <div className="font-semibold text-slate-500 mb-1">Audit Log:</div>
+                          <ul className="space-y-1">
+                            {auditLogs[b.id].map((log, idx) => (
+                              <li key={idx} className="flex gap-2">
+                                <span className="font-bold text-blue-700">{log.action}</span>
+                                <span className="text-slate-500">{new Date(log.timestamp).toLocaleString()}</span>
+                                <span className="text-slate-600">{typeof log.details === 'string' ? log.details : JSON.stringify(log.details)}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      ) : null}
+                    </div>
+                  ))
                 )}
               </div>
             </div>
@@ -329,6 +358,7 @@ export default function BookingsTab({
                         <th className="px-4 py-3 font-semibold">Time</th>
                         <th className="px-4 py-3 font-semibold">Status</th>
                         <th className="px-4 py-3 font-semibold">Actions</th>
+                        <th className="px-4 py-3 font-semibold">Audit Log</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
@@ -367,6 +397,19 @@ export default function BookingsTab({
                                 </button>
                               </div>
                             )}
+                          </td>
+                          <td className="px-4 py-3">
+                            {auditLogs[b.id]?.length ? (
+                              <ul className="space-y-1">
+                                {auditLogs[b.id].map((log, idx) => (
+                                  <li key={idx} className="flex gap-2">
+                                    <span className="font-bold text-blue-700">{log.action}</span>
+                                    <span className="text-slate-500">{new Date(log.timestamp).toLocaleString()}</span>
+                                    <span className="text-slate-600">{typeof log.details === 'string' ? log.details : JSON.stringify(log.details)}</span>
+                                  </li>
+                                ))}
+                              </ul>
+                            ) : null}
                           </td>
                         </tr>
                       ))}

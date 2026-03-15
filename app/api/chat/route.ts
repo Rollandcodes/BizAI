@@ -11,12 +11,84 @@ import {
   DEGRADED_MESSAGES,
 } from "@/lib/ai";
 import { PLAN_MESSAGE_LIMITS } from "@/lib/plans";
+import { checkCalendarAvailability, createCalendarEvent } from "@/app/actions/calendar";
 
 function adminClient() {
   return createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!
   );
+}
+
+type BookingIntent = {
+  name: string;
+  phone: string;
+  pickupDate: string;
+  returnDate: string;
+  carType: string;
+  totalDays: number;
+  bookingTime: string | null;
+  customerMessage: string;
+};
+
+function normalizePhone(value: string): string {
+  return value.replace(/[^\d]/g, "");
+}
+
+function parseBookingIntent(rawMessage: string): BookingIntent | null {
+  const marker = "[BOOKING_READY]";
+  const idx = rawMessage.indexOf(marker);
+  if (idx === -1) return null;
+
+  const after = rawMessage.slice(idx + marker.length).trim();
+  const jsonLine = after
+    .split("\n")
+    .map((line) => line.trim())
+    .find((line) => line.startsWith("{") && line.endsWith("}"));
+
+  if (!jsonLine) return null;
+
+  try {
+    const parsed = JSON.parse(jsonLine) as {
+      name?: string;
+      phone?: string;
+      pickupDate?: string;
+      returnDate?: string;
+      carType?: string;
+      totalDays?: number;
+      bookingTime?: string;
+    };
+
+    const phone = normalizePhone(parsed.phone ?? "");
+    const pickupDate = (parsed.pickupDate ?? "").trim();
+    if (!phone || !pickupDate) return null;
+
+    const customerMessage = rawMessage.slice(0, idx).trim();
+
+    return {
+      name: (parsed.name ?? "Customer").trim(),
+      phone,
+      pickupDate,
+      returnDate: (parsed.returnDate ?? pickupDate).trim() || pickupDate,
+      carType: (parsed.carType ?? "Standard").trim() || "Standard",
+      totalDays: Math.max(1, Number(parsed.totalDays ?? 1) || 1),
+      bookingTime: parsed.bookingTime?.trim() || null,
+      customerMessage,
+    };
+  } catch {
+    return null;
+  }
+}
+
+function buildBookingWindow(intent: BookingIntent): { startIso: string; endIso: string } {
+  const start = new Date(`${intent.pickupDate}T${intent.bookingTime ?? "10:00"}:00`);
+  if (Number.isNaN(start.getTime())) {
+    throw new Error("Invalid booking datetime from AI output");
+  }
+
+  // Default one-hour service slot for availability checks.
+  const end = new Date(start.getTime() + 60 * 60 * 1000);
+  return { startIso: start.toISOString(), endIso: end.toISOString() };
 }
 
 export async function OPTIONS() {
@@ -151,12 +223,111 @@ export async function POST(req: NextRequest) {
 
     const rawMessage = completion.choices[0]?.message?.content ?? "";
     const { leadCaptured, customerName, customerPhone, cleanMessage } = extractLead(rawMessage);
+    let finalMessage = cleanMessage;
+
+    // Booking flow: check calendar availability first, then create event if free.
+    const bookingIntent = parseBookingIntent(rawMessage);
+    if (bookingIntent && businessId && sessionId) {
+      try {
+        const { startIso, endIso } = buildBookingWindow(bookingIntent);
+        const availability = await checkCalendarAvailability(startIso, endIso, businessId);
+
+        if (!availability.available) {
+          finalMessage = `${bookingIntent.customerMessage || cleanMessage}\n\nThat time is not available. Please share another preferred slot and I will confirm it right away.`;
+        } else {
+          const { data: insertedBooking, error: bookingInsertError } = await supabase
+            .from("bookings")
+            .insert({
+              business_id: businessId,
+              session_id: sessionId,
+              customer_name: bookingIntent.name,
+              customer_phone: bookingIntent.phone,
+              pickup_date: bookingIntent.pickupDate,
+              return_date: bookingIntent.returnDate,
+              car_type: bookingIntent.carType,
+              total_days: bookingIntent.totalDays,
+              booking_date: bookingIntent.pickupDate,
+              booking_time: bookingIntent.bookingTime,
+              service_type: bookingIntent.carType,
+              status: "confirmed",
+            })
+            .select("id")
+            .single();
+
+          if (bookingInsertError) {
+            throw new Error(`Failed to save booking: ${bookingInsertError.message}`);
+          }
+
+          await createCalendarEvent(
+            {
+              title: `Booking - ${bookingIntent.name}`,
+              start: startIso,
+              end: endIso,
+              customerPhone: bookingIntent.phone,
+              description: `Business booking ${insertedBooking?.id ?? ""} (${bookingIntent.carType})`,
+            },
+            businessId
+          );
+
+          // Send booking confirmation email
+          try {
+            const { sendBookingEmailAction } = await import('@/app/actions/send-booking-email');
+            await sendBookingEmailAction(
+              bookingIntent.phone + '@example.com', // Replace with actual email if available
+              bookingIntent.name,
+              businessConfig?.business_name ?? businessName,
+              bookingIntent.pickupDate,
+              bookingIntent.bookingTime ?? undefined,
+              bookingIntent.carType ?? undefined,
+              undefined // confirmationLink, if available
+            );
+          } catch (emailErr) {
+            console.error('[chat] booking email error:', emailErr);
+          }
+
+            // PayPal order creation
+            try {
+              // Only proceed if booking was inserted
+              if (insertedBooking?.id) {
+                const { createPayPalOrder } = await import('@/app/actions/paypal');
+                const paypalOrder = await createPayPalOrder(
+                  insertedBooking.id,
+                  Number(bookingIntent.totalDays) * 50, // Example: €50 per day
+                  'EUR',
+                  `Booking for ${bookingIntent.name} (${bookingIntent.carType})`
+                );
+                // Persist PayPal order ID/status
+                await supabase
+                  .from('bookings')
+                  .update({
+                    paypal_order_id: paypalOrder.id,
+                    paypal_order_status: paypalOrder.status,
+                  })
+                  .eq('id', insertedBooking.id);
+                // Find approval link
+                const approvalLink = paypalOrder.links.find(l => l.rel === 'approve')?.href;
+                if (approvalLink) {
+                  finalMessage += `\n\nTo confirm your booking, please complete payment: ${approvalLink}`;
+                }
+              }
+            } catch (paypalErr) {
+              console.error('[chat] PayPal order error:', paypalErr);
+              finalMessage += '\n\nBooking confirmed, but payment link could not be generated. Our team will contact you.';
+            }
+
+            finalMessage = bookingIntent.customerMessage || cleanMessage;
+        }
+      } catch (bookingErr) {
+        console.error("[chat] booking calendar flow error:", bookingErr);
+        finalMessage = `${bookingIntent.customerMessage || cleanMessage}\n\nI could not finalize the booking calendar sync right now. Our team will confirm your booking manually shortly.`;
+      }
+    }
 
     // Persist conversation (non-blocking)
     if (businessId && sessionId) {
       void (async () => {
         try {
-          const allMessages = [...messages, { role: "assistant" as const, content: cleanMessage }];
+          const allMessages = [...messages, { role: "assistant" as const, content: finalMessage }];
           const { data: existing } = await supabase
             .from("conversations")
             .select("id")
@@ -197,7 +368,7 @@ export async function POST(req: NextRequest) {
     }
 
     return NextResponse.json(
-      { message: cleanMessage, leadCaptured, customerName, customerPhone, model },
+      { message: finalMessage, leadCaptured, customerName, customerPhone, model },
       { headers: corsHeaders }
     );
   } catch (err: unknown) {
