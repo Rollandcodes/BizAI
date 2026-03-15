@@ -139,9 +139,18 @@ type AutomationTrend = {
   successRate: number;
 };
 
+type AutomationTimelinePoint = {
+  day: string;
+  sent: number;
+  failed: number;
+  queued: number;
+  total: number;
+};
+
 type AutomationOverviewResponse = {
   summary?: AutomationSummary;
   trend?: AutomationTrend;
+  timeline?: AutomationTimelinePoint[];
   recent?: AutomationRecentRecord[];
   filter?: {
     eventType: 'abandoned_signup' | 'abandoned_payment' | null;
@@ -570,6 +579,7 @@ function DashboardInner() {
   const [satisfactionLoading, setSatisfactionLoading] = useState(false);
   const [automationSummary, setAutomationSummary] = useState<AutomationSummary | null>(null);
   const [automationTrend, setAutomationTrend] = useState<AutomationTrend | null>(null);
+  const [automationTimeline, setAutomationTimeline] = useState<AutomationTimelinePoint[]>([]);
   const [latestAutomationFailure, setLatestAutomationFailure] = useState<string | null>(null);
   const [latestFailedQueueId, setLatestFailedQueueId] = useState<string | null>(null);
   const [automationEventFilter, setAutomationEventFilter] = useState<AutomationEventFilter>('all');
@@ -654,6 +664,7 @@ function DashboardInner() {
     if (!businessId) {
       setAutomationSummary(null);
       setAutomationTrend(null);
+      setAutomationTimeline([]);
       setLatestAutomationFailure(null);
       setLatestFailedQueueId(null);
       setAutomationUnavailable(null);
@@ -784,6 +795,7 @@ function DashboardInner() {
       if (data.queue === 'missing_table') {
         setAutomationSummary(null);
         setAutomationTrend(null);
+        setAutomationTimeline([]);
         setLatestAutomationFailure(null);
         setLatestFailedQueueId(null);
         setAutomationUnavailable('Automation queue is not initialized yet. Run the latest Supabase schema migration.');
@@ -792,6 +804,7 @@ function DashboardInner() {
 
       setAutomationSummary(data.summary || { total: 0, queued: 0, sent: 0, failed: 0 });
       setAutomationTrend(data.trend || { windowDays: 7, sent: 0, failed: 0, queued: 0, successRate: 0 });
+      setAutomationTimeline(data.timeline || []);
 
       const latestFailure = (data.recent || []).find((item) => item.status === 'failed' && item.last_error);
       setLatestAutomationFailure(latestFailure?.last_error || null);
@@ -800,6 +813,7 @@ function DashboardInner() {
       const message = error instanceof Error ? error.message : 'Failed to load automation status';
       setAutomationSummary(null);
       setAutomationTrend(null);
+      setAutomationTimeline([]);
       setLatestAutomationFailure(null);
       setLatestFailedQueueId(null);
       setAutomationUnavailable(message);
@@ -1550,6 +1564,29 @@ function DashboardInner() {
                         <p className="mt-4 text-sm font-semibold text-emerald-300">
                           7d success rate: {automationTrend?.successRate ?? 0}%
                         </p>
+                        <div className="mt-4 rounded-2xl border border-zinc-800 bg-zinc-950/40 p-3">
+                          <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-zinc-400">7d delivery timeline</p>
+                          <div className="h-36 w-full">
+                            <ResponsiveContainer width="100%" height="100%">
+                              <LineChart
+                                data={automationTimeline.map((point) => ({
+                                  ...point,
+                                  dayLabel: point.day.slice(5),
+                                }))}
+                                margin={{ top: 6, right: 8, left: 0, bottom: 0 }}
+                              >
+                                <XAxis dataKey="dayLabel" tick={{ fill: '#a1a1aa', fontSize: 11 }} axisLine={false} tickLine={false} />
+                                <YAxis hide domain={[0, 'auto']} />
+                                <Tooltip
+                                  contentStyle={{ backgroundColor: '#18181b', border: '1px solid #3f3f46', borderRadius: 12 }}
+                                  labelStyle={{ color: '#e4e4e7' }}
+                                />
+                                <Line type="monotone" dataKey="sent" stroke="#34d399" strokeWidth={2} dot={false} />
+                                <Line type="monotone" dataKey="failed" stroke="#fb7185" strokeWidth={2} dot={false} />
+                              </LineChart>
+                            </ResponsiveContainer>
+                          </div>
+                        </div>
                         <p className="mt-4 text-sm text-zinc-500">
                           Latest failure: {latestAutomationFailure || 'No recent failures'}
                         </p>

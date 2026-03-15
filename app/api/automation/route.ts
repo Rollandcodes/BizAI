@@ -524,10 +524,32 @@ export async function GET(request: NextRequest) {
     successRate: 0,
   };
 
+  const timelineMap = new Map<string, { day: string; sent: number; failed: number; queued: number; total: number }>();
+  for (let i = 6; i >= 0; i -= 1) {
+    const date = new Date(Date.now() - i * 24 * 60 * 60 * 1000);
+    const dayKey = date.toISOString().slice(0, 10);
+    timelineMap.set(dayKey, {
+      day: dayKey,
+      sent: 0,
+      failed: 0,
+      queued: 0,
+      total: 0,
+    });
+  }
+
   for (const row of trendData || []) {
     if (row.status === 'queued') trend.queued += 1;
     if (row.status === 'sent') trend.sent += 1;
     if (row.status === 'failed') trend.failed += 1;
+
+    const dayKey = typeof row.created_at === 'string' ? row.created_at.slice(0, 10) : '';
+    const dayEntry = timelineMap.get(dayKey);
+    if (dayEntry) {
+      if (row.status === 'queued') dayEntry.queued += 1;
+      if (row.status === 'sent') dayEntry.sent += 1;
+      if (row.status === 'failed') dayEntry.failed += 1;
+      dayEntry.total += 1;
+    }
   }
 
   const attempts = trend.sent + trend.failed;
@@ -542,6 +564,7 @@ export async function GET(request: NextRequest) {
     },
     summary,
     trend,
+    timeline: Array.from(timelineMap.values()),
     recent: data || [],
   });
 }
