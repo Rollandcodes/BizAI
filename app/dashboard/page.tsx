@@ -380,6 +380,13 @@ function formatDateTime(value?: string | null) {
   }).format(new Date(value));
 }
 
+function formatDateInputValue(date: Date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
 function getConversationPreview(conversation: ConversationRecord) {
   const firstUserMessage = conversation.messages?.find((message) => message.role === 'user');
   return firstUserMessage?.content || conversation.messages?.[0]?.content || 'No messages yet';
@@ -1256,6 +1263,22 @@ function DashboardInner() {
     } finally {
       setAlertLogsExporting(false);
     }
+  }
+
+  function applyAlertLogDatePreset(days: number) {
+    const end = new Date();
+    const start = new Date();
+    start.setDate(end.getDate() - (days - 1));
+    setAlertLogFromDate(formatDateInputValue(start));
+    setAlertLogToDate(formatDateInputValue(end));
+    setAlertLogPage(1);
+  }
+
+  function isAlertLogPresetActive(days: number) {
+    const end = new Date();
+    const start = new Date();
+    start.setDate(end.getDate() - (days - 1));
+    return alertLogFromDate === formatDateInputValue(start) && alertLogToDate === formatDateInputValue(end);
   }
 
   async function saveRetryPolicy(eventType: 'abandoned_signup' | 'abandoned_payment') {
@@ -2263,6 +2286,20 @@ function DashboardInner() {
                               }`}
                             >
                               {option.label}
+                            </button>
+                          ))}
+                          {[{ days: 1, label: 'Today' }, { days: 7, label: 'Last 7d' }, { days: 30, label: 'Last 30d' }].map((preset) => (
+                            <button
+                              key={preset.label}
+                              type="button"
+                              onClick={() => applyAlertLogDatePreset(preset.days)}
+                              className={`rounded-full border px-2.5 py-1 font-semibold transition ${
+                                isAlertLogPresetActive(preset.days)
+                                  ? 'border-sky-500/70 bg-sky-100 text-sky-900'
+                                  : 'border-zinc-700 text-zinc-300 hover:bg-zinc-950'
+                              }`}
+                            >
+                              {preset.label}
                             </button>
                           ))}
                           <label className="ml-auto flex items-center gap-2 text-zinc-400">
