@@ -58,6 +58,47 @@ CREATE INDEX IF NOT EXISTS idx_businesses_paypal_order_id ON public.businesses(p
 CREATE INDEX IF NOT EXISTS idx_businesses_paypal_subscription_id ON public.businesses(paypal_subscription_id);
 CREATE INDEX IF NOT EXISTS idx_businesses_whatsapp_phone_number_id ON public.businesses(whatsapp_phone_number_id);
 
+-- --------------------------------------------------------------------------
+-- Login + payment reliability hardening for owner_email
+-- --------------------------------------------------------------------------
+-- 1) Normalize any existing owner_email values so lookups are consistent.
+UPDATE public.businesses
+SET owner_email = lower(trim(owner_email))
+WHERE owner_email IS NOT NULL
+  AND owner_email <> lower(trim(owner_email));
+
+-- 2) Abort if duplicates exist (required before creating unique index).
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1
+    FROM public.businesses
+    GROUP BY owner_email
+    HAVING COUNT(*) > 1
+  ) THEN
+    RAISE EXCEPTION 'Duplicate owner_email values detected in public.businesses. Deduplicate rows, then re-run this script.';
+  END IF;
+END $$;
+
+-- 3) Enforce uniqueness so UPSERT ... ON CONFLICT(owner_email) always works.
+CREATE UNIQUE INDEX IF NOT EXISTS uq_businesses_owner_email
+  ON public.businesses(owner_email);
+
+-- 4) Keep owner_email normalized on all future inserts/updates.
+CREATE OR REPLACE FUNCTION public.normalize_business_owner_email()
+RETURNS trigger LANGUAGE plpgsql AS $$
+BEGIN
+  NEW.owner_email := lower(trim(NEW.owner_email));
+  RETURN NEW;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS trg_normalize_business_owner_email ON public.businesses;
+CREATE TRIGGER trg_normalize_business_owner_email
+BEFORE INSERT OR UPDATE ON public.businesses
+FOR EACH ROW
+EXECUTE FUNCTION public.normalize_business_owner_email();
+
 -- ============================================================================
 -- Table: affiliates
 -- ============================================================================
