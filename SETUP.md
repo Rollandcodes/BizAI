@@ -1,5 +1,12 @@
 # BizAI Setup Guide
 
+This file is the technical setup guide for connecting the app to Supabase, OpenAI, PayPal, and WhatsApp.
+
+If you are a business owner and not technical, use the public guides instead:
+- `/how-it-works` for the simple overview
+- `/setup` for the beginner step-by-step walkthrough
+- `/blog/how-to-set-up-cypai-in-your-business-a-beginner-friendly-guide` for the long explanation
+
 ## 1. Create a Supabase project and get keys
 1. Go to https://supabase.com and create a new project.
 2. In your project dashboard, open **Project Settings** -> **API**.

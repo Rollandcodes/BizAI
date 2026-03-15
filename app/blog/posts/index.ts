@@ -2,10 +2,12 @@ import type { BlogPost } from './types';
 import { aiCustomerServiceForNorthernCyprusBusinessesAPracticalGuide } from './ai-customer-service-for-northern-cyprus-businesses-a-practical-guide';
 import { howCarRentalBusinessesInCyprusAreUsingAiToGetMoreBookings } from './how-car-rental-businesses-in-cyprus-are-using-ai-to-get-more-bookings';
 import { howToNeverMissACustomerInquiryAgain } from './how-to-never-miss-a-customer-inquiry-again';
+import { howToSetUpCypaiInYourBusinessABeginnerFriendlyGuide } from './how-to-set-up-cypai-in-your-business-a-beginner-friendly-guide';
 import { whatsappAiForSmallBusinessesCompleteGuide2026 } from './whatsapp-ai-for-small-businesses-complete-guide-2026';
 import { whyYourKyreniaBusinessLosesCustomersAtNightAndHowToFixIt } from './why-your-kyrenia-business-loses-customers-at-night-and-how-to-fix-it';
 
 export const blogPosts: BlogPost[] = [
+  howToSetUpCypaiInYourBusinessABeginnerFriendlyGuide,
   howCarRentalBusinessesInCyprusAreUsingAiToGetMoreBookings,
   whyYourKyreniaBusinessLosesCustomersAtNightAndHowToFixIt,
   whatsappAiForSmallBusinessesCompleteGuide2026,
