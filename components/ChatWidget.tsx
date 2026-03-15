@@ -45,6 +45,7 @@ function ChatWidget({
   const [leadCapturedToast, setLeadCapturedToast] = useState(false);
   const [showQrModal, setShowQrModal] = useState(false);
   const [qrLinkCopied, setQrLinkCopied] = useState(false);
+  const [qrCopyToastVisible, setQrCopyToastVisible] = useState(false);
   const [sessionId] = useState<string>(() => crypto.randomUUID());
   const [feedbackState, setFeedbackState] = useState<'idle' | 'prompt' | 'done'>('idle');
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -227,6 +228,12 @@ function ChatWidget({
     const timer = setTimeout(() => setQrLinkCopied(false), 1800);
     return () => clearTimeout(timer);
   }, [qrLinkCopied]);
+
+  useEffect(() => {
+    if (!qrCopyToastVisible) return;
+    const timer = setTimeout(() => setQrCopyToastVisible(false), 1600);
+    return () => clearTimeout(timer);
+  }, [qrCopyToastVisible]);
 
   const hasWhatsApp = Boolean(whatsappUrl);
   const qrImageSrc = whatsappUrl
@@ -452,12 +459,18 @@ function ChatWidget({
                   if (!whatsappUrl) return;
                   void navigator.clipboard.writeText(whatsappUrl);
                   setQrLinkCopied(true);
+                  setQrCopyToastVisible(true);
                 }}
                 className="inline-flex w-full items-center justify-center rounded-xl border border-zinc-700 px-4 py-3 text-sm font-semibold text-zinc-100 hover:bg-zinc-800"
               >
                 {qrLinkCopied ? 'Copied' : 'Copy Link'}
               </button>
             </div>
+            {qrCopyToastVisible && (
+              <p className="mt-2 text-center text-xs font-semibold text-emerald-400" role="status" aria-live="polite">
+                WhatsApp link copied to clipboard.
+              </p>
+            )}
           </div>
         </div>
       )}
