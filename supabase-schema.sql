@@ -129,6 +129,27 @@ CREATE POLICY "Service role full access to marketing automation queue" ON public
   WITH CHECK (auth.role() = 'service_role');
 
 -- ============================================================================
+-- Table: marketing_automation_policy
+-- ============================================================================
+CREATE TABLE IF NOT EXISTS public.marketing_automation_policy (
+  id TEXT PRIMARY KEY DEFAULT 'default',
+  max_retries INTEGER NOT NULL DEFAULT 3 CHECK (max_retries >= 1 AND max_retries <= 10),
+  retry_window_hours INTEGER NOT NULL DEFAULT 72 CHECK (retry_window_hours >= 1 AND retry_window_hours <= 168),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+INSERT INTO public.marketing_automation_policy (id, max_retries, retry_window_hours)
+VALUES ('default', 3, 72)
+ON CONFLICT (id) DO NOTHING;
+
+ALTER TABLE public.marketing_automation_policy ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Service role full access to marketing automation policy" ON public.marketing_automation_policy;
+CREATE POLICY "Service role full access to marketing automation policy" ON public.marketing_automation_policy
+  FOR ALL USING (auth.role() = 'service_role')
+  WITH CHECK (auth.role() = 'service_role');
+
+-- ============================================================================
 -- Table: conversations
 -- ============================================================================
 -- Stores chat conversations between customers and the AI

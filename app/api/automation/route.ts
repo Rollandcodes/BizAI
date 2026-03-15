@@ -5,15 +5,27 @@ type AutomationEventType = 'abandoned_signup' | 'abandoned_payment';
 
 type AutomationPayload = {
   eventType?: AutomationEventType;
-  action?: 'retry_failed' | 'retry_failed_batch';
+  action?: 'retry_failed' | 'retry_failed_batch' | 'get_retry_policy' | 'set_retry_policy';
   queueId?: string;
   limit?: number;
+  maxRetries?: number;
+  retryWindowHours?: number;
   planId?: string;
   email?: string;
   businessName?: string;
   yourName?: string;
   businessType?: string;
   source?: string;
+};
+
+type RetryPolicy = {
+  maxRetries: number;
+  retryWindowHours: number;
+};
+
+const DEFAULT_RETRY_POLICY: RetryPolicy = {
+  maxRetries: 3,
+  retryWindowHours: 72,
 };
 
 type QueueInsertInput = {
@@ -44,6 +56,69 @@ function toEventType(value: unknown): AutomationEventType | null {
     return value;
   }
   return null;
+}
+
+function normalizePositiveInt(value: unknown, fallback: number, min: number, max: number): number {
+  if (typeof value !== 'number' || Number.isNaN(value)) {
+    return fallback;
+  }
+
+  return Math.min(max, Math.max(min, Math.floor(value)));
+}
+
+async function getRetryPolicy(): Promise<RetryPolicy> {
+  const supabase = createServerClient();
+  const { data, error } = await supabase
+    .from('marketing_automation_policy')
+    .select('max_retries, retry_window_hours')
+    .eq('id', 'default')
+    .single();
+
+  if (error?.code === '42P01' || error?.code === 'PGRST116') {
+    return DEFAULT_RETRY_POLICY;
+  }
+
+  if (error || !data) {
+    return DEFAULT_RETRY_POLICY;
+  }
+
+  return {
+    maxRetries: Number(data.max_retries || DEFAULT_RETRY_POLICY.maxRetries),
+    retryWindowHours: Number(data.retry_window_hours || DEFAULT_RETRY_POLICY.retryWindowHours),
+  };
+}
+
+async function saveRetryPolicy(maxRetries: number, retryWindowHours: number) {
+  const supabase = createServerClient();
+  const { error } = await supabase.from('marketing_automation_policy').upsert(
+    {
+      id: 'default',
+      max_retries: maxRetries,
+      retry_window_hours: retryWindowHours,
+      updated_at: new Date().toISOString(),
+    },
+    { onConflict: 'id' }
+  );
+
+  if (error?.code === '42P01') {
+    return { ok: false as const, status: 400 as const, error: 'marketing_automation_policy table missing. Run latest supabase-schema.sql.' };
+  }
+
+  if (error) {
+    return { ok: false as const, status: 500 as const, error: error.message };
+  }
+
+  return { ok: true as const };
+}
+
+function isRetryWindowExpired(createdAt: string | null | undefined, retryWindowHours: number): boolean {
+  const createdAtMs = Date.parse(createdAt || '');
+  if (!Number.isFinite(createdAtMs)) {
+    return false;
+  }
+
+  const retryWindowMs = retryWindowHours * 60 * 60 * 1000;
+  return Date.now() - createdAtMs > retryWindowMs;
 }
 
 function buildDedupeKey(eventType: AutomationEventType, email: string | null, planId: string | null): string {
@@ -205,10 +280,11 @@ async function updateQueueDeliveryById(
 }
 
 async function retryFailedAutomation(queueId: string) {
+  const policy = await getRetryPolicy();
   const supabase = createServerClient();
   const { data, error } = await supabase
     .from('marketing_automation_queue')
-    .select('id, event_type, recipient_email, plan_id, payload, status, email_subject, email_body')
+    .select('id, event_type, recipient_email, plan_id, payload, status, email_subject, email_body, retry_count, created_at')
     .eq('id', queueId)
     .single();
 
@@ -218,6 +294,23 @@ async function retryFailedAutomation(queueId: string) {
 
   if (!data || data.status !== 'failed') {
     return { ok: false, status: 400 as const, error: 'Only failed automation records can be retried' };
+  }
+
+  const retryCount = Number(data.retry_count || 0);
+  if (retryCount >= policy.maxRetries) {
+    return {
+      ok: false,
+      status: 400 as const,
+      error: `Retry limit reached (${policy.maxRetries}) for this record`,
+    };
+  }
+
+  if (isRetryWindowExpired(data.created_at, policy.retryWindowHours)) {
+    return {
+      ok: false,
+      status: 400 as const,
+      error: `Retry window expired (${policy.retryWindowHours}h) for this record`,
+    };
   }
 
   if (!data.recipient_email) {
@@ -271,10 +364,11 @@ async function retryFailedAutomation(queueId: string) {
 }
 
 async function retryFailedAutomationBatch(limit: number, eventType: AutomationEventType | null) {
+  const policy = await getRetryPolicy();
   const supabase = createServerClient();
   let query = supabase
     .from('marketing_automation_queue')
-    .select('id')
+    .select('id, retry_count, created_at')
     .eq('status', 'failed')
     .order('created_at', { ascending: true })
     .limit(limit);
@@ -288,7 +382,18 @@ async function retryFailedAutomationBatch(limit: number, eventType: AutomationEv
     return { ok: false, status: 500 as const, error: error.message };
   }
 
-  const queueIds = (data || []).map((row) => row.id as string).filter(Boolean);
+  const queueIds = (data || [])
+    .filter((row) => {
+      const retryCount = Number((row as { retry_count?: number | null }).retry_count || 0);
+      if (retryCount >= policy.maxRetries) {
+        return false;
+      }
+
+      const createdAt = (row as { created_at?: string | null }).created_at;
+      return !isRetryWindowExpired(createdAt, policy.retryWindowHours);
+    })
+    .map((row) => row.id as string)
+    .filter(Boolean);
   let sent = 0;
   let failed = 0;
 
@@ -349,6 +454,27 @@ async function sendRecoveryEmail(input: {
 export async function POST(request: NextRequest) {
   try {
     const payload = (await request.json()) as AutomationPayload;
+    if (payload.action === 'get_retry_policy') {
+      const policy = await getRetryPolicy();
+      return NextResponse.json({ ok: true, policy });
+    }
+
+    if (payload.action === 'set_retry_policy') {
+      const maxRetries = normalizePositiveInt(payload.maxRetries, DEFAULT_RETRY_POLICY.maxRetries, 1, 10);
+      const retryWindowHours = normalizePositiveInt(payload.retryWindowHours, DEFAULT_RETRY_POLICY.retryWindowHours, 1, 168);
+
+      const saveResult = await saveRetryPolicy(maxRetries, retryWindowHours);
+      if (!saveResult.ok) {
+        return NextResponse.json({ error: saveResult.error }, { status: saveResult.status });
+      }
+
+      return NextResponse.json({
+        ok: true,
+        action: 'set_retry_policy',
+        policy: { maxRetries, retryWindowHours },
+      });
+    }
+
     if (payload.action === 'retry_failed_batch') {
       const rawLimit = typeof payload.limit === 'number' ? payload.limit : 5;
       const batchLimit = Math.min(20, Math.max(1, Math.floor(rawLimit)));
@@ -462,6 +588,7 @@ export async function POST(request: NextRequest) {
 
 export async function GET(request: NextRequest) {
   const supabase = createServerClient();
+  const policy = await getRetryPolicy();
   const eventTypeFilter = toEventType(request.nextUrl.searchParams.get('eventType'));
   const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
   let recentQuery = supabase
@@ -564,6 +691,7 @@ export async function GET(request: NextRequest) {
     },
     summary,
     trend,
+    policy,
     timeline: Array.from(timelineMap.values()),
     recent: data || [],
   });

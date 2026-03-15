@@ -147,9 +147,15 @@ type AutomationTimelinePoint = {
   total: number;
 };
 
+type AutomationRetryPolicy = {
+  maxRetries: number;
+  retryWindowHours: number;
+};
+
 type AutomationOverviewResponse = {
   summary?: AutomationSummary;
   trend?: AutomationTrend;
+  policy?: AutomationRetryPolicy;
   timeline?: AutomationTimelinePoint[];
   recent?: AutomationRecentRecord[];
   filter?: {
@@ -601,6 +607,8 @@ function DashboardInner() {
   const [satisfactionLoading, setSatisfactionLoading] = useState(false);
   const [automationSummary, setAutomationSummary] = useState<AutomationSummary | null>(null);
   const [automationTrend, setAutomationTrend] = useState<AutomationTrend | null>(null);
+  const [automationPolicy, setAutomationPolicy] = useState<AutomationRetryPolicy | null>(null);
+  const [retryPolicyForm, setRetryPolicyForm] = useState<AutomationRetryPolicy>({ maxRetries: 3, retryWindowHours: 72 });
   const [automationTimeline, setAutomationTimeline] = useState<AutomationTimelinePoint[]>([]);
   const [automationRecent, setAutomationRecent] = useState<AutomationRecentRecord[]>([]);
   const [latestAutomationFailure, setLatestAutomationFailure] = useState<string | null>(null);
@@ -609,6 +617,7 @@ function DashboardInner() {
   const [automationLoading, setAutomationLoading] = useState(false);
   const [retryAutomationLoading, setRetryAutomationLoading] = useState(false);
   const [retryBatchAutomationLoading, setRetryBatchAutomationLoading] = useState(false);
+  const [retryPolicySaving, setRetryPolicySaving] = useState(false);
   const [automationUnavailable, setAutomationUnavailable] = useState<string | null>(null);
   const hasTrackedInitialTab = useRef(false);
 
@@ -720,6 +729,8 @@ function DashboardInner() {
     if (!businessId) {
       setAutomationSummary(null);
       setAutomationTrend(null);
+      setAutomationPolicy(null);
+      setRetryPolicyForm({ maxRetries: 3, retryWindowHours: 72 });
       setAutomationTimeline([]);
       setAutomationRecent([]);
       setLatestAutomationFailure(null);
@@ -852,6 +863,8 @@ function DashboardInner() {
       if (data.queue === 'missing_table') {
         setAutomationSummary(null);
         setAutomationTrend(null);
+        setAutomationPolicy(null);
+        setRetryPolicyForm({ maxRetries: 3, retryWindowHours: 72 });
         setAutomationTimeline([]);
         setAutomationRecent([]);
         setLatestAutomationFailure(null);
@@ -862,6 +875,9 @@ function DashboardInner() {
 
       setAutomationSummary(data.summary || { total: 0, queued: 0, sent: 0, failed: 0 });
       setAutomationTrend(data.trend || { windowDays: 7, sent: 0, failed: 0, queued: 0, successRate: 0 });
+      const policy = data.policy || { maxRetries: 3, retryWindowHours: 72 };
+      setAutomationPolicy(policy);
+      setRetryPolicyForm(policy);
       setAutomationTimeline(data.timeline || []);
       setAutomationRecent(data.recent || []);
 
@@ -872,6 +888,8 @@ function DashboardInner() {
       const message = error instanceof Error ? error.message : 'Failed to load automation status';
       setAutomationSummary(null);
       setAutomationTrend(null);
+      setAutomationPolicy(null);
+      setRetryPolicyForm({ maxRetries: 3, retryWindowHours: 72 });
       setAutomationTimeline([]);
       setAutomationRecent([]);
       setLatestAutomationFailure(null);
@@ -959,6 +977,37 @@ function DashboardInner() {
 
     exportAutomationCsv(automationRecent);
     setToast({ message: 'Automation CSV exported.', tone: 'success' });
+  }
+
+  async function saveRetryPolicy() {
+    setRetryPolicySaving(true);
+    try {
+      const response = await fetch('/api/automation', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'set_retry_policy',
+          maxRetries: retryPolicyForm.maxRetries,
+          retryWindowHours: retryPolicyForm.retryWindowHours,
+        }),
+      });
+
+      const data = (await response.json()) as { ok?: boolean; error?: string; policy?: AutomationRetryPolicy };
+      if (!response.ok || !data.ok) {
+        throw new Error(data.error || 'Failed to save retry policy');
+      }
+
+      const updatedPolicy = data.policy || retryPolicyForm;
+      setAutomationPolicy(updatedPolicy);
+      setRetryPolicyForm(updatedPolicy);
+      setToast({ message: 'Retry policy saved.', tone: 'success' });
+      await loadAutomationOverview();
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to save retry policy';
+      setToast({ message, tone: 'error' });
+    } finally {
+      setRetryPolicySaving(false);
+    }
   }
 
   function handleLogout() {
@@ -1623,6 +1672,54 @@ function DashboardInner() {
                           {option.label}
                         </button>
                       ))}
+                    </div>
+
+                    <div className="mt-4 rounded-2xl border border-zinc-800 bg-zinc-950/40 p-3">
+                      <div className="flex flex-wrap items-end gap-3">
+                        <label className="flex min-w-[140px] flex-col gap-1 text-xs font-semibold uppercase tracking-wide text-zinc-400">
+                          Max Retries
+                          <input
+                            type="number"
+                            min={1}
+                            max={10}
+                            value={retryPolicyForm.maxRetries}
+                            onChange={(event) =>
+                              setRetryPolicyForm((prev) => ({
+                                ...prev,
+                                maxRetries: Number(event.target.value || 1),
+                              }))
+                            }
+                            className="rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm font-medium text-zinc-100"
+                          />
+                        </label>
+                        <label className="flex min-w-[160px] flex-col gap-1 text-xs font-semibold uppercase tracking-wide text-zinc-400">
+                          Retry Window (Hours)
+                          <input
+                            type="number"
+                            min={1}
+                            max={168}
+                            value={retryPolicyForm.retryWindowHours}
+                            onChange={(event) =>
+                              setRetryPolicyForm((prev) => ({
+                                ...prev,
+                                retryWindowHours: Number(event.target.value || 1),
+                              }))
+                            }
+                            className="rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm font-medium text-zinc-100"
+                          />
+                        </label>
+                        <button
+                          type="button"
+                          onClick={() => void saveRetryPolicy()}
+                          disabled={retryPolicySaving}
+                          className="rounded-full border border-blue-700/50 px-4 py-2 text-xs font-semibold text-blue-200 transition hover:bg-blue-900/30 disabled:cursor-not-allowed disabled:opacity-50"
+                        >
+                          {retryPolicySaving ? 'Saving...' : 'Save Retry Policy'}
+                        </button>
+                      </div>
+                      <p className="mt-2 text-xs text-zinc-500">
+                        Current policy: {automationPolicy?.maxRetries ?? 3} max retries within {automationPolicy?.retryWindowHours ?? 72} hours.
+                      </p>
                     </div>
 
                     {automationLoading ? (
