@@ -104,11 +104,66 @@ const comparisonRows = [
   ['Monthly cost', 'From $29', '$100-300', '$0 lost'],
 ]
 
+const shippedUpgrades = [
+  {
+    title: 'Recovery Automation Dashboard',
+    detail: 'Track queued, sent, failed, and conversion lift with timeline and drill-down logs.',
+  },
+  {
+    title: 'Retry Policies by Event',
+    detail: 'Set retry limits and recovery windows independently for signup and payment abandonment.',
+  },
+  {
+    title: 'Failure Spike Alerting',
+    detail: 'Automatic alerting to email/webhook with cooldown controls and one-click test alerts.',
+  },
+  {
+    title: 'Signed Webhook Security',
+    detail: 'Webhook payloads can be signed and verified to secure automation workflows.',
+  },
+  {
+    title: 'Alert Log Analytics',
+    detail: 'Filter, paginate, date-range, and export alert logs to CSV without manual reporting.',
+  },
+  {
+    title: 'PayPal Billing Flow',
+    detail: 'Subscription checkout is kept on PayPal so payout collection stays in your PayPal receiver.',
+  },
+]
+
+const workflowTabs = {
+  how: {
+    title: 'How the system works',
+    points: [
+      'CypAI captures website and WhatsApp conversations 24/7 in 5 languages.',
+      'Each conversation is analyzed, qualified, and saved into CRM automatically.',
+      'Booking and follow-up workflows run from one dashboard without switching tools.',
+    ],
+  },
+  connect: {
+    title: 'How you connect it yourself',
+    points: [
+      'Create your account and add business FAQs, pricing, and service rules.',
+      'Paste one widget script into your site and optionally connect WhatsApp.',
+      'Activate automations and alerts to reduce manual recovery and support work.',
+    ],
+  },
+  solves: {
+    title: 'What each feature solves',
+    points: [
+      'AI Chat Widget: stops missed website leads outside business hours.',
+      'Automation + Alerts: stops revenue leaks from abandoned signup/payment flows.',
+      'CRM + Analytics: stops manual tracking and gives clear conversion visibility.',
+    ],
+  },
+} as const
+
 export default function HomePage() {
   const [menuOpen, setMenuOpen] = useState(false)
   const [faqOpen, setFaqOpen] = useState<number | null>(0)
   const [showAnnouncement, setShowAnnouncement] = useState(true)
   const [scrolled, setScrolled] = useState(false)
+  const [activeWorkflowTab, setActiveWorkflowTab] = useState<'how' | 'connect' | 'solves'>('how')
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8)
@@ -164,7 +219,10 @@ export default function HomePage() {
           <nav className="hidden items-center gap-8 md:flex">
             {[
               ['#features', 'Features'],
+              ['#how-it-works', 'How It Works'],
+              ['#automation', 'Automation'],
               ['#pricing', 'Pricing'],
+              ['/how-it-works', 'Docs'],
               ['/demo', 'Demo'],
               ['#faq', 'FAQ'],
               ['/contact', 'Contact'],
@@ -199,7 +257,10 @@ export default function HomePage() {
           <div className="border-t border-zinc-800 px-4 py-3 md:hidden">
             {[
               ['#features', 'Features'],
+              ['#how-it-works', 'How It Works'],
+              ['#automation', 'Automation'],
               ['#pricing', 'Pricing'],
+              ['/how-it-works', 'Docs'],
               ['/demo', 'Demo'],
               ['#faq', 'FAQ'],
               ['/contact', 'Contact'],
@@ -381,7 +442,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="border-y border-zinc-800 bg-zinc-900 py-24">
+      <section id="how-it-works" className="border-y border-zinc-800 bg-zinc-900 py-24">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-zinc-500">How it works</p>
           <h2 className="mt-3 text-3xl font-black text-white sm:text-4xl">Live in 15 minutes</h2>
@@ -397,6 +458,86 @@ export default function HomePage() {
                 <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-lg bg-blue-600/20 text-xl text-blue-400">{icon}</div>
                 <h3 className="text-xl font-bold text-white">{title}</h3>
                 <p className="mt-2 text-sm text-zinc-400">{desc}</p>
+              </article>
+            ))}
+          </div>
+
+          <div className="mt-10 rounded-2xl border border-zinc-800 bg-zinc-950 p-6">
+            <div className="flex flex-wrap gap-2">
+              {[
+                ['how', 'System Flow'],
+                ['connect', 'Connect It Yourself'],
+                ['solves', 'Problem-Solution Map'],
+              ].map(([key, label]) => (
+                <button
+                  key={key}
+                  type="button"
+                  onClick={() => setActiveWorkflowTab(key as 'how' | 'connect' | 'solves')}
+                  className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition ${
+                    activeWorkflowTab === key
+                      ? 'border-blue-500 bg-blue-500/20 text-blue-200'
+                      : 'border-zinc-700 text-zinc-300 hover:bg-zinc-900'
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+            <h3 className="mt-5 text-xl font-bold text-white">{workflowTabs[activeWorkflowTab].title}</h3>
+            <ul className="mt-3 space-y-2 text-sm text-zinc-400">
+              {workflowTabs[activeWorkflowTab].points.map((point) => (
+                <li key={point}>• {point}</li>
+              ))}
+            </ul>
+            <div className="mt-5 flex flex-wrap gap-3 text-xs">
+              <Link href="/how-it-works" className="rounded-full border border-zinc-700 px-3 py-1.5 text-zinc-300 hover:bg-zinc-900">
+                Full setup guide
+              </Link>
+              <Link href="/automation" className="rounded-full border border-zinc-700 px-3 py-1.5 text-zinc-300 hover:bg-zinc-900">
+                Automation playbook
+              </Link>
+              <Link href="/integrations" className="rounded-full border border-zinc-700 px-3 py-1.5 text-zinc-300 hover:bg-zinc-900">
+                Integrations and connectors
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="automation" className="bg-zinc-950 py-24">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-zinc-500">No manual work</p>
+          <h2 className="mt-3 text-3xl font-black text-white sm:text-4xl">Automation-first operations for B2B SaaS teams</h2>
+          <p className="mt-4 max-w-3xl text-zinc-400">
+            Run lead recovery, follow-ups, and failure monitoring automatically. Your team focuses on deals, not repetitive admin tasks.
+          </p>
+          <div className="mt-10 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {[
+              ['Abandonment Recovery', 'Automatically retries failed signup/payment flows based on policy rules.'],
+              ['Spike Monitoring', 'Triggers alerts to webhook/email when failure-rate thresholds are crossed.'],
+              ['Delivery Logs', 'Tracks every alert attempt with filters, date ranges, and CSV export.'],
+              ['Retry Controls', 'Per-event retry windows and max retries to reduce noisy manual intervention.'],
+              ['Policy Testing', 'Send test alerts and validate channels before production issues happen.'],
+              ['Secure Webhooks', 'HMAC-signed outgoing webhooks with verification support on your receiver.'],
+            ].map(([title, text]) => (
+              <article key={title} className="rounded-2xl border border-zinc-800 bg-zinc-900 p-5">
+                <h3 className="text-lg font-semibold text-white">{title}</h3>
+                <p className="mt-2 text-sm text-zinc-400">{text}</p>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="border-y border-zinc-800 bg-zinc-900 py-24">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-zinc-500">What we implemented</p>
+          <h2 className="mt-3 text-3xl font-black text-white sm:text-4xl">Recent platform upgrades shipped</h2>
+          <div className="mt-10 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {shippedUpgrades.map((item) => (
+              <article key={item.title} className="rounded-2xl border border-zinc-800 bg-zinc-950 p-5">
+                <h3 className="text-base font-bold text-white">{item.title}</h3>
+                <p className="mt-2 text-sm text-zinc-400">{item.detail}</p>
               </article>
             ))}
           </div>
@@ -433,6 +574,7 @@ export default function HomePage() {
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-zinc-500">Pricing</p>
           <h2 className="mt-3 text-3xl font-black text-white sm:text-4xl">Simple pricing, no surprises</h2>
           <p className="mt-4 text-zinc-400">7-day free trial on all plans. No credit card required. Cancel anytime.</p>
+          <p className="mt-2 text-sm text-blue-300">Payments are processed with PayPal so you keep PayPal as your payment receiver.</p>
 
           <div className="mt-10 grid grid-cols-1 items-stretch gap-6 md:grid-cols-3">
             {[
@@ -485,6 +627,7 @@ export default function HomePage() {
                   {plan.list.map((item) => (
                     <li key={item}>✓ {item}</li>
                   ))}
+                  <li>✓ PayPal checkout and billing receiver</li>
                 </ul>
                 <Link
                   href={`/signup?plan=${plan.plan}`}
@@ -612,6 +755,9 @@ export default function HomePage() {
               <p className="text-sm font-semibold text-white">Product</p>
               <div className="mt-3 space-y-2 text-sm text-zinc-500">
                 <a href="#features" className="block hover:text-white">Features</a>
+                <Link href="/how-it-works" className="block hover:text-white">How It Works</Link>
+                <Link href="/automation" className="block hover:text-white">Automation</Link>
+                <Link href="/integrations" className="block hover:text-white">Integrations</Link>
                 <a href="#pricing" className="block hover:text-white">Pricing</a>
                 <Link href="/demo" className="block hover:text-white">Live Demo</Link>
                 <Link href="/dashboard" className="block hover:text-white">Dashboard</Link>
