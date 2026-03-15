@@ -181,6 +181,34 @@ CREATE POLICY "Service role full access to marketing automation alert policy" ON
   WITH CHECK (auth.role() = 'service_role');
 
 -- ============================================================================
+-- Table: marketing_automation_alert_logs
+-- ============================================================================
+CREATE TABLE IF NOT EXISTS public.marketing_automation_alert_logs (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  triggered_by TEXT NOT NULL CHECK (triggered_by IN ('automatic', 'manual_test')),
+  event_scope TEXT NOT NULL DEFAULT 'all',
+  failure_rate NUMERIC(5,2) NOT NULL DEFAULT 0,
+  attempts INTEGER NOT NULL DEFAULT 0,
+  sent_webhook BOOLEAN NOT NULL DEFAULT false,
+  sent_email BOOLEAN NOT NULL DEFAULT false,
+  webhook_provider TEXT,
+  signed_webhook BOOLEAN NOT NULL DEFAULT false,
+  dispatch_error TEXT,
+  payload JSONB NOT NULL DEFAULT '{}'::jsonb,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_marketing_automation_alert_logs_created_at ON public.marketing_automation_alert_logs(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_marketing_automation_alert_logs_scope_created ON public.marketing_automation_alert_logs(event_scope, created_at DESC);
+
+ALTER TABLE public.marketing_automation_alert_logs ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Service role full access to marketing automation alert logs" ON public.marketing_automation_alert_logs;
+CREATE POLICY "Service role full access to marketing automation alert logs" ON public.marketing_automation_alert_logs
+  FOR ALL USING (auth.role() = 'service_role')
+  WITH CHECK (auth.role() = 'service_role');
+
+-- ============================================================================
 -- Table: conversations
 -- ============================================================================
 -- Stores chat conversations between customers and the AI

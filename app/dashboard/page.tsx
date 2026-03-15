@@ -178,6 +178,20 @@ type AutomationAlertState = {
   reason: string;
 };
 
+type AutomationAlertLog = {
+  id: string;
+  triggered_by: 'automatic' | 'manual_test';
+  event_scope: string;
+  failure_rate: number;
+  attempts: number;
+  sent_webhook: boolean;
+  sent_email: boolean;
+  webhook_provider: string | null;
+  signed_webhook: boolean;
+  dispatch_error: string | null;
+  created_at: string;
+};
+
 type AutomationOverviewResponse = {
   summary?: AutomationSummary;
   trend?: AutomationTrend;
@@ -185,6 +199,7 @@ type AutomationOverviewResponse = {
   policies?: AutomationPolicyMap;
   alertPolicy?: AutomationAlertPolicy;
   alertState?: AutomationAlertState;
+  alertLogs?: AutomationAlertLog[];
   timeline?: AutomationTimelinePoint[];
   recent?: AutomationRecentRecord[];
   filter?: {
@@ -675,6 +690,7 @@ function DashboardInner() {
   const [retryPolicyForms, setRetryPolicyForms] = useState<AutomationPolicyMap>(DEFAULT_AUTOMATION_POLICIES);
   const [alertPolicy, setAlertPolicy] = useState<AutomationAlertPolicy>(DEFAULT_ALERT_POLICY);
   const [alertState, setAlertState] = useState<AutomationAlertState | null>(null);
+  const [alertLogs, setAlertLogs] = useState<AutomationAlertLog[]>([]);
   const [alertPolicyForm, setAlertPolicyForm] = useState({
     failureRateThreshold: DEFAULT_ALERT_POLICY.failureRateThreshold,
     minAttempts: DEFAULT_ALERT_POLICY.minAttempts,
@@ -809,6 +825,7 @@ function DashboardInner() {
       setRetryPolicyForms(DEFAULT_AUTOMATION_POLICIES);
       setAlertPolicy(DEFAULT_ALERT_POLICY);
       setAlertState(null);
+      setAlertLogs([]);
       setAlertPolicyForm({
         failureRateThreshold: DEFAULT_ALERT_POLICY.failureRateThreshold,
         minAttempts: DEFAULT_ALERT_POLICY.minAttempts,
@@ -952,6 +969,7 @@ function DashboardInner() {
         setRetryPolicyForms(DEFAULT_AUTOMATION_POLICIES);
         setAlertPolicy(DEFAULT_ALERT_POLICY);
         setAlertState(null);
+        setAlertLogs([]);
         setAlertPolicyForm({
           failureRateThreshold: DEFAULT_ALERT_POLICY.failureRateThreshold,
           minAttempts: DEFAULT_ALERT_POLICY.minAttempts,
@@ -975,6 +993,7 @@ function DashboardInner() {
       const nextAlertPolicy = data.alertPolicy || DEFAULT_ALERT_POLICY;
       setAlertPolicy(nextAlertPolicy);
       setAlertState(data.alertState || null);
+      setAlertLogs(data.alertLogs || []);
       setAlertPolicyForm((prev) => ({
         ...prev,
         failureRateThreshold: nextAlertPolicy.failureRateThreshold,
@@ -996,6 +1015,7 @@ function DashboardInner() {
       setRetryPolicyForms(DEFAULT_AUTOMATION_POLICIES);
       setAlertPolicy(DEFAULT_ALERT_POLICY);
       setAlertState(null);
+      setAlertLogs([]);
       setAutomationTimeline([]);
       setAutomationRecent([]);
       setLatestAutomationFailure(null);
@@ -2077,6 +2097,45 @@ function DashboardInner() {
                       <p className="mt-1 text-xs text-zinc-500">
                         Last alert: {formatDateTime(alertPolicy.lastAlertAt)} | Destination webhook: {alertPolicy.hasWebhook ? 'configured' : 'not configured'} | signed webhook: {alertPolicy.hasSigningSecret ? 'enabled' : 'disabled'} | email: {alertPolicy.alertEmail || 'not configured'}
                       </p>
+
+                      <div className="mt-3 overflow-hidden rounded-xl border border-zinc-800">
+                        <div className="border-b border-zinc-800 bg-zinc-900/70 px-3 py-2 text-xs font-semibold uppercase tracking-wide text-zinc-400">
+                          Recent alert deliveries
+                        </div>
+                        {alertLogs.length === 0 ? (
+                          <p className="px-3 py-3 text-xs text-zinc-500">No alert dispatch logs yet.</p>
+                        ) : (
+                          <div className="max-h-56 overflow-auto">
+                            <table className="min-w-full text-left text-xs text-zinc-300">
+                              <thead className="bg-zinc-950/80 text-zinc-500">
+                                <tr>
+                                  <th className="px-3 py-2 font-semibold">When</th>
+                                  <th className="px-3 py-2 font-semibold">Trigger</th>
+                                  <th className="px-3 py-2 font-semibold">Scope</th>
+                                  <th className="px-3 py-2 font-semibold">Rate</th>
+                                  <th className="px-3 py-2 font-semibold">Delivery</th>
+                                  <th className="px-3 py-2 font-semibold">Error</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {alertLogs.map((log) => (
+                                  <tr key={log.id} className="border-t border-zinc-800/70">
+                                    <td className="px-3 py-2 text-zinc-400">{formatDateTime(log.created_at)}</td>
+                                    <td className="px-3 py-2">{log.triggered_by === 'manual_test' ? 'Manual test' : 'Automatic'}</td>
+                                    <td className="px-3 py-2">{log.event_scope}</td>
+                                    <td className="px-3 py-2">{Number(log.failure_rate || 0).toFixed(1)}% ({log.attempts})</td>
+                                    <td className="px-3 py-2">
+                                      {(log.sent_webhook ? 'Webhook ' : '') + (log.sent_email ? 'Email' : '') || 'None'}
+                                      {log.webhook_provider ? ` (${log.webhook_provider})` : ''}
+                                    </td>
+                                    <td className="max-w-[240px] truncate px-3 py-2 text-rose-300">{log.dispatch_error || '-'}</td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                        )}
+                      </div>
                     </div>
 
                     {automationLoading ? (

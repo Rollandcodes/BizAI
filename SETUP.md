@@ -63,14 +63,14 @@ npm run dev
 2. Add these optional variables to `.env.local`:
    - `RESEND_API_KEY`
    - `RESEND_FROM_EMAIL` (for example: `CypAI <noreply@cypai.app>`)
-3. Re-run [`supabase-schema.sql`](supabase-schema.sql) to create `marketing_automation_queue`.
+3. Re-run [`supabase-schema.sql`](supabase-schema.sql) to create `marketing_automation_queue`, `marketing_automation_policy`, `marketing_automation_alert_policy`, and `marketing_automation_alert_logs`.
 4. The app will automatically queue and optionally email for:
    - `abandoned_signup`
    - `abandoned_payment`
 5. Health check endpoint:
    - `GET /api/automation`
 6. Delivery summary endpoint (dashboard-ready JSON):
-   - `GET /api/automation` (includes `summary` + `recent` queue records)
+   - `GET /api/automation` (includes `summary`, `recent` queue records, and `alertLogs` delivery history)
 7. Optional alert webhook security and templates:
     - Add `AUTOMATION_ALERT_WEBHOOK_SECRET` to sign outgoing webhook alerts.
     - Webhook payload template is auto-selected:

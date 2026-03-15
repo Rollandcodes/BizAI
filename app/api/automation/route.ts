@@ -60,6 +60,20 @@ type AlertDispatchResult = {
   error?: string;
 };
 
+type AlertLogRecord = {
+  id: string;
+  triggered_by: 'automatic' | 'manual_test';
+  event_scope: string;
+  failure_rate: number;
+  attempts: number;
+  sent_webhook: boolean;
+  sent_email: boolean;
+  webhook_provider: string | null;
+  signed_webhook: boolean;
+  dispatch_error: string | null;
+  created_at: string;
+};
+
 const DEFAULT_RETRY_POLICY: RetryPolicy = {
   maxRetries: 3,
   retryWindowHours: 72,
@@ -286,6 +300,56 @@ async function touchLastAlertAt() {
       },
       { onConflict: 'id' }
     );
+}
+
+async function logAlertDispatch(input: {
+  triggeredBy: 'automatic' | 'manual_test';
+  eventScope: AutomationEventType | null;
+  failureRate: number;
+  attempts: number;
+  dispatch: AlertDispatchResult;
+  trend: { sent: number; failed: number; queued: number };
+}) {
+  const supabase = createServerClient();
+  const { error } = await supabase.from('marketing_automation_alert_logs').insert({
+    triggered_by: input.triggeredBy,
+    event_scope: input.eventScope || 'all',
+    failure_rate: Number(input.failureRate.toFixed(2)),
+    attempts: input.attempts,
+    sent_webhook: input.dispatch.sentWebhook,
+    sent_email: input.dispatch.sentEmail,
+    webhook_provider: input.dispatch.webhookProvider || null,
+    signed_webhook: Boolean(input.dispatch.signedWebhook),
+    dispatch_error: input.dispatch.error || null,
+    payload: {
+      trend: input.trend,
+      dispatch: input.dispatch,
+    },
+  });
+
+  // The endpoint remains compatible before alert log migrations are applied.
+  if (error?.code === '42P01' || error?.code === '42703') {
+    return;
+  }
+}
+
+async function getRecentAlertLogs(limit: number): Promise<AlertLogRecord[]> {
+  const supabase = createServerClient();
+  const { data, error } = await supabase
+    .from('marketing_automation_alert_logs')
+    .select('id, triggered_by, event_scope, failure_rate, attempts, sent_webhook, sent_email, webhook_provider, signed_webhook, dispatch_error, created_at')
+    .order('created_at', { ascending: false })
+    .limit(limit);
+
+  if (error?.code === '42P01') {
+    return [];
+  }
+
+  if (error || !data) {
+    return [];
+  }
+
+  return data as AlertLogRecord[];
 }
 
 async function dispatchFailureSpikeAlert(input: {
@@ -829,11 +893,22 @@ export async function POST(request: NextRequest) {
     }
 
     if (payload.action === 'test_alert') {
+      const testEventScope = payload.eventType ? toEventType(payload.eventType) : null;
+      const testTrend = { sent: 0, failed: 1, queued: 0 };
       const dispatchResult = await dispatchFailureSpikeAlert({
         failureRate: 100,
         attempts: 1,
-        trend: { sent: 0, failed: 1, queued: 0 },
-        filter: payload.eventType ? toEventType(payload.eventType) : null,
+        trend: testTrend,
+        filter: testEventScope,
+      });
+
+      await logAlertDispatch({
+        triggeredBy: 'manual_test',
+        eventScope: testEventScope,
+        failureRate: 100,
+        attempts: 1,
+        dispatch: dispatchResult,
+        trend: testTrend,
       });
 
       if (dispatchResult.sentEmail || dispatchResult.sentWebhook) {
@@ -1109,6 +1184,19 @@ export async function GET(request: NextRequest) {
     alertReason = 'filtered_view_no_dispatch';
   }
 
+  if (alertDispatch) {
+    await logAlertDispatch({
+      triggeredBy: 'automatic',
+      eventScope: null,
+      failureRate,
+      attempts,
+      dispatch: alertDispatch,
+      trend,
+    });
+  }
+
+  const alertLogs = await getRecentAlertLogs(20);
+
   return NextResponse.json({
     message: 'CypAI automation endpoint',
     status: 'ready',
@@ -1121,6 +1209,7 @@ export async function GET(request: NextRequest) {
     policy: eventTypeFilter ? policies[eventTypeFilter] : policies.default,
     policies,
     alertPolicy,
+    alertLogs,
     alertState: {
       attempts,
       failureRate,
