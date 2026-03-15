@@ -723,8 +723,9 @@ function DashboardInner() {
                 { label: "Website URL", key: "website", placeholder: "https://yourbusiness.com" },
               ] as Array<{ label: string; key: keyof SettingsFormState; placeholder: string }>).map(field => (
                 <div key={field.key}>
-                  <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-zinc-400">{field.label}</label>
+                  <label htmlFor={`settings-${field.key}`} className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-zinc-400">{field.label}</label>
                   <input
+                    id={`settings-${field.key}`}
                     className="h-10 w-full rounded-xl border border-zinc-700 bg-zinc-950 px-3 text-sm text-zinc-100 outline-none focus:border-blue-500"
                     value={String(settingsForm[field.key])}
                     onChange={e => setSettingsForm(f => ({ ...f, [field.key]: e.target.value }))}
@@ -733,8 +734,8 @@ function DashboardInner() {
                 </div>
               ))}
               <div>
-                <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-zinc-400">Business type</label>
-                <select className="h-10 w-full rounded-xl border border-zinc-700 bg-zinc-950 px-3 text-sm text-zinc-100 outline-none focus:border-blue-500"
+                <label htmlFor="settings-business-type" className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-zinc-400">Business type</label>
+                <select id="settings-business-type" className="h-10 w-full rounded-xl border border-zinc-700 bg-zinc-950 px-3 text-sm text-zinc-100 outline-none focus:border-blue-500"
                   value={settingsForm.businessType} onChange={e => setSettingsForm(f => ({ ...f, businessType: e.target.value }))}>
                   {BUSINESS_TYPE_OPTIONS.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
                 </select>
@@ -782,11 +783,12 @@ function DashboardInner() {
             <h2 className="mb-4 text-base font-bold text-zinc-100">Widget colour</h2>
             <div className="flex flex-wrap gap-3">
               {WIDGET_COLORS.map(color => (
-                <button key={color} type="button" onClick={() => setSettingsForm(f => ({ ...f, primaryColor: color }))}
+                <button key={color} type="button" aria-label={`Set widget color ${color}`} title={`Set widget color ${color}`} onClick={() => setSettingsForm(f => ({ ...f, primaryColor: color }))}
                   className={`h-10 w-10 rounded-full border-2 transition ${settingsForm.primaryColor === color ? "border-white scale-110" : "border-transparent"}`}
                   style={{ background: color }} />
               ))}
-              <input type="color" value={settingsForm.primaryColor}
+              <label htmlFor="settings-primary-color" className="sr-only">Pick custom widget color</label>
+              <input id="settings-primary-color" aria-label="Pick custom widget color" type="color" value={settingsForm.primaryColor}
                 onChange={e => setSettingsForm(f => ({ ...f, primaryColor: e.target.value }))}
                 className="h-10 w-10 cursor-pointer rounded-full border-2 border-zinc-600" />
             </div>
@@ -824,7 +826,7 @@ function DashboardInner() {
             <div className="space-y-4">
               {settingsForm.customFaqs.map((faq, i) => (
                 <div key={i} className="relative rounded-2xl border border-zinc-700 bg-zinc-950/50 p-4">
-                  <button type="button" onClick={() => removeFaq(i)}
+                  <button type="button" aria-label={`Remove FAQ ${i + 1}`} title={`Remove FAQ ${i + 1}`} onClick={() => removeFaq(i)}
                     className="absolute right-3 top-3 text-zinc-600 hover:text-zinc-300">
                     <X className="h-4 w-4" />
                   </button>
