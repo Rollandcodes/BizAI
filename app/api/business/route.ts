@@ -45,6 +45,37 @@ type ConversationRow = {
   messages: Array<{ role: 'user' | 'assistant'; content: string }> | null;
 };
 
+type WhatsAppEventRow = {
+  id: string;
+  direction: 'inbound' | 'outbound';
+  whatsapp_message_id: string;
+  from_number: string | null;
+  to_phone_number_id: string | null;
+  body_text: string | null;
+  delivery_status: string | null;
+  error_message: string | null;
+  created_at: string;
+};
+
+async function getRecentWhatsAppEvents(businessId: string): Promise<WhatsAppEventRow[]> {
+  const { data, error } = await supabase
+    .from('whatsapp_message_events')
+    .select('id, direction, whatsapp_message_id, from_number, to_phone_number_id, body_text, delivery_status, error_message, created_at')
+    .eq('business_id', businessId)
+    .order('created_at', { ascending: false })
+    .limit(30);
+
+  if (error?.code === '42P01') {
+    return [];
+  }
+
+  if (error || !data) {
+    return [];
+  }
+
+  return data as WhatsAppEventRow[];
+}
+
 function parseBusinessPrompt(systemPrompt?: string | null) {
   if (!systemPrompt) {
     return { customInstructions: '', customFaqs: [] as CustomFaq[] };
@@ -194,6 +225,7 @@ async function buildDashboardPayload(business: Record<string, unknown>) {
     monthlyMessagesResult,
     conversationsResult,
     leadsResult,
+    whatsappEvents,
   ] = await Promise.all([
     supabase
       .from('conversations')
@@ -227,6 +259,7 @@ async function buildDashboardPayload(business: Record<string, unknown>) {
       .eq('lead_captured', true)
       .order('created_at', { ascending: false })
       .limit(200),
+    getRecentWhatsAppEvents(businessId),
   ]);
 
   if (
@@ -279,6 +312,7 @@ async function buildDashboardPayload(business: Record<string, unknown>) {
     },
     conversations: (conversationsResult.data ?? []) as ConversationRow[],
     leads: (leadsResult.data ?? []) as ConversationRow[],
+    whatsappEvents,
   };
 }
 

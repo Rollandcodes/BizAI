@@ -113,6 +113,19 @@ type DashboardPayload = {
   stats: DashboardStats | null;
   conversations: ConversationRecord[];
   leads: ConversationRecord[];
+  whatsappEvents?: WhatsAppEventRecord[];
+};
+
+type WhatsAppEventRecord = {
+  id: string;
+  direction: 'inbound' | 'outbound';
+  whatsapp_message_id: string;
+  from_number: string | null;
+  to_phone_number_id: string | null;
+  body_text: string | null;
+  delivery_status: string | null;
+  error_message: string | null;
+  created_at: string;
 };
 
 type AutomationSummary = {
@@ -774,6 +787,7 @@ function DashboardInner() {
   const stats = dashboard.stats;
   const conversations = dashboard.conversations;
   const leads = dashboard.leads;
+  const whatsappEvents = dashboard.whatsappEvents || [];
   const currentConversation = conversations.find((item) => item.id === selectedConversationId) || null;
   const planLimit = business ? messageLimits[business.plan] : null;
   const currentPlanName = business ? getPlanDisplayName(business.plan) : 'Trial';
@@ -3145,6 +3159,50 @@ function DashboardInner() {
                         >
                           {whatsAppTestLoading ? 'Sending test...' : 'Send WhatsApp test'}
                         </button>
+                      </div>
+
+                      <div className="mt-4 overflow-hidden rounded-2xl border border-zinc-800">
+                        <div className="border-b border-zinc-800 bg-zinc-950/60 px-3 py-2 text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                          Recent WhatsApp delivery statuses
+                        </div>
+                        {whatsappEvents.length === 0 ? (
+                          <div className="px-3 py-3 text-xs text-zinc-500">No WhatsApp events yet.</div>
+                        ) : (
+                          <div className="max-h-52 overflow-auto">
+                            <table className="min-w-full text-left text-xs text-zinc-300">
+                              <thead className="bg-zinc-950/80 text-zinc-500">
+                                <tr>
+                                  <th className="px-3 py-2 font-semibold">Time</th>
+                                  <th className="px-3 py-2 font-semibold">Dir</th>
+                                  <th className="px-3 py-2 font-semibold">Status</th>
+                                  <th className="px-3 py-2 font-semibold">Message</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {whatsappEvents.map((event) => (
+                                  <tr key={event.id} className="border-t border-zinc-800/60">
+                                    <td className="px-3 py-2 text-zinc-500">{formatDateTime(event.created_at)}</td>
+                                    <td className="px-3 py-2">{event.direction}</td>
+                                    <td className="px-3 py-2">
+                                      <span className={`inline-flex rounded-full px-2 py-0.5 text-[10px] font-semibold ${
+                                        event.delivery_status === 'read' || event.delivery_status === 'delivered'
+                                          ? 'bg-emerald-100 text-emerald-700'
+                                          : event.delivery_status === 'failed'
+                                            ? 'bg-rose-100 text-rose-700'
+                                            : 'bg-zinc-800 text-zinc-300'
+                                      }`}>
+                                        {event.delivery_status || 'unknown'}
+                                      </span>
+                                    </td>
+                                    <td className="max-w-[260px] truncate px-3 py-2 text-zinc-400">
+                                      {event.error_message || event.body_text || event.whatsapp_message_id}
+                                    </td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                        )}
                       </div>
                     </div>
 

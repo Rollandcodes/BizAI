@@ -170,6 +170,57 @@ async function insertMessageEvent(input: {
   }
 }
 
+async function syncMessageDeliveryStatus(input: {
+  phoneNumberId: string;
+  messageId: string;
+  status: string;
+  recipientId: string | null;
+  errorMessage: string | null;
+  payload: unknown;
+}) {
+  const supabase = createServiceClient();
+
+  const { data: updatedRows, error: updateError } = await supabase
+    .from('whatsapp_message_events')
+    .update({
+      delivery_status: input.status,
+      error_message: input.errorMessage,
+      payload: input.payload,
+    })
+    .eq('whatsapp_message_id', input.messageId)
+    .select('id');
+
+  if (updateError?.code === '42P01') {
+    return { ok: false as const, reason: 'missing_table' as const };
+  }
+
+  if (Array.isArray(updatedRows) && updatedRows.length > 0) {
+    return { ok: true as const, mode: 'updated' as const };
+  }
+
+  const business = await resolveBusiness(input.phoneNumberId);
+  if (!business) {
+    return { ok: false as const, reason: 'business_not_found' as const };
+  }
+
+  const sessionId = input.recipientId ? `wa:${input.recipientId}` : `wa:unknown:${input.messageId}`;
+
+  await insertMessageEvent({
+    businessId: business.id,
+    sessionId,
+    direction: 'outbound',
+    whatsappMessageId: input.messageId,
+    fromNumber: input.phoneNumberId,
+    toPhoneNumberId: input.phoneNumberId,
+    bodyText: '',
+    payload: input.payload,
+    deliveryStatus: input.status,
+    errorMessage: input.errorMessage || undefined,
+  });
+
+  return { ok: true as const, mode: 'inserted' as const };
+}
+
 async function upsertConversationWithMessage(input: {
   business: BusinessRow;
   sessionId: string;
@@ -430,6 +481,12 @@ export async function POST(request: NextRequest) {
             metadata?: { phone_number_id?: string };
             contacts?: Array<{ wa_id?: string; profile?: { name?: string } }>;
             messages?: Array<{ id?: string; from?: string; type?: string; text?: { body?: string } }>;
+            statuses?: Array<{
+              id?: string;
+              status?: string;
+              recipient_id?: string;
+              errors?: Array<{ title?: string; code?: number }>;
+            }>;
           };
         }>;
       }>;
@@ -505,6 +562,7 @@ export async function POST(request: NextRequest) {
         const value = change.value;
         const phoneNumberId = normalizeText(value?.metadata?.phone_number_id);
         const messages = value?.messages || [];
+        const statuses = value?.statuses || [];
 
         for (const message of messages) {
           if (message.type !== 'text') {
@@ -540,6 +598,40 @@ export async function POST(request: NextRequest) {
             from: inboundFrom,
             messageId: inboundId,
             ...result,
+          });
+        }
+
+        for (const status of statuses) {
+          const statusMessageId = normalizeText(status.id);
+          const deliveryStatus = normalizeText(status.status) || 'unknown';
+          const recipientId = normalizeText(status.recipient_id) || null;
+          const firstError = Array.isArray(status.errors) && status.errors.length > 0 ? status.errors[0] : null;
+          const errorMessage = firstError
+            ? `${normalizeText(firstError.title) || 'delivery_error'}${typeof firstError.code === 'number' ? `:${firstError.code}` : ''}`
+            : null;
+
+          if (!phoneNumberId || !statusMessageId) {
+            continue;
+          }
+
+          const statusResult = await syncMessageDeliveryStatus({
+            phoneNumberId,
+            messageId: statusMessageId,
+            status: deliveryStatus,
+            recipientId,
+            errorMessage,
+            payload: {
+              entry,
+              change,
+              status,
+            },
+          });
+
+          outcomes.push({
+            phoneNumberId,
+            messageId: statusMessageId,
+            deliveryStatus,
+            statusSync: statusResult,
           });
         }
       }
