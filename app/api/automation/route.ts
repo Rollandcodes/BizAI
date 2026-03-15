@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createHmac } from 'node:crypto';
 import { createServerClient } from '@/lib/supabase';
+import { CYPAI_WEBHOOK_SIGNATURE_VERSION, signCypaiWebhookPayload } from '@/lib/webhookSignature';
 
 type AutomationEventType = 'abandoned_signup' | 'abandoned_payment';
 
@@ -381,13 +381,15 @@ async function dispatchFailureSpikeAlert(input: {
 
     if (webhookSigningSecret) {
       const timestamp = String(Date.now());
-      const signature = createHmac('sha256', webhookSigningSecret)
-        .update(`${timestamp}.${webhookBody}`)
-        .digest('hex');
+      const signature = signCypaiWebhookPayload({
+        secret: webhookSigningSecret,
+        timestamp,
+        rawBody: webhookBody,
+      });
 
       webhookHeaders['X-CypAI-Timestamp'] = timestamp;
       webhookHeaders['X-CypAI-Signature'] = signature;
-      webhookHeaders['X-CypAI-Signature-Version'] = 'v1';
+      webhookHeaders['X-CypAI-Signature-Version'] = CYPAI_WEBHOOK_SIGNATURE_VERSION;
     }
 
     try {

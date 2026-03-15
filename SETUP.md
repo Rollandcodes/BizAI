@@ -81,6 +81,34 @@ npm run dev
        - `X-CypAI-Timestamp`
        - `X-CypAI-Signature` (HMAC SHA-256 over `${timestamp}.${rawBody}`)
        - `X-CypAI-Signature-Version` (`v1`)
+    - Receiver verification helper:
+         - Use [`lib/webhookSignature.ts`](lib/webhookSignature.ts) in your receiving API route.
+         - Example (Node runtime):
+
+```ts
+import { NextRequest, NextResponse } from 'next/server';
+import { verifyCypaiWebhookSignature } from '@/lib/webhookSignature';
+
+export async function POST(request: NextRequest) {
+   const rawBody = await request.text();
+   const result = verifyCypaiWebhookSignature({
+      secret: process.env.AUTOMATION_ALERT_WEBHOOK_SECRET || '',
+      rawBody,
+      headers: {
+         timestamp: request.headers.get('x-cypai-timestamp'),
+         signature: request.headers.get('x-cypai-signature'),
+         version: request.headers.get('x-cypai-signature-version'),
+      },
+      options: { maxSkewMs: 5 * 60 * 1000 },
+   });
+
+   if (!result.ok) {
+      return NextResponse.json({ error: result.reason }, { status: 401 });
+   }
+
+   return NextResponse.json({ ok: true });
+}
+```
 
 ## 7. Deploy to Vercel (GitHub connect)
 1. Push the repository to GitHub.
