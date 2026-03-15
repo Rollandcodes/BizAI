@@ -92,4 +92,7 @@ export const Analytics = {
 
   dashboardTabViewed: (tab: string) =>
     trackEvent('dashboard_tab_viewed', { tab }),
+
+  agencyAccessDenied: (email: string) =>
+    trackEvent('agency_access_denied', { email }),
 };

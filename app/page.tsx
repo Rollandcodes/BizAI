@@ -51,7 +51,7 @@ const featureCards = [
   ['🔒', 'Agent Audit', 'Review every AI response with compliance scoring and weekly report support.'],
   ['📲', 'QR Code Generator', 'Print a QR code for walk-in customers to start chatting instantly.'],
   ['⚙️', 'Custom AI Training', 'Add prices, FAQs, and custom rules. Your AI learns your business quickly.'],
-  ['🏢', 'Agency Mode', 'Manage multiple businesses from one login, perfect for agencies.'],
+  ['🏢', 'Agency Workspace', 'Available for approved agency accounts and multi-location enterprise setups.'],
   ['⚡', '15-Minute Setup', 'Answer a few questions, copy one line of code, and go live.'],
 ] as const
 
@@ -98,7 +98,7 @@ const comparisonRows = [
   ['Follow-up Tools', '✓', '✗', '✗'],
   ['Analytics & Reports', '✓', '✗', '✗'],
   ['Agent Audit', '✓', '✗', '✗'],
-  ['Agency Mode', '✓', '✗', '✗'],
+  ['Agency workspace (approval)', 'On request', '✗', '✗'],
   ['5 Language Support', '✓', 'sometimes', '✗'],
   ['Setup time', '15 min', 'Days', '—'],
   ['Monthly cost', 'From $29', '$100-300', '$0 lost'],
@@ -647,10 +647,10 @@ export default function HomePage() {
               {
                 name: 'Business',
                 price: '$149',
-                desc: 'For agencies and serious multi-location businesses',
+                desc: 'For serious multi-location businesses and approved agency accounts',
                 featured: false,
                 plan: 'business',
-                list: ['Everything in Pro', 'Agent audit and compliance scoring', 'Weekly PDF reports', 'Multi-location support', 'Agency mode', 'Dedicated onboarding call', 'Phone support', 'SLA guarantee', '7-day free trial'],
+                list: ['Everything in Pro', 'Agent audit and compliance scoring', 'Weekly PDF reports', 'Multi-location support', 'Agency workspace access on approval', 'Dedicated onboarding call', 'Phone support', 'SLA guarantee', '7-day free trial'],
               },
             ].map((plan) => (
               <article

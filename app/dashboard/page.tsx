@@ -1894,9 +1894,11 @@ function DashboardInner() {
 
   useEffect(() => {
     if (activeTab === 'agency' && !agencyAccess) {
+      Analytics.agencyAccessDenied(business?.owner_email || 'unknown');
       setActiveTab('overview');
+      setToast({ message: 'Agency Mode is restricted to approved accounts.', tone: 'error' });
     }
-  }, [activeTab, agencyAccess]);
+  }, [activeTab, agencyAccess, business?.owner_email]);
 
   return (
     <div
