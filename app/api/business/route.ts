@@ -47,6 +47,7 @@ type ConversationRow = {
 
 type WhatsAppEventRow = {
   id: string;
+  session_id: string;
   direction: 'inbound' | 'outbound';
   whatsapp_message_id: string;
   from_number: string | null;
@@ -60,7 +61,7 @@ type WhatsAppEventRow = {
 async function getRecentWhatsAppEvents(businessId: string): Promise<WhatsAppEventRow[]> {
   const { data, error } = await supabase
     .from('whatsapp_message_events')
-    .select('id, direction, whatsapp_message_id, from_number, to_phone_number_id, body_text, delivery_status, error_message, created_at')
+    .select('id, session_id, direction, whatsapp_message_id, from_number, to_phone_number_id, body_text, delivery_status, error_message, created_at')
     .eq('business_id', businessId)
     .order('created_at', { ascending: false })
     .limit(30);

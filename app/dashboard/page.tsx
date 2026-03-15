@@ -118,6 +118,7 @@ type DashboardPayload = {
 
 type WhatsAppEventRecord = {
   id: string;
+  session_id: string;
   direction: 'inbound' | 'outbound';
   whatsapp_message_id: string;
   from_number: string | null;
@@ -789,6 +790,15 @@ function DashboardInner() {
   const leads = dashboard.leads;
   const whatsappEvents = dashboard.whatsappEvents || [];
   const currentConversation = conversations.find((item) => item.id === selectedConversationId) || null;
+
+  // Unread WhatsApp replies: WhatsApp conversations where the customer messaged last
+  const unreadWhatsAppCount = conversations.filter(
+    (c) =>
+      c.channel === 'whatsapp' &&
+      Array.isArray(c.messages) &&
+      (c.messages as ConversationMessage[]).length > 0 &&
+      (c.messages as ConversationMessage[])[(c.messages as ConversationMessage[]).length - 1]?.role === 'user',
+  ).length;
   const planLimit = business ? messageLimits[business.plan] : null;
   const currentPlanName = business ? getPlanDisplayName(business.plan) : 'Trial';
   const normalizedPlanKey = business?.plan === 'basic' ? 'starter' : business?.plan;
@@ -1990,6 +2000,11 @@ function DashboardInner() {
                       {pendingBookingsCount}
                     </span>
                   )}
+                  {!isLocked && key === 'conversations' && unreadWhatsAppCount > 0 && (
+                    <span className="absolute -right-2 -top-2 flex h-4 min-w-[1rem] items-center justify-center rounded-full bg-emerald-500 px-1 text-[9px] font-bold leading-none text-white">
+                      {unreadWhatsAppCount}
+                    </span>
+                  )}
                 </span>
                 {label}
               </button>
@@ -2850,6 +2865,49 @@ function DashboardInner() {
                             <div className="text-sm text-zinc-500">No messages stored for this conversation.</div>
                           )}
                         </div>
+
+                        {currentConversation.channel === 'whatsapp' && (() => {
+                          const convEvents = whatsappEvents.filter((e) => e.session_id === currentConversation.id);
+                          if (convEvents.length === 0) return null;
+                          return (
+                            <div className="border-t border-zinc-800 px-6 py-4">
+                              <h4 className="mb-3 text-xs font-semibold uppercase tracking-widest text-zinc-500">WhatsApp Delivery Timeline</h4>
+                              <ol className="relative border-l border-zinc-700 pl-4 space-y-3">
+                                {convEvents.map((ev) => {
+                                  const statusColors: Record<string, string> = {
+                                    sent: 'bg-blue-900 text-blue-300',
+                                    delivered: 'bg-emerald-900 text-emerald-300',
+                                    read: 'bg-purple-900 text-purple-300',
+                                    failed: 'bg-red-900 text-red-300',
+                                  };
+                                  const colorClass = statusColors[ev.delivery_status || ''] ?? 'bg-zinc-800 text-zinc-400';
+                                  return (
+                                    <li key={ev.id} className="flex items-start gap-3">
+                                      <span className="absolute -left-[7px] mt-1.5 h-3 w-3 rounded-full border-2 border-zinc-800 bg-zinc-600" />
+                                      <div className="min-w-0 flex-1">
+                                        <div className="flex flex-wrap items-center gap-2">
+                                          <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${colorClass}`}>
+                                            {ev.delivery_status ?? 'pending'}
+                                          </span>
+                                          <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${ev.direction === 'inbound' ? 'bg-zinc-800 text-zinc-300' : 'bg-zinc-700 text-zinc-400'}`}>
+                                            {ev.direction}
+                                          </span>
+                                          <span className="text-[10px] text-zinc-500">{formatDateTime(ev.created_at)}</span>
+                                        </div>
+                                        {ev.body_text ? (
+                                          <p className="mt-1 truncate text-xs text-zinc-400">{ev.body_text}</p>
+                                        ) : null}
+                                        {ev.error_message ? (
+                                          <p className="mt-1 text-xs text-red-400">{ev.error_message}</p>
+                                        ) : null}
+                                      </div>
+                                    </li>
+                                  );
+                                })}
+                              </ol>
+                            </div>
+                          );
+                        })()}
                       </>
                     ) : (
                       <div className="flex h-full min-h-[300px] items-center justify-center text-sm text-zinc-500">
