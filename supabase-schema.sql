@@ -269,6 +269,7 @@ CREATE INDEX IF NOT EXISTS idx_audit_reports_business_id ON public.audit_reports
 -- RLS for audit_reports
 ALTER TABLE public.audit_reports ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Users can view own audit reports" ON public.audit_reports;
 CREATE POLICY "Users can view own audit reports" ON public.audit_reports
   FOR SELECT USING (
     EXISTS (
@@ -278,8 +279,10 @@ CREATE POLICY "Users can view own audit reports" ON public.audit_reports
     )
   );
 
+DROP POLICY IF EXISTS "Service role can manage audit reports" ON public.audit_reports;
 CREATE POLICY "Service role can manage audit reports" ON public.audit_reports
-  FOR ALL USING (true);
+  FOR ALL USING (auth.role() = 'service_role')
+  WITH CHECK (auth.role() = 'service_role');
 
 -- ============================================================================
 -- Row Level Security (RLS) Policies
@@ -290,53 +293,59 @@ ALTER TABLE public.conversations ENABLE ROW LEVEL SECURITY;
 
 -- Policies for businesses table
 -- Users can only see their own business
+DROP POLICY IF EXISTS "Users can view own business" ON public.businesses;
 CREATE POLICY "Users can view own business" ON public.businesses
   FOR SELECT USING (
-    auth.jwt() ->> 'email' = owner_email
+    lower(auth.jwt() ->> 'email') = lower(owner_email)
   );
 
 -- Users can only update their own business
+DROP POLICY IF EXISTS "Users can update own business" ON public.businesses;
 CREATE POLICY "Users can update own business" ON public.businesses
   FOR UPDATE USING (
-    auth.jwt() ->> 'email' = owner_email
+    lower(auth.jwt() ->> 'email') = lower(owner_email)
   ) WITH CHECK (
-    auth.jwt() ->> 'email' = owner_email
+    lower(auth.jwt() ->> 'email') = lower(owner_email)
   );
 
 -- Users can insert businesses (for signup)
+DROP POLICY IF EXISTS "Users can create business" ON public.businesses;
 CREATE POLICY "Users can create business" ON public.businesses
   FOR INSERT WITH CHECK (
-    auth.jwt() ->> 'email' = owner_email
+    lower(auth.jwt() ->> 'email') = lower(owner_email)
   );
 
 -- Policies for conversations table
 -- Users can view conversations for their businesses
+DROP POLICY IF EXISTS "Users can view business conversations" ON public.conversations;
 CREATE POLICY "Users can view business conversations" ON public.conversations
   FOR SELECT USING (
     EXISTS (
       SELECT 1 FROM public.businesses
       WHERE businesses.id = conversations.business_id
-      AND businesses.owner_email = auth.jwt() ->> 'email'
+      AND lower(businesses.owner_email) = lower(auth.jwt() ->> 'email')
     )
   );
 
 -- Users can update conversations for their businesses
+DROP POLICY IF EXISTS "Users can update business conversations" ON public.conversations;
 CREATE POLICY "Users can update business conversations" ON public.conversations
   FOR UPDATE USING (
     EXISTS (
       SELECT 1 FROM public.businesses
       WHERE businesses.id = conversations.business_id
-      AND businesses.owner_email = auth.jwt() ->> 'email'
+      AND lower(businesses.owner_email) = lower(auth.jwt() ->> 'email')
     )
   ) WITH CHECK (
     EXISTS (
       SELECT 1 FROM public.businesses
       WHERE businesses.id = conversations.business_id
-      AND businesses.owner_email = auth.jwt() ->> 'email'
+      AND lower(businesses.owner_email) = lower(auth.jwt() ->> 'email')
     )
   );
 
 -- Anyone can insert conversations (for widget interactions)
+DROP POLICY IF EXISTS "Anyone can create conversation" ON public.conversations;
 CREATE POLICY "Anyone can create conversation" ON public.conversations
   FOR INSERT WITH CHECK (true);
 
@@ -356,18 +365,28 @@ CREATE INDEX IF NOT EXISTS idx_broadcasts_business_id ON public.broadcasts (busi
 
 ALTER TABLE public.broadcasts ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Business owners can manage own broadcasts" ON public.broadcasts;
 CREATE POLICY "Business owners can manage own broadcasts" ON public.broadcasts
   FOR ALL USING (
     EXISTS (
       SELECT 1 FROM public.businesses
       WHERE businesses.id = broadcasts.business_id
-      AND businesses.owner_email = auth.jwt() ->> 'email'
+      AND lower(businesses.owner_email) = lower(auth.jwt() ->> 'email')
+    )
+  )
+  WITH CHECK (
+    EXISTS (
+      SELECT 1 FROM public.businesses
+      WHERE businesses.id = broadcasts.business_id
+      AND lower(businesses.owner_email) = lower(auth.jwt() ->> 'email')
     )
   );
 
 -- Service role has full access (used by API routes)
+DROP POLICY IF EXISTS "Service role full access to broadcasts" ON public.broadcasts;
 CREATE POLICY "Service role full access to broadcasts" ON public.broadcasts
-  FOR ALL USING (auth.role() = 'service_role');
+  FOR ALL USING (auth.role() = 'service_role')
+  WITH CHECK (auth.role() = 'service_role');
 
 -- ============================================================================
 -- Bookings Table (car rental & booking-based businesses)
@@ -392,20 +411,31 @@ CREATE INDEX IF NOT EXISTS idx_bookings_status ON public.bookings (business_id, 
 
 ALTER TABLE public.bookings ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Business owners can manage own bookings" ON public.bookings;
 CREATE POLICY "Business owners can manage own bookings" ON public.bookings
   FOR ALL USING (
     EXISTS (
       SELECT 1 FROM public.businesses
       WHERE businesses.id = bookings.business_id
-      AND businesses.owner_email = auth.jwt() ->> 'email'
+      AND lower(businesses.owner_email) = lower(auth.jwt() ->> 'email')
+    )
+  )
+  WITH CHECK (
+    EXISTS (
+      SELECT 1 FROM public.businesses
+      WHERE businesses.id = bookings.business_id
+      AND lower(businesses.owner_email) = lower(auth.jwt() ->> 'email')
     )
   );
 
 -- Service role has full access (used by API routes)
+DROP POLICY IF EXISTS "Service role full access to bookings" ON public.bookings;
 CREATE POLICY "Service role full access to bookings" ON public.bookings
-  FOR ALL USING (auth.role() = 'service_role');
+  FOR ALL USING (auth.role() = 'service_role')
+  WITH CHECK (auth.role() = 'service_role');
 
 -- Widget can create bookings (triggered by chat AI)
+DROP POLICY IF EXISTS "Anyone can create booking" ON public.bookings;
 CREATE POLICY "Anyone can create booking" ON public.bookings
   FOR INSERT WITH CHECK (true);
 
@@ -467,7 +497,7 @@ CREATE POLICY "Users can view own whatsapp message events" ON public.whatsapp_me
     EXISTS (
       SELECT 1 FROM public.businesses
       WHERE businesses.id = whatsapp_message_events.business_id
-      AND businesses.owner_email = auth.jwt() ->> 'email'
+      AND lower(businesses.owner_email) = lower(auth.jwt() ->> 'email')
     )
   );
 
