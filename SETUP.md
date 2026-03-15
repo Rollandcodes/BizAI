@@ -58,14 +58,28 @@ npm run dev
 
 4. Open http://localhost:3000.
 
-## 6. Deploy to Vercel (GitHub connect)
+## 6. Optional: Enable abandoned-flow recovery emails
+1. Create a Resend account and API key.
+2. Add these optional variables to `.env.local`:
+   - `RESEND_API_KEY`
+   - `RESEND_FROM_EMAIL` (for example: `CypAI <noreply@cypai.app>`)
+3. Re-run [`supabase-schema.sql`](supabase-schema.sql) to create `marketing_automation_queue`.
+4. The app will automatically queue and optionally email for:
+   - `abandoned_signup`
+   - `abandoned_payment`
+5. Health check endpoint:
+   - `GET /api/automation`
+6. Delivery summary endpoint (dashboard-ready JSON):
+   - `GET /api/automation` (includes `summary` + `recent` queue records)
+
+## 7. Deploy to Vercel (GitHub connect)
 1. Push the repository to GitHub.
 2. Go to https://vercel.com and create a new project.
 3. Import your GitHub repository.
 4. In Vercel project settings, add all environment variables from [`.env.local`](.env.local).
 5. Deploy.
 
-## 7. Switch PayPal from sandbox to live
+## 8. Switch PayPal from sandbox to live
 Update the PayPal base URL in both API routes:
 1. [app/api/paypal/create-order/route.ts](app/api/paypal/create-order/route.ts)
 2. [app/api/paypal/capture-order/route.ts](app/api/paypal/capture-order/route.ts)

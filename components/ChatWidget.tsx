@@ -40,6 +40,7 @@ function ChatWidget({
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [degradedMode, setDegradedMode] = useState(false);
+  const [leadCapturedToast, setLeadCapturedToast] = useState(false);
   const [sessionId] = useState<string>(() => crypto.randomUUID());
   const [feedbackState, setFeedbackState] = useState<'idle' | 'prompt' | 'done'>('idle');
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -173,6 +174,7 @@ function ChatWidget({
       setDegradedMode(Boolean(data.degraded));
       if (data.leadCaptured || assistantText.includes('[LEAD_CAPTURED]')) {
         Analytics.leadCaptured(businessType);
+        setLeadCapturedToast(true);
       }
 
       setMessages((prev) => [
@@ -200,6 +202,12 @@ function ChatWidget({
       setIsLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (!leadCapturedToast) return;
+    const timer = setTimeout(() => setLeadCapturedToast(false), 3500);
+    return () => clearTimeout(timer);
+  }, [leadCapturedToast]);
 
   return (
     <>
@@ -229,7 +237,7 @@ function ChatWidget({
                 }
                 setIsOpen(false);
               }}
-              className="text-white/80 hover:text-white transition-colors"
+              className="rounded-md text-white/80 transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80"
               aria-label="Close chat"
             >
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -247,6 +255,12 @@ function ChatWidget({
 
           {/* Messages */}
           <div className="flex-1 overflow-y-auto space-y-3 bg-white p-4">
+            {leadCapturedToast ? (
+              <div className="rounded-xl border border-green-200 bg-green-50 px-3 py-2 text-xs font-semibold text-green-700" role="status" aria-live="polite">
+                Lead captured successfully. We will follow up shortly.
+              </div>
+            ) : null}
+
             {messages.map((message) => (
               <div
                 key={message.id}
@@ -278,8 +292,9 @@ function ChatWidget({
                       key={emoji}
                       type="button"
                       onClick={() => void submitFeedback(idx + 1)}
-                      className="flex flex-col items-center gap-0.5 rounded-xl px-2 py-1.5 text-xl transition hover:bg-gray-100 active:scale-95"
+                      className="flex flex-col items-center gap-0.5 rounded-xl px-2 py-1.5 text-xl transition hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--bizai-color)] active:scale-95"
                       title={`Rate ${idx + 1} out of 5`}
+                      aria-label={`Rate ${idx + 1} out of 5`}
                     >
                       <span>{emoji}</span>
                       <span className="text-[10px] font-medium text-gray-400">{idx + 1}</span>
@@ -330,7 +345,7 @@ function ChatWidget({
             <button
               type="submit"
               disabled={isLoading || !inputValue.trim()}
-              className="flex h-9 w-9 items-center justify-center rounded-full bg-[var(--bizai-color)] text-white transition-opacity disabled:opacity-40"
+              className="flex h-9 w-9 items-center justify-center rounded-full bg-[var(--bizai-color)] text-white transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--bizai-color)] focus-visible:ring-offset-2 disabled:opacity-40"
               aria-label="Send message"
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -354,7 +369,7 @@ function ChatWidget({
               return next;
             });
           }}
-          className="fixed bottom-6 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-[var(--bizai-color)] shadow-lg transition-transform hover:scale-110 active:scale-95"
+          className="fixed bottom-6 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-[var(--bizai-color)] shadow-lg transition-transform hover:scale-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--bizai-color)] focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-900 active:scale-95"
           aria-label={isOpen ? 'Close chat' : 'Open chat'}
         >
           {isOpen ? (

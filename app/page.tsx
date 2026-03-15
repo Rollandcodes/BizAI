@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
+import { Analytics } from '@/lib/analytics'
 
 type FAQ = { q: string; a: string }
 
@@ -124,15 +125,19 @@ export default function HomePage() {
   return (
     <main className="min-h-screen bg-zinc-950 text-zinc-50">
       {showAnnouncement ? (
-        <div className="border-b border-blue-500/20 bg-blue-600/10 px-4 py-2.5 text-center text-xs text-blue-400">
+        <div className="border-b border-blue-500/20 bg-blue-600/10 px-4 py-2.5 text-center text-xs text-blue-200">
           <span>7-day free trial - No credit card required</span>
-          <Link href="/signup?plan=pro" className="ml-2 font-semibold underline hover:text-blue-300">
+          <Link
+            href="/signup?plan=pro"
+            className="ml-2 font-semibold underline hover:text-blue-100"
+            onClick={() => Analytics.heroCtaClicked('pro')}
+          >
             Start free today →
           </Link>
           <button
             aria-label="Close announcement"
             onClick={() => setShowAnnouncement(false)}
-            className="ml-3 text-blue-300 hover:text-blue-200"
+            className="ml-3 rounded-sm text-blue-200 hover:text-blue-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-200"
           >
             ✕
           </button>
@@ -238,12 +243,14 @@ export default function HomePage() {
           <div className="mb-12 flex flex-col items-center justify-center gap-4 sm:flex-row">
             <Link
               href="/signup?plan=pro"
+              onClick={() => Analytics.heroCtaClicked('pro')}
               className="rounded-xl bg-blue-600 px-8 py-4 text-lg font-bold text-white transition-all duration-200 hover:-translate-y-0.5 hover:bg-blue-500 hover:shadow-xl hover:shadow-blue-500/20"
             >
               Start Free Trial →
             </Link>
             <Link
               href="/demo"
+              onClick={() => Analytics.demoViewed()}
               className="rounded-xl border border-zinc-700 bg-zinc-800 px-8 py-4 text-lg font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:bg-zinc-700"
             >
               Try Live Demo
@@ -646,6 +653,8 @@ export default function HomePage() {
         href="https://wa.me/905338425559?text=Hi! I want to learn more about CypAI"
         target="_blank"
         rel="noopener noreferrer"
+        aria-label="Chat on WhatsApp"
+        title="Chat on WhatsApp"
         className="fixed bottom-6 left-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-green-500 shadow-lg shadow-green-500/30 transition-all duration-200 hover:scale-110 hover:bg-green-400"
       >
         <svg viewBox="0 0 24 24" className="h-7 w-7 fill-white">

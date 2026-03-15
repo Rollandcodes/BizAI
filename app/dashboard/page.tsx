@@ -113,6 +113,29 @@ type DashboardPayload = {
   leads: ConversationRecord[];
 };
 
+type AutomationSummary = {
+  total: number;
+  queued: number;
+  sent: number;
+  failed: number;
+};
+
+type AutomationRecentRecord = {
+  event_type: 'abandoned_signup' | 'abandoned_payment';
+  status: 'queued' | 'sent' | 'failed';
+  recipient_email: string | null;
+  created_at: string;
+  processed_at: string | null;
+  last_error?: string | null;
+};
+
+type AutomationOverviewResponse = {
+  summary?: AutomationSummary;
+  recent?: AutomationRecentRecord[];
+  queue?: string;
+  error?: string;
+};
+
 type BookingRecord = {
   id: string;
   business_id: string;
@@ -529,6 +552,10 @@ function DashboardInner() {
     distribution: number[]; // index 0 = rating 1 stars … index 4 = rating 5 stars
   } | null>(null);
   const [satisfactionLoading, setSatisfactionLoading] = useState(false);
+  const [automationSummary, setAutomationSummary] = useState<AutomationSummary | null>(null);
+  const [latestAutomationFailure, setLatestAutomationFailure] = useState<string | null>(null);
+  const [automationLoading, setAutomationLoading] = useState(false);
+  const [automationUnavailable, setAutomationUnavailable] = useState<string | null>(null);
   const hasTrackedInitialTab = useRef(false);
 
   const business = dashboard.business;
@@ -601,6 +628,17 @@ function DashboardInner() {
       setSelectedConversationId(conversations[0].id);
     }
   }, [conversations, selectedConversationId]);
+
+  useEffect(() => {
+    if (!businessId) {
+      setAutomationSummary(null);
+      setLatestAutomationFailure(null);
+      setAutomationUnavailable(null);
+      return;
+    }
+
+    void loadAutomationOverview();
+  }, [businessId]);
 
   useEffect(() => {
     if (activeTab === 'audit' && business && !auditSummary && !auditLoading) {
@@ -700,6 +738,39 @@ function DashboardInner() {
 
     if (lookupEmail) {
       await loadDashboard({ email: lookupEmail });
+    }
+  }
+
+  async function loadAutomationOverview() {
+    setAutomationLoading(true);
+    setAutomationUnavailable(null);
+
+    try {
+      const response = await fetch('/api/automation', { method: 'GET' });
+      const data = (await response.json()) as AutomationOverviewResponse;
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to load automation status');
+      }
+
+      if (data.queue === 'missing_table') {
+        setAutomationSummary(null);
+        setLatestAutomationFailure(null);
+        setAutomationUnavailable('Automation queue is not initialized yet. Run the latest Supabase schema migration.');
+        return;
+      }
+
+      setAutomationSummary(data.summary || { total: 0, queued: 0, sent: 0, failed: 0 });
+
+      const latestFailure = (data.recent || []).find((item) => item.status === 'failed' && item.last_error);
+      setLatestAutomationFailure(latestFailure?.last_error || null);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to load automation status';
+      setAutomationSummary(null);
+      setLatestAutomationFailure(null);
+      setAutomationUnavailable(message);
+    } finally {
+      setAutomationLoading(false);
     }
   }
 
@@ -1303,6 +1374,42 @@ function DashboardInner() {
                       value={currentPlanName}
                       badgeClassName={getPlanBadgeClasses(business.plan)}
                     />
+                  </div>
+
+                  <div className="rounded-3xl border border-zinc-800 bg-zinc-900 p-6 shadow-sm">
+                    <div className="flex items-center justify-between gap-4">
+                      <div>
+                        <h2 className="text-lg font-bold text-white">Recovery Automation</h2>
+                        <p className="mt-1 text-sm text-zinc-500">Abandoned signup and payment follow-up delivery status.</p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => void loadAutomationOverview()}
+                        className="rounded-full border border-zinc-700 px-3 py-1.5 text-xs font-semibold text-zinc-300 transition hover:bg-zinc-950"
+                      >
+                        Refresh
+                      </button>
+                    </div>
+
+                    {automationLoading ? (
+                      <div className="mt-5 text-sm text-zinc-400">Loading automation status...</div>
+                    ) : automationUnavailable ? (
+                      <div className="mt-5 rounded-2xl border border-amber-800/40 bg-amber-900/20 px-4 py-3 text-sm text-amber-200">
+                        {automationUnavailable}
+                      </div>
+                    ) : (
+                      <>
+                        <div className="mt-5 grid gap-3 sm:grid-cols-4">
+                          <MiniMetric label="Queued" value={automationSummary?.queued ?? 0} tone="neutral" />
+                          <MiniMetric label="Sent" value={automationSummary?.sent ?? 0} tone="success" />
+                          <MiniMetric label="Failed" value={automationSummary?.failed ?? 0} tone="error" />
+                          <MiniMetric label="Recent" value={automationSummary?.total ?? 0} tone="neutral" />
+                        </div>
+                        <p className="mt-4 text-sm text-zinc-500">
+                          Latest failure: {latestAutomationFailure || 'No recent failures'}
+                        </p>
+                      </>
+                    )}
                   </div>
 
                   {/* Customer Satisfaction */}
@@ -2530,6 +2637,29 @@ function StatCard({
       ) : (
         <p className="mt-4 text-3xl font-extrabold text-white">{value}</p>
       )}
+    </div>
+  );
+}
+
+function MiniMetric({
+  label,
+  value,
+  tone,
+}: {
+  label: string;
+  value: number;
+  tone: 'neutral' | 'success' | 'error';
+}) {
+  const styles: Record<'neutral' | 'success' | 'error', string> = {
+    neutral: 'border-zinc-700 bg-zinc-950 text-zinc-100',
+    success: 'border-emerald-700/40 bg-emerald-900/20 text-emerald-200',
+    error: 'border-rose-700/40 bg-rose-900/20 text-rose-200',
+  };
+
+  return (
+    <div className={`rounded-2xl border px-4 py-3 ${styles[tone]}`}>
+      <p className="text-xs font-semibold uppercase tracking-wide opacity-80">{label}</p>
+      <p className="mt-1 text-2xl font-black">{value}</p>
     </div>
   );
 }

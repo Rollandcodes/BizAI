@@ -206,6 +206,7 @@ function PaymentContent() {
 
   const [signupData, setSignupData] = useState<SignupData | null>(null);
   const hasTrackedPaymentStart = useRef(false);
+  const paymentCompletedRef = useRef(false);
 
   useEffect(() => {
     try {
@@ -223,12 +224,63 @@ function PaymentContent() {
   }, [plan.price, planId]);
 
   function handleSuccess() {
+    paymentCompletedRef.current = true;
     Analytics.paymentCompleted(planId, Number(plan.price));
     router.push('/success');
   }
 
   const businessName = getBusinessName(signupData);
   const email = getSignupEmail(signupData);
+
+  useEffect(() => {
+    const sendAbandonmentEvent = () => {
+      if (paymentCompletedRef.current) return;
+      if (!email.trim()) return;
+
+      Analytics.paymentFailed(planId);
+
+      const payload = {
+        eventType: 'abandoned_payment',
+        planId,
+        email: email.trim(),
+        businessName,
+        businessType: signupData?.businessType || '',
+        source: 'payment_page',
+      };
+
+      Analytics.paymentAbandoned(planId, Number(plan.price));
+
+      try {
+        const body = JSON.stringify(payload);
+        if (navigator.sendBeacon) {
+          navigator.sendBeacon('/api/automation', new Blob([body], { type: 'application/json' }));
+        } else {
+          fetch('/api/automation', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body,
+            keepalive: true,
+          }).catch(() => undefined);
+        }
+      } catch {
+        // Do nothing - abandonment tracking should never block UX.
+      }
+    };
+
+    const onVisibilityChange = () => {
+      if (document.visibilityState === 'hidden') {
+        sendAbandonmentEvent();
+      }
+    };
+
+    window.addEventListener('beforeunload', sendAbandonmentEvent);
+    document.addEventListener('visibilitychange', onVisibilityChange);
+
+    return () => {
+      document.removeEventListener('visibilitychange', onVisibilityChange);
+      window.removeEventListener('beforeunload', sendAbandonmentEvent);
+    };
+  }, [planId, email, businessName, signupData?.businessType]);
 
   return (
     <div className="flex min-h-screen flex-col bg-zinc-950 text-zinc-100">

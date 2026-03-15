@@ -90,6 +90,45 @@ CREATE INDEX IF NOT EXISTS idx_paypal_webhook_events_processed_at
   ON public.paypal_webhook_events(processed_at DESC);
 
 -- ============================================================================
+-- Table: marketing_automation_queue
+-- ============================================================================
+CREATE TABLE IF NOT EXISTS public.marketing_automation_queue (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  event_type TEXT NOT NULL CHECK (event_type IN ('abandoned_signup', 'abandoned_payment')),
+  dedupe_key TEXT UNIQUE,
+  recipient_email TEXT,
+  plan_id TEXT,
+  status TEXT NOT NULL DEFAULT 'queued' CHECK (status IN ('queued', 'sent', 'failed')),
+  email_subject TEXT,
+  email_body TEXT,
+  provider_message_id TEXT,
+  last_error TEXT,
+  retry_count INTEGER NOT NULL DEFAULT 0,
+  payload JSONB NOT NULL DEFAULT '{}'::jsonb,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  processed_at TIMESTAMPTZ
+);
+
+ALTER TABLE public.marketing_automation_queue ADD COLUMN IF NOT EXISTS email_subject TEXT;
+ALTER TABLE public.marketing_automation_queue ADD COLUMN IF NOT EXISTS email_body TEXT;
+ALTER TABLE public.marketing_automation_queue ADD COLUMN IF NOT EXISTS provider_message_id TEXT;
+ALTER TABLE public.marketing_automation_queue ADD COLUMN IF NOT EXISTS last_error TEXT;
+ALTER TABLE public.marketing_automation_queue ADD COLUMN IF NOT EXISTS retry_count INTEGER NOT NULL DEFAULT 0;
+
+CREATE INDEX IF NOT EXISTS idx_marketing_automation_queue_event_type
+  ON public.marketing_automation_queue(event_type, created_at DESC);
+
+CREATE INDEX IF NOT EXISTS idx_marketing_automation_queue_recipient
+  ON public.marketing_automation_queue(recipient_email, created_at DESC);
+
+ALTER TABLE public.marketing_automation_queue ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Service role full access to marketing automation queue" ON public.marketing_automation_queue;
+CREATE POLICY "Service role full access to marketing automation queue" ON public.marketing_automation_queue
+  FOR ALL USING (auth.role() = 'service_role')
+  WITH CHECK (auth.role() = 'service_role');
+
+-- ============================================================================
 -- Table: conversations
 -- ============================================================================
 -- Stores chat conversations between customers and the AI
