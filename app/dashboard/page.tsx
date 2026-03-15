@@ -705,7 +705,7 @@ function DashboardInner() {
 
       case "crm":       return <CRMTab businessId={businessId} businessName={business.business_name} />;
       case "bookings":  return <BookingsTab businessId={businessId} businessName={business.business_name} />;
-      case "followups": return <FollowUpsTab businessId={businessId} businessName={business.business_name} />;
+      case "followups": return <FollowUpsTab businessId={businessId} businessName={business.business_name} businessType={business.business_type} />;
       case "analytics": return <AnalyticsTab businessId={businessId} />;
       case "audit":     return <section><p className="text-zinc-400">Agent Audit — Business plan feature</p></section>;
       case "agency":    return agencyAccess ? <AgencyTab ownerEmail={business.owner_email} /> : null;
