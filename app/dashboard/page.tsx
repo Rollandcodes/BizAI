@@ -1879,6 +1879,10 @@ function DashboardInner() {
   const chartBase = auditSummary?.weeklyStats.avgSafetyScore ?? 75;
   const chartTrend = auditSummary?.weeklyStats.safetyTrend ?? 'stable';
   const chartLineColor = chartTrend === 'improving' ? '#10b981' : chartTrend === 'declining' ? '#ef4444' : '#3b82f6';
+  const hasFailedAutomationRecords = automationRecent.some((record) => record.status === 'failed');
+  const hasAlertDestinationsConfigured = Boolean(alertPolicy.hasWebhook || alertPolicy.alertEmail || alertPolicyForm.webhookUrl.trim() || alertPolicyForm.alertEmail.trim());
+  const hasAlertLogs = (alertLogsMeta.total || 0) > 0 || alertLogs.length > 0;
+  const hasAlertLogDateFilters = Boolean(alertLogFromDate || alertLogToDate);
   const chartData = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day, i) => ({
     day,
     score: Math.min(100, Math.max(0, Math.round(chartBase + (chartTrend === 'improving' ? (i - 3) * 1.5 : chartTrend === 'declining' ? (3 - i) * 1.5 : 0) + Math.sin(i) * 2))),
@@ -2111,9 +2115,10 @@ function DashboardInner() {
                         <button
                           type="button"
                           onClick={() => void loadAutomationOverview()}
+                          disabled={automationLoading}
                           className="rounded-full border border-zinc-700 px-3 py-1.5 text-xs font-semibold text-zinc-300 transition hover:bg-zinc-950"
                         >
-                          Refresh
+                          {automationLoading ? 'Refreshing...' : 'Refresh'}
                         </button>
                         <button
                           type="button"
@@ -2126,7 +2131,7 @@ function DashboardInner() {
                         <button
                           type="button"
                           onClick={() => void retryFailedBatchAutomation()}
-                          disabled={retryBatchAutomationLoading}
+                          disabled={!hasFailedAutomationRecords || retryBatchAutomationLoading}
                           className="rounded-full border border-emerald-700/50 px-3 py-1.5 text-xs font-semibold text-emerald-200 transition hover:bg-emerald-900/30 disabled:cursor-not-allowed disabled:opacity-50"
                         >
                           {retryBatchAutomationLoading ? 'Retrying Batch...' : 'Retry 5 Failed'}
@@ -2162,6 +2167,11 @@ function DashboardInner() {
                         </button>
                       ))}
                     </div>
+                    {!hasFailedAutomationRecords ? (
+                      <p className="mt-3 text-xs text-zinc-500">
+                        Retry actions unlock when the queue contains failed deliveries.
+                      </p>
+                    ) : null}
 
                     <div className="mt-4 rounded-2xl border border-zinc-800 bg-zinc-950/40 p-3">
                       <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-zinc-400">Per-event retry policies</p>
@@ -2325,7 +2335,7 @@ function DashboardInner() {
                         <button
                           type="button"
                           onClick={() => void testAlertHooks()}
-                          disabled={alertTestLoading}
+                          disabled={alertTestLoading || !hasAlertDestinationsConfigured}
                           className="rounded-full border border-indigo-700/50 px-3 py-1.5 text-xs font-semibold text-indigo-200 transition hover:bg-indigo-900/30 disabled:cursor-not-allowed disabled:opacity-50"
                         >
                           {alertTestLoading ? 'Sending Test...' : 'Send Test Alert'}
@@ -2333,12 +2343,17 @@ function DashboardInner() {
                         <button
                           type="button"
                           onClick={() => void handleExportAlertLogsCsv()}
-                          disabled={alertLogsExporting}
+                          disabled={alertLogsExporting || !hasAlertLogs}
                           className="rounded-full border border-zinc-700 px-3 py-1.5 text-xs font-semibold text-zinc-200 transition hover:bg-zinc-900/60 disabled:cursor-not-allowed disabled:opacity-50"
                         >
                           {alertLogsExporting ? 'Exporting...' : 'Export Alert Logs CSV'}
                         </button>
                       </div>
+                      {!hasAlertDestinationsConfigured ? (
+                        <p className="mt-3 text-xs text-zinc-500">
+                          Test alerts require at least one destination: alert email or webhook URL.
+                        </p>
+                      ) : null}
                       <p className="mt-3 text-xs text-zinc-500">
                         Status: failure rate {alertState?.failureRate ?? 0}% across {alertState?.attempts ?? 0} attempts; cooldown {alertState?.cooldownActive ? 'active' : 'inactive'}.
                       </p>
@@ -2430,6 +2445,7 @@ function DashboardInner() {
                               setAlertLogToDate('');
                               setAlertLogPage(1);
                             }}
+                            disabled={!hasAlertLogDateFilters}
                             className="rounded-full border border-zinc-700 px-2.5 py-1 font-semibold text-zinc-300 transition hover:bg-zinc-950"
                           >
                             Clear Dates
