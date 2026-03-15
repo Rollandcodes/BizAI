@@ -142,6 +142,12 @@ INSERT INTO public.marketing_automation_policy (id, max_retries, retry_window_ho
 VALUES ('default', 3, 72)
 ON CONFLICT (id) DO NOTHING;
 
+INSERT INTO public.marketing_automation_policy (id, max_retries, retry_window_hours)
+VALUES
+  ('abandoned_signup', 3, 72),
+  ('abandoned_payment', 3, 72)
+ON CONFLICT (id) DO NOTHING;
+
 ALTER TABLE public.marketing_automation_policy ENABLE ROW LEVEL SECURITY;
 
 DROP POLICY IF EXISTS "Service role full access to marketing automation policy" ON public.marketing_automation_policy;

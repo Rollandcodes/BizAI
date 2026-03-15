@@ -23,6 +23,12 @@ type RetryPolicy = {
   retryWindowHours: number;
 };
 
+type RetryPolicyMap = {
+  default: RetryPolicy;
+  abandoned_signup: RetryPolicy;
+  abandoned_payment: RetryPolicy;
+};
+
 const DEFAULT_RETRY_POLICY: RetryPolicy = {
   maxRetries: 3,
   retryWindowHours: 72,
@@ -66,12 +72,17 @@ function normalizePositiveInt(value: unknown, fallback: number, min: number, max
   return Math.min(max, Math.max(min, Math.floor(value)));
 }
 
-async function getRetryPolicy(): Promise<RetryPolicy> {
+function getPolicyId(eventType: AutomationEventType | null): string {
+  return eventType || 'default';
+}
+
+async function getRetryPolicy(eventType: AutomationEventType | null = null): Promise<RetryPolicy> {
   const supabase = createServerClient();
+  const policyId = getPolicyId(eventType);
   const { data, error } = await supabase
     .from('marketing_automation_policy')
     .select('max_retries, retry_window_hours')
-    .eq('id', 'default')
+    .eq('id', policyId)
     .single();
 
   if (error?.code === '42P01' || error?.code === 'PGRST116') {
@@ -79,6 +90,9 @@ async function getRetryPolicy(): Promise<RetryPolicy> {
   }
 
   if (error || !data) {
+    if (eventType) {
+      return getRetryPolicy(null);
+    }
     return DEFAULT_RETRY_POLICY;
   }
 
@@ -88,11 +102,26 @@ async function getRetryPolicy(): Promise<RetryPolicy> {
   };
 }
 
-async function saveRetryPolicy(maxRetries: number, retryWindowHours: number) {
+async function getRetryPoliciesMap(): Promise<RetryPolicyMap> {
+  const [defaultPolicy, signupPolicy, paymentPolicy] = await Promise.all([
+    getRetryPolicy(null),
+    getRetryPolicy('abandoned_signup'),
+    getRetryPolicy('abandoned_payment'),
+  ]);
+
+  return {
+    default: defaultPolicy,
+    abandoned_signup: signupPolicy,
+    abandoned_payment: paymentPolicy,
+  };
+}
+
+async function saveRetryPolicy(maxRetries: number, retryWindowHours: number, eventType: AutomationEventType | null = null) {
   const supabase = createServerClient();
+  const policyId = getPolicyId(eventType);
   const { error } = await supabase.from('marketing_automation_policy').upsert(
     {
-      id: 'default',
+      id: policyId,
       max_retries: maxRetries,
       retry_window_hours: retryWindowHours,
       updated_at: new Date().toISOString(),
@@ -280,7 +309,6 @@ async function updateQueueDeliveryById(
 }
 
 async function retryFailedAutomation(queueId: string) {
-  const policy = await getRetryPolicy();
   const supabase = createServerClient();
   const { data, error } = await supabase
     .from('marketing_automation_queue')
@@ -295,6 +323,13 @@ async function retryFailedAutomation(queueId: string) {
   if (!data || data.status !== 'failed') {
     return { ok: false, status: 400 as const, error: 'Only failed automation records can be retried' };
   }
+
+  const eventType = toEventType(data.event_type);
+  if (!eventType) {
+    return { ok: false, status: 400 as const, error: 'Unsupported event_type for retry' };
+  }
+
+  const policy = await getRetryPolicy(eventType);
 
   const retryCount = Number(data.retry_count || 0);
   if (retryCount >= policy.maxRetries) {
@@ -318,10 +353,6 @@ async function retryFailedAutomation(queueId: string) {
   }
 
   const payload = (data.payload || {}) as AutomationPayload;
-  const eventType = toEventType(data.event_type);
-  if (!eventType) {
-    return { ok: false, status: 400 as const, error: 'Unsupported event_type for retry' };
-  }
 
   const fallbackTemplate = buildRecoveryTemplate({
     eventType,
@@ -364,7 +395,6 @@ async function retryFailedAutomation(queueId: string) {
 }
 
 async function retryFailedAutomationBatch(limit: number, eventType: AutomationEventType | null) {
-  const policy = await getRetryPolicy();
   const supabase = createServerClient();
   let query = supabase
     .from('marketing_automation_queue')
@@ -382,18 +412,22 @@ async function retryFailedAutomationBatch(limit: number, eventType: AutomationEv
     return { ok: false, status: 500 as const, error: error.message };
   }
 
-  const queueIds = (data || [])
-    .filter((row) => {
-      const retryCount = Number((row as { retry_count?: number | null }).retry_count || 0);
-      if (retryCount >= policy.maxRetries) {
-        return false;
-      }
+  let queueIds = (data || []).map((row) => row.id as string).filter(Boolean);
+  if (eventType) {
+    const policy = await getRetryPolicy(eventType);
+    queueIds = (data || [])
+      .filter((row) => {
+        const retryCount = Number((row as { retry_count?: number | null }).retry_count || 0);
+        if (retryCount >= policy.maxRetries) {
+          return false;
+        }
 
-      const createdAt = (row as { created_at?: string | null }).created_at;
-      return !isRetryWindowExpired(createdAt, policy.retryWindowHours);
-    })
-    .map((row) => row.id as string)
-    .filter(Boolean);
+        const createdAt = (row as { created_at?: string | null }).created_at;
+        return !isRetryWindowExpired(createdAt, policy.retryWindowHours);
+      })
+      .map((row) => row.id as string)
+      .filter(Boolean);
+  }
   let sent = 0;
   let failed = 0;
 
@@ -455,15 +489,16 @@ export async function POST(request: NextRequest) {
   try {
     const payload = (await request.json()) as AutomationPayload;
     if (payload.action === 'get_retry_policy') {
-      const policy = await getRetryPolicy();
+      const policy = await getRetryPolicy(payload.eventType ? toEventType(payload.eventType) : null);
       return NextResponse.json({ ok: true, policy });
     }
 
     if (payload.action === 'set_retry_policy') {
       const maxRetries = normalizePositiveInt(payload.maxRetries, DEFAULT_RETRY_POLICY.maxRetries, 1, 10);
       const retryWindowHours = normalizePositiveInt(payload.retryWindowHours, DEFAULT_RETRY_POLICY.retryWindowHours, 1, 168);
+      const eventType = payload.eventType ? toEventType(payload.eventType) : null;
 
-      const saveResult = await saveRetryPolicy(maxRetries, retryWindowHours);
+      const saveResult = await saveRetryPolicy(maxRetries, retryWindowHours, eventType);
       if (!saveResult.ok) {
         return NextResponse.json({ error: saveResult.error }, { status: saveResult.status });
       }
@@ -471,6 +506,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({
         ok: true,
         action: 'set_retry_policy',
+        eventType,
         policy: { maxRetries, retryWindowHours },
       });
     }
@@ -588,7 +624,7 @@ export async function POST(request: NextRequest) {
 
 export async function GET(request: NextRequest) {
   const supabase = createServerClient();
-  const policy = await getRetryPolicy();
+  const policies = await getRetryPoliciesMap();
   const eventTypeFilter = toEventType(request.nextUrl.searchParams.get('eventType'));
   const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
   let recentQuery = supabase
@@ -691,7 +727,8 @@ export async function GET(request: NextRequest) {
     },
     summary,
     trend,
-    policy,
+    policy: eventTypeFilter ? policies[eventTypeFilter] : policies.default,
+    policies,
     timeline: Array.from(timelineMap.values()),
     recent: data || [],
   });
