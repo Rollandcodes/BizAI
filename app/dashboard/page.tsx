@@ -192,6 +192,15 @@ type AutomationAlertLog = {
   created_at: string;
 };
 
+type AutomationAlertLogMeta = {
+  page: number;
+  pageSize: number;
+  total: number;
+  totalPages: number;
+  trigger: 'all' | 'automatic' | 'manual_test';
+  outcome: 'all' | 'success' | 'failed';
+};
+
 type AutomationOverviewResponse = {
   summary?: AutomationSummary;
   trend?: AutomationTrend;
@@ -200,6 +209,7 @@ type AutomationOverviewResponse = {
   alertPolicy?: AutomationAlertPolicy;
   alertState?: AutomationAlertState;
   alertLogs?: AutomationAlertLog[];
+  alertLogsMeta?: AutomationAlertLogMeta;
   timeline?: AutomationTimelinePoint[];
   recent?: AutomationRecentRecord[];
   filter?: {
@@ -210,6 +220,8 @@ type AutomationOverviewResponse = {
 };
 
 type AutomationEventFilter = 'all' | 'abandoned_signup' | 'abandoned_payment';
+type AlertLogTriggerFilter = 'all' | 'automatic' | 'manual_test';
+type AlertLogOutcomeFilter = 'all' | 'success' | 'failed';
 
 const DEFAULT_AUTOMATION_POLICY: AutomationRetryPolicy = {
   maxRetries: 3,
@@ -230,6 +242,15 @@ const DEFAULT_ALERT_POLICY: AutomationAlertPolicy = {
   hasWebhook: false,
   hasSigningSecret: false,
   lastAlertAt: null,
+};
+
+const DEFAULT_ALERT_LOG_META: AutomationAlertLogMeta = {
+  page: 1,
+  pageSize: 10,
+  total: 0,
+  totalPages: 1,
+  trigger: 'all',
+  outcome: 'all',
 };
 
 type BookingRecord = {
@@ -691,6 +712,10 @@ function DashboardInner() {
   const [alertPolicy, setAlertPolicy] = useState<AutomationAlertPolicy>(DEFAULT_ALERT_POLICY);
   const [alertState, setAlertState] = useState<AutomationAlertState | null>(null);
   const [alertLogs, setAlertLogs] = useState<AutomationAlertLog[]>([]);
+  const [alertLogsMeta, setAlertLogsMeta] = useState<AutomationAlertLogMeta>(DEFAULT_ALERT_LOG_META);
+  const [alertLogTriggerFilter, setAlertLogTriggerFilter] = useState<AlertLogTriggerFilter>('all');
+  const [alertLogOutcomeFilter, setAlertLogOutcomeFilter] = useState<AlertLogOutcomeFilter>('all');
+  const [alertLogPage, setAlertLogPage] = useState(1);
   const [alertPolicyForm, setAlertPolicyForm] = useState({
     failureRateThreshold: DEFAULT_ALERT_POLICY.failureRateThreshold,
     minAttempts: DEFAULT_ALERT_POLICY.minAttempts,
@@ -826,6 +851,10 @@ function DashboardInner() {
       setAlertPolicy(DEFAULT_ALERT_POLICY);
       setAlertState(null);
       setAlertLogs([]);
+      setAlertLogsMeta(DEFAULT_ALERT_LOG_META);
+      setAlertLogTriggerFilter('all');
+      setAlertLogOutcomeFilter('all');
+      setAlertLogPage(1);
       setAlertPolicyForm({
         failureRateThreshold: DEFAULT_ALERT_POLICY.failureRateThreshold,
         minAttempts: DEFAULT_ALERT_POLICY.minAttempts,
@@ -842,7 +871,7 @@ function DashboardInner() {
     }
 
     void loadAutomationOverview();
-  }, [businessId, automationEventFilter]);
+  }, [businessId, automationEventFilter, alertLogTriggerFilter, alertLogOutcomeFilter, alertLogPage]);
 
   useEffect(() => {
     if (activeTab === 'audit' && business && !auditSummary && !auditLoading) {
@@ -954,6 +983,14 @@ function DashboardInner() {
       if (automationEventFilter !== 'all') {
         query.set('eventType', automationEventFilter);
       }
+      if (alertLogTriggerFilter !== 'all') {
+        query.set('alertLogTrigger', alertLogTriggerFilter);
+      }
+      if (alertLogOutcomeFilter !== 'all') {
+        query.set('alertLogOutcome', alertLogOutcomeFilter);
+      }
+      query.set('alertLogPage', String(alertLogPage));
+      query.set('alertLogPageSize', '10');
       const querySuffix = query.toString() ? `?${query.toString()}` : '';
       const response = await fetch(`/api/automation${querySuffix}`, { method: 'GET' });
       const data = (await response.json()) as AutomationOverviewResponse;
@@ -970,6 +1007,7 @@ function DashboardInner() {
         setAlertPolicy(DEFAULT_ALERT_POLICY);
         setAlertState(null);
         setAlertLogs([]);
+        setAlertLogsMeta(DEFAULT_ALERT_LOG_META);
         setAlertPolicyForm({
           failureRateThreshold: DEFAULT_ALERT_POLICY.failureRateThreshold,
           minAttempts: DEFAULT_ALERT_POLICY.minAttempts,
@@ -994,6 +1032,16 @@ function DashboardInner() {
       setAlertPolicy(nextAlertPolicy);
       setAlertState(data.alertState || null);
       setAlertLogs(data.alertLogs || []);
+      const nextAlertLogsMeta = data.alertLogsMeta || {
+        ...DEFAULT_ALERT_LOG_META,
+        trigger: alertLogTriggerFilter,
+        outcome: alertLogOutcomeFilter,
+        page: alertLogPage,
+      };
+      setAlertLogsMeta(nextAlertLogsMeta);
+      if (nextAlertLogsMeta.page !== alertLogPage) {
+        setAlertLogPage(nextAlertLogsMeta.page);
+      }
       setAlertPolicyForm((prev) => ({
         ...prev,
         failureRateThreshold: nextAlertPolicy.failureRateThreshold,
@@ -1016,6 +1064,7 @@ function DashboardInner() {
       setAlertPolicy(DEFAULT_ALERT_POLICY);
       setAlertState(null);
       setAlertLogs([]);
+      setAlertLogsMeta(DEFAULT_ALERT_LOG_META);
       setAutomationTimeline([]);
       setAutomationRecent([]);
       setLatestAutomationFailure(null);
@@ -2102,6 +2151,42 @@ function DashboardInner() {
                         <div className="border-b border-zinc-800 bg-zinc-900/70 px-3 py-2 text-xs font-semibold uppercase tracking-wide text-zinc-400">
                           Recent alert deliveries
                         </div>
+                        <div className="flex flex-wrap items-center gap-2 border-b border-zinc-800 px-3 py-2 text-xs">
+                          {[{ value: 'all', label: 'All Triggers' }, { value: 'automatic', label: 'Automatic' }, { value: 'manual_test', label: 'Manual Tests' }].map((option) => (
+                            <button
+                              key={option.value}
+                              type="button"
+                              onClick={() => {
+                                setAlertLogTriggerFilter(option.value as AlertLogTriggerFilter);
+                                setAlertLogPage(1);
+                              }}
+                              className={`rounded-full border px-2.5 py-1 font-semibold transition ${
+                                alertLogTriggerFilter === option.value
+                                  ? 'border-zinc-500 bg-zinc-100 text-zinc-900'
+                                  : 'border-zinc-700 text-zinc-300 hover:bg-zinc-950'
+                              }`}
+                            >
+                              {option.label}
+                            </button>
+                          ))}
+                          {[{ value: 'all', label: 'All Outcomes' }, { value: 'success', label: 'Delivered' }, { value: 'failed', label: 'Failed' }].map((option) => (
+                            <button
+                              key={option.value}
+                              type="button"
+                              onClick={() => {
+                                setAlertLogOutcomeFilter(option.value as AlertLogOutcomeFilter);
+                                setAlertLogPage(1);
+                              }}
+                              className={`rounded-full border px-2.5 py-1 font-semibold transition ${
+                                alertLogOutcomeFilter === option.value
+                                  ? 'border-emerald-500/70 bg-emerald-100 text-emerald-900'
+                                  : 'border-zinc-700 text-zinc-300 hover:bg-zinc-950'
+                              }`}
+                            >
+                              {option.label}
+                            </button>
+                          ))}
+                        </div>
                         {alertLogs.length === 0 ? (
                           <p className="px-3 py-3 text-xs text-zinc-500">No alert dispatch logs yet.</p>
                         ) : (
@@ -2135,6 +2220,29 @@ function DashboardInner() {
                             </table>
                           </div>
                         )}
+                        <div className="flex items-center justify-between border-t border-zinc-800 px-3 py-2 text-xs text-zinc-400">
+                          <span>
+                            Page {alertLogsMeta.page} of {Math.max(1, alertLogsMeta.totalPages)} ({alertLogsMeta.total} records)
+                          </span>
+                          <div className="flex items-center gap-2">
+                            <button
+                              type="button"
+                              onClick={() => setAlertLogPage((prev) => Math.max(1, prev - 1))}
+                              disabled={automationLoading || alertLogsMeta.page <= 1}
+                              className="rounded-full border border-zinc-700 px-2.5 py-1 font-semibold text-zinc-300 transition hover:bg-zinc-950 disabled:cursor-not-allowed disabled:opacity-40"
+                            >
+                              Prev
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setAlertLogPage((prev) => Math.min(alertLogsMeta.totalPages || 1, prev + 1))}
+                              disabled={automationLoading || alertLogsMeta.page >= alertLogsMeta.totalPages}
+                              className="rounded-full border border-zinc-700 px-2.5 py-1 font-semibold text-zinc-300 transition hover:bg-zinc-950 disabled:cursor-not-allowed disabled:opacity-40"
+                            >
+                              Next
+                            </button>
+                          </div>
+                        </div>
                       </div>
                     </div>
 

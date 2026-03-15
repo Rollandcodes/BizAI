@@ -74,6 +74,17 @@ type AlertLogRecord = {
   created_at: string;
 };
 
+type AlertLogTriggerFilter = 'all' | 'automatic' | 'manual_test';
+type AlertLogOutcomeFilter = 'all' | 'success' | 'failed';
+
+type AlertLogsPage = {
+  records: AlertLogRecord[];
+  total: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
+};
+
 const DEFAULT_RETRY_POLICY: RetryPolicy = {
   maxRetries: 3,
   retryWindowHours: 72,
@@ -125,6 +136,20 @@ function normalizePositiveInt(value: unknown, fallback: number, min: number, max
   }
 
   return Math.min(max, Math.max(min, Math.floor(value)));
+}
+
+function toAlertLogTriggerFilter(value: string | null): AlertLogTriggerFilter {
+  if (value === 'automatic' || value === 'manual_test') {
+    return value;
+  }
+  return 'all';
+}
+
+function toAlertLogOutcomeFilter(value: string | null): AlertLogOutcomeFilter {
+  if (value === 'success' || value === 'failed') {
+    return value;
+  }
+  return 'all';
 }
 
 function getPolicyId(eventType: AutomationEventType | null): string {
@@ -333,23 +358,88 @@ async function logAlertDispatch(input: {
   }
 }
 
-async function getRecentAlertLogs(limit: number): Promise<AlertLogRecord[]> {
+async function getAlertLogsPage(input: {
+  trigger: AlertLogTriggerFilter;
+  outcome: AlertLogOutcomeFilter;
+  page: number;
+  pageSize: number;
+}): Promise<AlertLogsPage> {
   const supabase = createServerClient();
-  const { data, error } = await supabase
+  let countQuery = supabase.from('marketing_automation_alert_logs').select('id', { count: 'exact', head: true });
+
+  if (input.trigger !== 'all') {
+    countQuery = countQuery.eq('triggered_by', input.trigger);
+  }
+
+  if (input.outcome === 'success') {
+    countQuery = countQuery.or('sent_webhook.eq.true,sent_email.eq.true');
+  } else if (input.outcome === 'failed') {
+    countQuery = countQuery.eq('sent_webhook', false).eq('sent_email', false);
+  }
+
+  const { count, error: countError } = await countQuery;
+
+  if (countError?.code === '42P01') {
+    return {
+      records: [],
+      total: 0,
+      page: 1,
+      pageSize: input.pageSize,
+      totalPages: 1,
+    };
+  }
+
+  if (countError) {
+    return {
+      records: [],
+      total: 0,
+      page: 1,
+      pageSize: input.pageSize,
+      totalPages: 1,
+    };
+  }
+
+  const total = Number(count || 0);
+  const totalPages = Math.max(1, Math.ceil(total / input.pageSize));
+  const page = Math.min(Math.max(1, input.page), totalPages);
+  const rangeStart = (page - 1) * input.pageSize;
+  const rangeEnd = rangeStart + input.pageSize - 1;
+
+  let dataQuery = supabase
     .from('marketing_automation_alert_logs')
     .select('id, triggered_by, event_scope, failure_rate, attempts, sent_webhook, sent_email, webhook_provider, signed_webhook, dispatch_error, created_at')
     .order('created_at', { ascending: false })
-    .limit(limit);
+    .range(rangeStart, rangeEnd);
 
-  if (error?.code === '42P01') {
-    return [];
+  if (input.trigger !== 'all') {
+    dataQuery = dataQuery.eq('triggered_by', input.trigger);
   }
+
+  if (input.outcome === 'success') {
+    dataQuery = dataQuery.or('sent_webhook.eq.true,sent_email.eq.true');
+  } else if (input.outcome === 'failed') {
+    dataQuery = dataQuery.eq('sent_webhook', false).eq('sent_email', false);
+  }
+
+  const { data, error } = await dataQuery;
 
   if (error || !data) {
-    return [];
+    return {
+      records: [],
+      total,
+      page,
+      pageSize: input.pageSize,
+      totalPages,
+    };
   }
 
-  return data as AlertLogRecord[];
+  return {
+    records: data as AlertLogRecord[],
+    total,
+    page,
+    pageSize: input.pageSize,
+    totalPages,
+  };
 }
 
 async function dispatchFailureSpikeAlert(input: {
@@ -1061,6 +1151,10 @@ export async function GET(request: NextRequest) {
   const alertPolicy = await getAlertPolicy();
   const policies = await getRetryPoliciesMap();
   const eventTypeFilter = toEventType(request.nextUrl.searchParams.get('eventType'));
+  const alertLogTrigger = toAlertLogTriggerFilter(request.nextUrl.searchParams.get('alertLogTrigger'));
+  const alertLogOutcome = toAlertLogOutcomeFilter(request.nextUrl.searchParams.get('alertLogOutcome'));
+  const alertLogPage = normalizePositiveInt(Number(request.nextUrl.searchParams.get('alertLogPage') || 1), 1, 1, 5000);
+  const alertLogPageSize = normalizePositiveInt(Number(request.nextUrl.searchParams.get('alertLogPageSize') || 10), 10, 5, 50);
   const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
   let recentQuery = supabase
     .from('marketing_automation_queue')
@@ -1195,7 +1289,12 @@ export async function GET(request: NextRequest) {
     });
   }
 
-  const alertLogs = await getRecentAlertLogs(20);
+  const alertLogsPage = await getAlertLogsPage({
+    trigger: alertLogTrigger,
+    outcome: alertLogOutcome,
+    page: alertLogPage,
+    pageSize: alertLogPageSize,
+  });
 
   return NextResponse.json({
     message: 'CypAI automation endpoint',
@@ -1209,7 +1308,15 @@ export async function GET(request: NextRequest) {
     policy: eventTypeFilter ? policies[eventTypeFilter] : policies.default,
     policies,
     alertPolicy,
-    alertLogs,
+    alertLogs: alertLogsPage.records,
+    alertLogsMeta: {
+      page: alertLogsPage.page,
+      pageSize: alertLogsPage.pageSize,
+      total: alertLogsPage.total,
+      totalPages: alertLogsPage.totalPages,
+      trigger: alertLogTrigger,
+      outcome: alertLogOutcome,
+    },
     alertState: {
       attempts,
       failureRate,
