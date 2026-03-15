@@ -82,6 +82,35 @@ export default function IntegrationsPage() {
       </section>
 
       <section className="py-16">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+          <h2 className="text-3xl font-black text-white">WhatsApp chatbot with website sync (GHL-style)</h2>
+          <p className="mt-3 max-w-3xl text-sm text-zinc-400">
+            Yes, this is possible. We can run WhatsApp as a channel for the same AI agent and push every message, lead, and status update back into the website dashboard conversation stream.
+          </p>
+          <div className="mt-6 grid gap-4 md:grid-cols-3">
+            {[
+              ['Channel ingest', 'Meta WhatsApp Cloud API webhook receives inbound WhatsApp messages in real time.'],
+              ['Unified conversation layer', 'Messages are mapped to the same business and session model used by website chat.'],
+              ['Central inbox and automation', 'Replies, tags, assignments, and automations update one shared timeline across channels.'],
+            ].map(([title, text]) => (
+              <article key={title} className="rounded-2xl border border-zinc-800 bg-zinc-900 p-5">
+                <h3 className="text-base font-bold text-white">{title}</h3>
+                <p className="mt-2 text-sm text-zinc-400">{text}</p>
+              </article>
+            ))}
+          </div>
+          <div className="mt-6 flex flex-wrap gap-2">
+            <Link href="/whatsapp-sync" className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-500">
+              View WhatsApp sync blueprint
+            </Link>
+            <Link href="/dashboard" className="rounded-lg border border-zinc-700 px-4 py-2 text-sm font-semibold hover:bg-zinc-900">
+              Open dashboard
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      <section className="py-16">
         <div className="mx-auto flex max-w-6xl flex-wrap gap-2 px-4 sm:px-6 lg:px-8">
           <Link href="/signup?plan=pro" className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-500">
             Start free trial

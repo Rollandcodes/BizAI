@@ -131,6 +131,33 @@ const shippedUpgrades = [
   },
 ]
 
+const growthModules = [
+  {
+    title: 'Programmatic SEO pages',
+    detail: 'City, niche, and use-case landing pages to compound long-tail organic traffic.',
+  },
+  {
+    title: 'Competitor alternatives hub',
+    detail: 'Create high-intent comparison pages to capture bottom-funnel search demand.',
+  },
+  {
+    title: 'A/B testing engine',
+    detail: 'Run controlled experiments on headline, CTA, pricing, and signup flow variants.',
+  },
+  {
+    title: 'Signup and onboarding CRO',
+    detail: 'Reduce friction from registration to first lead captured with guided activation.',
+  },
+  {
+    title: 'Referral and affiliate automation',
+    detail: 'Add partner and customer referral loops with tracked payouts and attribution.',
+  },
+  {
+    title: 'Analytics tracking standardization',
+    detail: 'Unify product and marketing events across GA4, Mixpanel, and ad channels.',
+  },
+]
+
 const workflowTabs = {
   how: {
     title: 'How the system works',
@@ -221,8 +248,10 @@ export default function HomePage() {
               ['#features', 'Features'],
               ['#how-it-works', 'How It Works'],
               ['#automation', 'Automation'],
+              ['#roadmap', 'Growth Modules'],
               ['#pricing', 'Pricing'],
               ['/how-it-works', 'Docs'],
+              ['/whatsapp-sync', 'WhatsApp Sync'],
               ['/demo', 'Demo'],
               ['#faq', 'FAQ'],
               ['/contact', 'Contact'],
@@ -259,8 +288,10 @@ export default function HomePage() {
               ['#features', 'Features'],
               ['#how-it-works', 'How It Works'],
               ['#automation', 'Automation'],
+              ['#roadmap', 'Growth Modules'],
               ['#pricing', 'Pricing'],
               ['/how-it-works', 'Docs'],
+              ['/whatsapp-sync', 'WhatsApp Sync'],
               ['/demo', 'Demo'],
               ['#faq', 'FAQ'],
               ['/contact', 'Contact'],
@@ -544,6 +575,24 @@ export default function HomePage() {
         </div>
       </section>
 
+      <section id="roadmap" className="bg-zinc-950 py-24">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-zinc-500">Based on your growth skill stack</p>
+          <h2 className="mt-3 text-3xl font-black text-white sm:text-4xl">High-impact modules we can add next</h2>
+          <p className="mt-4 max-w-3xl text-zinc-400">
+            These are aligned with your B2B SaaS goals: more organic traffic, less manual work, and stronger conversion performance.
+          </p>
+          <div className="mt-10 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {growthModules.map((item) => (
+              <article key={item.title} className="rounded-2xl border border-zinc-800 bg-zinc-900 p-5">
+                <h3 className="text-base font-bold text-white">{item.title}</h3>
+                <p className="mt-2 text-sm text-zinc-400">{item.detail}</p>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+
       <section className="bg-zinc-950 py-24">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-zinc-500">Why CypAI</p>
@@ -574,7 +623,8 @@ export default function HomePage() {
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-zinc-500">Pricing</p>
           <h2 className="mt-3 text-3xl font-black text-white sm:text-4xl">Simple pricing, no surprises</h2>
           <p className="mt-4 text-zinc-400">7-day free trial on all plans. No credit card required. Cancel anytime.</p>
-          <p className="mt-2 text-sm text-blue-300">Payments are processed with PayPal so you keep PayPal as your payment receiver.</p>
+          <p className="mt-2 text-sm text-blue-300">We accept all major card payments via PayPal checkout. Stripe direct checkout is marked as coming soon.</p>
+          <p className="mt-1 text-xs text-zinc-500">Current receiver: PayPal. Coming soon: native Stripe checkout option.</p>
 
           <div className="mt-10 grid grid-cols-1 items-stretch gap-6 md:grid-cols-3">
             {[
@@ -627,7 +677,8 @@ export default function HomePage() {
                   {plan.list.map((item) => (
                     <li key={item}>✓ {item}</li>
                   ))}
-                  <li>✓ PayPal checkout and billing receiver</li>
+                  <li>✓ All major cards via PayPal checkout</li>
+                  <li>✓ Stripe direct checkout (coming soon)</li>
                 </ul>
                 <Link
                   href={`/signup?plan=${plan.plan}`}
@@ -758,6 +809,7 @@ export default function HomePage() {
                 <Link href="/how-it-works" className="block hover:text-white">How It Works</Link>
                 <Link href="/automation" className="block hover:text-white">Automation</Link>
                 <Link href="/integrations" className="block hover:text-white">Integrations</Link>
+                <Link href="/whatsapp-sync" className="block hover:text-white">WhatsApp Sync</Link>
                 <a href="#pricing" className="block hover:text-white">Pricing</a>
                 <Link href="/demo" className="block hover:text-white">Live Demo</Link>
                 <Link href="/dashboard" className="block hover:text-white">Dashboard</Link>
