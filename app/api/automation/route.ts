@@ -247,7 +247,7 @@ async function retryFailedAutomation(queueId: string) {
   if (emailResult.sent) {
     await updateQueueDeliveryById(queueId, {
       status: 'sent',
-      providerMessageId: emailResult.providerMessageId || null,
+      providerMessageId: emailResult.providerMessageId || undefined,
       incrementRetryCount: true,
     });
 
@@ -373,7 +373,7 @@ export async function POST(request: NextRequest) {
       if (emailResult.sent) {
         await updateQueueDelivery(dedupeKey, {
           status: 'sent',
-          providerMessageId: emailResult.providerMessageId || null,
+          providerMessageId: emailResult.providerMessageId || undefined,
         });
       } else {
         await updateQueueDelivery(dedupeKey, {
