@@ -1,44 +1,38 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from "next/server";
+import { createClient } from "@supabase/supabase-js";
+import { corsHeaders } from "@/app/api/chat/cors";
 
-import { assertSupabaseConfig, createServerClient } from '@/lib/supabase';
+function admin() {
+  return createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
+}
 
-const supabase = createServerClient();
+export async function OPTIONS() {
+  return new NextResponse(null, { status: 200, headers: corsHeaders });
+}
 
-export async function POST(request: NextRequest) {
+export async function POST(req: NextRequest) {
   try {
-    assertSupabaseConfig();
+    const body = await req.json() as { sessionId?: string; businessId?: string; rating?: number };
+    const { sessionId, businessId, rating } = body;
 
-    const body = (await request.json()) as {
-      businessId?: string;
-      sessionId?: string;
-      rating?: number;
-    };
-
-    if (
-      !body.businessId ||
-      !body.sessionId ||
-      typeof body.rating !== 'number' ||
-      !Number.isInteger(body.rating) ||
-      body.rating < 1 ||
-      body.rating > 5
-    ) {
+    if (!sessionId || !businessId || typeof rating !== "number" || rating < 1 || rating > 5) {
       return NextResponse.json(
-        { error: 'businessId, sessionId, and rating (integer 1-5) are required' },
-        { status: 400 }
+        { error: "sessionId, businessId, and rating (1-5) are required" },
+        { status: 400, headers: corsHeaders }
       );
     }
 
+    const supabase = admin();
     const { error } = await supabase
-      .from('conversations')
-      .update({ customer_rating: body.rating })
-      .eq('business_id', body.businessId)
-      .eq('session_id', body.sessionId);
+      .from("conversations")
+      .update({ customer_rating: rating })
+      .eq("session_id", sessionId)
+      .eq("business_id", businessId);
 
-    if (error) throw error;
+    if (error) return NextResponse.json({ error: error.message }, { status: 500, headers: corsHeaders });
 
-    return NextResponse.json({ success: true });
-  } catch (error) {
-    console.error('Rating API error:', error);
-    return NextResponse.json({ error: 'Failed to save rating' }, { status: 500 });
+    return NextResponse.json({ success: true }, { headers: corsHeaders });
+  } catch (err) {
+    return NextResponse.json({ error: "Internal error" }, { status: 500, headers: corsHeaders });
   }
 }

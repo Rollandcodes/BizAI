@@ -2,8 +2,15 @@
 User-agent: *
 Allow: /
 
+# *
+User-agent: *
+Disallow: /api/
+Disallow: /dashboard/
+Disallow: /widget/
+
 # Host
-Host: https://www.cypai.app
+Host: https://biz-ai-u4n3.vercel.app/
 
 # Sitemaps
-Sitemap: https://www.cypai.app/sitemap.xml
+Sitemap: https://biz-ai-u4n3.vercel.app/sitemap.xml
+Sitemap: https://biz-ai-u4n3.vercel.app//sitemap.xml

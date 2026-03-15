@@ -1,161 +1,114 @@
-# CypAI (BizAI)
+# CypAI — AI Customer Service Platform
 
-AI-powered customer support and lead capture platform for local businesses, built with Next.js, Supabase, OpenAI, and PayPal.
+AI-powered customer service, lead capture, bookings, and WhatsApp automation for local businesses in Cyprus, MENA, Europe, and North America.
 
-## Overview
-
-CypAI helps businesses respond instantly to customer questions across web chat and WhatsApp, capture leads, and manage conversations from a unified dashboard.
-
-It is designed for service businesses that need:
-
-- 24/7 automated responses
-- Multilingual customer communication
-- Lead capture and conversation tracking
-- Fast setup with embeddable widgets
-
-## Key Features
-
-- AI chat widget for business websites
-- Conversation and lead management dashboard
-- Industry-specific demo and onboarding flows
-- PayPal checkout and webhook handling
-- Graceful degraded mode for AI provider issues
-- E2E coverage with Playwright
-- SEO sitemap and robots generation via next-sitemap
+**Live:** [www.cypai.app](https://www.cypai.app)
 
 ## Tech Stack
 
-- Next.js 16 (App Router)
-- React 19 + TypeScript
-- Supabase (database + auth patterns)
-- OpenAI API
-- PayPal APIs + webhook verification
-- Tailwind CSS
-- Playwright (E2E)
+- **Framework:** Next.js 16 (App Router) + React 19 + TypeScript
+- **Database:** Supabase (PostgreSQL + RLS)
+- **AI:** OpenAI GPT-4o / GPT-4o-mini (smart routing)
+- **Billing:** PayPal Orders API + Webhooks
+- **Channels:** Web widget (iframe embed) + WhatsApp Cloud API
+- **Analytics:** Simple Analytics (privacy-first)
+- **Deploy:** Vercel
 
-## Project Structure
+## Architecture
 
-- [app](app): App Router pages and API routes
-- [components](components): UI and feature components
-- [lib](lib): Shared utilities, API clients, and config helpers
-- [public](public): Static assets including sitemap and robots
-- [tests](tests): Playwright end-to-end test specs
-- [supabase-schema.sql](supabase-schema.sql): Database schema and migrations
-- [SETUP.md](SETUP.md): Full setup instructions
+```
+lib/
+  ai.ts          ← Single source of truth: prompts, model routing, lead extraction
+  supabase.ts    ← DB client + all TypeScript types
+  plans.ts       ← Plan config, limits, display helpers
+  utils.ts       ← formatDate, downloadCsv, parseMessages
 
-## Prerequisites
+app/api/
+  chat/          ← Widget chat endpoint (CORS-enabled, plan quota enforced)
+  business/      ← Dashboard data + settings PATCH
+  analytics/     ← Daily breakdown, language stats, ratings
+  paypal/        ← create-order, capture-order, webhook (signature verified)
+  whatsapp/      ← Meta Cloud API webhook (verify + inbound message handling)
+  audit/         ← Agent compliance scoring
+  conversations/ ← Lead status PATCH
+  automation/    ← Recovery queue (abandoned signup/payment)
+  affiliate/     ← Referral tracking
 
-- Node.js 18+ (recommended 20+)
-- npm
-- Supabase project
-- OpenAI API key
-- PayPal developer app
+app/dashboard/   ← Main SaaS dashboard (auth-gated, plan-aware)
+components/dashboard/
+  OverviewTab    StatCard   ConversationsTab   SettingsTab
+  AnalyticsTab   CRMTab     BookingsTab        FollowUpsTab
+  AgencyTab      (+ more)
+hooks/
+  use-dashboard.ts ← Data loading hook (extracted from monolith)
+public/
+  widget.js      ← Embeddable chat widget (iframe-based, data-* attributes)
+```
+
+## Setup
+
+```bash
+npm install
+cp .env.example .env.local   # fill in your keys
+npm run dev
+```
+
+Then run `supabase-schema.sql` in your Supabase SQL editor.
 
 ## Environment Variables
 
-Create `.env.local` in the project root with:
-
-```env
+```
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
 SUPABASE_SERVICE_ROLE_KEY=
 
 OPENAI_API_KEY=
 
+PAYPAL_BASE_URL=https://api-m.sandbox.paypal.com
 PAYPAL_CLIENT_ID=
 PAYPAL_CLIENT_SECRET=
 NEXT_PUBLIC_PAYPAL_CLIENT_ID=
-PAYPAL_BASE_URL=https://api-m.sandbox.paypal.com
 PAYPAL_WEBHOOK_ID=
 
-NEXT_PUBLIC_APP_URL=http://localhost:3000
+WHATSAPP_VERIFY_TOKEN=
+WHATSAPP_ACCESS_TOKEN=
+WHATSAPP_GRAPH_API_VERSION=v21.0
+WHATSAPP_DEFAULT_BUSINESS_ID=
+
+NEXT_PUBLIC_APP_URL=https://www.cypai.app
+
+# Optional
+AGENCY_ALLOWED_EMAILS=email1@domain.com,email2@domain.com
 ```
 
-## Local Development
-
-1. Install dependencies:
+## Deploy
 
 ```bash
-npm install
+npm run deploy       # Vercel CLI
+npm run postbuild    # generates sitemap (auto on build)
 ```
 
-2. Start the app:
+## Key Improvements (v2)
 
-```bash
-npm run dev
-```
+| Before | After |
+|---|---|
+| 4,069-line dashboard monolith | Extracted into 10+ focused components |
+| AI prompts duplicated in 3 routes | Single `lib/ai.ts` source of truth |
+| No plan quota on chat API | Server-enforced per-request quota check |
+| In-memory rate limiter (resets on cold start) | Per-request sliding window (Vercel-safe) |
+| console.log credentials in prod | Removed all debug logging |
+| PayPal webhook used old SDK | Pure REST API with proper signature verify |
+| No analytics API | `/api/analytics` with daily breakdown |
 
-3. Open `http://localhost:3000`
+## Plans
 
-## Available Scripts
-
-- `npm run dev` - Start local development server
-- `npm run build` - Production build
-- `npm run start` - Run production server
-- `npm run lint` - Run ESLint
-- `npm run test:e2e` - Run Playwright E2E suite
-- `npm run deploy` - Deploy via Vercel CLI
-- `npm run postbuild` - Generate sitemap using next-sitemap
-
-## Database Setup
-
-Run [supabase-schema.sql](supabase-schema.sql) in Supabase SQL Editor to create required tables and indexes.
-
-## PayPal Setup
-
-- Create a sandbox app in PayPal Developer Dashboard
-- Configure webhook endpoint:
-  - Local: `http://localhost:3000/api/paypal/webhook`
-  - Production: `https://www.cypai.app/api/paypal/webhook`
-- Subscribe to:
-  - `BILLING.SUBSCRIPTION.CREATED`
-  - `BILLING.SUBSCRIPTION.ACTIVATED`
-  - `BILLING.SUBSCRIPTION.UPDATED`
-  - `BILLING.SUBSCRIPTION.CANCELLED`
-  - `PAYMENT.SALE.COMPLETED`
-
-## SEO Sitemap
-
-Sitemap is generated with next-sitemap using [next-sitemap.config.js](next-sitemap.config.js).
-
-Generated output:
-
-- [public/sitemap.xml](public/sitemap.xml)
-- [public/sitemap-0.xml](public/sitemap-0.xml)
-- [public/robots.txt](public/robots.txt)
-
-## Testing
-
-Run E2E tests:
-
-```bash
-npm run test:e2e
-```
-
-Current suite covers major user journeys, including:
-
-- Homepage and navigation
-- Signup/payment guards and flow
-- Dashboard tab behavior
-- Demo chat and degraded mode UI
-- Blog and widget states
-
-## Deployment
-
-Recommended: Vercel (GitHub-connected CI and CD).
-
-1. Push to GitHub
-2. Import project in Vercel
-3. Add environment variables
-4. Deploy
-
-## Security Notes
-
-- Never expose service-role keys on the client
-- Keep webhook signature verification enabled
-- Rotate API keys regularly
-- Use production PayPal credentials only in production environments
+| Plan | Messages | WhatsApp | Bookings | Audit |
+|---|---|---|---|---|
+| Trial | 100/mo | — | — | — |
+| Starter ($29/mo) | 500/mo | — | ✓ | — |
+| Pro ($79/mo) | Unlimited | ✓ | ✓ | — |
+| Business ($149/mo) | Unlimited | ✓ | ✓ | ✓ |
 
 ## License
 
-This project is licensed under the terms in [LICENSE](LICENSE).
+MIT — see [LICENSE](LICENSE)

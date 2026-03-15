@@ -1,58 +1,41 @@
-const fs = require('node:fs');
-const path = require('node:path');
-
-function getBlogSlugs() {
-  const postsDir = path.join(process.cwd(), 'app', 'blog', 'posts');
-
-  if (!fs.existsSync(postsDir)) {
-    return [];
-  }
-
-  return fs
-    .readdirSync(postsDir)
-    .filter((name) => name.endsWith('.ts'))
-    .filter((name) => !['index.ts', 'types.ts'].includes(name))
-    .map((name) => name.replace(/\.ts$/, ''));
-}
-
 /** @type {import('next-sitemap').IConfig} */
 module.exports = {
-  siteUrl: 'https://www.cypai.app',
+  siteUrl: process.env.NEXT_PUBLIC_APP_URL || "https://www.cypai.app",
   generateRobotsTxt: true,
-  generateIndexSitemap: false,
-  sitemapSize: 5000,
+  changefreq: "weekly",
+  priority: 0.7,
   exclude: [
-    '/dashboard-login',
-    '/dashboard',
-    '/login',
-    '/signup',
-    '/payment',
-    '/success',
-    '/chat/*',
-    '/widget/*',
+    "/dashboard",
+    "/dashboard/*",
+    "/api/*",
+    "/success",
+    "/payment",
+    "/setup",
+    "/whatsapp-sync",
+    "/widget/*",
+    "/chat/*",
   ],
-  additionalPaths: async (config) => {
-    const staticRoutes = [
-      '/',
-      '/demo',
-      '/pricing',
-      '/blog',
-      '/contact',
-      '/affiliate',
-      '/privacy',
-      '/terms',
-    ];
-
-    const blogRoutes = getBlogSlugs().map((slug) => `/blog/${slug}`);
-
-    const uniqueRoutes = [...new Set([...staticRoutes, ...blogRoutes])];
-
-    return uniqueRoutes.map((loc) => ({
-      loc,
-      changefreq: 'daily',
-      priority: loc === '/' ? 1.0 : 0.7,
-      lastmod: new Date().toISOString(),
-      alternateRefs: config.alternateRefs ?? [],
-    }));
+  additionalPaths: async (config) => [
+    await config.transform(config, "/"),
+    await config.transform(config, "/pricing"),
+    await config.transform(config, "/demo"),
+    await config.transform(config, "/signup"),
+    await config.transform(config, "/blog"),
+    await config.transform(config, "/affiliate"),
+    await config.transform(config, "/contact"),
+    await config.transform(config, "/privacy"),
+    await config.transform(config, "/terms"),
+    await config.transform(config, "/how-it-works"),
+    await config.transform(config, "/alternatives"),
+    await config.transform(config, "/integrations"),
+  ],
+  robotsTxtOptions: {
+    policies: [
+      { userAgent: "*", allow: "/" },
+      { userAgent: "*", disallow: ["/api/", "/dashboard/", "/widget/"] },
+    ],
+    additionalSitemaps: [
+      `${process.env.NEXT_PUBLIC_APP_URL || "https://www.cypai.app"}/sitemap.xml`,
+    ],
   },
 };

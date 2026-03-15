@@ -529,3 +529,32 @@ CREATE INDEX IF NOT EXISTS idx_bookings_business_booking_date
 -- Uncomment if you want to store business logos/assets
 -- INSERT INTO storage.buckets (id, name, public)
 -- VALUES ('business-assets', 'business-assets', true);
+
+-- ============================================================================
+-- v2 additions: message counter and increment function
+-- ============================================================================
+ALTER TABLE public.businesses ADD COLUMN IF NOT EXISTS message_count_month INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE public.businesses ADD COLUMN IF NOT EXISTS message_count_total INTEGER NOT NULL DEFAULT 0;
+
+-- Atomic increment (called from chat route, non-blocking)
+CREATE OR REPLACE FUNCTION public.increment_message_count(p_business_id UUID)
+RETURNS void LANGUAGE plpgsql AS $$
+BEGIN
+  UPDATE public.businesses
+  SET message_count_month = message_count_month + 1,
+      message_count_total = message_count_total + 1
+  WHERE id = p_business_id;
+END;
+$$;
+
+-- Reset monthly counter (run on 1st of each month via cron or Supabase Edge Function)
+CREATE OR REPLACE FUNCTION public.reset_monthly_counts()
+RETURNS void LANGUAGE plpgsql AS $$
+BEGIN
+  UPDATE public.businesses SET message_count_month = 0;
+END;
+$$;
+
+-- Service role: allow API routes to bypass RLS for these functions
+GRANT EXECUTE ON FUNCTION public.increment_message_count TO service_role;
+GRANT EXECUTE ON FUNCTION public.reset_monthly_counts TO service_role;

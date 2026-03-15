@@ -1,122 +1,96 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from "next/server";
 
-const PLANS: Record<string, { price: string; name: string }> = {
-  starter:  { price: '29.00',  name: 'CypAI Starter Plan'  },
-  pro:      { price: '79.00',  name: 'CypAI Pro Plan'      },
-  business: { price: '149.00', name: 'CypAI Business Plan' }
-}
+const PLAN_CONFIG: Record<string, { price: string; name: string }> = {
+  starter:  { price: "29.00",  name: "BizAI Starter Plan"  },
+  basic:    { price: "29.00",  name: "BizAI Starter Plan"  },
+  pro:      { price: "79.00",  name: "BizAI Pro Plan"      },
+  business: { price: "149.00", name: "BizAI Business Plan" },
+};
 
 async function getPayPalToken(): Promise<string> {
-  const clientId     = process.env.PAYPAL_CLIENT_ID!
-  const clientSecret = process.env.PAYPAL_CLIENT_SECRET!
-  const baseUrl      = process.env.PAYPAL_BASE_URL!
+  const clientId     = process.env.PAYPAL_CLIENT_ID;
+  const clientSecret = process.env.PAYPAL_CLIENT_SECRET;
+  const baseUrl      = process.env.PAYPAL_BASE_URL;
 
-  console.log('PayPal baseUrl:', baseUrl)
-  console.log('PayPal clientId exists:', !!clientId)
-  console.log('PayPal secret exists:', !!clientSecret)
+  if (!clientId || !clientSecret || !baseUrl) {
+    throw new Error("PayPal credentials not configured");
+  }
 
-  const auth = Buffer.from(`${clientId}:${clientSecret}`)
-    .toString('base64')
-
+  const auth = Buffer.from(`${clientId}:${clientSecret}`).toString("base64");
   const res = await fetch(`${baseUrl}/v1/oauth2/token`, {
-    method: 'POST',
+    method: "POST",
     headers: {
-      'Authorization': `Basic ${auth}`,
-      'Content-Type':  'application/x-www-form-urlencoded'
+      Authorization: `Basic ${auth}`,
+      "Content-Type": "application/x-www-form-urlencoded",
     },
-    body: 'grant_type=client_credentials'
-  })
+    body: "grant_type=client_credentials",
+  });
 
-  const data = await res.json()
-  console.log('Token response status:', res.status)
-
-  if (!data.access_token) {
-    console.error('Token error:', data)
-    throw new Error('Failed to get PayPal token')
-  }
-
-  return data.access_token
+  if (!res.ok) throw new Error(`PayPal auth failed: ${res.status}`);
+  const data = await res.json() as { access_token?: string };
+  if (!data.access_token) throw new Error("No PayPal access token returned");
+  return data.access_token;
 }
 
-// ✅ THIS IS WHAT WAS MISSING — named POST export
-export async function POST(request: NextRequest) {
+export async function POST(req: NextRequest) {
   try {
-    const body = await request.json()
-    const { planId, customerEmail } = body
+    const body = await req.json() as { planId?: string; customerEmail?: string; businessEmail?: string };
+    const { planId, customerEmail, businessEmail } = body;
+    const email = customerEmail || businessEmail;
 
-    console.log('Creating order for plan:', planId)
+    if (!planId) {
+      return NextResponse.json({ error: "planId is required" }, { status: 400 });
+    }
 
-    const plan = PLANS[planId]
+    const plan = PLAN_CONFIG[planId];
     if (!plan) {
-      return NextResponse.json(
-        { error: `Invalid plan: ${planId}` },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: `Invalid planId: ${planId}` }, { status: 400 });
     }
 
-    const token   = await getPayPalToken()
-    const baseUrl = process.env.PAYPAL_BASE_URL!
+    const token   = await getPayPalToken();
+    const baseUrl = process.env.PAYPAL_BASE_URL!;
+    const appUrl  = process.env.NEXT_PUBLIC_APP_URL ?? "https://www.cypai.app";
 
-    const orderRes = await fetch(
-      `${baseUrl}/v2/checkout/orders`,
-      {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type':  'application/json'
+    const res = await fetch(`${baseUrl}/v2/checkout/orders`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        intent: "CAPTURE",
+        purchase_units: [{
+          amount: { currency_code: "USD", value: plan.price },
+          description: plan.name,
+          custom_id: email ?? "unknown",
+        }],
+        application_context: {
+          brand_name: "CypAI",
+          landing_page: "BILLING",
+          user_action: "PAY_NOW",
+          payment_method: {
+            payer_selected: "PAYPAL",
+            payee_preferred: "IMMEDIATE_PAYMENT_REQUIRED",
+          },
+          return_url: `${appUrl}/success`,
+          cancel_url: `${appUrl}/payment`,
         },
-        body: JSON.stringify({
-          intent: 'CAPTURE',
-          purchase_units: [{
-            amount: {
-              currency_code: 'USD',
-              value: plan.price
-            },
-            description: plan.name,
-            custom_id:   customerEmail || 'unknown'
-          }],
-          application_context: {
-            brand_name:  'CypAI',
-            landing_page: 'BILLING',
-            user_action:  'PAY_NOW',
-            payment_method: {
-              payer_selected: 'PAYPAL',
-              payee_preferred: 'IMMEDIATE_PAYMENT_REQUIRED'
-            },
-            return_url: `${process.env.NEXT_PUBLIC_APP_URL}/success`,
-            cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/payment`
-          }
-        })
-      }
-    )
+      }),
+    });
 
-    const orderData = await orderRes.json()
-    console.log('Order created:', orderData.id)
-
-    if (!orderData.id) {
-      console.error('Order creation failed:', orderData)
-      return NextResponse.json(
-        { error: 'PayPal order creation failed', details: orderData },
-        { status: 500 }
-      )
+    const data = await res.json() as { id?: string };
+    if (!data.id) {
+      return NextResponse.json({ error: "PayPal order creation failed" }, { status: 500 });
     }
 
-    return NextResponse.json({ id: orderData.id })
-
-  } catch (error: any) {
-    console.error('create-order error:', error)
-    return NextResponse.json(
-      { error: error.message || 'Server error' },
-      { status: 500 }
-    )
+    return NextResponse.json({ id: data.id });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Server error";
+    console.error("[create-order]", message);
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
 
-// Handles browser hitting the URL directly (GET)
 export async function GET() {
-  return NextResponse.json({
-    message: 'CypAI PayPal create-order endpoint',
-    status:  'ready',
-    method:  'POST required'
-  })
+  return NextResponse.json({ status: "CypAI PayPal create-order", method: "POST required" });
 }

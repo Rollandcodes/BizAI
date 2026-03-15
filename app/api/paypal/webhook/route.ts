@@ -1,339 +1,207 @@
-import { NextRequest, NextResponse } from 'next/server';
-import paypal from '@paypal/checkout-server-sdk';
-import { createServerClient, type BusinessPlan } from '@/lib/supabase';
-
-const PLAN_EXPIRY_DAYS = 30;
+import { NextRequest, NextResponse } from "next/server";
+import { createClient } from "@supabase/supabase-js";
 
 type JsonMap = Record<string, unknown>;
+type BusinessPlan = "trial" | "basic" | "starter" | "pro" | "business";
+const PLAN_EXPIRY_DAYS = 31;
+const PAYPAL_TOKEN_TTL_MS = 8 * 60 * 1000;
 
-interface PayPalWebhookEvent {
-  id?: string;
-  event_type?: string;
-  resource?: JsonMap;
+let paypalTokenCache: { token: string; expiresAt: number } | null = null;
+
+function admin() {
+  return createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
 }
 
-function asRecord(value: unknown): JsonMap {
-  if (!value || typeof value !== 'object') {
-    return {};
-  }
-  return value as JsonMap;
+function str(v: unknown): string | undefined {
+  if (typeof v !== "string") return undefined;
+  const t = v.trim();
+  return t.length ? t : undefined;
 }
 
-function getString(value: unknown): string | undefined {
-  if (typeof value !== 'string') {
-    return undefined;
-  }
-
-  const trimmed = value.trim();
-  return trimmed.length > 0 ? trimmed : undefined;
+function obj(v: unknown): JsonMap {
+  return v && typeof v === "object" ? (v as JsonMap) : {};
 }
 
-function normalizeEmail(value: string | undefined): string | undefined {
-  if (!value) {
-    return undefined;
+async function getPayPalToken(): Promise<string> {
+  const now = Date.now();
+  if (paypalTokenCache && now < paypalTokenCache.expiresAt) {
+    return paypalTokenCache.token;
   }
 
-  const normalized = value.trim().toLowerCase();
-  return normalized.length > 0 ? normalized : undefined;
+  const auth = Buffer.from(`${process.env.PAYPAL_CLIENT_ID}:${process.env.PAYPAL_CLIENT_SECRET}`).toString("base64");
+  const res = await fetch(`${process.env.PAYPAL_BASE_URL}/v1/oauth2/token`, {
+    method: "POST",
+    headers: { Authorization: `Basic ${auth}`, "Content-Type": "application/x-www-form-urlencoded" },
+    body: "grant_type=client_credentials",
+  });
+  const data = await res.json() as { access_token?: string; expires_in?: number };
+  if (!data.access_token) throw new Error("No PayPal token");
+
+  const ttlMs = Math.max(30_000, Math.min(PAYPAL_TOKEN_TTL_MS, (data.expires_in ?? 300) * 1000 - 15_000));
+  paypalTokenCache = {
+    token: data.access_token,
+    expiresAt: now + ttlMs,
+  };
+
+  return data.access_token;
 }
 
-function extractEmailCandidates(resource: JsonMap): string[] {
-  const candidates = [
-    getString(resource.custom_id),
-    getString(resource.custom),
-    getString(asRecord(resource.subscriber).email_address),
-    getString(asRecord(resource.payer).email_address),
-  ];
+async function verifyWebhookSignature(req: NextRequest, body: string): Promise<boolean> {
+  const webhookId = process.env.PAYPAL_WEBHOOK_ID;
+  if (!webhookId) return false;
 
-  return candidates
-    .map(normalizeEmail)
-    .filter((value): value is string => Boolean(value));
-}
+  const transmId   = req.headers.get("paypal-transmission-id");
+  const transmTime = req.headers.get("paypal-transmission-time");
+  const transmSig  = req.headers.get("paypal-transmission-sig");
+  const authAlgo   = req.headers.get("paypal-auth-algo");
+  const certUrl    = req.headers.get("paypal-cert-url");
 
-function extractSubscriptionCandidates(resource: JsonMap): string[] {
-  const supplementaryData = asRecord(resource.supplementary_data);
-  const relatedIds = asRecord(supplementaryData.related_ids);
+  if (!transmId || !transmTime || !transmSig || !authAlgo || !certUrl) return false;
 
-  const ids = [
-    getString(resource.id),
-    getString(resource.billing_agreement_id),
-    getString(relatedIds.billing_subscription_id),
-    getString(relatedIds.subscription_id),
-  ];
-
-  return ids.filter((value): value is string => Boolean(value));
+  try {
+    const token = await getPayPalToken();
+    const res = await fetch(`${process.env.PAYPAL_BASE_URL}/v1/notifications/verify-webhook-signature`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        auth_algo: authAlgo,
+        cert_url: certUrl,
+        transmission_id: transmId,
+        transmission_sig: transmSig,
+        transmission_time: transmTime,
+        webhook_id: webhookId,
+        webhook_event: JSON.parse(body),
+      }),
+    });
+    const data = await res.json() as { verification_status?: string };
+    return data.verification_status === "SUCCESS";
+  } catch {
+    return false;
+  }
 }
 
 function extractPlan(resource: JsonMap): BusinessPlan | undefined {
-  const planCandidates = [
-    getString(resource.plan_id),
-    getString(resource.custom),
-    getString(resource.custom_id),
-  ]
-    .filter((value): value is string => Boolean(value))
-    .map((value) => value.toLowerCase());
-
-  for (const candidate of planCandidates) {
-    if (candidate.includes('starter') || candidate.includes('basic')) {
-      return 'basic';
-    }
-    if (candidate.includes('pro')) {
-      return 'pro';
-    }
-    if (candidate.includes('business')) {
-      return 'business';
-    }
+  const candidates = [str(resource.plan_id), str(resource.custom), str(resource.custom_id)]
+    .filter(Boolean).map(s => s!.toLowerCase());
+  for (const c of candidates) {
+    if (c.includes("business")) return "business";
+    if (c.includes("pro")) return "pro";
+    if (c.includes("starter") || c.includes("basic")) return "basic";
   }
-
   return undefined;
 }
 
-function computePlanExpiry(resource: JsonMap): string {
-  const billingInfo = asRecord(resource.billing_info);
-  const nextBilling = getString(billingInfo.next_billing_time);
-
-  if (nextBilling) {
-    return nextBilling;
-  }
-
-  const fallback = new Date();
-  fallback.setDate(fallback.getDate() + PLAN_EXPIRY_DAYS);
-  return fallback.toISOString();
+function extractEmails(resource: JsonMap): string[] {
+  return [
+    str(resource.custom_id), str(resource.custom),
+    str(obj(resource.subscriber).email_address),
+    str(obj(resource.payer).email_address),
+  ].filter(Boolean).map(s => s!.toLowerCase());
 }
 
-function requiredHeader(request: NextRequest, name: string): string | null {
-  const value = request.headers.get(name);
-  return value && value.trim().length > 0 ? value : null;
+function extractSubscriptionId(resource: JsonMap): string | undefined {
+  const relatedIds = obj(obj(resource.supplementary_data).related_ids);
+  return str(resource.id) ?? str(resource.billing_agreement_id) ?? str(relatedIds.billing_subscription_id);
 }
 
-function getPayPalClient(): paypal.core.PayPalHttpClient {
-  const clientId = process.env.PAYPAL_CLIENT_ID;
-  const clientSecret = process.env.PAYPAL_CLIENT_SECRET || process.env.PAYPAL_SECRET;
-  const baseUrl = process.env.PAYPAL_BASE_URL || '';
-
-  if (!clientId || !clientSecret) {
-    throw new Error('Missing PAYPAL_CLIENT_ID and PAYPAL_CLIENT_SECRET (or PAYPAL_SECRET)');
-  }
-
-  const environment = baseUrl.includes('sandbox')
-    ? new paypal.core.SandboxEnvironment(clientId, clientSecret)
-    : new paypal.core.LiveEnvironment(clientId, clientSecret);
-
-  return new paypal.core.PayPalHttpClient(environment);
+function planExpiry(resource: JsonMap): string {
+  const billingInfo = obj(resource.billing_info);
+  const next = str(billingInfo.next_billing_time);
+  if (next) return next;
+  const d = new Date();
+  d.setDate(d.getDate() + PLAN_EXPIRY_DAYS);
+  return d.toISOString();
 }
 
-async function verifyWebhookSignature(
-  request: NextRequest,
-  event: PayPalWebhookEvent,
-): Promise<{ ok: boolean; reason?: string }> {
-  const transmissionId = requiredHeader(request, 'paypal-transmission-id');
-  const transmissionTime = requiredHeader(request, 'paypal-transmission-time');
-  const transmissionSig = requiredHeader(request, 'paypal-transmission-sig');
-  const authAlgo = requiredHeader(request, 'paypal-auth-algo');
-  const certUrl = requiredHeader(request, 'paypal-cert-url');
-  const webhookId = process.env.PAYPAL_WEBHOOK_ID;
+async function applyEvent(eventType: string, resource: JsonMap) {
+  const supabase = admin();
+  const subscriptionId = extractSubscriptionId(resource);
+  const emails = extractEmails(resource);
+  const plan = extractPlan(resource);
 
-  if (!webhookId) {
-    return { ok: false, reason: 'Missing PAYPAL_WEBHOOK_ID' };
+  // Find business
+  let businessId: string | null = null;
+  if (subscriptionId) {
+    const { data } = await supabase.from("businesses").select("id").eq("paypal_subscription_id", subscriptionId).maybeSingle();
+    businessId = data?.id ?? null;
   }
-
-  if (!transmissionId || !transmissionTime || !transmissionSig || !authAlgo || !certUrl) {
-    return { ok: false, reason: 'Missing PayPal signature headers' };
-  }
-
-  try {
-    const client = getPayPalClient();
-    const verifyResponse = await client.execute({
-      verb: 'POST',
-      path: '/v1/notifications/verify-webhook-signature',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: {
-        auth_algo: authAlgo,
-        cert_url: certUrl,
-        transmission_id: transmissionId,
-        transmission_sig: transmissionSig,
-        transmission_time: transmissionTime,
-        webhook_id: webhookId,
-        webhook_event: event,
-      },
-    });
-
-    const verifyData = verifyResponse.result as { verification_status?: string };
-
-    return {
-      ok: verifyData.verification_status === 'SUCCESS',
-      reason: verifyData.verification_status,
-    };
-  } catch (error) {
-    const reason = error instanceof Error ? error.message : 'Unknown verification error';
-    return { ok: false, reason };
-  }
-}
-
-async function markEventProcessed(event: PayPalWebhookEvent): Promise<{ duplicate: boolean }> {
-  const eventId = getString(event.id);
-  const eventType = getString(event.event_type) || 'unknown';
-
-  if (!eventId) {
-    return { duplicate: false };
-  }
-
-  const supabase = createServerClient();
-  const { error } = await supabase.from('paypal_webhook_events').insert({
-    event_id: eventId,
-    event_type: eventType,
-    payload: event,
-  });
-
-  if (!error) {
-    return { duplicate: false };
-  }
-
-  if (error.code === '23505') {
-    return { duplicate: true };
-  }
-
-  // Keep webhook flow alive if the idempotency table is not migrated yet.
-  if (error.code === '42P01') {
-    console.warn('[PayPal webhook] paypal_webhook_events table not found; idempotency skipped');
-    return { duplicate: false };
-  }
-
-  throw new Error(`Failed to persist webhook event: ${error.message}`);
-}
-
-async function findBusiness(resource: JsonMap) {
-  const supabase = createServerClient();
-  const subscriptionIds = extractSubscriptionCandidates(resource);
-
-  for (const subscriptionId of subscriptionIds) {
-    const { data } = await supabase
-      .from('businesses')
-      .select('id, owner_email, plan, paypal_subscription_id')
-      .eq('paypal_subscription_id', subscriptionId)
-      .maybeSingle();
-
-    if (data) {
-      return { business: data, matchedSubscriptionId: subscriptionId };
+  if (!businessId && emails.length > 0) {
+    for (const email of emails) {
+      const { data } = await supabase.from("businesses").select("id").eq("owner_email", email).maybeSingle();
+      if (data?.id) { businessId = data.id; break; }
     }
   }
 
-  const emailCandidates = extractEmailCandidates(resource);
-  for (const email of emailCandidates) {
-    const { data } = await supabase
-      .from('businesses')
-      .select('id, owner_email, plan, paypal_subscription_id')
-      .eq('owner_email', email)
-      .maybeSingle();
+  if (!businessId) return { applied: false, reason: "No matching business" };
 
-    if (data) {
-      return { business: data, matchedSubscriptionId: subscriptionIds[0] };
-    }
-  }
-
-  return null;
-}
-
-async function applyEventToBusiness(eventType: string, resource: JsonMap) {
-  const resolved = await findBusiness(resource);
-  if (!resolved?.business) {
-    return { applied: false, reason: 'No matching business found' };
-  }
-
-  const supabase = createServerClient();
-  const inferredPlan = extractPlan(resource);
-  const subscriptionId =
-    resolved.matchedSubscriptionId ||
-    getString(resource.id) ||
-    getString(resource.billing_agreement_id) ||
-    resolved.business.paypal_subscription_id ||
-    null;
-
-  const patch: Record<string, unknown> = {
-    paypal_subscription_id: subscriptionId,
-  };
+  const patch: Record<string, unknown> = { paypal_subscription_id: subscriptionId };
 
   switch (eventType) {
-    case 'BILLING.SUBSCRIPTION.CREATED':
-    case 'BILLING.SUBSCRIPTION.ACTIVATED':
-    case 'BILLING.SUBSCRIPTION.UPDATED':
-      patch.plan = inferredPlan || resolved.business.plan;
-      patch.plan_expires_at = computePlanExpiry(resource);
+    case "BILLING.SUBSCRIPTION.CREATED":
+    case "BILLING.SUBSCRIPTION.ACTIVATED":
+    case "BILLING.SUBSCRIPTION.UPDATED":
+    case "PAYMENT.SALE.COMPLETED":
+      if (plan) patch.plan = plan;
+      patch.plan_expires_at = planExpiry(resource);
       break;
-    case 'PAYMENT.SALE.COMPLETED':
-      patch.plan = inferredPlan || resolved.business.plan;
-      patch.plan_expires_at = computePlanExpiry(resource);
-      break;
-    case 'BILLING.SUBSCRIPTION.CANCELLED':
-      patch.plan = 'trial';
+    case "BILLING.SUBSCRIPTION.CANCELLED":
+      patch.plan = "trial";
       patch.plan_expires_at = new Date().toISOString();
       break;
+    case "BILLING.SUBSCRIPTION.SUSPENDED":
+      patch.plan = "trial";
+      break;
     default:
-      return { applied: false, reason: `Unhandled event type: ${eventType}` };
+      return { applied: false, reason: `Unhandled: ${eventType}` };
   }
 
-  const { error } = await supabase
-    .from('businesses')
-    .update(patch)
-    .eq('id', resolved.business.id);
-
-  if (error) {
-    throw new Error(`Failed to update business from webhook: ${error.message}`);
-  }
-
-  return { applied: true, businessId: resolved.business.id };
+  const { error } = await supabase.from("businesses").update(patch).eq("id", businessId);
+  if (error) throw new Error(`DB update failed: ${error.message}`);
+  return { applied: true, businessId };
 }
 
-export async function POST(request: NextRequest): Promise<NextResponse> {
+export async function POST(req: NextRequest) {
   try {
-    const event = (await request.json()) as PayPalWebhookEvent;
-    const eventType = getString(event.event_type);
+    const rawBody = await req.text();
+    const event = JSON.parse(rawBody) as { id?: string; event_type?: string; resource?: JsonMap };
+    const eventType = str(event.event_type);
 
-    if (!eventType) {
-      return NextResponse.json({ error: 'Missing event_type' }, { status: 400 });
+    if (!eventType) return NextResponse.json({ error: "Missing event_type" }, { status: 400 });
+
+    const isValid = await verifyWebhookSignature(req, rawBody);
+    if (!isValid) {
+      console.warn("[paypal-webhook] Invalid signature for event:", event.id);
+      return NextResponse.json({ error: "Invalid webhook signature" }, { status: 400 });
     }
 
-    const verification = await verifyWebhookSignature(request, event);
-    if (!verification.ok) {
-      return NextResponse.json(
-        {
-          error: 'Invalid webhook signature',
-          details: verification.reason || 'unknown',
-        },
-        { status: 400 },
-      );
+    // Idempotency check
+    const supabase = admin();
+    const eventId = str(event.id);
+    if (eventId) {
+      const { error: insertErr } = await supabase.from("paypal_webhook_events").insert({
+        event_id: eventId,
+        event_type: eventType,
+        payload: event,
+      });
+      if (insertErr?.code === "23505") {
+        return NextResponse.json({ received: true, duplicate: true });
+      }
+      if (insertErr && insertErr.code !== "42P01") {
+        throw new Error(`Idempotency insert failed: ${insertErr.message}`);
+      }
     }
 
-    const idempotency = await markEventProcessed(event);
-    if (idempotency.duplicate) {
-      return NextResponse.json({ received: true, duplicate: true }, { status: 200 });
-    }
+    const result = await applyEvent(eventType, obj(event.resource));
+    console.log("[paypal-webhook]", { id: event.id, eventType, ...result });
 
-    const resource = asRecord(event.resource);
-    const result = await applyEventToBusiness(eventType, resource);
-
-    console.log('[PayPal webhook]', {
-      eventId: event.id,
-      eventType,
-      result,
-    });
-
-    return NextResponse.json({ received: true, ...result }, { status: 200 });
-  } catch (error) {
-    const message = error instanceof Error ? error.message : 'Unknown webhook error';
-    console.error('[PayPal webhook] processing error:', message);
-    return NextResponse.json({ error: 'Webhook processing failed', details: message }, { status: 500 });
+    return NextResponse.json({ received: true, ...result });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Unknown error";
+    console.error("[paypal-webhook]", message);
+    return NextResponse.json({ error: "Webhook processing failed", details: message }, { status: 500 });
   }
 }
 
-export async function GET(): Promise<NextResponse> {
-  return NextResponse.json(
-    {
-      message: 'CypAI PayPal webhook endpoint',
-      method: 'POST required',
-    },
-    { status: 200 },
-  );
+export async function GET() {
+  return NextResponse.json({ status: "CypAI PayPal webhook", method: "POST required" });
 }
