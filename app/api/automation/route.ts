@@ -85,6 +85,11 @@ type AlertLogsPage = {
   totalPages: number;
 };
 
+type AlertLogDateRange = {
+  from: string | null;
+  to: string | null;
+};
+
 const DEFAULT_RETRY_POLICY: RetryPolicy = {
   maxRetries: 3,
   retryWindowHours: 72,
@@ -154,6 +159,24 @@ function toAlertLogOutcomeFilter(value: string | null): AlertLogOutcomeFilter {
 
 function csvEscape(value: string): string {
   return `"${value.replace(/"/g, '""')}"`;
+}
+
+function normalizeDateStart(value: string | null): string | null {
+  if (!value || !/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    return null;
+  }
+  const iso = `${value}T00:00:00.000Z`;
+  const parsed = Date.parse(iso);
+  return Number.isFinite(parsed) ? new Date(parsed).toISOString() : null;
+}
+
+function normalizeDateEnd(value: string | null): string | null {
+  if (!value || !/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    return null;
+  }
+  const iso = `${value}T23:59:59.999Z`;
+  const parsed = Date.parse(iso);
+  return Number.isFinite(parsed) ? new Date(parsed).toISOString() : null;
 }
 
 function buildAlertLogsCsv(records: AlertLogRecord[]): string {
@@ -401,6 +424,7 @@ async function logAlertDispatch(input: {
 async function getAlertLogsPage(input: {
   trigger: AlertLogTriggerFilter;
   outcome: AlertLogOutcomeFilter;
+  dateRange: AlertLogDateRange;
   page: number;
   pageSize: number;
 }): Promise<AlertLogsPage> {
@@ -415,6 +439,13 @@ async function getAlertLogsPage(input: {
     countQuery = countQuery.or('sent_webhook.eq.true,sent_email.eq.true');
   } else if (input.outcome === 'failed') {
     countQuery = countQuery.eq('sent_webhook', false).eq('sent_email', false);
+  }
+
+  if (input.dateRange.from) {
+    countQuery = countQuery.gte('created_at', input.dateRange.from);
+  }
+  if (input.dateRange.to) {
+    countQuery = countQuery.lte('created_at', input.dateRange.to);
   }
 
   const { count, error: countError } = await countQuery;
@@ -459,6 +490,13 @@ async function getAlertLogsPage(input: {
     dataQuery = dataQuery.or('sent_webhook.eq.true,sent_email.eq.true');
   } else if (input.outcome === 'failed') {
     dataQuery = dataQuery.eq('sent_webhook', false).eq('sent_email', false);
+  }
+
+  if (input.dateRange.from) {
+    dataQuery = dataQuery.gte('created_at', input.dateRange.from);
+  }
+  if (input.dateRange.to) {
+    dataQuery = dataQuery.lte('created_at', input.dateRange.to);
   }
 
   const { data, error } = await dataQuery;
@@ -1193,6 +1231,12 @@ export async function GET(request: NextRequest) {
   const eventTypeFilter = toEventType(request.nextUrl.searchParams.get('eventType'));
   const alertLogTrigger = toAlertLogTriggerFilter(request.nextUrl.searchParams.get('alertLogTrigger'));
   const alertLogOutcome = toAlertLogOutcomeFilter(request.nextUrl.searchParams.get('alertLogOutcome'));
+  const alertLogFromRaw = request.nextUrl.searchParams.get('alertLogFrom');
+  const alertLogToRaw = request.nextUrl.searchParams.get('alertLogTo');
+  const alertLogDateRange: AlertLogDateRange = {
+    from: normalizeDateStart(alertLogFromRaw),
+    to: normalizeDateEnd(alertLogToRaw),
+  };
   const alertLogsExport = request.nextUrl.searchParams.get('alertLogsExport') === 'csv';
   const alertLogPage = normalizePositiveInt(Number(request.nextUrl.searchParams.get('alertLogPage') || 1), 1, 1, 5000);
   const alertLogPageSize = normalizePositiveInt(Number(request.nextUrl.searchParams.get('alertLogPageSize') || 10), 10, 5, 50);
@@ -1201,6 +1245,7 @@ export async function GET(request: NextRequest) {
     const alertLogsPage = await getAlertLogsPage({
       trigger: alertLogTrigger,
       outcome: alertLogOutcome,
+      dateRange: alertLogDateRange,
       page: 1,
       pageSize: 5000,
     });
@@ -1355,6 +1400,7 @@ export async function GET(request: NextRequest) {
   const alertLogsPage = await getAlertLogsPage({
     trigger: alertLogTrigger,
     outcome: alertLogOutcome,
+    dateRange: alertLogDateRange,
     page: alertLogPage,
     pageSize: alertLogPageSize,
   });
@@ -1379,6 +1425,8 @@ export async function GET(request: NextRequest) {
       totalPages: alertLogsPage.totalPages,
       trigger: alertLogTrigger,
       outcome: alertLogOutcome,
+      from: alertLogFromRaw,
+      to: alertLogToRaw,
     },
     alertState: {
       attempts,

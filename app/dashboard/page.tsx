@@ -199,6 +199,8 @@ type AutomationAlertLogMeta = {
   totalPages: number;
   trigger: 'all' | 'automatic' | 'manual_test';
   outcome: 'all' | 'success' | 'failed';
+  from: string | null;
+  to: string | null;
 };
 
 type AutomationOverviewResponse = {
@@ -251,6 +253,8 @@ const DEFAULT_ALERT_LOG_META: AutomationAlertLogMeta = {
   totalPages: 1,
   trigger: 'all',
   outcome: 'all',
+  from: null,
+  to: null,
 };
 
 type BookingRecord = {
@@ -725,6 +729,8 @@ function DashboardInner() {
   const [alertLogsMeta, setAlertLogsMeta] = useState<AutomationAlertLogMeta>(DEFAULT_ALERT_LOG_META);
   const [alertLogTriggerFilter, setAlertLogTriggerFilter] = useState<AlertLogTriggerFilter>('all');
   const [alertLogOutcomeFilter, setAlertLogOutcomeFilter] = useState<AlertLogOutcomeFilter>('all');
+  const [alertLogFromDate, setAlertLogFromDate] = useState('');
+  const [alertLogToDate, setAlertLogToDate] = useState('');
   const [alertLogPage, setAlertLogPage] = useState(1);
   const [alertPolicyForm, setAlertPolicyForm] = useState({
     failureRateThreshold: DEFAULT_ALERT_POLICY.failureRateThreshold,
@@ -865,6 +871,8 @@ function DashboardInner() {
       setAlertLogsMeta(DEFAULT_ALERT_LOG_META);
       setAlertLogTriggerFilter('all');
       setAlertLogOutcomeFilter('all');
+      setAlertLogFromDate('');
+      setAlertLogToDate('');
       setAlertLogPage(1);
       setAlertPolicyForm({
         failureRateThreshold: DEFAULT_ALERT_POLICY.failureRateThreshold,
@@ -882,7 +890,7 @@ function DashboardInner() {
     }
 
     void loadAutomationOverview();
-  }, [businessId, automationEventFilter, alertLogTriggerFilter, alertLogOutcomeFilter, alertLogPage]);
+  }, [businessId, automationEventFilter, alertLogTriggerFilter, alertLogOutcomeFilter, alertLogFromDate, alertLogToDate, alertLogPage]);
 
   useEffect(() => {
     if (activeTab === 'audit' && business && !auditSummary && !auditLoading) {
@@ -1000,6 +1008,12 @@ function DashboardInner() {
       if (alertLogOutcomeFilter !== 'all') {
         query.set('alertLogOutcome', alertLogOutcomeFilter);
       }
+      if (alertLogFromDate) {
+        query.set('alertLogFrom', alertLogFromDate);
+      }
+      if (alertLogToDate) {
+        query.set('alertLogTo', alertLogToDate);
+      }
       query.set('alertLogPage', String(alertLogPage));
       query.set('alertLogPageSize', '10');
       const querySuffix = query.toString() ? `?${query.toString()}` : '';
@@ -1047,11 +1061,21 @@ function DashboardInner() {
         ...DEFAULT_ALERT_LOG_META,
         trigger: alertLogTriggerFilter,
         outcome: alertLogOutcomeFilter,
+        from: alertLogFromDate || null,
+        to: alertLogToDate || null,
         page: alertLogPage,
       };
       setAlertLogsMeta(nextAlertLogsMeta);
       if (nextAlertLogsMeta.page !== alertLogPage) {
         setAlertLogPage(nextAlertLogsMeta.page);
+      }
+      const nextFrom = nextAlertLogsMeta.from || '';
+      const nextTo = nextAlertLogsMeta.to || '';
+      if (nextFrom !== alertLogFromDate) {
+        setAlertLogFromDate(nextFrom);
+      }
+      if (nextTo !== alertLogToDate) {
+        setAlertLogToDate(nextTo);
       }
       setAlertPolicyForm((prev) => ({
         ...prev,
@@ -1207,6 +1231,12 @@ function DashboardInner() {
       }
       if (alertLogOutcomeFilter !== 'all') {
         query.set('alertLogOutcome', alertLogOutcomeFilter);
+      }
+      if (alertLogFromDate) {
+        query.set('alertLogFrom', alertLogFromDate);
+      }
+      if (alertLogToDate) {
+        query.set('alertLogTo', alertLogToDate);
       }
       query.set('alertLogsExport', 'csv');
 
@@ -2235,6 +2265,41 @@ function DashboardInner() {
                               {option.label}
                             </button>
                           ))}
+                          <label className="ml-auto flex items-center gap-2 text-zinc-400">
+                            <span className="font-semibold">From</span>
+                            <input
+                              type="date"
+                              value={alertLogFromDate}
+                              onChange={(event) => {
+                                setAlertLogFromDate(event.target.value);
+                                setAlertLogPage(1);
+                              }}
+                              className="rounded-md border border-zinc-700 bg-zinc-900 px-2 py-1 text-xs text-zinc-200"
+                            />
+                          </label>
+                          <label className="flex items-center gap-2 text-zinc-400">
+                            <span className="font-semibold">To</span>
+                            <input
+                              type="date"
+                              value={alertLogToDate}
+                              onChange={(event) => {
+                                setAlertLogToDate(event.target.value);
+                                setAlertLogPage(1);
+                              }}
+                              className="rounded-md border border-zinc-700 bg-zinc-900 px-2 py-1 text-xs text-zinc-200"
+                            />
+                          </label>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setAlertLogFromDate('');
+                              setAlertLogToDate('');
+                              setAlertLogPage(1);
+                            }}
+                            className="rounded-full border border-zinc-700 px-2.5 py-1 font-semibold text-zinc-300 transition hover:bg-zinc-950"
+                          >
+                            Clear Dates
+                          </button>
                         </div>
                         {alertLogs.length === 0 ? (
                           <p className="px-3 py-3 text-xs text-zinc-500">No alert dispatch logs yet.</p>
