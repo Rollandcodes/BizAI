@@ -71,6 +71,16 @@ npm run dev
    - `GET /api/automation`
 6. Delivery summary endpoint (dashboard-ready JSON):
    - `GET /api/automation` (includes `summary` + `recent` queue records)
+7. Optional alert webhook security and templates:
+    - Add `AUTOMATION_ALERT_WEBHOOK_SECRET` to sign outgoing webhook alerts.
+    - Webhook payload template is auto-selected:
+       - Slack (`hooks.slack.com`) gets Slack `text` + `blocks` payload.
+       - Discord (`discord.com/api/webhooks`) gets Discord `content` + `embeds` payload.
+       - Other URLs receive a generic JSON payload.
+    - Signature headers:
+       - `X-CypAI-Timestamp`
+       - `X-CypAI-Signature` (HMAC SHA-256 over `${timestamp}.${rawBody}`)
+       - `X-CypAI-Signature-Version` (`v1`)
 
 ## 7. Deploy to Vercel (GitHub connect)
 1. Push the repository to GitHub.

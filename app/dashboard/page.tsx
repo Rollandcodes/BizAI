@@ -164,6 +164,7 @@ type AutomationAlertPolicy = {
   cooldownMinutes: number;
   alertEmail: string | null;
   hasWebhook: boolean;
+  hasSigningSecret: boolean;
   lastAlertAt: string | null;
 };
 
@@ -212,6 +213,7 @@ const DEFAULT_ALERT_POLICY: AutomationAlertPolicy = {
   cooldownMinutes: 60,
   alertEmail: null,
   hasWebhook: false,
+  hasSigningSecret: false,
   lastAlertAt: null,
 };
 
@@ -2073,7 +2075,7 @@ function DashboardInner() {
                         Status: failure rate {alertState?.failureRate ?? 0}% across {alertState?.attempts ?? 0} attempts; cooldown {alertState?.cooldownActive ? 'active' : 'inactive'}.
                       </p>
                       <p className="mt-1 text-xs text-zinc-500">
-                        Last alert: {formatDateTime(alertPolicy.lastAlertAt)} | Destination webhook: {alertPolicy.hasWebhook ? 'configured' : 'not configured'} | email: {alertPolicy.alertEmail || 'not configured'}
+                        Last alert: {formatDateTime(alertPolicy.lastAlertAt)} | Destination webhook: {alertPolicy.hasWebhook ? 'configured' : 'not configured'} | signed webhook: {alertPolicy.hasSigningSecret ? 'enabled' : 'disabled'} | email: {alertPolicy.alertEmail || 'not configured'}
                       </p>
                     </div>
 

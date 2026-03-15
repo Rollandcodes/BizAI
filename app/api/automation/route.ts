@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { createHmac } from 'node:crypto';
 import { createServerClient } from '@/lib/supabase';
 
 type AutomationEventType = 'abandoned_signup' | 'abandoned_payment';
@@ -47,12 +48,15 @@ type AlertPolicy = {
   cooldownMinutes: number;
   alertEmail: string | null;
   hasWebhook: boolean;
+  hasSigningSecret: boolean;
   lastAlertAt: string | null;
 };
 
 type AlertDispatchResult = {
   sentWebhook: boolean;
   sentEmail: boolean;
+  webhookProvider?: 'slack' | 'discord' | 'generic';
+  signedWebhook?: boolean;
   error?: string;
 };
 
@@ -67,6 +71,7 @@ const DEFAULT_ALERT_POLICY: AlertPolicy = {
   cooldownMinutes: 60,
   alertEmail: null,
   hasWebhook: false,
+  hasSigningSecret: false,
   lastAlertAt: null,
 };
 
@@ -198,6 +203,7 @@ async function getAlertPolicy(): Promise<AlertPolicy> {
     cooldownMinutes: Number(data.cooldown_minutes || DEFAULT_ALERT_POLICY.cooldownMinutes),
     alertEmail: normalizeEmail(data.alert_email),
     hasWebhook: typeof data.webhook_url === 'string' && data.webhook_url.trim().length > 0,
+    hasSigningSecret: typeof process.env.AUTOMATION_ALERT_WEBHOOK_SECRET === 'string' && process.env.AUTOMATION_ALERT_WEBHOOK_SECRET.trim().length > 0,
     lastAlertAt: typeof data.last_alert_at === 'string' ? data.last_alert_at : null,
   };
 }
@@ -292,9 +298,11 @@ async function dispatchFailureSpikeAlert(input: {
   const resendApiKey = process.env.RESEND_API_KEY;
   const resendFrom = process.env.RESEND_FROM_EMAIL || 'CypAI <noreply@cypai.app>';
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.cypai.app';
+  const webhookSigningSecret = process.env.AUTOMATION_ALERT_WEBHOOK_SECRET?.trim() || '';
 
   let sentWebhook = false;
   let sentEmail = false;
+  let webhookProvider: 'slack' | 'discord' | 'generic' | undefined;
   let error: string | undefined;
 
   const payload = {
@@ -309,12 +317,84 @@ async function dispatchFailureSpikeAlert(input: {
     dashboardUrl: `${appUrl}/dashboard`,
   };
 
+  function getWebhookProvider(webhookUrl: string): 'slack' | 'discord' | 'generic' {
+    const normalized = webhookUrl.toLowerCase();
+    if (normalized.includes('discord.com/api/webhooks') || normalized.includes('discordapp.com/api/webhooks')) {
+      return 'discord';
+    }
+    if (normalized.includes('hooks.slack.com')) {
+      return 'slack';
+    }
+    return 'generic';
+  }
+
+  function buildProviderPayload(provider: 'slack' | 'discord' | 'generic') {
+    const title = `CypAI automation failure spike (${input.failureRate.toFixed(1)}%)`;
+    const lines = [
+      `Scope: ${input.filter || 'all events'}`,
+      `Failure rate: ${input.failureRate.toFixed(1)}%`,
+      `Attempts: ${input.attempts}`,
+      `Failed: ${input.trend.failed}`,
+      `Sent: ${input.trend.sent}`,
+      `Queued: ${input.trend.queued}`,
+      `Dashboard: ${appUrl}/dashboard`,
+    ];
+
+    if (provider === 'slack') {
+      return {
+        text: `${title}\n${lines.join('\n')}`,
+        blocks: [
+          { type: 'header', text: { type: 'plain_text', text: title } },
+          {
+            type: 'section',
+            text: {
+              type: 'mrkdwn',
+              text: lines.join('\n'),
+            },
+          },
+        ],
+      };
+    }
+
+    if (provider === 'discord') {
+      return {
+        content: title,
+        embeds: [
+          {
+            title,
+            description: lines.join('\n'),
+            color: 15158332,
+            timestamp: new Date().toISOString(),
+          },
+        ],
+      };
+    }
+
+    return payload;
+  }
+
   if (destinations.webhookUrl) {
+    webhookProvider = getWebhookProvider(destinations.webhookUrl);
+    const webhookPayload = buildProviderPayload(webhookProvider);
+    const webhookBody = JSON.stringify(webhookPayload);
+    const webhookHeaders: Record<string, string> = { 'Content-Type': 'application/json' };
+
+    if (webhookSigningSecret) {
+      const timestamp = String(Date.now());
+      const signature = createHmac('sha256', webhookSigningSecret)
+        .update(`${timestamp}.${webhookBody}`)
+        .digest('hex');
+
+      webhookHeaders['X-CypAI-Timestamp'] = timestamp;
+      webhookHeaders['X-CypAI-Signature'] = signature;
+      webhookHeaders['X-CypAI-Signature-Version'] = 'v1';
+    }
+
     try {
       const response = await fetch(destinations.webhookUrl, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
+        headers: webhookHeaders,
+        body: webhookBody,
       });
       sentWebhook = response.ok;
       if (!response.ok && !error) {
@@ -325,6 +405,7 @@ async function dispatchFailureSpikeAlert(input: {
         error = 'webhook_request_failed';
       }
     }
+
   }
 
   if (destinations.alertEmail && resendApiKey) {
@@ -362,7 +443,13 @@ async function dispatchFailureSpikeAlert(input: {
     }
   }
 
-  return { sentWebhook, sentEmail, error };
+  return {
+    sentWebhook,
+    sentEmail,
+    webhookProvider,
+    signedWebhook: Boolean(webhookSigningSecret),
+    error,
+  };
 }
 
 function isRetryWindowExpired(createdAt: string | null | undefined, retryWindowHours: number): boolean {
