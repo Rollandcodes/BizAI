@@ -5,11 +5,23 @@ type AutomationEventType = 'abandoned_signup' | 'abandoned_payment';
 
 type AutomationPayload = {
   eventType?: AutomationEventType;
-  action?: 'retry_failed' | 'retry_failed_batch' | 'get_retry_policy' | 'set_retry_policy';
+  action?:
+    | 'retry_failed'
+    | 'retry_failed_batch'
+    | 'get_retry_policy'
+    | 'set_retry_policy'
+    | 'get_alert_policy'
+    | 'set_alert_policy'
+    | 'test_alert';
   queueId?: string;
   limit?: number;
   maxRetries?: number;
   retryWindowHours?: number;
+  failureRateThreshold?: number;
+  minAttempts?: number;
+  cooldownMinutes?: number;
+  webhookUrl?: string;
+  alertEmail?: string;
   planId?: string;
   email?: string;
   businessName?: string;
@@ -29,9 +41,33 @@ type RetryPolicyMap = {
   abandoned_payment: RetryPolicy;
 };
 
+type AlertPolicy = {
+  failureRateThreshold: number;
+  minAttempts: number;
+  cooldownMinutes: number;
+  alertEmail: string | null;
+  hasWebhook: boolean;
+  lastAlertAt: string | null;
+};
+
+type AlertDispatchResult = {
+  sentWebhook: boolean;
+  sentEmail: boolean;
+  error?: string;
+};
+
 const DEFAULT_RETRY_POLICY: RetryPolicy = {
   maxRetries: 3,
   retryWindowHours: 72,
+};
+
+const DEFAULT_ALERT_POLICY: AlertPolicy = {
+  failureRateThreshold: 40,
+  minAttempts: 5,
+  cooldownMinutes: 60,
+  alertEmail: null,
+  hasWebhook: false,
+  lastAlertAt: null,
 };
 
 type QueueInsertInput = {
@@ -138,6 +174,195 @@ async function saveRetryPolicy(maxRetries: number, retryWindowHours: number, eve
   }
 
   return { ok: true as const };
+}
+
+async function getAlertPolicy(): Promise<AlertPolicy> {
+  const supabase = createServerClient();
+  const { data, error } = await supabase
+    .from('marketing_automation_alert_policy')
+    .select('failure_rate_threshold, min_attempts, cooldown_minutes, alert_email, webhook_url, last_alert_at')
+    .eq('id', 'default')
+    .single();
+
+  if (error?.code === '42P01' || error?.code === 'PGRST116') {
+    return DEFAULT_ALERT_POLICY;
+  }
+
+  if (error || !data) {
+    return DEFAULT_ALERT_POLICY;
+  }
+
+  return {
+    failureRateThreshold: Number(data.failure_rate_threshold || DEFAULT_ALERT_POLICY.failureRateThreshold),
+    minAttempts: Number(data.min_attempts || DEFAULT_ALERT_POLICY.minAttempts),
+    cooldownMinutes: Number(data.cooldown_minutes || DEFAULT_ALERT_POLICY.cooldownMinutes),
+    alertEmail: normalizeEmail(data.alert_email),
+    hasWebhook: typeof data.webhook_url === 'string' && data.webhook_url.trim().length > 0,
+    lastAlertAt: typeof data.last_alert_at === 'string' ? data.last_alert_at : null,
+  };
+}
+
+async function saveAlertPolicy(input: {
+  failureRateThreshold: number;
+  minAttempts: number;
+  cooldownMinutes: number;
+  alertEmail?: string | null;
+  webhookUrl?: string | null;
+}) {
+  const supabase = createServerClient();
+
+  const current = await supabase
+    .from('marketing_automation_alert_policy')
+    .select('alert_email, webhook_url')
+    .eq('id', 'default')
+    .single();
+
+  const existingAlertEmail = current.data && typeof current.data.alert_email === 'string' ? current.data.alert_email : null;
+  const existingWebhookUrl = current.data && typeof current.data.webhook_url === 'string' ? current.data.webhook_url : null;
+
+  const nextAlertEmail =
+    typeof input.alertEmail === 'string' && input.alertEmail.trim().length > 0
+      ? input.alertEmail.trim().toLowerCase()
+      : existingAlertEmail;
+
+  const nextWebhookUrl =
+    typeof input.webhookUrl === 'string' && input.webhookUrl.trim().length > 0
+      ? input.webhookUrl.trim()
+      : existingWebhookUrl;
+
+  const { error } = await supabase.from('marketing_automation_alert_policy').upsert(
+    {
+      id: 'default',
+      failure_rate_threshold: input.failureRateThreshold,
+      min_attempts: input.minAttempts,
+      cooldown_minutes: input.cooldownMinutes,
+      alert_email: nextAlertEmail,
+      webhook_url: nextWebhookUrl,
+      updated_at: new Date().toISOString(),
+    },
+    { onConflict: 'id' }
+  );
+
+  if (error?.code === '42P01') {
+    return { ok: false as const, status: 400 as const, error: 'marketing_automation_alert_policy table missing. Run latest supabase-schema.sql.' };
+  }
+
+  if (error) {
+    return { ok: false as const, status: 500 as const, error: error.message };
+  }
+
+  return { ok: true as const };
+}
+
+async function getAlertDestinations() {
+  const supabase = createServerClient();
+  const { data } = await supabase
+    .from('marketing_automation_alert_policy')
+    .select('alert_email, webhook_url')
+    .eq('id', 'default')
+    .single();
+
+  return {
+    alertEmail: data && typeof data.alert_email === 'string' ? data.alert_email.trim().toLowerCase() : null,
+    webhookUrl: data && typeof data.webhook_url === 'string' ? data.webhook_url.trim() : null,
+  };
+}
+
+async function touchLastAlertAt() {
+  const supabase = createServerClient();
+  await supabase
+    .from('marketing_automation_alert_policy')
+    .upsert(
+      {
+        id: 'default',
+        last_alert_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: 'id' }
+    );
+}
+
+async function dispatchFailureSpikeAlert(input: {
+  failureRate: number;
+  attempts: number;
+  trend: { sent: number; failed: number; queued: number };
+  filter: AutomationEventType | null;
+}): Promise<AlertDispatchResult> {
+  const destinations = await getAlertDestinations();
+  const resendApiKey = process.env.RESEND_API_KEY;
+  const resendFrom = process.env.RESEND_FROM_EMAIL || 'CypAI <noreply@cypai.app>';
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.cypai.app';
+
+  let sentWebhook = false;
+  let sentEmail = false;
+  let error: string | undefined;
+
+  const payload = {
+    type: 'automation_failure_spike',
+    filter: input.filter || 'all',
+    failureRate: input.failureRate,
+    attempts: input.attempts,
+    failed: input.trend.failed,
+    sent: input.trend.sent,
+    queued: input.trend.queued,
+    observedAt: new Date().toISOString(),
+    dashboardUrl: `${appUrl}/dashboard`,
+  };
+
+  if (destinations.webhookUrl) {
+    try {
+      const response = await fetch(destinations.webhookUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      sentWebhook = response.ok;
+      if (!response.ok && !error) {
+        error = `webhook_error:${response.status}`;
+      }
+    } catch {
+      if (!error) {
+        error = 'webhook_request_failed';
+      }
+    }
+  }
+
+  if (destinations.alertEmail && resendApiKey) {
+    try {
+      const response = await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${resendApiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          from: resendFrom,
+          to: [destinations.alertEmail],
+          subject: `CypAI alert: automation failure spike (${input.failureRate.toFixed(1)}%)`,
+          text: [
+            `Failure rate alert detected in automation queue.`,
+            `Scope: ${input.filter || 'all events'}`,
+            `Failure rate: ${input.failureRate.toFixed(1)}%`,
+            `Attempts: ${input.attempts}`,
+            `Failed: ${input.trend.failed}`,
+            `Sent: ${input.trend.sent}`,
+            `Queued: ${input.trend.queued}`,
+            `Dashboard: ${appUrl}/dashboard`,
+          ].join('\n'),
+        }),
+      });
+      sentEmail = response.ok;
+      if (!response.ok && !error) {
+        error = `alert_email_error:${response.status}`;
+      }
+    } catch {
+      if (!error) {
+        error = 'alert_email_request_failed';
+      }
+    }
+  }
+
+  return { sentWebhook, sentEmail, error };
 }
 
 function isRetryWindowExpired(createdAt: string | null | undefined, retryWindowHours: number): boolean {
@@ -488,6 +713,51 @@ async function sendRecoveryEmail(input: {
 export async function POST(request: NextRequest) {
   try {
     const payload = (await request.json()) as AutomationPayload;
+    if (payload.action === 'get_alert_policy') {
+      const policy = await getAlertPolicy();
+      return NextResponse.json({ ok: true, policy });
+    }
+
+    if (payload.action === 'set_alert_policy') {
+      const failureRateThreshold = normalizePositiveInt(payload.failureRateThreshold, DEFAULT_ALERT_POLICY.failureRateThreshold, 1, 100);
+      const minAttempts = normalizePositiveInt(payload.minAttempts, DEFAULT_ALERT_POLICY.minAttempts, 1, 1000);
+      const cooldownMinutes = normalizePositiveInt(payload.cooldownMinutes, DEFAULT_ALERT_POLICY.cooldownMinutes, 1, 1440);
+
+      const saveResult = await saveAlertPolicy({
+        failureRateThreshold,
+        minAttempts,
+        cooldownMinutes,
+        alertEmail: payload.alertEmail,
+        webhookUrl: payload.webhookUrl,
+      });
+
+      if (!saveResult.ok) {
+        return NextResponse.json({ error: saveResult.error }, { status: saveResult.status });
+      }
+
+      const policy = await getAlertPolicy();
+      return NextResponse.json({ ok: true, action: 'set_alert_policy', policy });
+    }
+
+    if (payload.action === 'test_alert') {
+      const dispatchResult = await dispatchFailureSpikeAlert({
+        failureRate: 100,
+        attempts: 1,
+        trend: { sent: 0, failed: 1, queued: 0 },
+        filter: payload.eventType ? toEventType(payload.eventType) : null,
+      });
+
+      if (dispatchResult.sentEmail || dispatchResult.sentWebhook) {
+        await touchLastAlertAt();
+      }
+
+      return NextResponse.json({
+        ok: true,
+        action: 'test_alert',
+        result: dispatchResult,
+      });
+    }
+
     if (payload.action === 'get_retry_policy') {
       const policy = await getRetryPolicy(payload.eventType ? toEventType(payload.eventType) : null);
       return NextResponse.json({ ok: true, policy });
@@ -624,6 +894,7 @@ export async function POST(request: NextRequest) {
 
 export async function GET(request: NextRequest) {
   const supabase = createServerClient();
+  const alertPolicy = await getAlertPolicy();
   const policies = await getRetryPoliciesMap();
   const eventTypeFilter = toEventType(request.nextUrl.searchParams.get('eventType'));
   const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
@@ -718,6 +989,37 @@ export async function GET(request: NextRequest) {
   const attempts = trend.sent + trend.failed;
   trend.successRate = attempts > 0 ? Number(((trend.sent / attempts) * 100).toFixed(1)) : 0;
 
+  const failureRate = attempts > 0 ? Number(((trend.failed / attempts) * 100).toFixed(1)) : 0;
+  const lastAlertAtMs = Date.parse(alertPolicy.lastAlertAt || '');
+  const cooldownMs = alertPolicy.cooldownMinutes * 60 * 1000;
+  const cooldownActive = Number.isFinite(lastAlertAtMs) ? Date.now() - lastAlertAtMs < cooldownMs : false;
+  const thresholdMet = attempts >= alertPolicy.minAttempts && failureRate >= alertPolicy.failureRateThreshold;
+
+  let alertTriggered = false;
+  let alertDispatch: AlertDispatchResult | null = null;
+  let alertReason = 'below_threshold_or_filtered';
+
+  if (!eventTypeFilter && thresholdMet && !cooldownActive) {
+    alertDispatch = await dispatchFailureSpikeAlert({
+      failureRate,
+      attempts,
+      trend,
+      filter: null,
+    });
+
+    if (alertDispatch.sentEmail || alertDispatch.sentWebhook) {
+      await touchLastAlertAt();
+      alertTriggered = true;
+      alertReason = 'alert_dispatched';
+    } else {
+      alertReason = alertDispatch.error || 'no_destinations_configured';
+    }
+  } else if (cooldownActive) {
+    alertReason = 'cooldown_active';
+  } else if (eventTypeFilter) {
+    alertReason = 'filtered_view_no_dispatch';
+  }
+
   return NextResponse.json({
     message: 'CypAI automation endpoint',
     status: 'ready',
@@ -729,6 +1031,17 @@ export async function GET(request: NextRequest) {
     trend,
     policy: eventTypeFilter ? policies[eventTypeFilter] : policies.default,
     policies,
+    alertPolicy,
+    alertState: {
+      attempts,
+      failureRate,
+      thresholdMet,
+      cooldownActive,
+      lastAlertAt: alertTriggered ? new Date().toISOString() : alertPolicy.lastAlertAt,
+      alertTriggered,
+      reason: alertReason,
+      dispatch: alertDispatch,
+    },
     timeline: Array.from(timelineMap.values()),
     recent: data || [],
   });

@@ -158,11 +158,32 @@ type AutomationPolicyMap = {
   abandoned_payment: AutomationRetryPolicy;
 };
 
+type AutomationAlertPolicy = {
+  failureRateThreshold: number;
+  minAttempts: number;
+  cooldownMinutes: number;
+  alertEmail: string | null;
+  hasWebhook: boolean;
+  lastAlertAt: string | null;
+};
+
+type AutomationAlertState = {
+  attempts: number;
+  failureRate: number;
+  thresholdMet: boolean;
+  cooldownActive: boolean;
+  lastAlertAt: string | null;
+  alertTriggered: boolean;
+  reason: string;
+};
+
 type AutomationOverviewResponse = {
   summary?: AutomationSummary;
   trend?: AutomationTrend;
   policy?: AutomationRetryPolicy;
   policies?: AutomationPolicyMap;
+  alertPolicy?: AutomationAlertPolicy;
+  alertState?: AutomationAlertState;
   timeline?: AutomationTimelinePoint[];
   recent?: AutomationRecentRecord[];
   filter?: {
@@ -183,6 +204,15 @@ const DEFAULT_AUTOMATION_POLICIES: AutomationPolicyMap = {
   default: { ...DEFAULT_AUTOMATION_POLICY },
   abandoned_signup: { ...DEFAULT_AUTOMATION_POLICY },
   abandoned_payment: { ...DEFAULT_AUTOMATION_POLICY },
+};
+
+const DEFAULT_ALERT_POLICY: AutomationAlertPolicy = {
+  failureRateThreshold: 40,
+  minAttempts: 5,
+  cooldownMinutes: 60,
+  alertEmail: null,
+  hasWebhook: false,
+  lastAlertAt: null,
 };
 
 type BookingRecord = {
@@ -641,6 +671,15 @@ function DashboardInner() {
   const [automationTrend, setAutomationTrend] = useState<AutomationTrend | null>(null);
   const [automationPolicies, setAutomationPolicies] = useState<AutomationPolicyMap>(DEFAULT_AUTOMATION_POLICIES);
   const [retryPolicyForms, setRetryPolicyForms] = useState<AutomationPolicyMap>(DEFAULT_AUTOMATION_POLICIES);
+  const [alertPolicy, setAlertPolicy] = useState<AutomationAlertPolicy>(DEFAULT_ALERT_POLICY);
+  const [alertState, setAlertState] = useState<AutomationAlertState | null>(null);
+  const [alertPolicyForm, setAlertPolicyForm] = useState({
+    failureRateThreshold: DEFAULT_ALERT_POLICY.failureRateThreshold,
+    minAttempts: DEFAULT_ALERT_POLICY.minAttempts,
+    cooldownMinutes: DEFAULT_ALERT_POLICY.cooldownMinutes,
+    alertEmail: '',
+    webhookUrl: '',
+  });
   const [automationTimeline, setAutomationTimeline] = useState<AutomationTimelinePoint[]>([]);
   const [automationRecent, setAutomationRecent] = useState<AutomationRecentRecord[]>([]);
   const [latestAutomationFailure, setLatestAutomationFailure] = useState<string | null>(null);
@@ -651,6 +690,8 @@ function DashboardInner() {
   const [retryBatchAutomationLoading, setRetryBatchAutomationLoading] = useState(false);
   const [retryRowLoadingIds, setRetryRowLoadingIds] = useState<Set<string>>(new Set());
   const [retryPolicySaving, setRetryPolicySaving] = useState(false);
+  const [alertPolicySaving, setAlertPolicySaving] = useState(false);
+  const [alertTestLoading, setAlertTestLoading] = useState(false);
   const [automationUnavailable, setAutomationUnavailable] = useState<string | null>(null);
   const hasTrackedInitialTab = useRef(false);
 
@@ -764,6 +805,15 @@ function DashboardInner() {
       setAutomationTrend(null);
       setAutomationPolicies(DEFAULT_AUTOMATION_POLICIES);
       setRetryPolicyForms(DEFAULT_AUTOMATION_POLICIES);
+      setAlertPolicy(DEFAULT_ALERT_POLICY);
+      setAlertState(null);
+      setAlertPolicyForm({
+        failureRateThreshold: DEFAULT_ALERT_POLICY.failureRateThreshold,
+        minAttempts: DEFAULT_ALERT_POLICY.minAttempts,
+        cooldownMinutes: DEFAULT_ALERT_POLICY.cooldownMinutes,
+        alertEmail: '',
+        webhookUrl: '',
+      });
       setAutomationTimeline([]);
       setAutomationRecent([]);
       setLatestAutomationFailure(null);
@@ -898,6 +948,15 @@ function DashboardInner() {
         setAutomationTrend(null);
         setAutomationPolicies(DEFAULT_AUTOMATION_POLICIES);
         setRetryPolicyForms(DEFAULT_AUTOMATION_POLICIES);
+        setAlertPolicy(DEFAULT_ALERT_POLICY);
+        setAlertState(null);
+        setAlertPolicyForm({
+          failureRateThreshold: DEFAULT_ALERT_POLICY.failureRateThreshold,
+          minAttempts: DEFAULT_ALERT_POLICY.minAttempts,
+          cooldownMinutes: DEFAULT_ALERT_POLICY.cooldownMinutes,
+          alertEmail: '',
+          webhookUrl: '',
+        });
         setAutomationTimeline([]);
         setAutomationRecent([]);
         setLatestAutomationFailure(null);
@@ -911,6 +970,16 @@ function DashboardInner() {
       const policies = data.policies || DEFAULT_AUTOMATION_POLICIES;
       setAutomationPolicies(policies);
       setRetryPolicyForms(policies);
+      const nextAlertPolicy = data.alertPolicy || DEFAULT_ALERT_POLICY;
+      setAlertPolicy(nextAlertPolicy);
+      setAlertState(data.alertState || null);
+      setAlertPolicyForm((prev) => ({
+        ...prev,
+        failureRateThreshold: nextAlertPolicy.failureRateThreshold,
+        minAttempts: nextAlertPolicy.minAttempts,
+        cooldownMinutes: nextAlertPolicy.cooldownMinutes,
+        alertEmail: nextAlertPolicy.alertEmail || '',
+      }));
       setAutomationTimeline(data.timeline || []);
       setAutomationRecent(data.recent || []);
 
@@ -923,6 +992,8 @@ function DashboardInner() {
       setAutomationTrend(null);
       setAutomationPolicies(DEFAULT_AUTOMATION_POLICIES);
       setRetryPolicyForms(DEFAULT_AUTOMATION_POLICIES);
+      setAlertPolicy(DEFAULT_ALERT_POLICY);
+      setAlertState(null);
       setAutomationTimeline([]);
       setAutomationRecent([]);
       setLatestAutomationFailure(null);
@@ -1086,6 +1157,83 @@ function DashboardInner() {
       setToast({ message, tone: 'error' });
     } finally {
       setRetryPolicySaving(false);
+    }
+  }
+
+  async function saveAlertPolicy() {
+    setAlertPolicySaving(true);
+    try {
+      const payload: {
+        action: 'set_alert_policy';
+        failureRateThreshold: number;
+        minAttempts: number;
+        cooldownMinutes: number;
+        alertEmail: string;
+        webhookUrl?: string;
+      } = {
+        action: 'set_alert_policy',
+        failureRateThreshold: Number(alertPolicyForm.failureRateThreshold || DEFAULT_ALERT_POLICY.failureRateThreshold),
+        minAttempts: Number(alertPolicyForm.minAttempts || DEFAULT_ALERT_POLICY.minAttempts),
+        cooldownMinutes: Number(alertPolicyForm.cooldownMinutes || DEFAULT_ALERT_POLICY.cooldownMinutes),
+        alertEmail: alertPolicyForm.alertEmail,
+      };
+
+      if (alertPolicyForm.webhookUrl.trim().length > 0) {
+        payload.webhookUrl = alertPolicyForm.webhookUrl.trim();
+      }
+
+      const response = await fetch('/api/automation', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      const data = (await response.json()) as { ok?: boolean; error?: string; policy?: AutomationAlertPolicy };
+      if (!response.ok || !data.ok) {
+        throw new Error(data.error || 'Failed to save alert policy');
+      }
+
+      const updated = data.policy || DEFAULT_ALERT_POLICY;
+      setAlertPolicy(updated);
+      setAlertPolicyForm((prev) => ({ ...prev, webhookUrl: '' }));
+      setToast({ message: 'Alert policy saved.', tone: 'success' });
+      await loadAutomationOverview();
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to save alert policy';
+      setToast({ message, tone: 'error' });
+    } finally {
+      setAlertPolicySaving(false);
+    }
+  }
+
+  async function testAlertHooks() {
+    setAlertTestLoading(true);
+    try {
+      const response = await fetch('/api/automation', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'test_alert', eventType: automationEventFilter === 'all' ? undefined : automationEventFilter }),
+      });
+
+      const data = (await response.json()) as { ok?: boolean; error?: string; result?: { sentWebhook?: boolean; sentEmail?: boolean; error?: string } };
+      if (!response.ok || !data.ok) {
+        throw new Error(data.error || 'Failed to send test alert');
+      }
+
+      const sentWebhook = Boolean(data.result?.sentWebhook);
+      const sentEmail = Boolean(data.result?.sentEmail);
+      if (sentWebhook || sentEmail) {
+        setToast({ message: `Test alert sent (${sentWebhook ? 'webhook ' : ''}${sentEmail ? 'email' : ''}).`.trim(), tone: 'success' });
+      } else {
+        setToast({ message: `Test alert did not dispatch (${data.result?.error || 'no configured destinations'}).`, tone: 'error' });
+      }
+
+      await loadAutomationOverview();
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to send test alert';
+      setToast({ message, tone: 'error' });
+    } finally {
+      setAlertTestLoading(false);
     }
   }
 
@@ -1818,6 +1966,114 @@ function DashboardInner() {
                       </div>
                       <p className="mt-3 text-xs text-zinc-500">
                         Fallback default policy: {automationPolicies.default.maxRetries} retries within {automationPolicies.default.retryWindowHours}h.
+                      </p>
+                    </div>
+
+                    <div className="mt-4 rounded-2xl border border-zinc-800 bg-zinc-950/40 p-3">
+                      <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-zinc-400">Failure spike alerting</p>
+                      <div className="grid gap-3 lg:grid-cols-2">
+                        <label className="flex min-w-[120px] flex-col gap-1 text-xs font-semibold uppercase tracking-wide text-zinc-400">
+                          Failure Threshold (%)
+                          <input
+                            type="number"
+                            min={1}
+                            max={100}
+                            value={alertPolicyForm.failureRateThreshold}
+                            onChange={(event) =>
+                              setAlertPolicyForm((prev) => ({
+                                ...prev,
+                                failureRateThreshold: Number(event.target.value || 1),
+                              }))
+                            }
+                            className="rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm font-medium text-zinc-100"
+                          />
+                        </label>
+                        <label className="flex min-w-[120px] flex-col gap-1 text-xs font-semibold uppercase tracking-wide text-zinc-400">
+                          Min Attempts
+                          <input
+                            type="number"
+                            min={1}
+                            max={1000}
+                            value={alertPolicyForm.minAttempts}
+                            onChange={(event) =>
+                              setAlertPolicyForm((prev) => ({
+                                ...prev,
+                                minAttempts: Number(event.target.value || 1),
+                              }))
+                            }
+                            className="rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm font-medium text-zinc-100"
+                          />
+                        </label>
+                        <label className="flex min-w-[120px] flex-col gap-1 text-xs font-semibold uppercase tracking-wide text-zinc-400">
+                          Cooldown (Minutes)
+                          <input
+                            type="number"
+                            min={1}
+                            max={1440}
+                            value={alertPolicyForm.cooldownMinutes}
+                            onChange={(event) =>
+                              setAlertPolicyForm((prev) => ({
+                                ...prev,
+                                cooldownMinutes: Number(event.target.value || 1),
+                              }))
+                            }
+                            className="rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm font-medium text-zinc-100"
+                          />
+                        </label>
+                        <label className="flex min-w-[160px] flex-col gap-1 text-xs font-semibold uppercase tracking-wide text-zinc-400">
+                          Alert Email
+                          <input
+                            type="email"
+                            value={alertPolicyForm.alertEmail}
+                            onChange={(event) =>
+                              setAlertPolicyForm((prev) => ({
+                                ...prev,
+                                alertEmail: event.target.value,
+                              }))
+                            }
+                            placeholder="owner@yourdomain.com"
+                            className="rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm font-medium text-zinc-100"
+                          />
+                        </label>
+                      </div>
+                      <label className="mt-3 flex min-w-[220px] flex-col gap-1 text-xs font-semibold uppercase tracking-wide text-zinc-400">
+                        Webhook URL (optional)
+                        <input
+                          type="url"
+                          value={alertPolicyForm.webhookUrl}
+                          onChange={(event) =>
+                            setAlertPolicyForm((prev) => ({
+                              ...prev,
+                              webhookUrl: event.target.value,
+                            }))
+                          }
+                          placeholder={alertPolicy.hasWebhook ? 'Webhook already configured; enter new URL to replace' : 'https://hooks.example.com/...'}
+                          className="rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm font-medium text-zinc-100"
+                        />
+                      </label>
+                      <div className="mt-3 flex flex-wrap items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => void saveAlertPolicy()}
+                          disabled={alertPolicySaving}
+                          className="rounded-full border border-amber-700/50 px-3 py-1.5 text-xs font-semibold text-amber-200 transition hover:bg-amber-900/30 disabled:cursor-not-allowed disabled:opacity-50"
+                        >
+                          {alertPolicySaving ? 'Saving...' : 'Save Alert Policy'}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => void testAlertHooks()}
+                          disabled={alertTestLoading}
+                          className="rounded-full border border-indigo-700/50 px-3 py-1.5 text-xs font-semibold text-indigo-200 transition hover:bg-indigo-900/30 disabled:cursor-not-allowed disabled:opacity-50"
+                        >
+                          {alertTestLoading ? 'Sending Test...' : 'Send Test Alert'}
+                        </button>
+                      </div>
+                      <p className="mt-3 text-xs text-zinc-500">
+                        Status: failure rate {alertState?.failureRate ?? 0}% across {alertState?.attempts ?? 0} attempts; cooldown {alertState?.cooldownActive ? 'active' : 'inactive'}.
+                      </p>
+                      <p className="mt-1 text-xs text-zinc-500">
+                        Last alert: {formatDateTime(alertPolicy.lastAlertAt)} | Destination webhook: {alertPolicy.hasWebhook ? 'configured' : 'not configured'} | email: {alertPolicy.alertEmail || 'not configured'}
                       </p>
                     </div>
 

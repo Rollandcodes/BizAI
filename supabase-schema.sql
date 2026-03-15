@@ -156,6 +156,31 @@ CREATE POLICY "Service role full access to marketing automation policy" ON publi
   WITH CHECK (auth.role() = 'service_role');
 
 -- ============================================================================
+-- Table: marketing_automation_alert_policy
+-- ============================================================================
+CREATE TABLE IF NOT EXISTS public.marketing_automation_alert_policy (
+  id TEXT PRIMARY KEY DEFAULT 'default',
+  failure_rate_threshold INTEGER NOT NULL DEFAULT 40 CHECK (failure_rate_threshold >= 1 AND failure_rate_threshold <= 100),
+  min_attempts INTEGER NOT NULL DEFAULT 5 CHECK (min_attempts >= 1 AND min_attempts <= 1000),
+  cooldown_minutes INTEGER NOT NULL DEFAULT 60 CHECK (cooldown_minutes >= 1 AND cooldown_minutes <= 1440),
+  alert_email TEXT,
+  webhook_url TEXT,
+  last_alert_at TIMESTAMPTZ,
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+INSERT INTO public.marketing_automation_alert_policy (id, failure_rate_threshold, min_attempts, cooldown_minutes)
+VALUES ('default', 40, 5, 60)
+ON CONFLICT (id) DO NOTHING;
+
+ALTER TABLE public.marketing_automation_alert_policy ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Service role full access to marketing automation alert policy" ON public.marketing_automation_alert_policy;
+CREATE POLICY "Service role full access to marketing automation alert policy" ON public.marketing_automation_alert_policy
+  FOR ALL USING (auth.role() = 'service_role')
+  WITH CHECK (auth.role() = 'service_role');
+
+-- ============================================================================
 -- Table: conversations
 -- ============================================================================
 -- Stores chat conversations between customers and the AI
