@@ -583,5 +583,6 @@ function Field({
   );
 }
 
-const inputClassName = 'h-12 w-full rounded-2xl border border-slate-300 px-4 text-sm outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10';
-const textareaClassName = 'w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10';
+// Keep mobile inputs at 16px to prevent iOS Safari auto-zoom, while using 14px on larger screens.
+const inputClassName = 'h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-base text-slate-900 placeholder:text-slate-400 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 sm:text-sm';
+const textareaClassName = 'w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-base text-slate-900 placeholder:text-slate-400 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 sm:text-sm';
