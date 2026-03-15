@@ -17,6 +17,7 @@
 import { Suspense, useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
+import QRCode from "qrcode";
 import {
   Bot, Building2, Calendar, Copy, CreditCard,
   Download, LayoutDashboard, LogOut, MessageSquare,
@@ -101,6 +102,15 @@ function emptyPayload(): DashboardPayload {
 
 function getAgencyAllowlist(): string[] {
   return [];
+}
+
+function normalizeWhatsAppPhone(value: string): string {
+  return value.replace(/[^\d]/g, "");
+}
+
+function buildWhatsAppUrl(value: string): string {
+  const digits = normalizeWhatsAppPhone(value);
+  return digits ? `https://wa.me/${digits}` : "";
 }
 
 // ─── Sub-components ─────────────────────────────────────────────────────────────
@@ -242,6 +252,7 @@ function DashboardInner() {
   const [bookings,         setBookings]          = useState<BookingRecord[]>([]);
   const [bookingsLoading,  setBookingsLoading]   = useState(false);
   const [bookingsInited,   setBookingsInited]    = useState(false);
+  const [whatsAppQrDataUrl, setWhatsAppQrDataUrl] = useState("");
   const [isTabletSidebarOpen, setIsTabletSidebarOpen] = useState(false);
   const [upgradeLockTab,   setUpgradeLockTab]    = useState<TabKey | null>(null);
   const [settingsForm,     setSettingsForm]      = useState<SettingsFormState>({
@@ -271,6 +282,7 @@ function DashboardInner() {
     () => business ? `<script src="https://cypai.app/widget.js" data-business-id="${business.id}"></script>` : "",
     [business]
   );
+  const whatsAppUrl = useMemo(() => buildWhatsAppUrl(settingsForm.whatsapp), [settingsForm.whatsapp]);
 
   const visibleTabs = agencyAccess ? TAB_ITEMS : TAB_ITEMS.filter(t => t.key !== "agency");
 
@@ -326,6 +338,31 @@ function DashboardInner() {
       setToast({ message: "Agency Mode is restricted to approved accounts.", tone: "error" });
     }
   }, [activeTab, agencyAccess, business]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    if (!whatsAppUrl) {
+      setWhatsAppQrDataUrl("");
+      return;
+    }
+
+    void QRCode.toDataURL(whatsAppUrl, {
+      width: 280,
+      margin: 1,
+      color: { dark: "#0f172a", light: "#ffffff" },
+    })
+      .then((dataUrl) => {
+        if (!cancelled) setWhatsAppQrDataUrl(dataUrl);
+      })
+      .catch(() => {
+        if (!cancelled) setWhatsAppQrDataUrl("");
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [whatsAppUrl]);
 
   // ── Data loading ──────────────────────────────────────────────────────────
   async function loadDashboard(params: { email?: string; businessId?: string }, isAuth = false) {
@@ -442,6 +479,23 @@ function DashboardInner() {
   function addFaq() { setSettingsForm(f => ({ ...f, customFaqs: [...f.customFaqs, { question: "", answer: "" }] })); }
   function removeFaq(i: number) {
     setSettingsForm(f => ({ ...f, customFaqs: f.customFaqs.length === 1 ? [{ question: "", answer: "" }] : f.customFaqs.filter((_, idx) => idx !== i) }));
+  }
+
+  async function handleCopyWhatsAppLink() {
+    if (!whatsAppUrl) {
+      showToast("Add a valid WhatsApp number first.", "error");
+      return;
+    }
+    await navigator.clipboard.writeText(whatsAppUrl);
+    showToast("WhatsApp link copied.", "success");
+  }
+
+  function handleDownloadWhatsAppQr() {
+    if (!whatsAppQrDataUrl || !business) return;
+    const a = document.createElement("a");
+    a.href = whatsAppQrDataUrl;
+    a.download = `${business.business_name.toLowerCase().replace(/[^a-z0-9]+/g, "-")}-whatsapp-qr.png`;
+    a.click();
   }
 
   // ── Auth gate ──────────────────────────────────────────────────────────────
@@ -686,6 +740,41 @@ function DashboardInner() {
                 </select>
               </div>
             </div>
+          </section>
+
+          {/* WhatsApp QR */}
+          <section className="rounded-3xl border border-zinc-800 bg-zinc-900 p-6">
+            <h2 className="mb-2 text-base font-bold text-zinc-100">WhatsApp QR code</h2>
+            <p className="mb-5 text-sm text-zinc-400">Customers can scan this code to start a WhatsApp chat instantly.</p>
+
+            {whatsAppUrl && whatsAppQrDataUrl ? (
+              <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
+                <div className="rounded-2xl border border-zinc-700 bg-white p-3">
+                  <img src={whatsAppQrDataUrl} alt="WhatsApp QR code" className="h-44 w-44" />
+                </div>
+                <div className="space-y-3">
+                  <p className="max-w-md break-all text-xs text-zinc-500">{whatsAppUrl}</p>
+                  <div className="flex flex-wrap gap-2">
+                    <a href={whatsAppUrl} target="_blank" rel="noopener noreferrer"
+                      className="rounded-full bg-green-600 px-4 py-2 text-sm font-semibold text-white hover:bg-green-500">
+                      Open WhatsApp link
+                    </a>
+                    <button type="button" onClick={() => void handleCopyWhatsAppLink()}
+                      className="inline-flex items-center gap-1 rounded-full border border-zinc-700 px-4 py-2 text-sm font-semibold text-zinc-300 hover:bg-zinc-800">
+                      <Copy className="h-3.5 w-3.5" /> Copy link
+                    </button>
+                    <button type="button" onClick={handleDownloadWhatsAppQr}
+                      className="inline-flex items-center gap-1 rounded-full border border-zinc-700 px-4 py-2 text-sm font-semibold text-zinc-300 hover:bg-zinc-800">
+                      <Download className="h-3.5 w-3.5" /> Download QR
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="rounded-2xl border border-amber-700/40 bg-amber-900/20 px-4 py-3 text-sm text-amber-200">
+                Add a valid WhatsApp number in Business details to generate your QR code.
+              </div>
+            )}
           </section>
 
           {/* Widget colour */}
