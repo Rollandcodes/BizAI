@@ -299,6 +299,28 @@ function exportLeadsCsv(leads: ConversationRecord[]) {
   URL.revokeObjectURL(url);
 }
 
+function exportAutomationCsv(records: AutomationRecentRecord[]) {
+  const rows = records.map((record) => [
+    formatDate(record.created_at),
+    record.event_type,
+    record.status,
+    record.recipient_email || '',
+    String(record.retry_count || 0),
+    record.last_error || '',
+  ]);
+  const csv = [
+    ['Date', 'Event Type', 'Status', 'Recipient Email', 'Retries', 'Last Error'].map(escapeCsv).join(','),
+    ...rows.map((row) => row.map((value) => escapeCsv(String(value))).join(',')),
+  ].join('\n');
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = 'cypai-automation-recent.csv';
+  link.click();
+  URL.revokeObjectURL(url);
+}
+
 function SkeletonBlock({ className = '' }: { className?: string }) {
   return <div className={`animate-pulse rounded-2xl bg-slate-200/80 ${className}`} />;
 }
@@ -580,6 +602,7 @@ function DashboardInner() {
   const [automationSummary, setAutomationSummary] = useState<AutomationSummary | null>(null);
   const [automationTrend, setAutomationTrend] = useState<AutomationTrend | null>(null);
   const [automationTimeline, setAutomationTimeline] = useState<AutomationTimelinePoint[]>([]);
+  const [automationRecent, setAutomationRecent] = useState<AutomationRecentRecord[]>([]);
   const [latestAutomationFailure, setLatestAutomationFailure] = useState<string | null>(null);
   const [latestFailedQueueId, setLatestFailedQueueId] = useState<string | null>(null);
   const [automationEventFilter, setAutomationEventFilter] = useState<AutomationEventFilter>('all');
@@ -605,6 +628,39 @@ function DashboardInner() {
 
     return `<script src="https://cypai.app/widget.js" data-business-id="${business.id}"></script>`;
   }, [business]);
+
+  const automationLiftInsight = useMemo(() => {
+    const daysWithAttempts = automationTimeline.filter((point) => point.sent + point.failed > 0);
+    const recovered = automationTimeline.reduce((sum, point) => sum + point.sent, 0);
+    const lost = automationTimeline.reduce((sum, point) => sum + point.failed, 0);
+
+    const avgDailyRate =
+      daysWithAttempts.length > 0
+        ? Number(
+            (
+              daysWithAttempts.reduce((sum, point) => sum + point.sent / (point.sent + point.failed), 0) /
+              daysWithAttempts.length
+            *
+              100
+            ).toFixed(1)
+          )
+        : 0;
+
+    const bestPoint = automationTimeline.reduce<AutomationTimelinePoint | null>((best, point) => {
+      if (!best || point.sent > best.sent) {
+        return point;
+      }
+      return best;
+    }, null);
+
+    return {
+      recovered,
+      lost,
+      avgDailyRate,
+      bestDay: bestPoint?.day || '-',
+      bestDayRecovered: bestPoint?.sent || 0,
+    };
+  }, [automationTimeline]);
 
   useEffect(() => {
     if (!toast) {
@@ -665,6 +721,7 @@ function DashboardInner() {
       setAutomationSummary(null);
       setAutomationTrend(null);
       setAutomationTimeline([]);
+      setAutomationRecent([]);
       setLatestAutomationFailure(null);
       setLatestFailedQueueId(null);
       setAutomationUnavailable(null);
@@ -796,6 +853,7 @@ function DashboardInner() {
         setAutomationSummary(null);
         setAutomationTrend(null);
         setAutomationTimeline([]);
+        setAutomationRecent([]);
         setLatestAutomationFailure(null);
         setLatestFailedQueueId(null);
         setAutomationUnavailable('Automation queue is not initialized yet. Run the latest Supabase schema migration.');
@@ -805,6 +863,7 @@ function DashboardInner() {
       setAutomationSummary(data.summary || { total: 0, queued: 0, sent: 0, failed: 0 });
       setAutomationTrend(data.trend || { windowDays: 7, sent: 0, failed: 0, queued: 0, successRate: 0 });
       setAutomationTimeline(data.timeline || []);
+      setAutomationRecent(data.recent || []);
 
       const latestFailure = (data.recent || []).find((item) => item.status === 'failed' && item.last_error);
       setLatestAutomationFailure(latestFailure?.last_error || null);
@@ -814,6 +873,7 @@ function DashboardInner() {
       setAutomationSummary(null);
       setAutomationTrend(null);
       setAutomationTimeline([]);
+      setAutomationRecent([]);
       setLatestAutomationFailure(null);
       setLatestFailedQueueId(null);
       setAutomationUnavailable(message);
@@ -889,6 +949,16 @@ function DashboardInner() {
     } finally {
       setRetryBatchAutomationLoading(false);
     }
+  }
+
+  function handleExportAutomationCsv() {
+    if (automationRecent.length === 0) {
+      setToast({ message: 'No automation records to export yet.', tone: 'error' });
+      return;
+    }
+
+    exportAutomationCsv(automationRecent);
+    setToast({ message: 'Automation CSV exported.', tone: 'success' });
   }
 
   function handleLogout() {
@@ -1523,6 +1593,14 @@ function DashboardInner() {
                         >
                           {retryBatchAutomationLoading ? 'Retrying Batch...' : 'Retry 5 Failed'}
                         </button>
+                        <button
+                          type="button"
+                          onClick={handleExportAutomationCsv}
+                          disabled={automationLoading || automationRecent.length === 0}
+                          className="rounded-full border border-zinc-600 px-3 py-1.5 text-xs font-semibold text-zinc-100 transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-50"
+                        >
+                          Export CSV
+                        </button>
                       </div>
                     </div>
 
@@ -1564,27 +1642,39 @@ function DashboardInner() {
                         <p className="mt-4 text-sm font-semibold text-emerald-300">
                           7d success rate: {automationTrend?.successRate ?? 0}%
                         </p>
-                        <div className="mt-4 rounded-2xl border border-zinc-800 bg-zinc-950/40 p-3">
-                          <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-zinc-400">7d delivery timeline</p>
-                          <div className="h-36 w-full">
-                            <ResponsiveContainer width="100%" height="100%">
-                              <LineChart
-                                data={automationTimeline.map((point) => ({
-                                  ...point,
-                                  dayLabel: point.day.slice(5),
-                                }))}
-                                margin={{ top: 6, right: 8, left: 0, bottom: 0 }}
-                              >
-                                <XAxis dataKey="dayLabel" tick={{ fill: '#a1a1aa', fontSize: 11 }} axisLine={false} tickLine={false} />
-                                <YAxis hide domain={[0, 'auto']} />
-                                <Tooltip
-                                  contentStyle={{ backgroundColor: '#18181b', border: '1px solid #3f3f46', borderRadius: 12 }}
-                                  labelStyle={{ color: '#e4e4e7' }}
-                                />
-                                <Line type="monotone" dataKey="sent" stroke="#34d399" strokeWidth={2} dot={false} />
-                                <Line type="monotone" dataKey="failed" stroke="#fb7185" strokeWidth={2} dot={false} />
-                              </LineChart>
-                            </ResponsiveContainer>
+                        <div className="mt-4 grid gap-3 lg:grid-cols-[1.4fr_0.6fr]">
+                          <div className="rounded-2xl border border-zinc-800 bg-zinc-950/40 p-3">
+                            <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-zinc-400">7d delivery timeline</p>
+                            <div className="h-36 w-full">
+                              <ResponsiveContainer width="100%" height="100%">
+                                <LineChart
+                                  data={automationTimeline.map((point) => ({
+                                    ...point,
+                                    dayLabel: point.day.slice(5),
+                                  }))}
+                                  margin={{ top: 6, right: 8, left: 0, bottom: 0 }}
+                                >
+                                  <XAxis dataKey="dayLabel" tick={{ fill: '#a1a1aa', fontSize: 11 }} axisLine={false} tickLine={false} />
+                                  <YAxis hide domain={[0, 'auto']} />
+                                  <Tooltip
+                                    contentStyle={{ backgroundColor: '#18181b', border: '1px solid #3f3f46', borderRadius: 12 }}
+                                    labelStyle={{ color: '#e4e4e7' }}
+                                  />
+                                  <Line type="monotone" dataKey="sent" stroke="#34d399" strokeWidth={2} dot={false} />
+                                  <Line type="monotone" dataKey="failed" stroke="#fb7185" strokeWidth={2} dot={false} />
+                                </LineChart>
+                              </ResponsiveContainer>
+                            </div>
+                          </div>
+                          <div className="rounded-2xl border border-zinc-800 bg-zinc-950/40 p-3">
+                            <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-zinc-400">Conversion Lift</p>
+                            <div className="space-y-2 text-sm text-zinc-300">
+                              <p>Recovered (7d): <span className="font-semibold text-emerald-300">{automationLiftInsight.recovered}</span></p>
+                              <p>Lost (7d): <span className="font-semibold text-rose-300">{automationLiftInsight.lost}</span></p>
+                              <p>Avg daily rate: <span className="font-semibold text-emerald-300">{automationLiftInsight.avgDailyRate}%</span></p>
+                              <p>Best day: <span className="font-semibold text-zinc-100">{automationLiftInsight.bestDay}</span></p>
+                              <p>Best day recovered: <span className="font-semibold text-emerald-300">{automationLiftInsight.bestDayRecovered}</span></p>
+                            </div>
                           </div>
                         </div>
                         <p className="mt-4 text-sm text-zinc-500">
