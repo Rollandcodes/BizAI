@@ -152,6 +152,46 @@ function toAlertLogOutcomeFilter(value: string | null): AlertLogOutcomeFilter {
   return 'all';
 }
 
+function csvEscape(value: string): string {
+  return `"${value.replace(/"/g, '""')}"`;
+}
+
+function buildAlertLogsCsv(records: AlertLogRecord[]): string {
+  const header = [
+    'Created At',
+    'Trigger',
+    'Scope',
+    'Failure Rate',
+    'Attempts',
+    'Sent Webhook',
+    'Sent Email',
+    'Webhook Provider',
+    'Signed Webhook',
+    'Dispatch Error',
+  ]
+    .map(csvEscape)
+    .join(',');
+
+  const rows = records.map((record) =>
+    [
+      record.created_at,
+      record.triggered_by,
+      record.event_scope,
+      String(record.failure_rate),
+      String(record.attempts),
+      String(record.sent_webhook),
+      String(record.sent_email),
+      record.webhook_provider || '',
+      String(record.signed_webhook),
+      record.dispatch_error || '',
+    ]
+      .map((value) => csvEscape(value))
+      .join(',')
+  );
+
+  return [header, ...rows].join('\n');
+}
+
 function getPolicyId(eventType: AutomationEventType | null): string {
   return eventType || 'default';
 }
@@ -1153,8 +1193,31 @@ export async function GET(request: NextRequest) {
   const eventTypeFilter = toEventType(request.nextUrl.searchParams.get('eventType'));
   const alertLogTrigger = toAlertLogTriggerFilter(request.nextUrl.searchParams.get('alertLogTrigger'));
   const alertLogOutcome = toAlertLogOutcomeFilter(request.nextUrl.searchParams.get('alertLogOutcome'));
+  const alertLogsExport = request.nextUrl.searchParams.get('alertLogsExport') === 'csv';
   const alertLogPage = normalizePositiveInt(Number(request.nextUrl.searchParams.get('alertLogPage') || 1), 1, 1, 5000);
   const alertLogPageSize = normalizePositiveInt(Number(request.nextUrl.searchParams.get('alertLogPageSize') || 10), 10, 5, 50);
+
+  if (alertLogsExport) {
+    const alertLogsPage = await getAlertLogsPage({
+      trigger: alertLogTrigger,
+      outcome: alertLogOutcome,
+      page: 1,
+      pageSize: 5000,
+    });
+
+    const csv = buildAlertLogsCsv(alertLogsPage.records);
+    const dateSuffix = new Date().toISOString().slice(0, 10);
+    const fileName = `cypai-alert-logs-${alertLogTrigger}-${alertLogOutcome}-${dateSuffix}.csv`;
+
+    return new NextResponse(csv, {
+      status: 200,
+      headers: {
+        'Content-Type': 'text/csv; charset=utf-8',
+        'Content-Disposition': `attachment; filename="${fileName}"`,
+      },
+    });
+  }
+
   const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
   let recentQuery = supabase
     .from('marketing_automation_queue')

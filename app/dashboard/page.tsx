@@ -427,6 +427,16 @@ function exportAutomationCsv(records: AutomationRecentRecord[]) {
   URL.revokeObjectURL(url);
 }
 
+function downloadCsvFile(csv: string, fileName: string) {
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = fileName;
+  link.click();
+  URL.revokeObjectURL(url);
+}
+
 function SkeletonBlock({ className = '' }: { className?: string }) {
   return <div className={`animate-pulse rounded-2xl bg-slate-200/80 ${className}`} />;
 }
@@ -735,6 +745,7 @@ function DashboardInner() {
   const [retryPolicySaving, setRetryPolicySaving] = useState(false);
   const [alertPolicySaving, setAlertPolicySaving] = useState(false);
   const [alertTestLoading, setAlertTestLoading] = useState(false);
+  const [alertLogsExporting, setAlertLogsExporting] = useState(false);
   const [automationUnavailable, setAutomationUnavailable] = useState<string | null>(null);
   const hasTrackedInitialTab = useRef(false);
 
@@ -1185,6 +1196,36 @@ function DashboardInner() {
 
     exportAutomationCsv(automationRecent);
     setToast({ message: 'Automation CSV exported.', tone: 'success' });
+  }
+
+  async function handleExportAlertLogsCsv() {
+    setAlertLogsExporting(true);
+    try {
+      const query = new URLSearchParams();
+      if (alertLogTriggerFilter !== 'all') {
+        query.set('alertLogTrigger', alertLogTriggerFilter);
+      }
+      if (alertLogOutcomeFilter !== 'all') {
+        query.set('alertLogOutcome', alertLogOutcomeFilter);
+      }
+      query.set('alertLogsExport', 'csv');
+
+      const response = await fetch(`/api/automation?${query.toString()}`, { method: 'GET' });
+      if (!response.ok) {
+        const fallback = (await response.json().catch(() => null)) as { error?: string } | null;
+        throw new Error(fallback?.error || 'Failed to export alert logs');
+      }
+
+      const csvText = await response.text();
+      const fileName = `cypai-alert-logs-${alertLogTriggerFilter}-${alertLogOutcomeFilter}.csv`;
+      downloadCsvFile(csvText, fileName);
+      setToast({ message: 'Alert log CSV exported.', tone: 'success' });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to export alert logs';
+      setToast({ message, tone: 'error' });
+    } finally {
+      setAlertLogsExporting(false);
+    }
   }
 
   async function saveRetryPolicy(eventType: 'abandoned_signup' | 'abandoned_payment') {
@@ -2138,6 +2179,14 @@ function DashboardInner() {
                           className="rounded-full border border-indigo-700/50 px-3 py-1.5 text-xs font-semibold text-indigo-200 transition hover:bg-indigo-900/30 disabled:cursor-not-allowed disabled:opacity-50"
                         >
                           {alertTestLoading ? 'Sending Test...' : 'Send Test Alert'}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => void handleExportAlertLogsCsv()}
+                          disabled={alertLogsExporting}
+                          className="rounded-full border border-zinc-700 px-3 py-1.5 text-xs font-semibold text-zinc-200 transition hover:bg-zinc-900/60 disabled:cursor-not-allowed disabled:opacity-50"
+                        >
+                          {alertLogsExporting ? 'Exporting...' : 'Export Alert Logs CSV'}
                         </button>
                       </div>
                       <p className="mt-3 text-xs text-zinc-500">
