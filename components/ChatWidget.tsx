@@ -44,6 +44,7 @@ function ChatWidget({
   const [degradedMode, setDegradedMode] = useState(false);
   const [leadCapturedToast, setLeadCapturedToast] = useState(false);
   const [showQrModal, setShowQrModal] = useState(false);
+  const [qrLinkCopied, setQrLinkCopied] = useState(false);
   const [sessionId] = useState<string>(() => crypto.randomUUID());
   const [feedbackState, setFeedbackState] = useState<'idle' | 'prompt' | 'done'>('idle');
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -220,6 +221,12 @@ function ChatWidget({
     window.addEventListener('keydown', closeOnEscape);
     return () => window.removeEventListener('keydown', closeOnEscape);
   }, [showQrModal]);
+
+  useEffect(() => {
+    if (!qrLinkCopied) return;
+    const timer = setTimeout(() => setQrLinkCopied(false), 1800);
+    return () => clearTimeout(timer);
+  }, [qrLinkCopied]);
 
   const hasWhatsApp = Boolean(whatsappUrl);
   const qrImageSrc = whatsappUrl
@@ -430,14 +437,27 @@ function ChatWidget({
             <div className="rounded-xl bg-white p-3">
               <img src={qrImageSrc} alt="WhatsApp QR code" className="mx-auto h-[250px] w-[250px]" />
             </div>
-            <a
-              href={whatsappUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="mt-4 inline-flex w-full items-center justify-center rounded-xl bg-green-600 px-4 py-3 text-sm font-semibold text-white hover:bg-green-500"
-            >
-              Open WhatsApp
-            </a>
+            <div className="mt-4 grid gap-2 sm:grid-cols-2">
+              <a
+                href={whatsappUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex w-full items-center justify-center rounded-xl bg-green-600 px-4 py-3 text-sm font-semibold text-white hover:bg-green-500"
+              >
+                Open WhatsApp
+              </a>
+              <button
+                type="button"
+                onClick={() => {
+                  if (!whatsappUrl) return;
+                  void navigator.clipboard.writeText(whatsappUrl);
+                  setQrLinkCopied(true);
+                }}
+                className="inline-flex w-full items-center justify-center rounded-xl border border-zinc-700 px-4 py-3 text-sm font-semibold text-zinc-100 hover:bg-zinc-800"
+              >
+                {qrLinkCopied ? 'Copied' : 'Copy Link'}
+              </button>
+            </div>
           </div>
         </div>
       )}
