@@ -80,6 +80,19 @@ const dailyUse = [
   'Check analytics to see how many chats and leads you got.',
 ]
 
+const nicheGuides = [
+  {
+    title: 'How CypAI works for car rentals',
+    detail: 'Built for availability checks, pricing questions, date capture, and booking requests.',
+    href: '/how-it-works/car-rentals',
+  },
+  {
+    title: 'How CypAI works for clinics',
+    detail: 'Built for patient inquiries, appointment request capture, and cleaner front-desk workflow.',
+    href: '/how-it-works/clinics',
+  },
+]
+
 export default function HowItWorksPage() {
   return (
     <main className="min-h-screen bg-zinc-950 text-zinc-100">
@@ -128,6 +141,26 @@ export default function HowItWorksPage() {
                 <div className="border-t border-zinc-800 p-3 text-zinc-100">{feature}</div>
                 <div className="border-l border-t border-zinc-800 p-3 text-zinc-400">{problem}</div>
               </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="py-16">
+        <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+          <h2 className="text-3xl font-black text-white">Beginner guides by business type</h2>
+          <p className="mt-3 max-w-3xl text-zinc-400">
+            Pick the guide that matches your business so you get examples that feel familiar.
+          </p>
+          <div className="mt-8 grid gap-4 md:grid-cols-2">
+            {nicheGuides.map((guide) => (
+              <article key={guide.href} className="rounded-2xl border border-zinc-800 bg-zinc-900 p-6">
+                <h3 className="text-xl font-bold text-white">{guide.title}</h3>
+                <p className="mt-3 text-sm leading-7 text-zinc-400">{guide.detail}</p>
+                <Link href={guide.href} className="mt-5 inline-flex rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-500">
+                  Open guide
+                </Link>
+              </article>
             ))}
           </div>
         </div>

@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Image from 'next/image';
 import Link from 'next/link';
 
 export const metadata: Metadata = {
@@ -111,6 +112,39 @@ export default function SetupPage() {
             <Link href="/how-it-works" className="rounded-xl border border-zinc-700 px-5 py-3 text-sm font-semibold text-zinc-200 hover:bg-zinc-900">
               Read How It Works
             </Link>
+          </div>
+        </div>
+      </section>
+
+      <section className="py-16">
+        <div className="mx-auto max-w-5xl px-6 sm:px-10">
+          <h2 className="text-3xl font-extrabold text-white">Visual walkthrough (so you can see each step)</h2>
+          <p className="mt-3 max-w-3xl text-zinc-400">
+            These illustrations show what the setup and dashboard flow looks like, so it feels easier before you start.
+          </p>
+          <div className="mt-8 grid gap-5 lg:grid-cols-3">
+            {[
+              {
+                src: '/images/guides/onboarding-wizard.svg',
+                alt: 'CypAI onboarding wizard visual',
+                title: '1) Fill business info',
+              },
+              {
+                src: '/images/guides/whatsapp-sync.svg',
+                alt: 'CypAI website and WhatsApp sync visual',
+                title: '2) Connect channels',
+              },
+              {
+                src: '/images/guides/dashboard-leads.svg',
+                alt: 'CypAI dashboard and leads visual',
+                title: '3) Track leads and conversations',
+              },
+            ].map((item) => (
+              <article key={item.src} className="overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-900">
+                <Image src={item.src} alt={item.alt} width={1200} height={720} className="h-auto w-full" />
+                <p className="border-t border-zinc-800 px-4 py-3 text-sm font-semibold text-zinc-200">{item.title}</p>
+              </article>
+            ))}
           </div>
         </div>
       </section>

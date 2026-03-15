@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
@@ -73,6 +74,8 @@ export default async function BlogPostPage({ params }: PageProps) {
     notFound();
   }
 
+  const showBeginnerVisuals = slug === 'how-to-set-up-cypai-in-your-business-a-beginner-friendly-guide';
+
   return (
     <main className="min-h-screen bg-zinc-950 text-zinc-100">
       <article className="mx-auto max-w-4xl px-6 py-16 sm:px-10">
@@ -87,6 +90,39 @@ export default async function BlogPostPage({ params }: PageProps) {
           {formatDate(post.publishedAt)} • {post.readingMinutes} min read
         </p>
         <p className="mt-8 text-xl leading-8 text-zinc-300">{post.excerpt}</p>
+
+        {showBeginnerVisuals ? (
+          <section className="mt-10 rounded-2xl border border-zinc-800 bg-zinc-900 p-6">
+            <h2 className="text-2xl font-bold text-white">Visual walkthrough</h2>
+            <p className="mt-2 text-sm leading-7 text-zinc-400">
+              If you learn better by seeing, use these screenshot-style visuals while reading the steps.
+            </p>
+            <div className="mt-5 grid gap-4 md:grid-cols-3">
+              {[
+                {
+                  src: '/images/guides/onboarding-wizard.svg',
+                  alt: 'Onboarding wizard visual step',
+                  caption: 'Setup wizard',
+                },
+                {
+                  src: '/images/guides/whatsapp-sync.svg',
+                  alt: 'Website and WhatsApp sync visual step',
+                  caption: 'Website + WhatsApp sync',
+                },
+                {
+                  src: '/images/guides/dashboard-leads.svg',
+                  alt: 'Dashboard leads and conversations visual step',
+                  caption: 'Leads dashboard',
+                },
+              ].map((item) => (
+                <article key={item.src} className="overflow-hidden rounded-xl border border-zinc-800 bg-zinc-950">
+                  <Image src={item.src} alt={item.alt} width={1200} height={720} className="h-auto w-full" />
+                  <p className="border-t border-zinc-800 px-3 py-2 text-xs font-semibold text-zinc-300">{item.caption}</p>
+                </article>
+              ))}
+            </div>
+          </section>
+        ) : null}
 
         <div className="mt-10 space-y-10">
           {post.sections.map((section) => (

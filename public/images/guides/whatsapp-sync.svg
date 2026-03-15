@@ -1,0 +1,30 @@
+<svg width="1200" height="720" viewBox="0 0 1200 720" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="720" rx="32" fill="#090C16"/>
+  <rect x="52" y="52" width="1096" height="616" rx="28" fill="#111827" stroke="#1F2937"/>
+  <text x="96" y="116" fill="#E5E7EB" font-size="30" font-family="Arial, sans-serif" font-weight="700">Website + WhatsApp in One Inbox</text>
+  <rect x="96" y="156" width="300" height="468" rx="22" fill="#0B1220" stroke="#334155"/>
+  <text x="124" y="196" fill="#93C5FD" font-size="20" font-family="Arial, sans-serif" font-weight="700">Website Chat</text>
+  <rect x="124" y="224" width="244" height="78" rx="14" fill="#111827"/>
+  <text x="138" y="255" fill="#CBD5E1" font-size="14" font-family="Arial, sans-serif">"What are your prices?"</text>
+  <rect x="124" y="318" width="244" height="78" rx="14" fill="#111827"/>
+  <text x="138" y="349" fill="#CBD5E1" font-size="14" font-family="Arial, sans-serif">"Do you open on Sunday?"</text>
+  <rect x="452" y="156" width="300" height="468" rx="22" fill="#0B1220" stroke="#334155"/>
+  <text x="480" y="196" fill="#86EFAC" font-size="20" font-family="Arial, sans-serif" font-weight="700">WhatsApp</text>
+  <rect x="480" y="224" width="244" height="78" rx="14" fill="#111827"/>
+  <text x="494" y="255" fill="#CBD5E1" font-size="14" font-family="Arial, sans-serif">"I need a booking for tomorrow"</text>
+  <rect x="480" y="318" width="244" height="78" rx="14" fill="#111827"/>
+  <text x="494" y="349" fill="#CBD5E1" font-size="14" font-family="Arial, sans-serif">"Can you share location?"</text>
+  <rect x="808" y="156" width="244" height="468" rx="22" fill="#0B1220" stroke="#334155"/>
+  <text x="832" y="196" fill="#E5E7EB" font-size="18" font-family="Arial, sans-serif" font-weight="700">CypAI CRM</text>
+  <rect x="832" y="230" width="196" height="64" rx="12" fill="#111827"/>
+  <text x="846" y="258" fill="#E2E8F0" font-size="14" font-family="Arial, sans-serif">Lead: Sarah</text>
+  <text x="846" y="278" fill="#64748B" font-size="12" font-family="Arial, sans-serif">Status: New</text>
+  <rect x="832" y="308" width="196" height="64" rx="12" fill="#111827"/>
+  <text x="846" y="336" fill="#E2E8F0" font-size="14" font-family="Arial, sans-serif">Lead: Omar</text>
+  <text x="846" y="356" fill="#64748B" font-size="12" font-family="Arial, sans-serif">Status: Contacted</text>
+  <rect x="832" y="386" width="196" height="64" rx="12" fill="#111827"/>
+  <text x="846" y="414" fill="#E2E8F0" font-size="14" font-family="Arial, sans-serif">Lead: Elena</text>
+  <text x="846" y="434" fill="#64748B" font-size="12" font-family="Arial, sans-serif">Status: Converted</text>
+  <path d="M402 388H448" stroke="#3B82F6" stroke-width="6" stroke-linecap="round"/>
+  <path d="M758 388H804" stroke="#22C55E" stroke-width="6" stroke-linecap="round"/>
+</svg>
