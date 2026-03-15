@@ -51,6 +51,7 @@ export default async function WidgetPage({
             businessName={business.business_name}
             primaryColor={business.widget_color || '#2563eb'}
             welcomeMessage={`Hi, this is ${business.business_name}. How can I help you today?`}
+            whatsappUrl={waUrl}
             embedded
           />
         </div>

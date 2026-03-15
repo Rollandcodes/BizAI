@@ -15,6 +15,7 @@ interface ChatWidgetProps {
   businessName: string;
   primaryColor: string;
   welcomeMessage: string;
+  whatsappUrl?: string;
   businessType?: string;
   embedded?: boolean;
 }
@@ -24,6 +25,7 @@ function ChatWidget({
   businessName,
   primaryColor,
   welcomeMessage,
+  whatsappUrl,
   businessType = 'default',
   embedded = false,
 }: ChatWidgetProps) {
@@ -41,6 +43,7 @@ function ChatWidget({
   const [isLoading, setIsLoading] = useState(false);
   const [degradedMode, setDegradedMode] = useState(false);
   const [leadCapturedToast, setLeadCapturedToast] = useState(false);
+  const [showQrModal, setShowQrModal] = useState(false);
   const [sessionId] = useState<string>(() => crypto.randomUUID());
   const [feedbackState, setFeedbackState] = useState<'idle' | 'prompt' | 'done'>('idle');
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -209,6 +212,20 @@ function ChatWidget({
     return () => clearTimeout(timer);
   }, [leadCapturedToast]);
 
+  useEffect(() => {
+    if (!showQrModal) return;
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setShowQrModal(false);
+    };
+    window.addEventListener('keydown', closeOnEscape);
+    return () => window.removeEventListener('keydown', closeOnEscape);
+  }, [showQrModal]);
+
+  const hasWhatsApp = Boolean(whatsappUrl);
+  const qrImageSrc = whatsappUrl
+    ? `https://api.qrserver.com/v1/create-qr-code/?size=260x260&data=${encodeURIComponent(whatsappUrl)}`
+    : '';
+
   return (
     <>
       {/* Chat Panel */}
@@ -230,21 +247,33 @@ function ChatWidget({
               <span className="h-2 w-2 rounded-full bg-green-300 animate-pulse" />
               <span className="font-semibold text-white text-sm">{businessName}</span>
             </div>
-            <button
-              onClick={() => {
-                if (embedded && typeof window !== 'undefined') {
-                  window.parent.postMessage('cypai:close', '*');
-                }
-                setIsOpen(false);
-              }}
-              className="rounded-md text-white/80 transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80"
-              aria-label="Close chat"
-            >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <line x1="18" y1="6" x2="6" y2="18" />
-                <line x1="6" y1="6" x2="18" y2="18" />
-              </svg>
-            </button>
+            <div className="flex items-center gap-2">
+              {embedded && isMobile && hasWhatsApp && (
+                <button
+                  type="button"
+                  onClick={() => setShowQrModal(true)}
+                  className="rounded-md bg-white/15 px-2 py-1 text-xs font-semibold text-white transition hover:bg-white/25 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80"
+                  aria-label="Show WhatsApp QR"
+                >
+                  QR
+                </button>
+              )}
+              <button
+                onClick={() => {
+                  if (embedded && typeof window !== 'undefined') {
+                    window.parent.postMessage('cypai:close', '*');
+                  }
+                  setIsOpen(false);
+                }}
+                className="rounded-md text-white/80 transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80"
+                aria-label="Close chat"
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="18" y1="6" x2="6" y2="18" />
+                  <line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
+              </button>
+            </div>
           </div>
 
           {degradedMode ? (
@@ -384,6 +413,34 @@ function ChatWidget({
           )}
         </button>
       )}
+
+      {embedded && showQrModal && hasWhatsApp && (
+        <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/70 px-4">
+          <div className="w-full max-w-sm rounded-2xl bg-zinc-950 p-4 shadow-2xl">
+            <div className="mb-3 flex items-center justify-between">
+              <h3 className="text-sm font-bold text-zinc-100">Scan WhatsApp QR</h3>
+              <button
+                type="button"
+                onClick={() => setShowQrModal(false)}
+                className="rounded-md px-2 py-1 text-xs font-semibold text-zinc-300 hover:bg-zinc-800"
+              >
+                Close
+              </button>
+            </div>
+            <div className="rounded-xl bg-white p-3">
+              <img src={qrImageSrc} alt="WhatsApp QR code" className="mx-auto h-[250px] w-[250px]" />
+            </div>
+            <a
+              href={whatsappUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-4 inline-flex w-full items-center justify-center rounded-xl bg-green-600 px-4 py-3 text-sm font-semibold text-white hover:bg-green-500"
+            >
+              Open WhatsApp
+            </a>
+          </div>
+        </div>
+      )}
     </>
   );
 }
@@ -393,6 +450,7 @@ export default memo(ChatWidget, (prev, next) =>
   prev.businessName === next.businessName &&
   prev.primaryColor === next.primaryColor &&
   prev.welcomeMessage === next.welcomeMessage &&
+  prev.whatsappUrl === next.whatsappUrl &&
   prev.embedded === next.embedded
 );
 
