@@ -84,6 +84,7 @@ type BusinessRecord = {
   business_type?: string | null;
   owner_name?: string | null;
   whatsapp?: string | null;
+  whatsapp_phone_number_id?: string | null;
   website?: string | null;
   widget_color?: string | null;
   widget_position?: string | null;
@@ -282,6 +283,8 @@ type ToastState = {
 type SettingsFormState = {
   businessName: string;
   businessType: string;
+  whatsapp: string;
+  whatsappPhoneNumberId: string;
   primaryColor: string;
   aiInstructions: string;
   customFaqs: CustomFaq[];
@@ -644,10 +647,14 @@ function DashboardInner() {
   const [settingsForm, setSettingsForm] = useState<SettingsFormState>({
     businessName: '',
     businessType: 'other',
+    whatsapp: '',
+    whatsappPhoneNumberId: '',
     primaryColor: '#2563eb',
     aiInstructions: '',
     customFaqs: [{ question: '', answer: '' }],
   });
+  const [whatsAppTestLoading, setWhatsAppTestLoading] = useState(false);
+  const [whatsAppTestMessage, setWhatsAppTestMessage] = useState('Test from CypAI dashboard. If you received this, WhatsApp sync is working.');
 
   // ── Audit Tab State ──────────────────────────────────────────────────────
   type AuditFlaggedConv = {
@@ -846,6 +853,8 @@ function DashboardInner() {
     setSettingsForm({
       businessName: business.business_name || '',
       businessType: business.business_type || 'other',
+      whatsapp: business.whatsapp || '',
+      whatsappPhoneNumberId: business.whatsapp_phone_number_id || '',
       primaryColor: business.widget_color || '#2563eb',
       aiInstructions: business.customInstructions || '',
       customFaqs: business.customFaqs && business.customFaqs.length > 0 ? business.customFaqs : [{ question: '', answer: '' }],
@@ -1661,6 +1670,8 @@ function DashboardInner() {
           businessId: business.id,
           businessName: settingsForm.businessName,
           businessType: settingsForm.businessType,
+          whatsapp: settingsForm.whatsapp,
+          whatsappPhoneNumberId: settingsForm.whatsappPhoneNumberId,
           widgetColor: settingsForm.primaryColor,
           customInstructions: settingsForm.aiInstructions,
           customFaqs: settingsForm.customFaqs.filter((faq) => faq.question.trim() || faq.answer.trim()),
@@ -1681,6 +1692,48 @@ function DashboardInner() {
       });
     } finally {
       setSaveLoading(false);
+    }
+  }
+
+  async function handleSendWhatsAppTest() {
+    if (!business) {
+      return;
+    }
+
+    const to = settingsForm.whatsapp.trim();
+    if (!to) {
+      setToast({ message: 'Add a WhatsApp number first (settings).', tone: 'error' });
+      return;
+    }
+
+    setWhatsAppTestLoading(true);
+    try {
+      const response = await fetch('/api/whatsapp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'send_test',
+          businessId: business.id,
+          to,
+          message: whatsAppTestMessage,
+          phoneNumberId: settingsForm.whatsappPhoneNumberId || undefined,
+        }),
+      });
+
+      const data = (await response.json()) as { ok?: boolean; error?: string; sent?: boolean; details?: string };
+      if (!response.ok || !data.ok || !data.sent) {
+        throw new Error(data.error || data.details || 'Failed to send WhatsApp test message');
+      }
+
+      setToast({ message: 'WhatsApp test message sent.', tone: 'success' });
+      await refreshDashboard();
+    } catch (error) {
+      setToast({
+        message: error instanceof Error ? error.message : 'Failed to send WhatsApp test message',
+        tone: 'error',
+      });
+    } finally {
+      setWhatsAppTestLoading(false);
     }
   }
 
@@ -3045,6 +3098,53 @@ function DashboardInner() {
                             </option>
                           ))}
                         </select>
+                      </div>
+                    </div>
+
+                    <div className="mt-5 rounded-2xl border border-zinc-800 p-4">
+                      <p className="text-sm font-semibold text-white">WhatsApp Channel Management</p>
+                      <p className="mt-1 text-xs text-zinc-500">Configure business mapping for unified inbox sync (website + WhatsApp).</p>
+
+                      <div className="mt-4 grid gap-4 md:grid-cols-2">
+                        <div>
+                          <label htmlFor="whatsapp-number" className="mb-2 block text-sm font-semibold text-zinc-300">WhatsApp Number</label>
+                          <input
+                            id="whatsapp-number"
+                            value={settingsForm.whatsapp}
+                            onChange={(event) => setSettingsForm((current) => ({ ...current, whatsapp: event.target.value }))}
+                            placeholder="+905xxxxxxxxx"
+                            className="h-12 w-full rounded-2xl border border-zinc-700 px-4 text-sm outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
+                          />
+                        </div>
+                        <div>
+                          <label htmlFor="whatsapp-phone-number-id" className="mb-2 block text-sm font-semibold text-zinc-300">Meta Phone Number ID</label>
+                          <input
+                            id="whatsapp-phone-number-id"
+                            value={settingsForm.whatsappPhoneNumberId}
+                            onChange={(event) => setSettingsForm((current) => ({ ...current, whatsappPhoneNumberId: event.target.value }))}
+                            placeholder="e.g. 123456789012345"
+                            className="h-12 w-full rounded-2xl border border-zinc-700 px-4 text-sm outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="mt-4 rounded-2xl border border-zinc-800 p-3">
+                        <label htmlFor="whatsapp-test-message" className="mb-2 block text-xs font-semibold uppercase tracking-wide text-zinc-500">Test Message</label>
+                        <textarea
+                          id="whatsapp-test-message"
+                          rows={2}
+                          value={whatsAppTestMessage}
+                          onChange={(event) => setWhatsAppTestMessage(event.target.value)}
+                          className="w-full rounded-xl border border-zinc-700 px-3 py-2 text-sm outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => void handleSendWhatsAppTest()}
+                          disabled={whatsAppTestLoading}
+                          className="mt-3 inline-flex items-center justify-center rounded-full border border-emerald-700/50 px-4 py-2 text-xs font-semibold text-emerald-200 transition hover:bg-emerald-900/30 disabled:cursor-not-allowed disabled:opacity-50"
+                        >
+                          {whatsAppTestLoading ? 'Sending test...' : 'Send WhatsApp test'}
+                        </button>
                       </div>
                     </div>
 

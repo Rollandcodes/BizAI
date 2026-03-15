@@ -8,6 +8,7 @@ type BusinessRow = {
   business_type: string | null;
   system_prompt: string | null;
   whatsapp_phone_number_id: string | null;
+  whatsapp: string | null;
 };
 
 type ConversationRow = {
@@ -47,15 +48,44 @@ function getDefaultBusinessId(): string {
 async function resolveBusiness(phoneNumberId: string | null): Promise<BusinessRow | null> {
   const supabase = createServiceClient();
 
-  if (phoneNumberId) {
-    const { data } = await supabase
+  async function loadBusinessById(businessId: string): Promise<BusinessRow | null> {
+    const primary = await supabase
       .from('businesses')
-      .select('id, business_name, business_type, system_prompt, whatsapp_phone_number_id')
+      .select('id, business_name, business_type, system_prompt, whatsapp_phone_number_id, whatsapp')
+      .eq('id', businessId)
+      .maybeSingle();
+
+    if (primary.error?.code === '42703') {
+      const fallback = await supabase
+        .from('businesses')
+        .select('id, business_name, business_type, system_prompt, whatsapp')
+        .eq('id', businessId)
+        .maybeSingle();
+
+      if (!fallback.data) {
+        return null;
+      }
+
+      const withDefaults = fallback.data as Omit<BusinessRow, 'whatsapp_phone_number_id'>;
+      return { ...withDefaults, whatsapp_phone_number_id: null };
+    }
+
+    return (primary.data as BusinessRow | null) || null;
+  }
+
+  if (phoneNumberId) {
+    const lookup = await supabase
+      .from('businesses')
+      .select('id, business_name, business_type, system_prompt, whatsapp_phone_number_id, whatsapp')
       .eq('whatsapp_phone_number_id', phoneNumberId)
       .maybeSingle();
 
-    if (data) {
-      return data as BusinessRow;
+    if (lookup.error?.code === '42703') {
+      return null;
+    }
+
+    if (lookup.data) {
+      return lookup.data as BusinessRow;
     }
   }
 
@@ -64,13 +94,33 @@ async function resolveBusiness(phoneNumberId: string | null): Promise<BusinessRo
     return null;
   }
 
-  const { data } = await supabase
+  return loadBusinessById(fallbackBusinessId);
+}
+
+async function getBusinessById(businessId: string): Promise<BusinessRow | null> {
+  const supabase = createServiceClient();
+  const primary = await supabase
     .from('businesses')
-    .select('id, business_name, business_type, system_prompt, whatsapp_phone_number_id')
-    .eq('id', fallbackBusinessId)
+    .select('id, business_name, business_type, system_prompt, whatsapp_phone_number_id, whatsapp')
+    .eq('id', businessId)
     .maybeSingle();
 
-  return (data as BusinessRow | null) || null;
+  if (primary.error?.code === '42703') {
+    const fallback = await supabase
+      .from('businesses')
+      .select('id, business_name, business_type, system_prompt, whatsapp')
+      .eq('id', businessId)
+      .maybeSingle();
+
+    if (!fallback.data) {
+      return null;
+    }
+
+    const withDefaults = fallback.data as Omit<BusinessRow, 'whatsapp_phone_number_id'>;
+    return { ...withDefaults, whatsapp_phone_number_id: null };
+  }
+
+  return (primary.data as BusinessRow | null) || null;
 }
 
 async function hasProcessedInboundMessage(messageId: string): Promise<boolean> {
@@ -369,6 +419,11 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = (await request.json()) as {
+      action?: string;
+      businessId?: string;
+      to?: string;
+      phoneNumberId?: string;
+      message?: string;
       entry?: Array<{
         changes?: Array<{
           value?: {
@@ -379,6 +434,69 @@ export async function POST(request: NextRequest) {
         }>;
       }>;
     };
+
+    if (body.action === 'send_test') {
+      const businessId = normalizeText(body.businessId);
+      const to = normalizeText(body.to);
+      const customPhoneNumberId = normalizeText(body.phoneNumberId);
+      const messageText = normalizeText(body.message) || 'Test from CypAI dashboard. If you received this, WhatsApp sync is working.';
+
+      if (!businessId || !to) {
+        return NextResponse.json({ ok: false, error: 'businessId and to are required' }, { status: 400 });
+      }
+
+      const business = await getBusinessById(businessId);
+      if (!business) {
+        return NextResponse.json({ ok: false, error: 'business_not_found' }, { status: 404 });
+      }
+
+      const phoneNumberId = customPhoneNumberId || normalizeText(business.whatsapp_phone_number_id);
+      if (!phoneNumberId) {
+        return NextResponse.json({ ok: false, error: 'missing_whatsapp_phone_number_id', details: 'Set whatsapp_phone_number_id for this business first.' }, { status: 400 });
+      }
+
+      const sendResult = await sendWhatsAppText({
+        phoneNumberId,
+        to,
+        body: messageText,
+      });
+
+      const sessionId = `wa:${to}`;
+
+      await upsertConversationWithMessage({
+        business,
+        sessionId,
+        customerName: null,
+        customerPhone: to,
+        message: {
+          role: 'assistant',
+          content: messageText,
+        },
+      });
+
+      await insertMessageEvent({
+        businessId,
+        sessionId,
+        direction: 'outbound',
+        whatsappMessageId: sendResult.messageId || `test:${Date.now()}`,
+        fromNumber: phoneNumberId,
+        toPhoneNumberId: phoneNumberId,
+        bodyText: messageText,
+        payload: {
+          action: 'send_test',
+          to,
+        },
+        deliveryStatus: sendResult.ok ? 'sent' : 'failed',
+        errorMessage: sendResult.ok ? undefined : sendResult.error,
+      });
+
+      return NextResponse.json({
+        ok: true,
+        sent: sendResult.ok,
+        details: sendResult.error || null,
+        messageId: sendResult.messageId,
+      });
+    }
 
     const outcomes: Array<Record<string, unknown>> = [];
 

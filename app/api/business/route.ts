@@ -365,6 +365,8 @@ export async function PATCH(request: NextRequest) {
       businessName,
       businessType,
       widgetColor,
+      whatsapp,
+      whatsappPhoneNumberId,
       customInstructions,
       customFaqs,
       onboardingData,
@@ -374,6 +376,8 @@ export async function PATCH(request: NextRequest) {
       businessName?: string;
       businessType?: string;
       widgetColor?: string;
+      whatsapp?: string;
+      whatsappPhoneNumberId?: string;
       customInstructions?: string;
       customFaqs?: CustomFaq[];
       onboardingData?: OnboardingPayload;
@@ -406,6 +410,12 @@ export async function PATCH(request: NextRequest) {
       }
       if (typeof widgetColor !== 'undefined') {
         updatePayload.widget_color = widgetColor;
+      }
+      if (typeof whatsapp !== 'undefined') {
+        updatePayload.whatsapp = whatsapp;
+      }
+      if (typeof whatsappPhoneNumberId !== 'undefined') {
+        updatePayload.whatsapp_phone_number_id = whatsappPhoneNumberId;
       }
       if (typeof customInstructions !== 'undefined' || typeof customFaqs !== 'undefined') {
         const normalizedFaqs = (customFaqs || []).filter((faq) => faq.question.trim() || faq.answer.trim());
