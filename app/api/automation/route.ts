@@ -5,8 +5,9 @@ type AutomationEventType = 'abandoned_signup' | 'abandoned_payment';
 
 type AutomationPayload = {
   eventType?: AutomationEventType;
-  action?: 'retry_failed';
+  action?: 'retry_failed' | 'retry_failed_batch';
   queueId?: string;
+  limit?: number;
   planId?: string;
   email?: string;
   businessName?: string;
@@ -269,6 +270,46 @@ async function retryFailedAutomation(queueId: string) {
   };
 }
 
+async function retryFailedAutomationBatch(limit: number, eventType: AutomationEventType | null) {
+  const supabase = createServerClient();
+  let query = supabase
+    .from('marketing_automation_queue')
+    .select('id')
+    .eq('status', 'failed')
+    .order('created_at', { ascending: true })
+    .limit(limit);
+
+  if (eventType) {
+    query = query.eq('event_type', eventType);
+  }
+
+  const { data, error } = await query;
+  if (error) {
+    return { ok: false, status: 500 as const, error: error.message };
+  }
+
+  const queueIds = (data || []).map((row) => row.id as string).filter(Boolean);
+  let sent = 0;
+  let failed = 0;
+
+  for (const id of queueIds) {
+    const retryResult = await retryFailedAutomation(id);
+    if (retryResult.ok && retryResult.sent) {
+      sent += 1;
+    } else {
+      failed += 1;
+    }
+  }
+
+  return {
+    ok: true,
+    status: 200 as const,
+    attempted: queueIds.length,
+    sent,
+    failed,
+  };
+}
+
 async function sendRecoveryEmail(input: {
   subject: string;
   body: string;
@@ -308,6 +349,26 @@ async function sendRecoveryEmail(input: {
 export async function POST(request: NextRequest) {
   try {
     const payload = (await request.json()) as AutomationPayload;
+    if (payload.action === 'retry_failed_batch') {
+      const rawLimit = typeof payload.limit === 'number' ? payload.limit : 5;
+      const batchLimit = Math.min(20, Math.max(1, Math.floor(rawLimit)));
+      const eventTypeFilter = payload.eventType ? toEventType(payload.eventType) : null;
+
+      const batchResult = await retryFailedAutomationBatch(batchLimit, eventTypeFilter);
+      if (!batchResult.ok) {
+        return NextResponse.json({ error: batchResult.error }, { status: batchResult.status });
+      }
+
+      return NextResponse.json({
+        ok: true,
+        action: 'retry_failed_batch',
+        attempted: batchResult.attempted,
+        sent: batchResult.sent,
+        failed: batchResult.failed,
+        eventType: eventTypeFilter,
+      });
+    }
+
     if (payload.action === 'retry_failed') {
       const queueId = normalizeString(payload.queueId);
       if (!queueId) {
@@ -399,21 +460,30 @@ export async function POST(request: NextRequest) {
   }
 }
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   const supabase = createServerClient();
+  const eventTypeFilter = toEventType(request.nextUrl.searchParams.get('eventType'));
   const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
-  const { data, error } = await supabase
+  let recentQuery = supabase
     .from('marketing_automation_queue')
-    .select('id, event_type, status, recipient_email, created_at, processed_at, last_error, retry_count')
-    .order('created_at', { ascending: false })
-    .limit(25);
+    .select('id, event_type, status, recipient_email, created_at, processed_at, last_error, retry_count');
 
-  const { data: trendData, error: trendError } = await supabase
+  if (eventTypeFilter) {
+    recentQuery = recentQuery.eq('event_type', eventTypeFilter);
+  }
+
+  const { data, error } = await recentQuery.order('created_at', { ascending: false }).limit(25);
+
+  let trendQuery = supabase
     .from('marketing_automation_queue')
     .select('status, created_at')
-    .gte('created_at', sevenDaysAgo)
-    .order('created_at', { ascending: false })
-    .limit(1000);
+    .gte('created_at', sevenDaysAgo);
+
+  if (eventTypeFilter) {
+    trendQuery = trendQuery.eq('event_type', eventTypeFilter);
+  }
+
+  const { data: trendData, error: trendError } = await trendQuery.order('created_at', { ascending: false }).limit(1000);
 
   if (error?.code === '42P01') {
     return NextResponse.json({
@@ -467,6 +537,9 @@ export async function GET() {
     message: 'CypAI automation endpoint',
     status: 'ready',
     method: 'POST required',
+    filter: {
+      eventType: eventTypeFilter,
+    },
     summary,
     trend,
     recent: data || [],

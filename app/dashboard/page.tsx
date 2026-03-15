@@ -143,9 +143,14 @@ type AutomationOverviewResponse = {
   summary?: AutomationSummary;
   trend?: AutomationTrend;
   recent?: AutomationRecentRecord[];
+  filter?: {
+    eventType: 'abandoned_signup' | 'abandoned_payment' | null;
+  };
   queue?: string;
   error?: string;
 };
+
+type AutomationEventFilter = 'all' | 'abandoned_signup' | 'abandoned_payment';
 
 type BookingRecord = {
   id: string;
@@ -567,8 +572,10 @@ function DashboardInner() {
   const [automationTrend, setAutomationTrend] = useState<AutomationTrend | null>(null);
   const [latestAutomationFailure, setLatestAutomationFailure] = useState<string | null>(null);
   const [latestFailedQueueId, setLatestFailedQueueId] = useState<string | null>(null);
+  const [automationEventFilter, setAutomationEventFilter] = useState<AutomationEventFilter>('all');
   const [automationLoading, setAutomationLoading] = useState(false);
   const [retryAutomationLoading, setRetryAutomationLoading] = useState(false);
+  const [retryBatchAutomationLoading, setRetryBatchAutomationLoading] = useState(false);
   const [automationUnavailable, setAutomationUnavailable] = useState<string | null>(null);
   const hasTrackedInitialTab = useRef(false);
 
@@ -654,7 +661,7 @@ function DashboardInner() {
     }
 
     void loadAutomationOverview();
-  }, [businessId]);
+  }, [businessId, automationEventFilter]);
 
   useEffect(() => {
     if (activeTab === 'audit' && business && !auditSummary && !auditLoading) {
@@ -762,7 +769,12 @@ function DashboardInner() {
     setAutomationUnavailable(null);
 
     try {
-      const response = await fetch('/api/automation', { method: 'GET' });
+      const query = new URLSearchParams();
+      if (automationEventFilter !== 'all') {
+        query.set('eventType', automationEventFilter);
+      }
+      const querySuffix = query.toString() ? `?${query.toString()}` : '';
+      const response = await fetch(`/api/automation${querySuffix}`, { method: 'GET' });
       const data = (await response.json()) as AutomationOverviewResponse;
 
       if (!response.ok) {
@@ -827,6 +839,41 @@ function DashboardInner() {
       setToast({ message, tone: 'error' });
     } finally {
       setRetryAutomationLoading(false);
+    }
+  }
+
+  async function retryFailedBatchAutomation() {
+    setRetryBatchAutomationLoading(true);
+    try {
+      const body: { action: 'retry_failed_batch'; limit: number; eventType?: 'abandoned_signup' | 'abandoned_payment' } = {
+        action: 'retry_failed_batch',
+        limit: 5,
+      };
+      if (automationEventFilter !== 'all') {
+        body.eventType = automationEventFilter;
+      }
+
+      const response = await fetch('/api/automation', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+
+      const data = (await response.json()) as { ok?: boolean; error?: string; attempted?: number; sent?: number; failed?: number };
+      if (!response.ok || !data.ok) {
+        throw new Error(data.error || 'Batch retry failed');
+      }
+
+      setToast({
+        message: `Batch retry complete: ${data.sent || 0} sent, ${data.failed || 0} failed, ${data.attempted || 0} attempted.`,
+        tone: (data.failed || 0) > 0 ? 'error' : 'success',
+      });
+      await loadAutomationOverview();
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Batch retry failed';
+      setToast({ message, tone: 'error' });
+    } finally {
+      setRetryBatchAutomationLoading(false);
     }
   }
 
@@ -1454,7 +1501,36 @@ function DashboardInner() {
                         >
                           {retryAutomationLoading ? 'Retrying...' : 'Retry Latest Failed'}
                         </button>
+                        <button
+                          type="button"
+                          onClick={() => void retryFailedBatchAutomation()}
+                          disabled={retryBatchAutomationLoading}
+                          className="rounded-full border border-emerald-700/50 px-3 py-1.5 text-xs font-semibold text-emerald-200 transition hover:bg-emerald-900/30 disabled:cursor-not-allowed disabled:opacity-50"
+                        >
+                          {retryBatchAutomationLoading ? 'Retrying Batch...' : 'Retry 5 Failed'}
+                        </button>
                       </div>
+                    </div>
+
+                    <div className="mt-4 flex flex-wrap items-center gap-2">
+                      {[
+                        { value: 'all', label: 'All Events' },
+                        { value: 'abandoned_signup', label: 'Signups' },
+                        { value: 'abandoned_payment', label: 'Payments' },
+                      ].map((option) => (
+                        <button
+                          key={option.value}
+                          type="button"
+                          onClick={() => setAutomationEventFilter(option.value as AutomationEventFilter)}
+                          className={`rounded-full border px-3 py-1 text-xs font-semibold transition ${
+                            automationEventFilter === option.value
+                              ? 'border-zinc-400 bg-zinc-100 text-zinc-900'
+                              : 'border-zinc-700 text-zinc-300 hover:bg-zinc-950'
+                          }`}
+                        >
+                          {option.label}
+                        </button>
+                      ))}
                     </div>
 
                     {automationLoading ? (
