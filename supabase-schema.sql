@@ -48,6 +48,7 @@ ALTER TABLE public.businesses ADD COLUMN IF NOT EXISTS additional_info TEXT;
 ALTER TABLE public.businesses ADD COLUMN IF NOT EXISTS onboarding_complete BOOLEAN DEFAULT false;
 ALTER TABLE public.businesses ADD COLUMN IF NOT EXISTS referral_code TEXT;
 ALTER TABLE public.businesses ADD COLUMN IF NOT EXISTS affiliate_commission_credited BOOLEAN DEFAULT false;
+ALTER TABLE public.businesses ADD COLUMN IF NOT EXISTS whatsapp_phone_number_id TEXT;
 
 -- Create index for faster lookups
 CREATE INDEX IF NOT EXISTS idx_businesses_owner_email ON public.businesses(owner_email);
@@ -55,6 +56,7 @@ CREATE INDEX IF NOT EXISTS idx_businesses_created_at ON public.businesses(create
 CREATE INDEX IF NOT EXISTS idx_businesses_referral_code ON public.businesses(referral_code);
 CREATE INDEX IF NOT EXISTS idx_businesses_paypal_order_id ON public.businesses(paypal_order_id);
 CREATE INDEX IF NOT EXISTS idx_businesses_paypal_subscription_id ON public.businesses(paypal_subscription_id);
+CREATE INDEX IF NOT EXISTS idx_businesses_whatsapp_phone_number_id ON public.businesses(whatsapp_phone_number_id);
 
 -- ============================================================================
 -- Table: affiliates
@@ -420,10 +422,54 @@ ALTER TABLE public.conversations ADD COLUMN IF NOT EXISTS contact_status TEXT DE
 ALTER TABLE public.conversations ADD COLUMN IF NOT EXISTS contact_notes TEXT;
 ALTER TABLE public.conversations ADD COLUMN IF NOT EXISTS contacted_at TIMESTAMPTZ;
 ALTER TABLE public.conversations ADD COLUMN IF NOT EXISTS converted_at TIMESTAMPTZ;
+ALTER TABLE public.conversations ADD COLUMN IF NOT EXISTS channel TEXT DEFAULT 'web';
+ALTER TABLE public.conversations ADD COLUMN IF NOT EXISTS external_contact_id TEXT;
 
 -- Optional helper index for CRM filtering by status per business
 CREATE INDEX IF NOT EXISTS idx_conversations_contact_status
   ON public.conversations (business_id, contact_status, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_conversations_channel_created
+  ON public.conversations (business_id, channel, created_at DESC);
+
+-- ============================================================================
+-- Table: whatsapp_message_events
+-- ============================================================================
+CREATE TABLE IF NOT EXISTS public.whatsapp_message_events (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  business_id UUID NOT NULL REFERENCES public.businesses(id) ON DELETE CASCADE,
+  session_id TEXT NOT NULL,
+  direction TEXT NOT NULL CHECK (direction IN ('inbound', 'outbound')),
+  whatsapp_message_id TEXT NOT NULL UNIQUE,
+  from_number TEXT,
+  to_phone_number_id TEXT,
+  body_text TEXT,
+  delivery_status TEXT,
+  error_message TEXT,
+  payload JSONB NOT NULL DEFAULT '{}'::jsonb,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_whatsapp_message_events_business_created
+  ON public.whatsapp_message_events (business_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_whatsapp_message_events_session_created
+  ON public.whatsapp_message_events (session_id, created_at DESC);
+
+ALTER TABLE public.whatsapp_message_events ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Service role full access to whatsapp message events" ON public.whatsapp_message_events;
+CREATE POLICY "Service role full access to whatsapp message events" ON public.whatsapp_message_events
+  FOR ALL USING (auth.role() = 'service_role')
+  WITH CHECK (auth.role() = 'service_role');
+
+DROP POLICY IF EXISTS "Users can view own whatsapp message events" ON public.whatsapp_message_events;
+CREATE POLICY "Users can view own whatsapp message events" ON public.whatsapp_message_events
+  FOR SELECT USING (
+    EXISTS (
+      SELECT 1 FROM public.businesses
+      WHERE businesses.id = whatsapp_message_events.business_id
+      AND businesses.owner_email = auth.jwt() ->> 'email'
+    )
+  );
 
 -- ============================================================================
 -- Migration: Generic booking fields (v6 – safe to re-run)

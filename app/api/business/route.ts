@@ -39,6 +39,7 @@ type ConversationRow = {
   created_at: string;
   customer_name: string | null;
   customer_phone: string | null;
+  channel?: string | null;
   lead_captured: boolean;
   lead_contacted: boolean | null;
   messages: Array<{ role: 'user' | 'assistant'; content: string }> | null;
@@ -215,13 +216,13 @@ async function buildDashboardPayload(business: Record<string, unknown>) {
       .gte('created_at', monthStart),
     supabase
       .from('conversations')
-      .select('id, created_at, customer_name, customer_phone, lead_captured, lead_contacted, messages')
+      .select('id, created_at, customer_name, customer_phone, channel, lead_captured, lead_contacted, messages')
       .eq('business_id', businessId)
       .order('created_at', { ascending: false })
       .limit(100),
     supabase
       .from('conversations')
-      .select('id, created_at, customer_name, customer_phone, lead_captured, lead_contacted, messages')
+      .select('id, created_at, customer_name, customer_phone, channel, lead_captured, lead_contacted, messages')
       .eq('business_id', businessId)
       .eq('lead_captured', true)
       .order('created_at', { ascending: false })

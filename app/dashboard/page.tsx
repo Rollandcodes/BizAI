@@ -71,6 +71,7 @@ type ConversationRecord = {
   created_at: string;
   customer_name: string | null;
   customer_phone: string | null;
+  channel?: string | null;
   lead_captured: boolean;
   lead_contacted?: boolean | null;
   messages: ConversationMessage[] | null;
@@ -2611,6 +2612,7 @@ function DashboardInner() {
                               <tr>
                                 <th className="px-4 py-3 font-semibold">Time</th>
                                 <th className="px-4 py-3 font-semibold">Preview</th>
+                                <th className="px-4 py-3 font-semibold">Channel</th>
                                 <th className="px-4 py-3 font-semibold">Lead Captured</th>
                               </tr>
                             </thead>
@@ -2619,6 +2621,11 @@ function DashboardInner() {
                                 <tr key={conversation.id} className="bg-zinc-900">
                                   <td className="px-4 py-3 text-zinc-400">{formatDate(conversation.created_at)}</td>
                                   <td className="px-4 py-3 text-white">{getConversationPreview(conversation)}</td>
+                                  <td className="px-4 py-3">
+                                    <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${conversation.channel === 'whatsapp' ? 'bg-emerald-100 text-emerald-700' : 'bg-zinc-800 text-zinc-400'}`}>
+                                      {conversation.channel === 'whatsapp' ? 'WhatsApp' : 'Website'}
+                                    </span>
+                                  </td>
                                   <td className="px-4 py-3">
                                     <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${conversation.lead_captured ? 'bg-emerald-100 text-emerald-700' : 'bg-zinc-800 text-zinc-400'}`}>
                                       {conversation.lead_captured ? 'Yes' : 'No'}
@@ -2733,7 +2740,12 @@ function DashboardInner() {
                               <p className="truncate text-sm font-semibold text-white">
                                 {conversation.customer_name || 'Unknown visitor'}
                               </p>
-                              <span className="text-xs text-zinc-500">{formatDate(conversation.created_at)}</span>
+                              <div className="flex items-center gap-2">
+                                <span className={`inline-flex rounded-full px-2 py-0.5 text-[10px] font-semibold ${conversation.channel === 'whatsapp' ? 'bg-emerald-100 text-emerald-700' : 'bg-zinc-800 text-zinc-400'}`}>
+                                  {conversation.channel === 'whatsapp' ? 'WhatsApp' : 'Website'}
+                                </span>
+                                <span className="text-xs text-zinc-500">{formatDate(conversation.created_at)}</span>
+                              </div>
                             </div>
                             <p className="mt-1 truncate text-sm text-zinc-400">{getConversationPreview(conversation)}</p>
                           </button>
@@ -2750,6 +2762,7 @@ function DashboardInner() {
                             <div>
                               <h3 className="text-lg font-bold text-white">{currentConversation.customer_name || 'Unknown visitor'}</h3>
                               <p className="mt-1 text-sm text-zinc-500">{currentConversation.customer_phone || 'Phone not captured yet'}</p>
+                              <p className="mt-1 text-xs text-zinc-500">Channel: {currentConversation.channel === 'whatsapp' ? 'WhatsApp' : 'Website'}</p>
                             </div>
                             <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${currentConversation.lead_captured ? 'bg-emerald-100 text-emerald-700' : 'bg-zinc-800 text-zinc-400'}`}>
                               {currentConversation.lead_captured ? 'Lead captured' : 'No lead yet'}

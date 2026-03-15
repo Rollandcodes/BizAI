@@ -135,3 +135,25 @@ const PAYPAL_BASE_URL = 'https://api-m.paypal.com';
 ```
 
 Then replace PayPal sandbox credentials in your environment variables with live credentials.
+
+## 9. Optional: Connect WhatsApp unified inbox (website + WhatsApp sync)
+1. Create a Meta app and enable WhatsApp Cloud API.
+2. Set webhook URL:
+   - Local: `http://localhost:3000/api/whatsapp`
+   - Production: `https://www.cypai.app/api/whatsapp`
+3. Configure webhook verify token and add these to `.env.local`:
+   - `WHATSAPP_VERIFY_TOKEN`
+   - `WHATSAPP_ACCESS_TOKEN`
+   - `WHATSAPP_GRAPH_API_VERSION` (default `v21.0`)
+   - `WHATSAPP_DEFAULT_BUSINESS_ID` (fallback business for unmatched phone number IDs)
+4. Re-run [`supabase-schema.sql`](supabase-schema.sql) to apply:
+   - `businesses.whatsapp_phone_number_id`
+   - `conversations.channel`
+   - `conversations.external_contact_id`
+   - `whatsapp_message_events`
+5. For multi-business mapping, set `businesses.whatsapp_phone_number_id` to each connected WhatsApp phone number ID.
+6. Inbound WhatsApp text messages will:
+   - be stored in `conversations` with `channel='whatsapp'`
+   - auto-generate AI replies
+   - send outbound reply through WhatsApp Cloud API
+   - log inbound/outbound events in `whatsapp_message_events`
