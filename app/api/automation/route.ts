@@ -5,6 +5,8 @@ type AutomationEventType = 'abandoned_signup' | 'abandoned_payment';
 
 type AutomationPayload = {
   eventType?: AutomationEventType;
+  action?: 'retry_failed';
+  queueId?: string;
   planId?: string;
   email?: string;
   businessName?: string;
@@ -152,6 +154,121 @@ async function updateQueueDelivery(
   }
 }
 
+async function updateQueueDeliveryById(
+  queueId: string,
+  update: {
+    status: 'sent' | 'failed';
+    providerMessageId?: string;
+    errorMessage?: string;
+    incrementRetryCount?: boolean;
+  }
+) {
+  const supabase = createServerClient();
+  const processedAt = new Date().toISOString();
+  const payload = {
+    status: update.status,
+    processed_at: processedAt,
+    provider_message_id: update.providerMessageId || null,
+    last_error: update.errorMessage || null,
+  };
+
+  let res = await supabase.from('marketing_automation_queue').update(payload).eq('id', queueId);
+
+  if (res.error?.code === '42703') {
+    res = await supabase
+      .from('marketing_automation_queue')
+      .update({
+        status: update.status,
+        processed_at: processedAt,
+      })
+      .eq('id', queueId);
+  }
+
+  if (!res.error && update.incrementRetryCount) {
+    const { data: currentRow } = await supabase
+      .from('marketing_automation_queue')
+      .select('retry_count')
+      .eq('id', queueId)
+      .single();
+
+    const currentRetryCount =
+      currentRow && typeof currentRow === 'object' && 'retry_count' in currentRow
+        ? Number((currentRow as { retry_count?: number | null }).retry_count || 0)
+        : 0;
+
+    await supabase
+      .from('marketing_automation_queue')
+      .update({ retry_count: currentRetryCount + 1 })
+      .eq('id', queueId);
+  }
+}
+
+async function retryFailedAutomation(queueId: string) {
+  const supabase = createServerClient();
+  const { data, error } = await supabase
+    .from('marketing_automation_queue')
+    .select('id, event_type, recipient_email, plan_id, payload, status, email_subject, email_body')
+    .eq('id', queueId)
+    .single();
+
+  if (error) {
+    return { ok: false, status: 404 as const, error: error.message };
+  }
+
+  if (!data || data.status !== 'failed') {
+    return { ok: false, status: 400 as const, error: 'Only failed automation records can be retried' };
+  }
+
+  if (!data.recipient_email) {
+    return { ok: false, status: 400 as const, error: 'Record has no recipient_email to retry' };
+  }
+
+  const payload = (data.payload || {}) as AutomationPayload;
+  const eventType = toEventType(data.event_type);
+  if (!eventType) {
+    return { ok: false, status: 400 as const, error: 'Unsupported event_type for retry' };
+  }
+
+  const fallbackTemplate = buildRecoveryTemplate({
+    eventType,
+    planId: normalizeString(data.plan_id),
+    businessName: normalizeString(payload.businessName),
+  });
+
+  const subject = normalizeString(data.email_subject) || fallbackTemplate.subject;
+  const body = normalizeString(data.email_body) || fallbackTemplate.body;
+
+  const emailResult = await sendRecoveryEmail({
+    subject,
+    body,
+    recipientEmail: data.recipient_email,
+  });
+
+  if (emailResult.sent) {
+    await updateQueueDeliveryById(queueId, {
+      status: 'sent',
+      providerMessageId: emailResult.providerMessageId || null,
+      incrementRetryCount: true,
+    });
+
+    return { ok: true, status: 200 as const, sent: true };
+  }
+
+  await updateQueueDeliveryById(queueId, {
+    status: 'failed',
+    errorMessage: emailResult.reason,
+    incrementRetryCount: true,
+  });
+
+  return {
+    ok: true,
+    status: 200 as const,
+    sent: false,
+    reason: emailResult.reason,
+    details: emailResult.details,
+  };
+}
+
 async function sendRecoveryEmail(input: {
   subject: string;
   body: string;
@@ -191,6 +308,26 @@ async function sendRecoveryEmail(input: {
 export async function POST(request: NextRequest) {
   try {
     const payload = (await request.json()) as AutomationPayload;
+    if (payload.action === 'retry_failed') {
+      const queueId = normalizeString(payload.queueId);
+      if (!queueId) {
+        return NextResponse.json({ error: 'queueId is required for retry_failed' }, { status: 400 });
+      }
+
+      const retryResult = await retryFailedAutomation(queueId);
+      if (!retryResult.ok) {
+        return NextResponse.json({ error: retryResult.error }, { status: retryResult.status });
+      }
+
+      return NextResponse.json({
+        ok: true,
+        action: 'retry_failed',
+        sent: retryResult.sent,
+        reason: retryResult.reason,
+        details: retryResult.details,
+      });
+    }
+
     const eventType = toEventType(payload.eventType);
 
     if (!eventType) {
@@ -264,11 +401,19 @@ export async function POST(request: NextRequest) {
 
 export async function GET() {
   const supabase = createServerClient();
+  const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
   const { data, error } = await supabase
     .from('marketing_automation_queue')
-    .select('event_type, status, recipient_email, created_at, processed_at, last_error')
+    .select('id, event_type, status, recipient_email, created_at, processed_at, last_error, retry_count')
     .order('created_at', { ascending: false })
     .limit(25);
+
+  const { data: trendData, error: trendError } = await supabase
+    .from('marketing_automation_queue')
+    .select('status, created_at')
+    .gte('created_at', sevenDaysAgo)
+    .order('created_at', { ascending: false })
+    .limit(1000);
 
   if (error?.code === '42P01') {
     return NextResponse.json({
@@ -284,6 +429,10 @@ export async function GET() {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
+  if (trendError && trendError.code !== '42P01') {
+    return NextResponse.json({ error: trendError.message }, { status: 500 });
+  }
+
   const summary = {
     total: data?.length || 0,
     queued: 0,
@@ -297,11 +446,29 @@ export async function GET() {
     if (row.status === 'failed') summary.failed += 1;
   }
 
+  const trend = {
+    windowDays: 7,
+    sent: 0,
+    failed: 0,
+    queued: 0,
+    successRate: 0,
+  };
+
+  for (const row of trendData || []) {
+    if (row.status === 'queued') trend.queued += 1;
+    if (row.status === 'sent') trend.sent += 1;
+    if (row.status === 'failed') trend.failed += 1;
+  }
+
+  const attempts = trend.sent + trend.failed;
+  trend.successRate = attempts > 0 ? Number(((trend.sent / attempts) * 100).toFixed(1)) : 0;
+
   return NextResponse.json({
     message: 'CypAI automation endpoint',
     status: 'ready',
     method: 'POST required',
     summary,
+    trend,
     recent: data || [],
   });
 }

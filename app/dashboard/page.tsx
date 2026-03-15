@@ -121,16 +121,27 @@ type AutomationSummary = {
 };
 
 type AutomationRecentRecord = {
+  id: string;
   event_type: 'abandoned_signup' | 'abandoned_payment';
   status: 'queued' | 'sent' | 'failed';
   recipient_email: string | null;
   created_at: string;
   processed_at: string | null;
   last_error?: string | null;
+  retry_count?: number | null;
+};
+
+type AutomationTrend = {
+  windowDays: number;
+  sent: number;
+  failed: number;
+  queued: number;
+  successRate: number;
 };
 
 type AutomationOverviewResponse = {
   summary?: AutomationSummary;
+  trend?: AutomationTrend;
   recent?: AutomationRecentRecord[];
   queue?: string;
   error?: string;
@@ -553,8 +564,11 @@ function DashboardInner() {
   } | null>(null);
   const [satisfactionLoading, setSatisfactionLoading] = useState(false);
   const [automationSummary, setAutomationSummary] = useState<AutomationSummary | null>(null);
+  const [automationTrend, setAutomationTrend] = useState<AutomationTrend | null>(null);
   const [latestAutomationFailure, setLatestAutomationFailure] = useState<string | null>(null);
+  const [latestFailedQueueId, setLatestFailedQueueId] = useState<string | null>(null);
   const [automationLoading, setAutomationLoading] = useState(false);
+  const [retryAutomationLoading, setRetryAutomationLoading] = useState(false);
   const [automationUnavailable, setAutomationUnavailable] = useState<string | null>(null);
   const hasTrackedInitialTab = useRef(false);
 
@@ -632,7 +646,9 @@ function DashboardInner() {
   useEffect(() => {
     if (!businessId) {
       setAutomationSummary(null);
+      setAutomationTrend(null);
       setLatestAutomationFailure(null);
+      setLatestFailedQueueId(null);
       setAutomationUnavailable(null);
       return;
     }
@@ -755,22 +771,62 @@ function DashboardInner() {
 
       if (data.queue === 'missing_table') {
         setAutomationSummary(null);
+        setAutomationTrend(null);
         setLatestAutomationFailure(null);
+        setLatestFailedQueueId(null);
         setAutomationUnavailable('Automation queue is not initialized yet. Run the latest Supabase schema migration.');
         return;
       }
 
       setAutomationSummary(data.summary || { total: 0, queued: 0, sent: 0, failed: 0 });
+      setAutomationTrend(data.trend || { windowDays: 7, sent: 0, failed: 0, queued: 0, successRate: 0 });
 
       const latestFailure = (data.recent || []).find((item) => item.status === 'failed' && item.last_error);
       setLatestAutomationFailure(latestFailure?.last_error || null);
+      setLatestFailedQueueId(latestFailure?.id || null);
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Failed to load automation status';
       setAutomationSummary(null);
+      setAutomationTrend(null);
       setLatestAutomationFailure(null);
+      setLatestFailedQueueId(null);
       setAutomationUnavailable(message);
     } finally {
       setAutomationLoading(false);
+    }
+  }
+
+  async function retryLatestFailedAutomation() {
+    if (!latestFailedQueueId) {
+      setToast({ message: 'No failed automation event available to retry.', tone: 'error' });
+      return;
+    }
+
+    setRetryAutomationLoading(true);
+    try {
+      const response = await fetch('/api/automation', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'retry_failed', queueId: latestFailedQueueId }),
+      });
+
+      const data = (await response.json()) as { ok?: boolean; error?: string; sent?: boolean; reason?: string };
+      if (!response.ok || !data.ok) {
+        throw new Error(data.error || 'Retry request failed');
+      }
+
+      if (data.sent) {
+        setToast({ message: 'Retry succeeded and email was sent.', tone: 'success' });
+      } else {
+        setToast({ message: `Retry attempted but still failed (${data.reason || 'unknown reason'}).`, tone: 'error' });
+      }
+
+      await loadAutomationOverview();
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Retry request failed';
+      setToast({ message, tone: 'error' });
+    } finally {
+      setRetryAutomationLoading(false);
     }
   }
 
@@ -1382,13 +1438,23 @@ function DashboardInner() {
                         <h2 className="text-lg font-bold text-white">Recovery Automation</h2>
                         <p className="mt-1 text-sm text-zinc-500">Abandoned signup and payment follow-up delivery status.</p>
                       </div>
-                      <button
-                        type="button"
-                        onClick={() => void loadAutomationOverview()}
-                        className="rounded-full border border-zinc-700 px-3 py-1.5 text-xs font-semibold text-zinc-300 transition hover:bg-zinc-950"
-                      >
-                        Refresh
-                      </button>
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => void loadAutomationOverview()}
+                          className="rounded-full border border-zinc-700 px-3 py-1.5 text-xs font-semibold text-zinc-300 transition hover:bg-zinc-950"
+                        >
+                          Refresh
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => void retryLatestFailedAutomation()}
+                          disabled={!latestFailedQueueId || retryAutomationLoading}
+                          className="rounded-full border border-rose-700/50 px-3 py-1.5 text-xs font-semibold text-rose-200 transition hover:bg-rose-900/30 disabled:cursor-not-allowed disabled:opacity-50"
+                        >
+                          {retryAutomationLoading ? 'Retrying...' : 'Retry Latest Failed'}
+                        </button>
+                      </div>
                     </div>
 
                     {automationLoading ? (
@@ -1405,6 +1471,9 @@ function DashboardInner() {
                           <MiniMetric label="Failed" value={automationSummary?.failed ?? 0} tone="error" />
                           <MiniMetric label="Recent" value={automationSummary?.total ?? 0} tone="neutral" />
                         </div>
+                        <p className="mt-4 text-sm font-semibold text-emerald-300">
+                          7d success rate: {automationTrend?.successRate ?? 0}%
+                        </p>
                         <p className="mt-4 text-sm text-zinc-500">
                           Latest failure: {latestAutomationFailure || 'No recent failures'}
                         </p>
