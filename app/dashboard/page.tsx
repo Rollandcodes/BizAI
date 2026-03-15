@@ -308,6 +308,7 @@ type SettingsFormState = {
 const DASHBOARD_STORAGE_KEY = 'cypai-dashboard-email';
 const businessTypeOptions = [
   { value: 'car_rental', label: 'Car Rental' },
+  { value: 'car_sales', label: 'Car Sales' },
   { value: 'barbershop', label: 'Barbershop' },
   { value: 'accommodation', label: 'Accommodation' },
   { value: 'restaurant', label: 'Restaurant' },
@@ -407,9 +408,38 @@ function formatDateInputValue(date: Date) {
   return `${year}-${month}-${day}`;
 }
 
+function parseConversationMessages(raw: unknown): ConversationMessage[] {
+  const normalizeArray = (value: unknown[]): ConversationMessage[] =>
+    value
+      .filter((item): item is { role?: unknown; content?: unknown } => !!item && typeof item === 'object')
+      .map((item): ConversationMessage => ({
+        role: item.role === 'assistant' ? 'assistant' : 'user',
+        content: typeof item.content === 'string' ? item.content : '',
+      }))
+      .filter((message) => message.content.trim().length > 0);
+
+  if (Array.isArray(raw)) {
+    return normalizeArray(raw);
+  }
+
+  if (typeof raw === 'string') {
+    try {
+      const parsed = JSON.parse(raw) as unknown;
+      if (Array.isArray(parsed)) {
+        return normalizeArray(parsed);
+      }
+    } catch {
+      return [];
+    }
+  }
+
+  return [];
+}
+
 function getConversationPreview(conversation: ConversationRecord) {
-  const firstUserMessage = conversation.messages?.find((message) => message.role === 'user');
-  return firstUserMessage?.content || conversation.messages?.[0]?.content || 'No messages yet';
+  const messages = parseConversationMessages(conversation.messages);
+  const firstUserMessage = messages.find((message) => message.role === 'user');
+  return firstUserMessage?.content || messages[0]?.content || 'No messages yet';
 }
 
 function escapeCsv(value: string) {
@@ -796,13 +826,14 @@ function DashboardInner() {
   const visibleTabItems = agencyAccess ? tabItems : tabItems.filter((item) => item.key !== 'agency');
 
   // Unread WhatsApp replies: WhatsApp conversations where the customer messaged last
-  const unreadWhatsAppCount = conversations.filter(
-    (c) =>
-      c.channel === 'whatsapp' &&
-      Array.isArray(c.messages) &&
-      (c.messages as ConversationMessage[]).length > 0 &&
-      (c.messages as ConversationMessage[])[(c.messages as ConversationMessage[]).length - 1]?.role === 'user',
-  ).length;
+  const unreadWhatsAppCount = conversations.filter((conversation) => {
+    if (conversation.channel !== 'whatsapp') {
+      return false;
+    }
+
+    const messages = parseConversationMessages(conversation.messages);
+    return messages.length > 0 && messages[messages.length - 1]?.role === 'user';
+  }).length;
   const planLimit = business ? messageLimits[business.plan] : null;
   const currentPlanName = business ? getPlanDisplayName(business.plan) : 'Trial';
   const normalizedPlanKey = business?.plan === 'basic' ? 'starter' : business?.plan;
@@ -1852,6 +1883,14 @@ function DashboardInner() {
     }
   }
 
+  useEffect(() => {
+    if (activeTab === 'agency' && !agencyAccess) {
+      Analytics.agencyAccessDenied(business?.owner_email || 'unknown');
+      setActiveTab('overview');
+      setToast({ message: 'Agency Mode is restricted to approved accounts.', tone: 'error' });
+    }
+  }, [activeTab, agencyAccess, business?.owner_email]);
+
   if (!business) {
     return (
       <>
@@ -1895,14 +1934,6 @@ function DashboardInner() {
     { id: 'bookings', label: 'Book', icon: '📅' },
     { id: 'settings', label: 'Settings', icon: '⚙️' },
   ];
-
-  useEffect(() => {
-    if (activeTab === 'agency' && !agencyAccess) {
-      Analytics.agencyAccessDenied(business?.owner_email || 'unknown');
-      setActiveTab('overview');
-      setToast({ message: 'Agency Mode is restricted to approved accounts.', tone: 'error' });
-    }
-  }, [activeTab, agencyAccess, business?.owner_email]);
 
   return (
     <div
@@ -2883,8 +2914,8 @@ function DashboardInner() {
                         </div>
 
                         <div className="max-h-[70vh] space-y-4 overflow-y-auto bg-zinc-950 p-6">
-                          {(currentConversation.messages || []).length > 0 ? (
-                            currentConversation.messages?.map((message, index) => (
+                          {parseConversationMessages(currentConversation.messages).length > 0 ? (
+                            parseConversationMessages(currentConversation.messages).map((message, index) => (
                               <div key={`${currentConversation.id}-${index}`} className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                                 <div className={`max-w-[75%] rounded-2xl px-4 py-3 text-sm leading-6 ${message.role === 'user' ? 'rounded-br-sm bg-blue-600 text-white' : 'rounded-bl-sm bg-zinc-900 text-zinc-300 shadow-sm'}`}>
                                   {message.content}

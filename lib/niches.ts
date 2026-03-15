@@ -82,6 +82,57 @@ ${LANGUAGE_RULE}`,
 };
 
 // ============================================================================
+// Car Sales Configuration
+// ============================================================================
+const CAR_SALES: NicheConfig = {
+  systemPrompt: `You are a professional and trustworthy sales assistant for {businessName}. Help customers with:
+- Available vehicles and key model details
+- Pricing ranges and financing options
+- Trade-in process and required documents
+- Test drive scheduling and showroom hours
+- Warranty, service history, and after-sales support
+
+Always be helpful and clear. Try to collect the customer's name, phone number, preferred car model, and desired test drive date.
+
+When you have collected the customer's name, phone, and preferred model, say EXACTLY:
+'Great! I have all your details. Let me pass this to our sales team so they can contact you shortly. 🚗'
+Then output a special marker: [LEAD_CAPTURED]
+followed by a JSON summary on a new line: {"name":"...","phone":"...","preferredModel":"...","testDriveDate":"YYYY-MM-DD"}
+${LANGUAGE_RULE}`,
+
+  welcomeMessage: 'Hello! 🚘 Looking for your next car? I can help with available models, prices, and test drive requests. What are you interested in?',
+
+  faqs: [
+    {
+      question: 'Do you offer financing options?',
+      answer: 'Yes, we offer multiple financing plans through partner banks. We can guide you through monthly payment options based on your budget and preferred term.',
+    },
+    {
+      question: 'Can I book a test drive?',
+      answer: 'Absolutely. Share your preferred model, your name, and phone number, and we will schedule a suitable test drive slot for you.',
+    },
+    {
+      question: 'Do you accept trade-ins?',
+      answer: 'Yes, trade-ins are welcome. We evaluate your current vehicle based on age, condition, mileage, and market value, then provide a fair offer.',
+    },
+    {
+      question: 'Are your cars inspected before sale?',
+      answer: 'Yes, all vehicles go through quality and safety checks before being listed. We can also share service records when available.',
+    },
+    {
+      question: 'What documents do I need to purchase a car?',
+      answer: 'Typically you need a valid ID or passport, driving license, and proof of address. Financing applications may require additional documents.',
+    },
+  ],
+
+  languages: ['en', 'tr', 'ar', 'ru', 'el'],
+
+  leadFields: ['name', 'phone', 'preferredModel', 'testDriveDate'],
+  primaryColor: '#0f766e',
+  suggestedPrice: 79,
+};
+
+// ============================================================================
 // Barbershop Configuration
 // ============================================================================
 const BARBERSHOP: NicheConfig = {
@@ -181,6 +232,7 @@ ${LANGUAGE_RULE}`,
 // ============================================================================
 const NICHE_CONFIGS: Record<string, NicheConfig> = {
   car_rental: CAR_RENTAL,
+  car_sales: CAR_SALES,
   barbershop: BARBERSHOP,
   student_accommodation: STUDENT_ACCOMMODATION,
 };
@@ -223,4 +275,4 @@ export function interpolateNicheConfig(
 }
 
 // Export individual configs for direct access
-export { CAR_RENTAL, BARBERSHOP, STUDENT_ACCOMMODATION };
+export { CAR_RENTAL, CAR_SALES, BARBERSHOP, STUDENT_ACCOMMODATION };

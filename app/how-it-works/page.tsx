@@ -87,6 +87,11 @@ const nicheGuides = [
     href: '/how-it-works/car-rentals',
   },
   {
+    title: 'How CypAI works for car sales',
+    detail: 'Built for stock inquiries, financing questions, test-drive requests, and lead qualification.',
+    href: '/how-it-works/car-sales',
+  },
+  {
     title: 'How CypAI works for clinics',
     detail: 'Built for patient inquiries, appointment request capture, and cleaner front-desk workflow.',
     href: '/how-it-works/clinics',
@@ -152,7 +157,7 @@ export default function HowItWorksPage() {
           <p className="mt-3 max-w-3xl text-zinc-400">
             Pick the guide that matches your business so you get examples that feel familiar.
           </p>
-          <div className="mt-8 grid gap-4 md:grid-cols-2">
+          <div className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
             {nicheGuides.map((guide) => (
               <article key={guide.href} className="rounded-2xl border border-zinc-800 bg-zinc-900 p-6">
                 <h3 className="text-xl font-bold text-white">{guide.title}</h3>

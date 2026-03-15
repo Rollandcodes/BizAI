@@ -34,6 +34,7 @@ const PLAN_PRICE: Record<string, number> = {
 
 const BUSINESS_TYPES = [
   { value: 'car_rental', label: 'Car Rental' },
+  { value: 'car_sales', label: 'Car Sales' },
   { value: 'barbershop', label: 'Barbershop' },
   { value: 'accommodation', label: 'Accommodation' },
   { value: 'restaurant', label: 'Restaurant' },

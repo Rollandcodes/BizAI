@@ -61,6 +61,11 @@ type ConversationRow = {
   messages: Array<{ role: 'user' | 'assistant'; content: string }> | null;
 };
 
+type ConversationMessage = {
+  role: 'user' | 'assistant';
+  content: string;
+};
+
 type WhatsAppEventRow = {
   id: string;
   session_id: string;
@@ -231,6 +236,41 @@ function buildOnboardingSystemPrompt(onboarding: OnboardingPayload) {
     .join('\n\n');
 }
 
+function normalizeConversationMessages(raw: unknown): ConversationMessage[] {
+  const normalizeArray = (value: unknown[]): ConversationMessage[] =>
+    value
+      .filter((item): item is { role?: unknown; content?: unknown } => !!item && typeof item === 'object')
+      .map((item): ConversationMessage => ({
+        role: item.role === 'assistant' ? 'assistant' : 'user',
+        content: typeof item.content === 'string' ? item.content : '',
+      }))
+      .filter((message) => message.content.trim().length > 0);
+
+  if (Array.isArray(raw)) {
+    return normalizeArray(raw);
+  }
+
+  if (typeof raw === 'string') {
+    try {
+      const parsed = JSON.parse(raw) as unknown;
+      if (Array.isArray(parsed)) {
+        return normalizeArray(parsed);
+      }
+    } catch {
+      return [];
+    }
+  }
+
+  return [];
+}
+
+function normalizeConversationRows(rows: ConversationRow[] | null | undefined): ConversationRow[] {
+  return (rows || []).map((row) => ({
+    ...row,
+    messages: normalizeConversationMessages(row.messages),
+  }));
+}
+
 async function buildDashboardPayload(business: Record<string, unknown>) {
   const businessId = String(business.id);
   const monthStart = getMonthStartIso();
@@ -328,8 +368,8 @@ async function buildDashboardPayload(business: Record<string, unknown>) {
       monthlyConversations: monthlyConversationsResult.count ?? 0,
       monthlyMessages,
     },
-    conversations: (conversationsResult.data ?? []) as ConversationRow[],
-    leads: (leadsResult.data ?? []) as ConversationRow[],
+    conversations: normalizeConversationRows((conversationsResult.data ?? []) as ConversationRow[]),
+    leads: normalizeConversationRows((leadsResult.data ?? []) as ConversationRow[]),
     whatsappEvents,
   };
 }

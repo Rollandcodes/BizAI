@@ -78,6 +78,41 @@ export const SEO_NICHES: NicheSEO[] = [
     ],
   },
   {
+    slug: 'car-sales',
+    name: 'Car Sales',
+    plural: 'Car Dealerships',
+    emoji: '🚘',
+    keyword: 'AI chatbot for car sales',
+    useCase: 'stock inquiries, financing questions, test drives, and buyer lead capture',
+    painPoints: [
+      'Buyers message at night asking if a specific model is still available',
+      'Sales teams lose warm leads when no one replies quickly on WhatsApp',
+      'The same financing and trade-in questions are repeated all day',
+      'Test-drive interest gets lost across calls, DMs, and website chats',
+    ],
+    features: [
+      'Answers model availability, mileage, price range, and warranty questions 24/7',
+      'Captures buyer name, phone, preferred model, and test-drive intent automatically',
+      'Handles financing and trade-in FAQs with clear, consistent replies',
+      'Unifies website and WhatsApp inquiries into one searchable dashboard',
+      'Replies in English, Greek, Turkish, Arabic, and Russian',
+    ],
+    faqs: [
+      {
+        q: 'Can CypAI book test-drive requests automatically?',
+        a: 'Yes. CypAI collects the customer name, phone number, preferred car, and requested date/time, then sends the complete lead to your team for confirmation.',
+      },
+      {
+        q: 'Can it answer financing and monthly payment questions?',
+        a: 'Yes. You can configure your dealership financing rules and sample payment ranges during setup, and CypAI will share that information consistently.',
+      },
+      {
+        q: 'Will all buyer chats be visible in one place?',
+        a: 'Yes. Every website and WhatsApp conversation is saved in your CypAI dashboard with lead details and conversation history for follow-up.',
+      },
+    ],
+  },
+  {
     slug: 'barbershop',
     name: 'Barbershop',
     plural: 'Barbershops',

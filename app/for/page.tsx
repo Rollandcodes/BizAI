@@ -8,10 +8,11 @@ const BASE_URL = 'https://www.cypai.app';
 export const metadata: Metadata = {
   title: 'AI Chatbot by Business Type & City | CypAI',
   description:
-    'Find CypAI tailored for your business type and location — car rental, barbershop, hotel, restaurant, clinic, gym, real estate, or law firm across all Cyprus cities.',
+    'Find CypAI tailored for your business type and location — car rental, car sales, barbershop, hotel, restaurant, clinic, gym, real estate, or law firm across all Cyprus cities.',
   keywords: [
     'AI chatbot by niche Cyprus',
     'AI chatbot for car rental Nicosia',
+    'AI chatbot for car sales Cyprus',
     'AI chatbot for barbershop Limassol',
     'chatbot for hotels Cyprus',
     'AI lead capture Cyprus businesses',

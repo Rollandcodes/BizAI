@@ -64,6 +64,7 @@ const languages = [
 ];
 const businessTypeOptions = [
   { value: 'car_rental', label: 'Car Rental' },
+  { value: 'car_sales', label: 'Car Sales' },
   { value: 'barbershop', label: 'Barbershop' },
   { value: 'restaurant', label: 'Restaurant' },
   { value: 'hotel', label: 'Hotel' },

@@ -15,6 +15,7 @@ const PLAN_STYLES: Record<string, { badge: string; dot: string }> = {
 
 const BUSINESS_TYPES = [
   'Car Rental',
+  'Car Sales',
   'Barbershop / Salon',
   'Student Accommodation',
   'Restaurant / Cafe',
