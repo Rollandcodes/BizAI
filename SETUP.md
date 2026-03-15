@@ -157,3 +157,10 @@ Then replace PayPal sandbox credentials in your environment variables with live 
    - auto-generate AI replies
    - send outbound reply through WhatsApp Cloud API
    - log inbound/outbound events in `whatsapp_message_events`
+
+## 10. Optional: Restrict Agency Mode to approved owner emails
+1. Add this server-only environment variable to `.env.local` and Vercel:
+   - `AGENCY_ALLOWED_EMAILS=email1@example.com,email2@example.com`
+2. Only owner emails in that comma-separated list will see and access the `Manage Clients` / Agency Mode tab.
+3. Business plan alone is no longer enough to unlock Agency Mode.
+4. If the variable is empty or missing, Agency Mode is disabled for everyone.

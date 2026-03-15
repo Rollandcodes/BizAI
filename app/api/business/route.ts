@@ -6,6 +6,22 @@ const CUSTOM_FAQ_SEPARATOR = '\n\nCustom FAQs:\n';
 const defaultWelcomeMessage = 'Hi! 👋 How can I help you today?';
 const weekDays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'] as const;
 
+function getAgencyAllowlist() {
+  return (process.env.AGENCY_ALLOWED_EMAILS || '')
+    .split(',')
+    .map((email) => email.trim().toLowerCase())
+    .filter(Boolean);
+}
+
+function hasAgencyAccess(ownerEmail?: string | null) {
+  const normalizedOwnerEmail = ownerEmail?.trim().toLowerCase();
+  if (!normalizedOwnerEmail) {
+    return false;
+  }
+
+  return getAgencyAllowlist().includes(normalizedOwnerEmail);
+}
+
 type CustomFaq = {
   question: string;
   answer: string;
@@ -305,6 +321,7 @@ async function buildDashboardPayload(business: Record<string, unknown>) {
       common_questions_text: (business.common_questions_text as string | null | undefined) || '',
       additional_info: (business.additional_info as string | null | undefined) || '',
     },
+    agencyAccess: hasAgencyAccess((business.owner_email as string | null | undefined) ?? null),
     stats: {
       totalConversations: totalConversationsResult.count ?? 0,
       leadsCaptured: leadsCountResult.count ?? 0,

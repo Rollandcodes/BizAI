@@ -110,6 +110,7 @@ type DashboardStats = {
 
 type DashboardPayload = {
   business: BusinessRecord | null;
+  agencyAccess?: boolean;
   stats: DashboardStats | null;
   conversations: ConversationRecord[];
   leads: ConversationRecord[];
@@ -342,6 +343,7 @@ const messageLimits: Record<BusinessRecord['plan'], number | null> = {
 function emptyPayload(): DashboardPayload {
   return {
     business: null,
+    agencyAccess: false,
     stats: null,
     conversations: [],
     leads: [],
@@ -785,11 +787,13 @@ function DashboardInner() {
   const hasTrackedInitialTab = useRef(false);
 
   const business = dashboard.business;
+  const agencyAccess = dashboard.agencyAccess === true;
   const stats = dashboard.stats;
   const conversations = dashboard.conversations;
   const leads = dashboard.leads;
   const whatsappEvents = dashboard.whatsappEvents || [];
   const currentConversation = conversations.find((item) => item.id === selectedConversationId) || null;
+  const visibleTabItems = agencyAccess ? tabItems : tabItems.filter((item) => item.key !== 'agency');
 
   // Unread WhatsApp replies: WhatsApp conversations where the customer messaged last
   const unreadWhatsAppCount = conversations.filter(
@@ -985,9 +989,11 @@ function DashboardInner() {
 
       setDashboard({
         business: data.business,
+        agencyAccess: data.agencyAccess === true,
         stats: data.stats,
         conversations: data.conversations || [],
         leads: data.leads || [],
+        whatsappEvents: data.whatsappEvents || [],
       });
       if (isAuthLookup) {
         Analytics.dashboardLogin();
@@ -1886,6 +1892,12 @@ function DashboardInner() {
     { id: 'settings', label: 'Settings', icon: '⚙️' },
   ];
 
+  useEffect(() => {
+    if (activeTab === 'agency' && !agencyAccess) {
+      setActiveTab('overview');
+    }
+  }, [activeTab, agencyAccess]);
+
   return (
     <div
       className="min-h-screen bg-zinc-950 text-zinc-100 lg:flex"
@@ -1924,7 +1936,7 @@ function DashboardInner() {
               </button>
             </div>
             <nav className="space-y-1 overflow-y-auto px-4 py-4">
-              {tabItems.map(({ key, label, Icon, plans }) => {
+              {visibleTabItems.map(({ key, label, Icon, plans }) => {
                 const active = activeTab === key;
                 const normalizedPlan: SidebarPlan =
                   business.plan === 'basic' ? 'starter' : (business.plan as SidebarPlan);
@@ -1964,7 +1976,7 @@ function DashboardInner() {
         <div className="flex h-20 items-center px-6 text-xl font-black tracking-tight">CypAI</div>
 
         <nav className="flex-1 space-y-1 overflow-y-auto px-4 py-4">
-          {tabItems.map(({ key, label, Icon, plans }) => {
+          {visibleTabItems.map(({ key, label, Icon, plans }) => {
             const active = activeTab === key;
             const normalizedPlan: SidebarPlan =
               business.plan === 'basic' ? 'starter' : (business.plan as SidebarPlan);
@@ -3850,7 +3862,7 @@ function DashboardInner() {
                 </section>
               ) : null}
 
-              {activeTab === 'agency' ? (
+              {activeTab === 'agency' && agencyAccess ? (
                 <section>
                   <div data-testid="dashboard-agency-panel" />
                   <AgencyTab ownerEmail={business.owner_email} />
@@ -3918,7 +3930,7 @@ function DashboardInner() {
             key={tab.id}
             type="button"
             onClick={() => {
-              const tabConfig = tabItems.find((item) => item.key === tab.id);
+              const tabConfig = visibleTabItems.find((item) => item.key === tab.id);
               const normalizedPlan: SidebarPlan =
                 business?.plan === 'basic' ? 'starter' : ((business?.plan ?? 'trial') as SidebarPlan);
               if (tabConfig && !tabConfig.plans.includes(normalizedPlan)) {
