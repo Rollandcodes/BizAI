@@ -63,14 +63,22 @@ export default function AgencyTab({ ownerEmail }: { ownerEmail: string }) {
 
   useEffect(() => {
     void fetchClients();
-  }, []);
+  }, [ownerEmail]);
 
   async function fetchClients() {
     setLoading(true);
     try {
+      const normalizedOwnerEmail = ownerEmail.trim().toLowerCase();
+
+      if (!normalizedOwnerEmail) {
+        setClients([]);
+        return;
+      }
+
       const { data } = await supabase
         .from('businesses')
         .select('id, business_name, business_type, owner_email, plan, created_at')
+        .eq('owner_email', normalizedOwnerEmail)
         .order('created_at', { ascending: false });
       const raw = (data as ClientRecord[]) ?? [];
 
