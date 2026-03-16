@@ -37,7 +37,7 @@ function PaymentButtons({
 }: {
   planId: string;
   signupData: SignupData;
-  onSuccess: (warning?: string) => void;
+  onSuccess: () => void;
 }) {
   const [{ isPending, isRejected }] = usePayPalScriptReducer();
   const [error, setError] = useState('');
@@ -136,7 +136,6 @@ function PaymentButtons({
             });
             const result = (await res.json()) as {
               success?: boolean;
-              warning?: string;
               user?: { id?: string; email?: string; businessName?: string; plan?: string };
               error?: string;
             };
@@ -151,7 +150,7 @@ function PaymentButtons({
             };
             localStorage.setItem('bizai_user', JSON.stringify(userPayload));
             localStorage.setItem('cypai_user', JSON.stringify(userPayload));
-            onSuccess(result.warning);
+            onSuccess();
           } catch (err) {
             setError(err instanceof Error ? err.message : 'Payment failed');
             setProcessing(false);
@@ -207,8 +206,6 @@ function PaymentContent() {
   const plan = PLANS[planId] ?? PLANS.pro;
 
   const [signupData, setSignupData] = useState<SignupData | null>(null);
-  const [signupLoading, setSignupLoading] = useState(true);
-  const [paymentWarning, setPaymentWarning] = useState('');
   const hasTrackedPaymentStart = useRef(false);
   const paymentCompletedRef = useRef(false);
 
@@ -218,8 +215,6 @@ function PaymentContent() {
       if (raw) startTransition(() => setSignupData(JSON.parse(raw) as SignupData));
     } catch {
       // localStorage unavailable or corrupt — proceed without pre-fill
-    } finally {
-      setSignupLoading(false);
     }
   }, []);
 
@@ -229,15 +224,10 @@ function PaymentContent() {
     Analytics.paymentStarted(planId, Number(plan.price));
   }, [plan.price, planId]);
 
-  function handleSuccess(warning?: string) {
+  function handleSuccess() {
     paymentCompletedRef.current = true;
     Analytics.paymentCompleted(planId, Number(plan.price));
-    if (warning) {
-      setPaymentWarning(warning);
-      setTimeout(() => router.push('/success'), 3500);
-    } else {
-      router.push('/success');
-    }
+    router.push('/success');
   }
 
   const businessName = getBusinessName(signupData);
@@ -393,17 +383,7 @@ function PaymentContent() {
                 <p className="mb-4 text-[11px] font-semibold uppercase tracking-widest text-zinc-500">
                   Pay securely without leaving CypAI
                 </p>
-                {paymentWarning && (
-                  <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-                    <p className="font-semibold">⚠️ {paymentWarning}</p>
-                    <p className="mt-1">Redirecting you in a moment…</p>
-                  </div>
-                )}
-                {signupLoading ? (
-                  <div className="flex items-center justify-center py-10">
-                    <div className="h-8 w-8 animate-spin rounded-full border-4 border-blue-600 border-t-transparent" />
-                  </div>
-                ) : signupData ? (
+                {signupData ? (
                   <PaymentButtons planId={planId} signupData={signupData} onSuccess={handleSuccess} />
                 ) : (
                   <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-4 text-sm text-amber-800">

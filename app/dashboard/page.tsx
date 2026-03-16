@@ -17,7 +17,6 @@
 import { Suspense, useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import QRCode from "qrcode";
 import {
   Bot, Building2, Calendar, Copy, CreditCard,
   Download, LayoutDashboard, LogOut, MessageSquare,
@@ -104,15 +103,6 @@ function getAgencyAllowlist(): string[] {
   return [];
 }
 
-function normalizeWhatsAppPhone(value: string): string {
-  return value.replace(/[^\d]/g, "");
-}
-
-function buildWhatsAppUrl(value: string): string {
-  const digits = normalizeWhatsAppPhone(value);
-  return digits ? `https://wa.me/${digits}` : "";
-}
-
 // ─── Sub-components ─────────────────────────────────────────────────────────────
 function SkeletonBlock({ className = "" }: { className?: string }) {
   return <div className={`animate-pulse rounded-2xl bg-zinc-800 ${className}`} />;
@@ -177,19 +167,7 @@ function AccessGate({ email, onEmailChange, onSubmit, loading, error }: {
         </div>
         {error && (
           <div className="mt-4 rounded-2xl border border-amber-700/40 bg-amber-900/20 px-4 py-3 text-sm text-amber-200">
-            {error.toLowerCase().includes("no account") ? (
-              <>
-                No account found.
-                <span className="mt-1 block text-xs text-amber-300">
-                  Already paid?{' '}
-                  <a href="https://wa.me/905338425559" target="_blank" rel="noopener noreferrer" className="font-semibold underline">Contact support</a>
-                  {' '}or{' '}
-                  <Link href="/signup" className="font-semibold underline">create a new account</Link>.
-                </span>
-              </>
-            ) : (
-              <>{error} — <Link href="/signup" className="font-semibold underline">Sign up</Link></>
-            )}
+            {error} — <Link href="/signup" className="font-semibold underline">Sign up</Link>
           </div>
         )}
       </div>
@@ -252,7 +230,6 @@ function DashboardInner() {
   const [bookings,         setBookings]          = useState<BookingRecord[]>([]);
   const [bookingsLoading,  setBookingsLoading]   = useState(false);
   const [bookingsInited,   setBookingsInited]    = useState(false);
-  const [whatsAppQrDataUrl, setWhatsAppQrDataUrl] = useState("");
   const [isTabletSidebarOpen, setIsTabletSidebarOpen] = useState(false);
   const [upgradeLockTab,   setUpgradeLockTab]    = useState<TabKey | null>(null);
   const [settingsForm,     setSettingsForm]      = useState<SettingsFormState>({
@@ -282,7 +259,6 @@ function DashboardInner() {
     () => business ? `<script src="https://cypai.app/widget.js" data-business-id="${business.id}"></script>` : "",
     [business]
   );
-  const whatsAppUrl = useMemo(() => buildWhatsAppUrl(settingsForm.whatsapp), [settingsForm.whatsapp]);
 
   const visibleTabs = agencyAccess ? TAB_ITEMS : TAB_ITEMS.filter(t => t.key !== "agency");
 
@@ -338,31 +314,6 @@ function DashboardInner() {
       setToast({ message: "Agency Mode is restricted to approved accounts.", tone: "error" });
     }
   }, [activeTab, agencyAccess, business]);
-
-  useEffect(() => {
-    let cancelled = false;
-
-    if (!whatsAppUrl) {
-      setWhatsAppQrDataUrl("");
-      return;
-    }
-
-    void QRCode.toDataURL(whatsAppUrl, {
-      width: 280,
-      margin: 1,
-      color: { dark: "#0f172a", light: "#ffffff" },
-    })
-      .then((dataUrl) => {
-        if (!cancelled) setWhatsAppQrDataUrl(dataUrl);
-      })
-      .catch(() => {
-        if (!cancelled) setWhatsAppQrDataUrl("");
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [whatsAppUrl]);
 
   // ── Data loading ──────────────────────────────────────────────────────────
   async function loadDashboard(params: { email?: string; businessId?: string }, isAuth = false) {
@@ -481,23 +432,6 @@ function DashboardInner() {
     setSettingsForm(f => ({ ...f, customFaqs: f.customFaqs.length === 1 ? [{ question: "", answer: "" }] : f.customFaqs.filter((_, idx) => idx !== i) }));
   }
 
-  async function handleCopyWhatsAppLink() {
-    if (!whatsAppUrl) {
-      showToast("Add a valid WhatsApp number first.", "error");
-      return;
-    }
-    await navigator.clipboard.writeText(whatsAppUrl);
-    showToast("WhatsApp link copied.", "success");
-  }
-
-  function handleDownloadWhatsAppQr() {
-    if (!whatsAppQrDataUrl || !business) return;
-    const a = document.createElement("a");
-    a.href = whatsAppQrDataUrl;
-    a.download = `${business.business_name.toLowerCase().replace(/[^a-z0-9]+/g, "-")}-whatsapp-qr.png`;
-    a.click();
-  }
-
   // ── Auth gate ──────────────────────────────────────────────────────────────
   if (!business) {
     return (
@@ -532,10 +466,7 @@ function DashboardInner() {
                 {(stats?.monthlyMessages ?? 0).toLocaleString()} / {limit.toLocaleString()} messages used this month
               </p>
               <div className="h-2 w-full rounded-full bg-zinc-800">
-                <div
-                  className="h-2 rounded-full bg-blue-500 transition-all"
-                  style={{ width: `${Math.min(100, ((stats?.monthlyMessages ?? 0) / limit) * 100)}%` }}
-                />
+                <div className="h-2 rounded-full bg-blue-500 transition-all" style={{ width: `${Math.min(100, ((stats?.monthlyMessages ?? 0) / limit) * 100)}%` }} />
               </div>
             </div>
           )}
@@ -708,7 +639,7 @@ function DashboardInner() {
 
       case "crm":       return <CRMTab businessId={businessId} businessName={business.business_name} />;
       case "bookings":  return <BookingsTab businessId={businessId} businessName={business.business_name} />;
-      case "followups": return <FollowUpsTab businessId={businessId} businessName={business.business_name} businessType={business.business_type} />;
+      case "followups": return <FollowUpsTab businessId={businessId} businessName={business.business_name} />;
       case "analytics": return <AnalyticsTab businessId={businessId} />;
       case "audit":     return <section><p className="text-zinc-400">Agent Audit — Business plan feature</p></section>;
       case "agency":    return agencyAccess ? <AgencyTab ownerEmail={business.owner_email} /> : null;
@@ -726,9 +657,8 @@ function DashboardInner() {
                 { label: "Website URL", key: "website", placeholder: "https://yourbusiness.com" },
               ] as Array<{ label: string; key: keyof SettingsFormState; placeholder: string }>).map(field => (
                 <div key={field.key}>
-                  <label htmlFor={`settings-${field.key}`} className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-zinc-400">{field.label}</label>
+                  <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-zinc-400">{field.label}</label>
                   <input
-                    id={`settings-${field.key}`}
                     className="h-10 w-full rounded-xl border border-zinc-700 bg-zinc-950 px-3 text-sm text-zinc-100 outline-none focus:border-blue-500"
                     value={String(settingsForm[field.key])}
                     onChange={e => setSettingsForm(f => ({ ...f, [field.key]: e.target.value }))}
@@ -737,8 +667,8 @@ function DashboardInner() {
                 </div>
               ))}
               <div>
-                <label htmlFor="settings-business-type" className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-zinc-400">Business type</label>
-                <select id="settings-business-type" className="h-10 w-full rounded-xl border border-zinc-700 bg-zinc-950 px-3 text-sm text-zinc-100 outline-none focus:border-blue-500"
+                <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-zinc-400">Business type</label>
+                <select className="h-10 w-full rounded-xl border border-zinc-700 bg-zinc-950 px-3 text-sm text-zinc-100 outline-none focus:border-blue-500"
                   value={settingsForm.businessType} onChange={e => setSettingsForm(f => ({ ...f, businessType: e.target.value }))}>
                   {BUSINESS_TYPE_OPTIONS.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
                 </select>
@@ -746,53 +676,16 @@ function DashboardInner() {
             </div>
           </section>
 
-          {/* WhatsApp QR */}
-          <section className="rounded-3xl border border-zinc-800 bg-zinc-900 p-6">
-            <h2 className="mb-2 text-base font-bold text-zinc-100">WhatsApp QR code</h2>
-            <p className="mb-5 text-sm text-zinc-400">Customers can scan this code to start a WhatsApp chat instantly.</p>
-
-            {whatsAppUrl && whatsAppQrDataUrl ? (
-              <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
-                <div className="rounded-2xl border border-zinc-700 bg-white p-3">
-                  <img src={whatsAppQrDataUrl} alt="WhatsApp QR code" className="h-44 w-44" />
-                </div>
-                <div className="space-y-3">
-                  <p className="max-w-md break-all text-xs text-zinc-500">{whatsAppUrl}</p>
-                  <div className="flex flex-wrap gap-2">
-                    <a href={whatsAppUrl} target="_blank" rel="noopener noreferrer"
-                      className="rounded-full bg-green-600 px-4 py-2 text-sm font-semibold text-white hover:bg-green-500">
-                      Open WhatsApp link
-                    </a>
-                    <button type="button" onClick={() => void handleCopyWhatsAppLink()}
-                      className="inline-flex items-center gap-1 rounded-full border border-zinc-700 px-4 py-2 text-sm font-semibold text-zinc-300 hover:bg-zinc-800">
-                      <Copy className="h-3.5 w-3.5" /> Copy link
-                    </button>
-                    <button type="button" onClick={handleDownloadWhatsAppQr}
-                      className="inline-flex items-center gap-1 rounded-full border border-zinc-700 px-4 py-2 text-sm font-semibold text-zinc-300 hover:bg-zinc-800">
-                      <Download className="h-3.5 w-3.5" /> Download QR
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <div className="rounded-2xl border border-amber-700/40 bg-amber-900/20 px-4 py-3 text-sm text-amber-200">
-                Add a valid WhatsApp number in Business details to generate your QR code.
-              </div>
-            )}
-          </section>
-
           {/* Widget colour */}
           <section className="rounded-3xl border border-zinc-800 bg-zinc-900 p-6">
             <h2 className="mb-4 text-base font-bold text-zinc-100">Widget colour</h2>
             <div className="flex flex-wrap gap-3">
               {WIDGET_COLORS.map(color => (
-                <button key={color} type="button" aria-label={`Set widget color ${color}`} title={`Set widget color ${color}`} onClick={() => setSettingsForm(f => ({ ...f, primaryColor: color }))}
+                <button key={color} type="button" onClick={() => setSettingsForm(f => ({ ...f, primaryColor: color }))}
                   className={`h-10 w-10 rounded-full border-2 transition ${settingsForm.primaryColor === color ? "border-white scale-110" : "border-transparent"}`}
-                  /* Tailwind does not support dynamic bg colors, so style is required */
                   style={{ background: color }} />
               ))}
-              <label htmlFor="settings-primary-color" className="sr-only">Pick custom widget color</label>
-              <input id="settings-primary-color" aria-label="Pick custom widget color" type="color" value={settingsForm.primaryColor}
+              <input type="color" value={settingsForm.primaryColor}
                 onChange={e => setSettingsForm(f => ({ ...f, primaryColor: e.target.value }))}
                 className="h-10 w-10 cursor-pointer rounded-full border-2 border-zinc-600" />
             </div>
@@ -830,7 +723,7 @@ function DashboardInner() {
             <div className="space-y-4">
               {settingsForm.customFaqs.map((faq, i) => (
                 <div key={i} className="relative rounded-2xl border border-zinc-700 bg-zinc-950/50 p-4">
-                  <button type="button" aria-label={`Remove FAQ ${i + 1}`} title={`Remove FAQ ${i + 1}`} onClick={() => removeFaq(i)}
+                  <button type="button" onClick={() => removeFaq(i)}
                     className="absolute right-3 top-3 text-zinc-600 hover:text-zinc-300">
                     <X className="h-4 w-4" />
                   </button>
@@ -918,7 +811,7 @@ function DashboardInner() {
   }
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-100 lg:flex font-sans">
+    <div className="min-h-screen bg-zinc-950 text-zinc-100 lg:flex" style={{ fontFamily: "-apple-system, BlinkMacSystemFont, 'Inter', sans-serif" }}>
       {toast && <Toast toast={toast} />}
 
       {showOnboarding && (
