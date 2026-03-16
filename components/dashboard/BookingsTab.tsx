@@ -59,7 +59,7 @@ export default function BookingsTab({
   businessName: string;
 }): JSX.Element {
   const [bookings, setBookings] = useState<Booking[]>([]);
-  const [auditLogs, setAuditLogs] = useState<Record<string, Array<{ action: string; details: any; timestamp: string }>>>({});
+  const [auditLogs, setAuditLogs] = useState<Record<string, Array<{ action: string; details: unknown; timestamp: string }>>>({});
   const [loading, setLoading] = useState(true);
   const [view, setView] = useState<'calendar' | 'list'>('calendar');
   const [calMonth, setCalMonth] = useState(() => {
@@ -83,20 +83,15 @@ export default function BookingsTab({
     void fetchBookingHistory();
   }, [businessId]);
 
-  async function fetchBookings() {
-    // replaced by fetchBookingHistory
-  }
-
   async function fetchBookingHistory() {
     setLoading(true);
     try {
       const res = await fetch(`/api/booking-history?businessId=${businessId}`);
       if (!res.ok) throw new Error('Failed to load booking history');
-      const { bookings, auditLogs } = await res.json();
-      setBookings(bookings ?? []);
-      // Group audit logs by booking_id
-      const grouped: Record<string, Array<{ action: string; details: any; timestamp: string }>> = {};
-      for (const log of auditLogs ?? []) {
+      const { bookings: fetchedBookings, auditLogs: fetchedLogs } = await res.json();
+      setBookings(fetchedBookings ?? []);
+      const grouped: Record<string, Array<{ action: string; details: unknown; timestamp: string }>> = {};
+      for (const log of fetchedLogs ?? []) {
         if (!grouped[log.booking_id]) grouped[log.booking_id] = [];
         grouped[log.booking_id].push(log);
       }
@@ -104,7 +99,6 @@ export default function BookingsTab({
     } finally {
       setLoading(false);
     }
-  }
   }
 
   async function confirmBooking(b: Booking) {
@@ -121,6 +115,7 @@ export default function BookingsTab({
       const date = b.booking_date ?? '';
       const service = b.service_type ?? 'your booking';
       const msg = `Hi ${name}! Your booking at ${businessName} is confirmed for ${date}. See you then! 🎉`;
+      void service;
       const phone = (b.customer_phone ?? '').replace(/\D/g, '');
       if (phone) window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, '_blank');
     } finally {
@@ -185,7 +180,7 @@ export default function BookingsTab({
 
   const { year, month } = calMonth;
   const daysInMonth = getDaysInMonth(year, month);
-  const firstDow = new Date(year, month, 1).getDay(); // 0=Sun
+  const firstDow = new Date(year, month, 1).getDay();
 
   const calDays: Array<string | null> = [
     ...Array<null>(firstDow).fill(null),
@@ -259,9 +254,9 @@ export default function BookingsTab({
               {/* Calendar */}
               <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
                 <div className="mb-4 flex items-center justify-between gap-4">
-                  <button type="button" onClick={prevMonth} className="rounded-full p-2 text-slate-400 hover:bg-slate-100">‹</button>
+                  <button type="button" onClick={prevMonth} className="rounded-full p-2 text-slate-400 hover:bg-slate-100">&#8249;</button>
                   <h3 className="font-bold text-slate-900">{monthNames[month]} {year}</h3>
-                  <button type="button" onClick={nextMonth} className="rounded-full p-2 text-slate-400 hover:bg-slate-100">›</button>
+                  <button type="button" onClick={nextMonth} className="rounded-full p-2 text-slate-400 hover:bg-slate-100">&#8250;</button>
                 </div>
                 <div className="grid grid-cols-7 gap-1 text-center text-xs font-semibold text-slate-400">
                   {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((d) => (
