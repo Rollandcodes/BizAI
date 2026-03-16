@@ -57,7 +57,7 @@ export default function BookingsTab({
 }: {
   businessId: string;
   businessName: string;
-}): JSX.Element {
+}) {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [auditLogs, setAuditLogs] = useState<Record<string, Array<{ action: string; details: unknown; timestamp: string }>>>({});
   const [loading, setLoading] = useState(true);
