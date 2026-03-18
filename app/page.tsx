@@ -719,9 +719,9 @@ export default function HomePage() {
                 Email
               </a>
               <a
-                href="https://wa.me/35799999999"
+                href="https://wa.me/905338425559"
                 target="_blank"
-                rel="noreferrer"
+                rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-6 py-3 text-sm font-semibold text-white hover:bg-white/10 transition-colors"
               >
                 <span>💬</span>
