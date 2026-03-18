@@ -638,3 +638,58 @@ $$;
 -- Service role: allow API routes to bypass RLS for these functions
 GRANT EXECUTE ON FUNCTION public.increment_message_count TO service_role;
 GRANT EXECUTE ON FUNCTION public.reset_monthly_counts TO service_role;
+
+-- ============================================================================
+-- FIX 4: Add last_message_at and is_read to conversations
+-- ============================================================================
+ALTER TABLE public.conversations ADD COLUMN IF NOT EXISTS last_message_at TIMESTAMPTZ;
+ALTER TABLE public.conversations ADD COLUMN IF NOT EXISTS is_read BOOLEAN DEFAULT false;
+
+CREATE INDEX IF NOT EXISTS idx_conversations_last_message_at ON public.conversations(last_message_at DESC);
+CREATE INDEX IF NOT EXISTS idx_conversations_is_read ON public.conversations(business_id, is_read);
+
+-- ============================================================================
+-- FIX 5: Orders table
+-- ============================================================================
+CREATE TABLE IF NOT EXISTS public.orders (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  business_id UUID NOT NULL REFERENCES businesses(id) ON DELETE CASCADE,
+  conversation_id UUID REFERENCES conversations(id) ON DELETE SET NULL,
+  customer_name TEXT NOT NULL,
+  customer_phone TEXT,
+  customer_email TEXT,
+  items JSONB DEFAULT '[]'::jsonb,
+  total_amount DECIMAL(10,2) DEFAULT 0,
+  status TEXT DEFAULT 'pending' CHECK (status IN ('pending', 'confirmed', 'preparing', 'ready', 'done', 'cancelled')),
+  source TEXT DEFAULT 'chat',
+  notes TEXT,
+  created_at TIMESTAMPTZ DEFAULT now(),
+  updated_at TIMESTAMPTZ
+);
+
+ALTER TABLE public.orders ENABLE ROW LEVEL SECURITY;
+
+CREATE INDEX IF NOT EXISTS idx_orders_business_id ON public.orders(business_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_orders_status ON public.orders(business_id, status);
+
+-- Orders RLS policies
+DROP POLICY IF EXISTS "Business owners can manage own orders" ON public.orders;
+CREATE POLICY "Business owners can manage own orders" ON public.orders
+  FOR ALL USING (
+    EXISTS (
+      SELECT 1 FROM public.businesses
+      WHERE businesses.id = orders.business_id
+      AND lower(businesses.owner_email) = lower(auth.jwt() ->> 'email')
+    )
+  );
+
+DROP POLICY IF EXISTS "Service role full access to orders" ON public.orders;
+CREATE POLICY "Service role full access to orders" ON public.orders
+  FOR ALL USING (auth.role() = 'service_role');
+
+DROP POLICY IF EXISTS "Anyone can create order" ON public.orders;
+CREATE POLICY "Anyone can create order" ON public.orders
+  FOR INSERT WITH CHECK (true);
+
+-- Add conversation_id to bookings if not exists
+ALTER TABLE public.bookings ADD COLUMN IF NOT EXISTS conversation_id UUID REFERENCES conversations(id) ON DELETE SET NULL;

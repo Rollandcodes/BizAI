@@ -6,12 +6,14 @@ import { Smartphone, Check, X, ExternalLink, Copy, RefreshCw, MessageCircle } fr
 import { supabase } from "@/lib/supabase";
 import { useBusiness } from "@/contexts/BusinessContext";
 import { ChatSkeleton } from "@/components/dashboard/Skeleton";
+import WhatsAppConnectModal from "@/components/dashboard/WhatsAppConnectModal";
 
 export default function WhatsAppPage() {
   const router = useRouter();
   const { business, loading: contextLoading, isAuthenticated } = useBusiness();
   const [whatsappEvents, setWhatsappEvents] = useState<unknown[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showModal, setShowModal] = useState(false);
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -104,13 +106,13 @@ export default function WhatsAppPage() {
         )}
 
         <div className="mt-6">
-          <a
-            href="/dashboard/settings"
+          <button
+            onClick={() => setShowModal(true)}
             className="inline-flex items-center gap-2 rounded-2xl bg-[#25D366] px-4 py-2 text-sm font-semibold text-white hover:bg-[#20bd5a]"
           >
             <Smartphone className="h-4 w-4" />
             {isConnected ? "Update Connection" : "Connect WhatsApp"}
-          </a>
+          </button>
         </div>
       </div>
 
@@ -172,6 +174,22 @@ export default function WhatsAppPage() {
           <p className="mt-4 text-sm text-slate-500">No recent WhatsApp activity</p>
         )}
       </div>
+
+      {/* WhatsApp Connect Modal */}
+      <WhatsAppConnectModal
+        isOpen={showModal}
+        onClose={() => setShowModal(false)}
+        onConnect={async (phoneNumber: string) => {
+          if (!business) return;
+          await supabase
+            .from("businesses")
+            .update({ whatsapp: phoneNumber })
+            .eq("id", business.id);
+          // Refresh to show updated status
+          window.location.reload();
+        }}
+        currentNumber={business?.whatsapp || undefined}
+      />
     </div>
   );
 }

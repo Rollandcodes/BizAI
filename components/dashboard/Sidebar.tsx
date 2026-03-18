@@ -18,6 +18,7 @@ import {
   LogOut,
   Menu,
   X,
+  Package,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -32,6 +33,7 @@ const MAIN_NAV_ITEMS: NavItem[] = [
   { label: "Conversations", href: "/dashboard/conversations", icon: MessageCircle },
   { label: "Leads & CRM", href: "/dashboard/leads", icon: Users },
   { label: "Bookings", href: "/dashboard/bookings", icon: Calendar },
+  { label: "Orders", href: "/dashboard/orders", icon: Package },
   { label: "Analytics", href: "/dashboard/analytics", icon: BarChart3 },
 ];
 

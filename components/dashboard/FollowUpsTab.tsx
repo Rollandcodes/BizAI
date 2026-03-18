@@ -205,11 +205,17 @@ export default function FollowUpsTab({
               rows={5}
               value={customMessage}
               onChange={(e) => setCustomMessage(e.target.value)}
-              className="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10"
+              className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-gray-900 placeholder-gray-400 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10"
+              placeholder="Write your message here..."
             />
-            <p className="mt-1 text-xs text-slate-400">
-              Use <code className="rounded bg-slate-100 px-1">{'{name}'}</code> to personalize.
-            </p>
+            <div className="mt-2 flex items-center justify-between">
+              <p className="text-xs text-slate-500">
+                Use <code className="rounded bg-slate-100 px-1 text-blue-600">{'{name}'}</code> or <code className="rounded bg-slate-100 px-1 text-blue-600">{'{businessName}'}</code> to personalize.
+              </p>
+              <p className={`text-xs ${customMessage.length > 300 ? 'text-red-500' : 'text-slate-400'}`}>
+                {customMessage.length}/300 characters
+              </p>
+            </div>
           </div>
         </div>
 
