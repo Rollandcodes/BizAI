@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { createClient } from '@supabase/supabase-js';
 import { blogPosts, getBlogPostBySlug } from '../posts';
+import CopyButton from '@/components/CopyButton';
 
 const baseUrl = 'https://cypai.app';
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -237,14 +238,7 @@ export default async function BlogPostPage({ params }: PageProps) {
           >
             WhatsApp
           </a>
-          <button
-            onClick={() => {
-              navigator.clipboard.writeText(`${baseUrl}/blog/${slug}`);
-            }}
-            className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-white hover:bg-white/10"
-          >
-            Copy Link
-          </button>
+          <CopyButton text={`${baseUrl}/blog/${slug}`} />
         </div>
 
         {/* CTA Section */}
