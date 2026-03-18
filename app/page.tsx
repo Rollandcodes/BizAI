@@ -786,6 +786,7 @@ export default function HomePage() {
               <div>
                 <h4 className="font-semibold text-white">Company</h4>
                 <ul className="mt-4 space-y-2">
+                  <li><Link href="/login" className="text-sm text-white/60 hover:text-[#e8a020]">Log In</Link></li>
                   <li><Link href="/blog" className="text-sm text-white/60 hover:text-[#e8a020]">Blog</Link></li>
                   <li><Link href="/contact" className="text-sm text-white/60 hover:text-[#e8a020]">Contact</Link></li>
                   <li><Link href="/privacy-policy" className="text-sm text-white/60 hover:text-[#e8a020]">Privacy Policy</Link></li>
