@@ -693,3 +693,87 @@ CREATE POLICY "Anyone can create order" ON public.orders
 
 -- Add conversation_id to bookings if not exists
 ALTER TABLE public.bookings ADD COLUMN IF NOT EXISTS conversation_id UUID REFERENCES conversations(id) ON DELETE SET NULL;
+
+-- ============================================================================
+-- Table: blog_posts
+-- ============================================================================
+-- Blog posts for CypAI blog - public submissions and admin management
+CREATE TABLE IF NOT EXISTS public.blog_posts (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  slug VARCHAR(255) UNIQUE NOT NULL,
+  title VARCHAR(500) NOT NULL,
+  excerpt TEXT,
+  content TEXT NOT NULL,
+  author_name VARCHAR(255) NOT NULL,
+  author_email VARCHAR(255) NOT NULL,
+  author_type VARCHAR(20) DEFAULT 'community',
+  author_bio TEXT,
+  category VARCHAR(100),
+  tags TEXT[],
+  cover_image_url TEXT,
+  status VARCHAR(20) DEFAULT 'pending',
+  rejection_reason TEXT,
+  submitted_at TIMESTAMPTZ DEFAULT NOW(),
+  approved_at TIMESTAMPTZ,
+  approved_by VARCHAR(255),
+  views INTEGER DEFAULT 0,
+  is_featured BOOLEAN DEFAULT FALSE,
+  agreed_to_rules BOOLEAN NOT NULL DEFAULT FALSE,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Indexes for blog_posts
+CREATE INDEX IF NOT EXISTS idx_blog_posts_status ON blog_posts(status);
+CREATE INDEX IF NOT EXISTS idx_blog_posts_slug ON blog_posts(slug);
+CREATE INDEX IF NOT EXISTS idx_blog_posts_category ON blog_posts(category);
+CREATE INDEX IF NOT EXISTS idx_blog_posts_featured ON blog_posts(is_featured) WHERE is_featured = true;
+CREATE INDEX IF NOT EXISTS idx_blog_posts_created_at ON blog_posts(created_at DESC);
+
+-- RLS policies for blog_posts
+ALTER TABLE public.blog_posts ENABLE ROW LEVEL SECURITY;
+
+-- Anyone can read approved posts
+CREATE POLICY "Anyone can read approved blog posts" ON public.blog_posts
+  FOR SELECT USING (status = 'approved');
+
+-- Anyone can insert (submit) blog posts
+CREATE POLICY "Anyone can submit blog posts" ON public.blog_posts
+  FOR INSERT WITH CHECK (true);
+
+-- Admin can do everything
+DROP POLICY IF EXISTS "Service role full access to blog_posts" ON public.blog_posts;
+CREATE POLICY "Service role full access to blog_posts" ON public.blog_posts
+  FOR ALL USING (auth.role() = 'service_role');
+
+-- Function to generate slug from title
+CREATE OR REPLACE FUNCTION generate_blog_slug(title_text TEXT)
+RETURNS TEXT AS $$
+DECLARE
+  slug TEXT;
+BEGIN
+  slug := LOWER(title_text);
+  slug := REGEXP_REPLACE(slug, '[^a-z0-9\s-]', '', 'g');
+  slug := REGEXP_REPLACE(slug, '\s+', '-', 'g');
+  slug := REGEXP_REPLACE(slug, '-+', '-', 'g');
+  slug := TRIM(slug, '-');
+  slug := slug || '-' || TO_CHAR(NOW(), 'YYYYMMDD');
+  RETURN slug;
+END;
+$$ LANGUAGE plpgsql IMMUTABLE;
+
+-- Function to update updated_at timestamp
+CREATE OR REPLACE FUNCTION update_blog_post_timestamp()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.updated_at = NOW();
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Trigger to auto-update timestamp
+DROP TRIGGER IF EXISTS update_blog_posts_timestamp ON public.blog_posts;
+CREATE TRIGGER update_blog_posts_timestamp
+  BEFORE UPDATE ON public.blog_posts
+  FOR EACH ROW
+  EXECUTE FUNCTION update_blog_post_timestamp();

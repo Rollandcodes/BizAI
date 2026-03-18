@@ -1,7 +1,6 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import Image from 'next/image'
-import { AnnouncementBar } from '@/components/home/AnnouncementBar'
 import { Navigation } from '@/components/home/Navigation'
 import { FAQAccordion } from '@/components/home/FAQAccordion'
 
@@ -223,9 +222,6 @@ export default function HomePage() {
       />
       
       <main className="min-h-screen bg-[#0a0f1e] text-white">
-        {/* Section 0: Announcement Bar */}
-        <AnnouncementBar />
-        
         {/* Amber top border */}
         <div className="h-1 w-full bg-[#e8a020]" />
 
@@ -790,6 +786,7 @@ export default function HomePage() {
               <div>
                 <h4 className="font-semibold text-white">Company</h4>
                 <ul className="mt-4 space-y-2">
+                  <li><Link href="/blog" className="text-sm text-white/60 hover:text-[#e8a020]">Blog</Link></li>
                   <li><Link href="/contact" className="text-sm text-white/60 hover:text-[#e8a020]">Contact</Link></li>
                   <li><Link href="/privacy-policy" className="text-sm text-white/60 hover:text-[#e8a020]">Privacy Policy</Link></li>
                   <li><Link href="/terms-of-service" className="text-sm text-white/60 hover:text-[#e8a020]">Terms of Service</Link></li>

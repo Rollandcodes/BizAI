@@ -102,6 +102,9 @@ export default function Navbar() {
             <Link href="/how-it-works" className="text-sm font-medium text-gray-600 transition-colors hover:text-[#e8a020]">
               Docs
             </Link>
+            <Link href="/blog" className="text-sm font-medium text-gray-600 transition-colors hover:text-[#e8a020]">
+              Blog
+            </Link>
             <Link href="/contact" className="text-sm font-medium text-gray-600 transition-colors hover:text-[#e8a020]">
               Contact
             </Link>
@@ -182,6 +185,13 @@ export default function Navbar() {
               className="block rounded-lg px-4 py-2 text-gray-700 hover:bg-gray-50"
             >
               Docs
+            </Link>
+            <Link
+              href="/blog"
+              onClick={() => setIsMenuOpen(false)}
+              className="block rounded-lg px-4 py-2 text-gray-700 hover:bg-gray-50"
+            >
+              Blog
             </Link>
             <Link
               href="/contact"

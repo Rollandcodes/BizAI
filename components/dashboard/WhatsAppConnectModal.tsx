@@ -1,7 +1,6 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { X, Phone, ExternalLink, HelpCircle, Loader2 } from "lucide-react";
+import { useState } from 'react';
 
 interface WhatsAppConnectModalProps {
   isOpen: boolean;
@@ -16,127 +15,107 @@ export default function WhatsAppConnectModal({
   onConnect,
   currentNumber
 }: WhatsAppConnectModalProps) {
-  const [phoneNumber, setPhoneNumber] = useState(currentNumber || "");
-  const [connecting, setConnecting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [phoneNumber, setPhoneNumber] = useState(currentNumber || '');
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
 
   if (!isOpen) return null;
 
-  const handleConnect = async () => {
-    // Validate phone number
-    const cleaned = phoneNumber.replace(/[^\d+]/g, "");
-    if (cleaned.length < 10) {
-      setError("Please enter a valid phone number");
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    
+    if (!phoneNumber.trim()) {
+      setError('Please enter a phone number');
       return;
     }
 
-    setConnecting(true);
-    setError(null);
+    // Validate phone number format
+    const cleaned = phoneNumber.replace(/\D/g, '');
+    if (cleaned.length < 10) {
+      setError('Please enter a valid phone number');
+      return;
+    }
 
+    setIsLoading(true);
     try {
       await onConnect(phoneNumber);
       onClose();
     } catch (err) {
-      setError("Failed to connect. Please try again or contact support.");
+      setError('Failed to connect. Please try again.');
     } finally {
-      setConnecting(false);
+      setIsLoading(false);
     }
   };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       {/* Backdrop */}
-      <div
-        className="absolute inset-0 bg-black/50"
+      <div 
+        className="absolute inset-0 bg-black/50 backdrop-blur-sm"
         onClick={onClose}
       />
-
+      
       {/* Modal */}
-      <div className="relative z-10 w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <h2 className="text-xl font-bold text-slate-900">
-            Connect WhatsApp
+      <div className="relative z-10 w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl">
+        <div className="mb-4 flex items-center justify-between">
+          <h2 className="text-xl font-bold text-gray-900">
+            {currentNumber ? 'Update WhatsApp Number' : 'Connect WhatsApp'}
           </h2>
           <button
             onClick={onClose}
-            aria-label="Close modal"
-            className="flex h-8 w-8 items-center justify-center rounded-full hover:bg-slate-100"
+            className="rounded-full p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
           >
-            <X className="h-5 w-5 text-slate-500" />
+            <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
           </button>
         </div>
 
-        {/* Content */}
-        <div className="mt-4 space-y-4">
-          <p className="text-sm text-slate-500">
-            Enter your WhatsApp Business phone number to start receiving messages from customers.
-          </p>
+        <p className="mb-4 text-sm text-gray-600">
+          Connect your WhatsApp Business number to receive and respond to customer messages directly from your dashboard.
+        </p>
 
-          <div>
-            <label className="mb-1.5 block text-sm font-medium text-slate-700">
-              Phone Number
+        <form onSubmit={handleSubmit}>
+          <div className="mb-4">
+            <label className="mb-1 block text-sm font-medium text-gray-700">
+              WhatsApp Business Number
             </label>
-            <div className="relative">
-              <Phone className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
-              <input
-                type="tel"
-                value={phoneNumber}
-                onChange={(e) => {
-                  setPhoneNumber(e.target.value);
-                  setError(null);
-                }}
-                placeholder="+90 532 123 4567"
-                className="w-full rounded-xl border border-slate-200 bg-white py-3 pl-10 pr-4 text-slate-900 placeholder-slate-400 outline-none focus:border-green-500 focus:ring-2 focus:ring-green-500/10"
-              />
-            </div>
-            <p className="mt-1 text-xs text-slate-500">
-              Use international format (e.g., +90 for Turkey)
+            <input
+              type="tel"
+              value={phoneNumber}
+              onChange={(e) => setPhoneNumber(e.target.value)}
+              placeholder="+90 532 123 4567"
+              className="w-full rounded-lg border border-gray-300 px-4 py-2 text-gray-900 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
+            />
+            <p className="mt-1 text-xs text-gray-500">
+              Include country code (e.g., +90 for Turkey, +357 for Cyprus)
             </p>
           </div>
 
           {error && (
-            <p className="text-sm text-red-600">{error}</p>
+            <div className="mb-4 rounded-lg bg-red-50 p-3 text-sm text-red-600">
+              {error}
+            </div>
           )}
 
-          {/* Help link */}
-          <div className="rounded-xl bg-slate-50 p-4">
-            <a
-              href="https://faq.whatsapp.com/591012899409066"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-2 text-sm text-slate-600 hover:text-slate-900"
+          <div className="flex gap-3">
+            <button
+              type="button"
+              onClick={onClose}
+              className="flex-1 rounded-lg border border-gray-300 px-4 py-2 font-medium text-gray-700 hover:bg-gray-50"
             >
-              <HelpCircle className="h-4 w-4" />
-              Need help setting up WhatsApp Business?
-              <ExternalLink className="h-3 w-3" />
-            </a>
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="flex-1 rounded-lg bg-amber-500 px-4 py-2 font-medium text-white hover:bg-amber-600 disabled:opacity-50"
+            >
+              {isLoading ? 'Connecting...' : 'Connect'}
+            </button>
           </div>
-        </div>
-
-        {/* Actions */}
-        <div className="mt-6 flex gap-3">
-          <button
-            onClick={onClose}
-            className="flex-1 rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50"
-          >
-            Cancel
-          </button>
-          <button
-            onClick={handleConnect}
-            disabled={connecting || !phoneNumber}
-            className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-[#25D366] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[#20bd5a] disabled:opacity-50"
-          >
-            {connecting ? (
-              <>
-                <Loader2 className="h-4 w-4 animate-spin" />
-                Connecting...
-              </>
-            ) : (
-              "Connect"
-            )}
-          </button>
-        </div>
+        </form>
       </div>
     </div>
   );

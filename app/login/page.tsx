@@ -93,7 +93,12 @@ export default function LoginPage() {
           </ul>
         </div>
 
-        <div className="relative z-10 text-sm text-gray-500">
+        <div className="relative z-10 flex flex-col items-center gap-2 text-sm text-gray-500">
+          <div className="flex gap-4">
+            <Link href="/blog" className="hover:text-[#e8a020]">Blog</Link>
+            <Link href="/privacy-policy" className="hover:text-[#e8a020]">Privacy</Link>
+            <Link href="/terms-of-service" className="hover:text-[#e8a020]">Terms</Link>
+          </div>
           © 2026 CypAI. All rights reserved.
         </div>
       </div>
