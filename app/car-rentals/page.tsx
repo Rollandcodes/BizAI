@@ -3,6 +3,10 @@
 import Link from 'next/link'
 import Image from 'next/image'
 
+export const metadata = {
+  title: 'Car Rentals | CypAI',
+}
+
 export default function CarRentalsPage() {
   return (
     <main className="min-h-screen bg-white">
@@ -35,19 +39,21 @@ export default function CarRentalsPage() {
       {/* Hero Section */}
       <section className="bg-[#1a1a2e] py-20 lg:py-28">
         <div className="mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
-          <h1 className="mb-6 text-4xl font-black leading-tight text-white sm:text-5xl lg:text-6xl">
-            Stop losing bookings<br />
-            <span className="text-[#e8a020]">while you sleep.</span>
+          <span className="mb-4 inline-block rounded-full bg-[#e8a020]/20 px-4 py-2 text-sm font-semibold text-[#e8a020]">
+            🚗 For Car Rental Businesses in Cyprus
+          </span>
+          <h1 className="mb-6 text-4xl font-black leading-tight text-white md:text-5xl lg:text-6xl">
+            Stop losing bookings while you sleep.
           </h1>
-          <p className="mx-auto mb-10 max-w-2xl text-lg text-gray-300">
-            Your car rental business answers WhatsApp at 3am. CypAI answers automatically — in any language. Capture every enquiry, 24/7.
+          <p className="mx-auto mb-10 max-w-2xl text-lg text-white/70">
+            CypAI answers WhatsApp enquiries 24/7, quotes prices instantly in any language, and captures every lead — even at 3am.
           </p>
           <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
             <Link
               href="/signup?plan=pro"
               className="rounded-xl bg-[#e8a020] px-8 py-4 text-lg font-bold text-[#1a1a2e] transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#d4920a] hover:shadow-lg hover:shadow-[#e8a020]/20"
             >
-              Start Free Trial — No Credit Card →
+              Start Free Trial — No Credit Card
             </Link>
             <Link
               href="/demo"
@@ -56,15 +62,15 @@ export default function CarRentalsPage() {
               See Live Demo →
             </Link>
           </div>
-          <div className="mt-6 flex flex-wrap items-center justify-center gap-4 text-sm text-gray-400">
+          <div className="mt-6 flex flex-wrap items-center justify-center gap-4 text-sm text-white/60">
             <span>✓ 7-day free trial</span>
             <span>·</span>
             <span>✓ Setup in 15 minutes</span>
             <span>·</span>
             <span>✓ Cancel anytime</span>
           </div>
-          <p className="mt-4 text-sm text-gray-400">
-            Join [X] Cyprus businesses already using CypAI
+          <p className="mt-4 text-sm text-white/60">
+            Join 200+ Cyprus businesses already using CypAI
           </p>
         </div>
       </section>
@@ -75,31 +81,27 @@ export default function CarRentalsPage() {
           <h2 className="mb-10 text-center text-3xl font-bold text-[#1a1a2e]">Sound familiar?</h2>
           <div className="space-y-4">
             <div className="flex items-start gap-4 rounded-xl bg-white p-5 shadow-sm">
-              <span className="text-2xl">🌙</span>
+              <span className="text-2xl">😴</span>
               <div>
-                <p className="font-semibold text-[#1a1a2e]">Late-night enquiries get missed</p>
-                <p className="mt-1 text-gray-600">Customers WhatsApp at 11pm asking "how much for an SUV for 3 days?" You're asleep. They book with a competitor.</p>
+                <p className="font-semibold text-[#1a1a2e]">You <strong>miss bookings</strong> because customers WhatsApp at midnight and you're asleep</p>
               </div>
             </div>
             <div className="flex items-start gap-4 rounded-xl bg-white p-5 shadow-sm">
               <span className="text-2xl">🌍</span>
               <div>
-                <p className="font-semibold text-[#1a1a2e]">Language barriers with tourists</p>
-                <p className="mt-1 text-gray-600">International tourists message in Russian, Arabic, German. You only speak Turkish and English. You struggle to reply.</p>
+                <p className="font-semibold text-[#1a1a2e]">Tourists message in <strong>Russian, Arabic, German</strong> — you can't reply in their language</p>
               </div>
             </div>
             <div className="flex items-start gap-4 rounded-xl bg-white p-5 shadow-sm">
-              <span className="text-2xl">⏰</span>
+              <span className="text-2xl">🔁</span>
               <div>
-                <p className="font-semibold text-[#1a1a2e]">Missed bookings because you're busy</p>
-                <p className="mt-1 text-gray-600">You're at the car yard, not at a computer. Enquiries go unanswered. Customers move on.</p>
+                <p className="font-semibold text-[#1a1a2e]">You answer <strong>"what's your cheapest car?"</strong> 40 times a day</p>
               </div>
             </div>
             <div className="flex items-start gap-4 rounded-xl bg-white p-5 shadow-sm">
-              <span className="text-2xl">📋</span>
+              <span className="text-2xl">📵</span>
               <div>
-                <p className="font-semibold text-[#1a1a2e]">Repetitive questions waste your time</p>
-                <p className="mt-1 text-gray-600">40% of messages are "what's your cheapest car?" — the same answer, every single time.</p>
+                <p className="font-semibold text-[#1a1a2e]">You're at the car yard, not at your phone, and <strong>lose leads</strong></p>
               </div>
             </div>
           </div>
@@ -116,17 +118,17 @@ export default function CarRentalsPage() {
           <div className="grid gap-8 md:grid-cols-3">
             <div className="text-center">
               <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[#e8a020]/20 text-3xl mx-auto">1</div>
-              <h3 className="text-xl font-bold text-[#1a1a2e]">Tell CypAI about your business</h3>
+              <h3 className="text-xl font-bold text-[#1a1a2e]">Tell CypAI about your car rental business</h3>
               <p className="mt-2 text-gray-600">Add your prices, fleet details, hours, and policies. Takes 10 minutes. The AI learns your business quickly.</p>
             </div>
             <div className="text-center">
               <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[#e8a020]/20 text-3xl mx-auto">2</div>
-              <h3 className="text-xl font-bold text-[#1a1a2e]">Connect your WhatsApp and website</h3>
+              <h3 className="text-xl font-bold text-[#1a1a2e]">Connect WhatsApp and your website</h3>
               <p className="mt-2 text-gray-600">One line of code for the website widget. 2 minutes to connect your WhatsApp Business number.</p>
             </div>
             <div className="text-center">
               <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[#e8a020]/20 text-3xl mx-auto">3</div>
-              <h3 className="text-xl font-bold text-[#1a1a2e]">Watch enquiries turn into bookings</h3>
+              <h3 className="text-xl font-bold text-[#1a1a2e]">Watch enquiries become bookings</h3>
               <p className="mt-2 text-gray-600">CypAI handles conversations 24/7 in 5 languages. You review the dashboard and confirm bookings.</p>
             </div>
           </div>
@@ -140,18 +142,18 @@ export default function CarRentalsPage() {
           <p className="mx-auto mb-12 max-w-2xl text-center text-gray-600">Built specifically for car rental companies in Cyprus</p>
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             <div className="rounded-xl bg-white p-6 shadow-sm transition-all hover:shadow-md">
-              <div className="mb-4 text-3xl">📱</div>
+              <div className="mb-4 text-3xl">💬</div>
               <h3 className="text-lg font-bold text-[#1a1a2e]">WhatsApp Automation</h3>
               <p className="mt-2 text-gray-600">90% of your customers contact you via WhatsApp. CypAI answers instantly, 24/7.</p>
             </div>
             <div className="rounded-xl bg-white p-6 shadow-sm transition-all hover:shadow-md">
               <div className="mb-4 text-3xl">🌍</div>
-              <h3 className="text-lg font-bold text-[#1a1a2e]">Multi-Language Replies</h3>
+              <h3 className="text-lg font-bold text-[#1a1a2e]">Multi-Language Quotes</h3>
               <p className="mt-2 text-gray-600">Tourists from 10+ countries message in their language. CypAI replies in kind.</p>
             </div>
             <div className="rounded-xl bg-white p-6 shadow-sm transition-all hover:shadow-md">
-              <div className="mb-4 text-3xl">💰</div>
-              <h3 className="text-lg font-bold text-[#1a1a2e]">Instant Price Quotes</h3>
+              <div className="mb-4 text-3xl">⚡</div>
+              <h3 className="text-lg font-bold text-[#1a1a2e]">Instant Price Responses</h3>
               <p className="mt-2 text-gray-600">AI provides exact quotes from your rate cards. No back-and-forth needed.</p>
             </div>
             <div className="rounded-xl bg-white p-6 shadow-sm transition-all hover:shadow-md">
@@ -160,14 +162,14 @@ export default function CarRentalsPage() {
               <p className="mt-2 text-gray-600">Every enquiry is captured — even "do you have availability for next week?"</p>
             </div>
             <div className="rounded-xl bg-white p-6 shadow-sm transition-all hover:shadow-md">
-              <div className="mb-4 text-3xl">🔄</div>
-              <h3 className="text-lg font-bold text-[#1a1a2e]">Automatic Follow-up</h3>
-              <p className="mt-2 text-gray-600">Follow up automatically with people who enquired but didn't book.</p>
+              <div className="mb-4 text-3xl">✅</div>
+              <h3 className="text-lg font-bold text-[#1a1a2e]">Booking Confirmation</h3>
+              <p className="mt-2 text-gray-600">Confirmation sent automatically. Reduce no-shows with booking details.</p>
             </div>
             <div className="rounded-xl bg-white p-6 shadow-sm transition-all hover:shadow-md">
-              <div className="mb-4 text-3xl">📅</div>
-              <h3 className="text-lg font-bold text-[#1a1a2e]">Booking Confirmations</h3>
-              <p className="mt-2 text-gray-600">Confirmation sent automatically. Reduce no-shows with booking details.</p>
+              <div className="mb-4 text-3xl">🔄</div>
+              <h3 className="text-lg font-bold text-[#1a1a2e]">Follow-up to Unbooked Enquiries</h3>
+              <p className="mt-2 text-gray-600">Follow up automatically with people who enquired but didn't book.</p>
             </div>
           </div>
         </div>
@@ -184,7 +186,7 @@ export default function CarRentalsPage() {
             <span>🇷🇺</span>
             <span>🇬🇷</span>
           </div>
-          <p className="text-gray-600">Auto-detects language. Responds automatically. No translator needed.</p>
+          <p className="text-gray-600">Auto-detects language. Responds automatically.</p>
         </div>
       </section>
 
@@ -202,14 +204,14 @@ export default function CarRentalsPage() {
               <p className="mt-2 text-gray-600">15 minutes. We walk you through it. One line of code for your website, or just connect your WhatsApp. That's it.</p>
             </div>
             <div className="rounded-xl bg-white p-6 shadow-sm">
-              <h3 className="text-lg font-semibold text-[#1a1a2e]">"$79/month is expensive for a small business"</h3>
-              <p className="mt-2 text-gray-600">One missed booking in peak season = €80-150 lost. CypAI pays for itself in 1 recovered booking per month.</p>
+              <h3 className="text-lg font-semibold text-[#1a1a2e]">"$79/month is expensive"</h3>
+              <p className="mt-2 text-gray-600">One missed booking in peak season = €80–150 lost. CypAI pays for itself in 1 recovered booking per month.</p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Pricing Section */}
+                 {/* Pricing Section */}
       <section id="pricing" className="bg-white py-16">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <h2 className="mb-4 text-center text-3xl font-bold text-[#1a1a2e]">Simple pricing</h2>
@@ -284,8 +286,7 @@ export default function CarRentalsPage() {
             </div>
           </div>
           <p className="mt-8 text-center text-sm text-gray-500">
-            Secure card payment powered by Paddle — trusted by 3,000+ software companies.<br />
-            Cancel anytime, no questions asked.
+            🔒 Secure payment by Paddle · 30-day money-back guarantee
           </p>
         </div>
       </section>
@@ -300,7 +301,7 @@ export default function CarRentalsPage() {
           >
             Start Your Free Trial Now →
           </Link>
-          <p className="mt-4 text-sm text-gray-400">No credit card. No commitment. Cancel anytime.</p>
+          <p className="mt-4 text-sm text-gray-400">No credit card. Cancel anytime.</p>
         </div>
       </section>
 
@@ -317,12 +318,14 @@ export default function CarRentalsPage() {
                 className="h-7 w-auto"
               />
             </div>
-            <div className="flex gap-6 text-sm text-gray-600">
+            <div className="flex flex-wrap justify-center gap-6 text-sm text-gray-600">
               <Link href="/" className="hover:text-[#1a1a2e]">Home</Link>
               <Link href="#pricing" className="hover:text-[#1a1a2e]">Pricing</Link>
               <Link href="/demo" className="hover:text-[#1a1a2e]">Demo</Link>
               <Link href="/contact" className="hover:text-[#1a1a2e]">Contact</Link>
-              <Link href="/privacy" className="hover:text-[#1a1a2e]">Privacy</Link>
+              <Link href="/privacy" className="hover:text-[#1a1a2e]">Privacy Policy</Link>
+              <Link href="/terms" className="hover:text-[#1a1a2e]">Terms</Link>
+              <Link href="/refund-policy" className="hover:text-[#1a1a2e]">Refund Policy</Link>
             </div>
             <p className="text-sm text-gray-500">© 2025 CypAI. Built in Northern Cyprus.</p>
           </div>

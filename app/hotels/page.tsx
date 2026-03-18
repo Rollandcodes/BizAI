@@ -3,6 +3,10 @@
 import Link from 'next/link'
 import Image from 'next/image'
 
+export const metadata = {
+  title: 'Hotels | CypAI',
+}
+
 export default function HotelsPage() {
   return (
     <main className="min-h-screen bg-white">
@@ -35,19 +39,21 @@ export default function HotelsPage() {
       {/* Hero Section */}
       <section className="bg-[#1a1a2e] py-20 lg:py-28">
         <div className="mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
-          <h1 className="mb-6 text-4xl font-black leading-tight text-white sm:text-5xl lg:text-6xl">
-            Your hotel never sleeps.<br />
-            <span className="text-[#e8a020]">Neither does your AI receptionist.</span>
+          <span className="mb-4 inline-block rounded-full bg-[#e8a020]/20 px-4 py-2 text-sm font-semibold text-[#e8a020]">
+            🏨 For Hotels & Guesthouses in Cyprus
+          </span>
+          <h1 className="mb-6 text-4xl font-black leading-tight text-white md:text-5xl lg:text-6xl">
+            Your hotel never sleeps.<br />Neither does your AI receptionist.
           </h1>
-          <p className="mx-auto mb-10 max-w-2xl text-lg text-gray-300">
-            Answer every guest enquiry in their language. In 3 seconds. At 3am. Capture direct bookings and save 15-25% in commission.
+          <p className="mx-auto mb-10 max-w-2xl text-lg text-white/70">
+            CypAI answers guest enquiries in any language, captures direct bookings 24/7, and saves you 15% Booking.com commission.
           </p>
           <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
             <Link
               href="/signup?plan=pro"
               className="rounded-xl bg-[#e8a020] px-8 py-4 text-lg font-bold text-[#1a1a2e] transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#d4920a] hover:shadow-lg hover:shadow-[#e8a020]/20"
             >
-              Start Free Trial — No Credit Card →
+              Start Free Trial — No Credit Card
             </Link>
             <Link
               href="/demo"
@@ -56,50 +62,46 @@ export default function HotelsPage() {
               See Live Demo →
             </Link>
           </div>
-          <div className="mt-6 flex flex-wrap items-center justify-center gap-4 text-sm text-gray-400">
+          <div className="mt-6 flex flex-wrap items-center justify-center gap-4 text-sm text-white/60">
             <span>✓ 7-day free trial</span>
             <span>·</span>
             <span>✓ Setup in 15 minutes</span>
             <span>·</span>
             <span>✓ Cancel anytime</span>
           </div>
-          <p className="mt-4 text-sm text-gray-400">
-            Join [X] Cyprus businesses already using CypAI
+          <p className="mt-4 text-sm text-white/60">
+            Join 200+ Cyprus businesses already using CypAI
           </p>
         </div>
       </section>
 
-      {/* Pain Section */}
+      {/* Pain Section - Sound familiar? */}
       <section className="bg-[#f8f9fb] py-16">
         <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
           <h2 className="mb-10 text-center text-3xl font-bold text-[#1a1a2e]">Sound familiar?</h2>
           <div className="space-y-4">
             <div className="flex items-start gap-4 rounded-xl bg-white p-5 shadow-sm">
+              <span className="text-2xl">💤</span>
+              <div>
+                <p className="font-semibold text-[#1a1a2e]">International guests message at 2am — <strong>no one replies</strong></p>
+              </div>
+            </div>
+            <div className="flex items-start gap-4 rounded-xl bg-white p-5 shadow-sm">
+              <span className="text-2xl">💰</span>
+              <div>
+                <p className="font-semibold text-[#1a1a2e]">You lose <strong>direct bookings to Booking.com</strong> because you reply too slowly</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-4 rounded-xl bg-white p-5 shadow-sm">
               <span className="text-2xl">🌍</span>
               <div>
-                <p className="font-semibold text-[#1a1a2e]">Multilingual chaos</p>
-                <p className="mt-1 text-gray-600">Guests from Russia, UK, Germany, Middle East message in different languages. You struggle to reply to all of them.</p>
+                <p className="font-semibold text-[#1a1a2e]">Guests write in <strong>Russian, Arabic, German</strong> — hard to respond correctly</p>
               </div>
             </div>
             <div className="flex items-start gap-4 rounded-xl bg-white p-5 shadow-sm">
-              <span className="text-2xl">⏱️</span>
+              <span className="text-2xl">🔁</span>
               <div>
-                <p className="font-semibold text-[#1a1a2e]">Hours wasted on repetitive questions</p>
-                <p className="mt-1 text-gray-600">You spend hours every day answering the same 10 questions about room rates, breakfast, and airport transfers.</p>
-              </div>
-            </div>
-            <div className="flex items-start gap-4 rounded-xl bg-white p-5 shadow-sm">
-              <span className="text-2xl">💸</span>
-              <div>
-                <p className="font-semibold text-[#1a1a2e]">Lost direct bookings</p>
-                <p className="mt-1 text-gray-600">You reply too slowly to WhatsApp enquiries. Guests book on Booking.com instead — and you pay 15-25% commission.</p>
-              </div>
-            </div>
-            <div className="flex items-start gap-4 rounded-xl bg-white p-5 shadow-sm">
-              <span className="text-2xl">🌙</span>
-              <div>
-                <p className="font-semibold text-[#1a1a2e]">After-hours silence</p>
-                <p className="mt-1 text-gray-600">International guests message at night. No one replies. They book elsewhere.</p>
+                <p className="font-semibold text-[#1a1a2e]">You answer <strong>the same room rate and availability questions</strong> every day</p>
               </div>
             </div>
           </div>
@@ -116,18 +118,18 @@ export default function HotelsPage() {
           <div className="grid gap-8 md:grid-cols-3">
             <div className="text-center">
               <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[#e8a020]/20 text-3xl mx-auto">1</div>
-              <h3 className="text-xl font-bold text-[#1a1a2e]">Tell CypAI about your property</h3>
+              <h3 className="text-xl font-bold text-[#1a1a2e]">Tell CypAI about your hotel</h3>
               <p className="mt-2 text-gray-600">Add room types, rates, amenities, policies. Takes 10 minutes.</p>
             </div>
             <div className="text-center">
               <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[#e8a020]/20 text-3xl mx-auto">2</div>
-              <h3 className="text-xl font-bold text-[#1a1a2e]">Connect WhatsApp and website</h3>
-              <p className="mt-2 text-gray-600">Link your WhatsApp Business. Add chat widget to your site.</p>
+              <h3 className="text-xl font-bold text-[#1a1a2e]">Connect WhatsApp and your website</h3>
+              <p className="mt-2 text-gray-600">One line of code for the website widget. 2 minutes to connect your WhatsApp Business number.</p>
             </div>
             <div className="text-center">
               <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[#e8a020]/20 text-3xl mx-auto">3</div>
-              <h3 className="text-xl font-bold text-[#1a1a2e]">Watch direct bookings grow</h3>
-              <p className="mt-2 text-gray-600">Every enquiry answered instantly. More direct bookings. Less commission.</p>
+              <h3 className="text-xl font-bold text-[#1a1a2e]">Watch enquiries become bookings</h3>
+              <p className="mt-2 text-gray-600">Every enquiry answered instantly in 5 languages. More direct bookings. Less commission.</p>
             </div>
           </div>
         </div>
@@ -141,8 +143,8 @@ export default function HotelsPage() {
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             <div className="rounded-xl bg-white p-6 shadow-sm transition-all hover:shadow-md">
               <div className="mb-4 text-3xl">🌍</div>
-              <h3 className="text-lg font-bold text-[#1a1a2e]">Multi-Language Support</h3>
-              <p className="mt-2 text-gray-600">Russian, Arabic, English, Turkish, Greek — all handled automatically.</p>
+              <h3 className="text-lg font-bold text-[#1a1a2e]">24/7 Guest Enquiries</h3>
+              <p className="mt-2 text-gray-600">Answer every guest enquiry instantly — even at 3am.</p>
             </div>
             <div className="rounded-xl bg-white p-6 shadow-sm transition-all hover:shadow-md">
               <div className="mb-4 text-3xl">💰</div>
@@ -150,24 +152,24 @@ export default function HotelsPage() {
               <p className="mt-2 text-gray-600">Guests book directly — bypass Booking.com and save 15-25% commission.</p>
             </div>
             <div className="rounded-xl bg-white p-6 shadow-sm transition-all hover:shadow-md">
+              <div className="mb-4 text-3xl">🌐</div>
+              <h3 className="text-lg font-bold text-[#1a1a2e]">Multi-Language Responses</h3>
+              <p className="mt-2 text-gray-600">Russian, Arabic, English, Turkish, Greek — all handled automatically.</p>
+            </div>
+            <div className="rounded-xl bg-white p-6 shadow-sm transition-all hover:shadow-md">
               <div className="mb-4 text-3xl">🏠</div>
-              <h3 className="text-lg font-bold text-[#1a1a2e]">Room Availability</h3>
+              <h3 className="text-lg font-bold text-[#1a1a2e]">Room Rate FAQ</h3>
               <p className="mt-2 text-gray-600">Instant answers about rates and availability — 24/7.</p>
             </div>
             <div className="rounded-xl bg-white p-6 shadow-sm transition-all hover:shadow-md">
-              <div className="mb-4 text-3xl">✈️</div>
-              <h3 className="text-lg font-bold text-[#1a1a2e]">Airport Transfer Info</h3>
-              <p className="mt-2 text-gray-600">Answers about transfers, directions, and local info automatically.</p>
+              <div className="mb-4 text-3xl">📅</div>
+              <h3 className="text-lg font-bold text-[#1a1a2e]">Availability Checking</h3>
+              <p className="mt-2 text-gray-600">CypAI checks availability and confirms bookings automatically.</p>
             </div>
             <div className="rounded-xl bg-white p-6 shadow-sm transition-all hover:shadow-md">
-              <div className="mb-4 text-3xl">⭐</div>
-              <h3 className="text-lg font-bold text-[#1a1a2e]">Post-Stay Follow-up</h3>
-              <p className="mt-2 text-gray-600">Automated messages asking for reviews after checkout.</p>
-            </div>
-            <div className="rounded-xl bg-white p-6 shadow-sm transition-all hover:shadow-md">
-              <div className="mb-4 text-3xl">📱</div>
-              <h3 className="text-lg font-bold text-[#1a1a2e]">WhatsApp Integration</h3>
-              <p className="mt-2 text-gray-600">Works through WhatsApp — the #1 channel for international guests.</p>
+              <div className="mb-4 text-3xl">🏨</div>
+              <h3 className="text-lg font-bold text-[#1a1a2e]">Booking.com Alternative</h3>
+              <p className="mt-2 text-gray-600">Every direct booking saves you 15-25% in commission.</p>
             </div>
           </div>
         </div>
@@ -184,7 +186,7 @@ export default function HotelsPage() {
             <span>🇷🇺</span>
             <span>🇬🇷</span>
           </div>
-          <p className="text-gray-600">Auto-detects language. Responds automatically. No translator needed.</p>
+          <p className="text-gray-600">Auto-detects language. Responds automatically.</p>
         </div>
       </section>
 
@@ -203,7 +205,7 @@ export default function HotelsPage() {
             </div>
             <div className="rounded-xl bg-white p-6 shadow-sm">
               <h3 className="text-lg font-semibold text-[#1a1a2e]">"Is it worth the cost?"</h3>
-              <p className="mt-2 text-gray-600">One direct booking per month saves you €50-150 in commission. CypAI pays for itself in 1-2 bookings.</p>
+              <p className="mt-2 text-gray-600">Every direct booking saves 15-25% Booking.com commission. CypAI pays for itself with ONE recovered direct booking per month.</p>
             </div>
           </div>
         </div>
@@ -281,8 +283,7 @@ export default function HotelsPage() {
             </div>
           </div>
           <p className="mt-8 text-center text-sm text-gray-500">
-            Secure card payment powered by Paddle — trusted by 3,000+ software companies.<br />
-            Cancel anytime, no questions asked.
+            🔒 Secure payment by Paddle · 30-day money-back guarantee
           </p>
         </div>
       </section>
@@ -290,14 +291,14 @@ export default function HotelsPage() {
       {/* Final CTA */}
       <section className="bg-[#1a1a2e] py-16">
         <div className="mx-auto max-w-3xl px-4 text-center sm:px-6 lg:px-8">
-          <h2 className="text-3xl font-bold text-white">Get set up before peak summer season.<br />Takes 15 minutes.</h2>
+          <h2 className="text-3xl font-bold text-white">Every unanswered enquiry<br />is a booking lost to Booking.com.</h2>
           <Link
             href="/signup?plan=pro"
             className="mt-8 inline-block rounded-xl bg-[#e8a020] px-8 py-4 text-lg font-bold text-[#1a1a2e] transition-all duration-200 hover:bg-[#d4920a] hover:shadow-lg hover:shadow-[#e8a020]/20"
           >
             Start Your Free Trial Now →
           </Link>
-          <p className="mt-4 text-sm text-gray-400">No credit card. No commitment. Cancel anytime.</p>
+          <p className="mt-4 text-sm text-gray-400">No credit card. Cancel anytime.</p>
         </div>
       </section>
 
@@ -314,12 +315,14 @@ export default function HotelsPage() {
                 className="h-7 w-auto"
               />
             </div>
-            <div className="flex gap-6 text-sm text-gray-600">
+            <div className="flex flex-wrap justify-center gap-6 text-sm text-gray-600">
               <Link href="/" className="hover:text-[#1a1a2e]">Home</Link>
               <Link href="#pricing" className="hover:text-[#1a1a2e]">Pricing</Link>
               <Link href="/demo" className="hover:text-[#1a1a2e]">Demo</Link>
               <Link href="/contact" className="hover:text-[#1a1a2e]">Contact</Link>
-              <Link href="/privacy" className="hover:text-[#1a1a2e]">Privacy</Link>
+              <Link href="/privacy" className="hover:text-[#1a1a2e]">Privacy Policy</Link>
+              <Link href="/terms" className="hover:text-[#1a1a2e]">Terms</Link>
+              <Link href="/refund-policy" className="hover:text-[#1a1a2e]">Refund Policy</Link>
             </div>
             <p className="text-sm text-gray-500">© 2025 CypAI. Built in Northern Cyprus.</p>
           </div>

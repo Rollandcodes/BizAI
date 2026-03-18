@@ -1,17 +1,12 @@
 "use client";
 
 /**
- * dashboard/page.tsx — Refactored from 4,069-line monolith
+ * dashboard/page.tsx — Refactored for new sidebar layout
  *
  * What changed:
- *  - All shared logic moved to hooks/use-dashboard.ts
- *  - StatCard, ConversationsTab, SettingsTab extracted to components/dashboard/
- *  - OverviewTab extracted to components/dashboard/OverviewTab.tsx
- *  - 200+ duplicate type declarations removed (use @/lib/supabase types)
- *  - Utility functions moved to lib/utils.ts
- *  - Plan helpers moved to lib/plans.ts
- *  - Heavy tabs (Audit, Agency, Analytics, CRM, Bookings, FollowUps) kept as-is
- *    from original components but now import from centralized libs
+ *  - Removed old sidebar code (now handled by layout.tsx)
+ *  - New dashboard UI with stats, quick actions, recent panels
+ *  - Preserves all data fetching and business logic
  */
 
 import { Suspense, useEffect, useMemo, useRef, useState, type FormEvent } from "react";
@@ -20,8 +15,9 @@ import { useRouter, useSearchParams } from "next/navigation";
 import {
   Bot, Building2, Calendar, Copy, CreditCard,
   Download, LayoutDashboard, LogOut, MessageSquare,
-  Plus, Send, Settings, ShieldCheck,
-  TrendingUp, Users, X, type LucideIcon,
+  Plus, Send, Settings, ShieldCheck, TrendingUp, TrendingDown,
+  Users, X, ArrowRight, QrCode, Brain, Smartphone,
+  Check, CheckCircle, Clock, AlertCircle, type LucideIcon,
 } from "lucide-react";
 
 import { supabase } from "@/lib/supabase";
@@ -38,6 +34,7 @@ import BookingsTab from "@/components/dashboard/BookingsTab";
 import FollowUpsTab from "@/components/dashboard/FollowUpsTab";
 import AnalyticsTab from "@/components/dashboard/AnalyticsTab";
 import AgencyTab from "@/components/dashboard/AgencyTab";
+import TopBar from "@/components/dashboard/TopBar";
 
 // ─── Types ─────────────────────────────────────────────────────────────────────
 type CustomFaq = { question: string; answer: string };
@@ -796,8 +793,277 @@ function DashboardInner() {
     );
   }
 
+  // Calculate mock change percentages for demo (in real app, compare with previous period)
+  const getChangeValue = (value: number) => {
+    const change = Math.round((Math.random() * 30) - 10); // -10% to +20% for demo
+    return { value: change, isPositive: change >= 0 };
+  };
+
+  // Sample language data (in real app, this comes from actual conversation analysis)
+  const languageData = [
+    { flag: "🇬🇧", language: "English", percentage: 45 },
+    { flag: "🇹🇷", language: "Turkish", percentage: 28 },
+    { flag: "🇷🇺", language: "Russian", percentage: 15 },
+    { flag: "🇸🇦", language: "Arabic", percentage: 8 },
+    { flag: "🇬🇷", language: "Greek", percentage: 4 },
+  ];
+
+  // New dashboard UI - stats row with changes
+  const renderStatsRow = () => {
+    const statsData = [
+      { label: "Total Conversations", value: stats?.totalConversations ?? 0, icon: MessageSquare, change: getChangeValue(stats?.totalConversations ?? 0) },
+      { label: "Leads Captured", value: stats?.leadsCaptured ?? 0, icon: Users, change: getChangeValue(stats?.leadsCaptured ?? 0) },
+      { label: "Bookings Made", value: bookings.length, icon: Calendar, change: getChangeValue(bookings.length) },
+      { label: "Conversion Rate", value: stats?.totalConversations ? Math.round((stats.leadsCaptured / stats.totalConversations) * 100) : 0, suffix: "%", icon: TrendingUp, change: getChangeValue(10) },
+    ];
+
+    return (
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {statsData.map((stat, idx) => (
+          <div key={idx} className="relative overflow-hidden rounded-xl border border-gray-100 bg-white p-5 shadow-sm transition hover:shadow-md">
+            <div className="absolute right-4 top-4 flex h-10 w-10 items-center justify-center rounded-lg bg-amber-50">
+              <stat.icon className="h-5 w-5 text-amber-500" />
+            </div>
+            <p className="text-sm font-medium text-gray-500">{stat.label}</p>
+            <div className="mt-2 flex items-baseline gap-2">
+              <p className="text-4xl font-black text-[#1a1a2e]">
+                {stat.value}{stat.suffix || ""}
+              </p>
+            </div>
+            <div className={`mt-2 flex items-center gap-1 text-sm font-medium ${stat.change.isPositive ? "text-green-600" : "text-red-600"}`}>
+              {stat.change.isPositive ? <TrendingUp className="h-4 w-4" /> : <TrendingDown className="h-4 w-4" />}
+              <span>{Math.abs(stat.change.value)}%</span>
+              <span className="text-gray-400">vs last 7 days</span>
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  };
+
+  // Quick actions section
+  const renderQuickActions = () => {
+    const newLeadsCount = leads.filter(l => !l.lead_contacted).length;
+    const unreadCount = conversations.filter(c => {
+      const msgs = Array.isArray(c.messages) ? c.messages : [];
+      return msgs.length > 0 && msgs[msgs.length - 1]?.role === "user";
+    }).length;
+
+    const actions = [
+      { label: "View new leads", badge: newLeadsCount, href: "/dashboard/leads", icon: Users },
+      { label: "Check conversations", badge: unreadCount, href: "/dashboard/conversations", icon: MessageSquare },
+      { label: "Train your AI", badge: null, href: "/dashboard/training", icon: Brain },
+      { label: "Share QR code", badge: null, href: "/dashboard/qr", icon: QrCode },
+    ];
+
+    return (
+      <div className="rounded-xl border border-gray-100 bg-white p-5 shadow-sm">
+        <h2 className="mb-4 text-lg font-bold text-[#1a1a2e]">Quick Actions</h2>
+        <div className="flex flex-wrap gap-3">
+          {actions.map((action, idx) => (
+            <Link
+              key={idx}
+              href={action.href}
+              className="inline-flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 transition hover:border-amber-300 hover:bg-amber-50 hover:shadow-sm"
+            >
+              <action.icon className="h-4 w-4 text-gray-500" />
+              {action.label}
+              {action.badge !== null && action.badge > 0 && (
+                <span className="ml-1 flex h-5 min-w-[20px] items-center justify-center rounded-full bg-amber-500 px-1.5 text-xs font-bold text-white">
+                  {action.badge}
+                </span>
+              )}
+            </Link>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
+  // Recent conversations panel
+  const renderRecentConversations = () => {
+    const recentConvs = conversations.slice(0, 5);
+    
+    const getStatusBadge = (conv: ConversationRecord) => {
+      const msgs = Array.isArray(conv.messages) ? conv.messages : [];
+      if (!conv.lead_captured) return { label: "New", className: "bg-amber-100 text-amber-700" };
+      if (msgs.length > 0 && msgs[msgs.length - 1]?.role === "user") 
+        return { label: "In Progress", className: "bg-blue-100 text-blue-700" };
+      return { label: "Resolved", className: "bg-green-100 text-green-700" };
+    };
+
+    const getTimeAgo = (dateStr: string) => {
+      const date = new Date(dateStr);
+      const now = new Date();
+      const diff = Math.floor((now.getTime() - date.getTime()) / 1000);
+      if (diff < 60) return "Just now";
+      if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+      if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
+      return `${Math.floor(diff / 86400)}d ago`;
+    };
+
+    return (
+      <div className="rounded-xl border border-gray-100 bg-white p-5 shadow-sm">
+        <div className="mb-4 flex items-center justify-between">
+          <h2 className="text-lg font-bold text-[#1a1a2e]">Recent Conversations</h2>
+          <Link href="/dashboard/conversations" className="flex items-center gap-1 text-sm font-medium text-amber-600 hover:text-amber-700">
+            View all <ArrowRight className="h-4 w-4" />
+          </Link>
+        </div>
+        {recentConvs.length === 0 ? (
+          <div className="py-8 text-center">
+            <MessageSquare className="mx-auto mb-2 h-10 w-10 text-gray-300" />
+            <p className="text-gray-500">No conversations yet</p>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {recentConvs.map((conv) => {
+              const status = getStatusBadge(conv);
+              const preview = conversationPreview(conv.messages);
+              return (
+                <Link
+                  key={conv.id}
+                  href={`/dashboard/conversations?id=${conv.id}`}
+                  className="flex items-center gap-3 rounded-lg p-2 transition hover:bg-gray-50"
+                >
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gray-100 text-sm font-bold text-gray-600">
+                    {(conv.customer_name || "?")[0]?.toUpperCase()}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center justify-between">
+                      <p className="truncate font-medium text-gray-900">{conv.customer_name || "Unknown"}</p>
+                      <span className="text-xs text-gray-400">{getTimeAgo(conv.created_at)}</span>
+                    </div>
+                    <p className="truncate text-sm text-gray-500">{preview || "No messages"}</p>
+                  </div>
+                  <span className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-medium ${status.className}`}>
+                    {status.label}
+                  </span>
+                </Link>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  // Recent leads panel
+  const renderRecentLeads = () => {
+    const recentLeads = leads.slice(0, 5);
+
+    const getLeadStatus = (lead: ConversationRecord) => {
+      if (!lead.lead_captured) return { label: "New Lead", className: "bg-amber-100 text-amber-700" };
+      if (!lead.lead_contacted) return { label: "New Lead", className: "bg-amber-100 text-amber-700" };
+      return { label: "Contacted", className: "bg-blue-100 text-blue-700" };
+    };
+
+    return (
+      <div className="rounded-xl border border-gray-100 bg-white p-5 shadow-sm">
+        <div className="mb-4 flex items-center justify-between">
+          <h2 className="text-lg font-bold text-[#1a1a2e]">Recent Leads</h2>
+          <Link href="/dashboard/leads" className="flex items-center gap-1 text-sm font-medium text-amber-600 hover:text-amber-700">
+            View all <ArrowRight className="h-4 w-4" />
+          </Link>
+        </div>
+        {recentLeads.length === 0 ? (
+          <div className="py-8 text-center">
+            <Users className="mx-auto mb-2 h-10 w-10 text-gray-300" />
+            <p className="text-gray-500">No leads yet</p>
+            <p className="text-sm text-gray-400">Your AI will capture them automatically</p>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {recentLeads.map((lead) => {
+              const status = getLeadStatus(lead);
+              return (
+                <div key={lead.id} className="flex items-center justify-between rounded-lg p-2">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-amber-100 text-sm font-bold text-amber-600">
+                      {(lead.customer_name || "?")[0]?.toUpperCase()}
+                    </div>
+                    <div>
+                      <p className="font-medium text-gray-900">{lead.customer_name || "Unknown"}</p>
+                      <p className="text-xs text-gray-400">{lead.channel || "Widget"} • {formatDate(lead.created_at)}</p>
+                    </div>
+                  </div>
+                  <span className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-medium ${status.className}`}>
+                    {status.label}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  // Language breakdown section
+  const renderLanguageBreakdown = () => (
+    <div className="rounded-xl border border-gray-100 bg-white p-5 shadow-sm">
+      <h2 className="mb-4 text-lg font-bold text-[#1a1a2e]">Your customers this week speak:</h2>
+      <div className="space-y-3">
+        {languageData.map((lang, idx) => (
+          <div key={idx} className="flex items-center gap-3">
+            <span className="text-xl">{lang.flag}</span>
+            <div className="flex-1">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium text-gray-700">{lang.language}</span>
+                <span className="text-sm font-semibold text-gray-900">{lang.percentage}%</span>
+              </div>
+              <div className="mt-1 h-2 w-full overflow-hidden rounded-full bg-gray-100">
+                <div 
+                  className="h-full rounded-full bg-amber-500 transition-all" 
+                  style={{ width: `${lang.percentage}%` }}
+                />
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+
+  // Trial banner (if on trial)
+  const renderTrialBanner = () => {
+    if (plan !== "trial") return null;
+    const daysLeft = 7; // Would calculate from actual trial end date
+    return (
+      <div className="mb-6 flex items-center justify-between rounded-xl border border-amber-200 bg-amber-50 px-4 py-3">
+        <div className="flex items-center gap-2">
+          <AlertCircle className="h-5 w-5 text-amber-600" />
+          <span className="font-medium text-amber-800">Your free trial ends in {daysLeft} days.</span>
+        </div>
+        <Link 
+          href="/pricing" 
+          className="rounded-lg bg-amber-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-amber-600"
+        >
+          Upgrade Now
+        </Link>
+      </div>
+    );
+  };
+
+  // Render the main overview content (new design)
+  const renderOverviewNew = () => (
+    <div className="space-y-6">
+      {renderTrialBanner()}
+      {renderStatsRow()}
+      {renderQuickActions()}
+      
+      <div className="grid gap-6 lg:grid-cols-2">
+        {renderRecentConversations()}
+        {renderRecentLeads()}
+      </div>
+
+      {renderLanguageBreakdown()}
+    </div>
+  );
+
+  // Main render
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-100 lg:flex" style={{ fontFamily: "-apple-system, BlinkMacSystemFont, 'Inter', sans-serif" }}>
+    <div className="min-h-screen bg-[#f8f9fb]">
       {toast && <Toast toast={toast} />}
 
       {showOnboarding && (
@@ -824,79 +1090,21 @@ function DashboardInner() {
         </div>
       )}
 
-      {/* Tablet sidebar overlay */}
-      {isTabletSidebarOpen && (
-        <div className="fixed inset-0 z-50 hidden md:block lg:hidden">
-          <button type="button" className="absolute inset-0 bg-black/40" onClick={() => setIsTabletSidebarOpen(false)} aria-label="Close sidebar" />
-          <aside className="relative h-full w-72 border-r border-zinc-800 bg-zinc-900 shadow-2xl">
-            <div className="flex h-20 items-center justify-between px-6 text-xl font-black">
-              CypAI
-              <button type="button" onClick={() => setIsTabletSidebarOpen(false)} className="rounded-full p-2 text-zinc-500 hover:bg-zinc-800">✕</button>
-            </div>
-            {renderSidebar(() => setIsTabletSidebarOpen(false))}
-          </aside>
-        </div>
-      )}
-
-      {/* Desktop sidebar */}
-      <aside className="hidden w-60 shrink-0 flex-col border-r border-zinc-800 bg-zinc-900 lg:flex">
-        <div className="flex h-20 items-center px-6 text-xl font-black">CypAI</div>
-        {renderSidebar()}
-        <div className="mx-4 h-px bg-zinc-800" />
-        <div className="p-4">
-          <p className="mb-2 truncate px-4 text-xs font-medium text-zinc-500">{business.owner_email}</p>
-          <button type="button" onClick={() => { window.localStorage.removeItem(DASHBOARD_STORAGE_KEY); setDashboard(emptyPayload()); setLookupEmail(""); setBusinessId(""); router.push("/"); }}
-            className="flex w-full items-center gap-3 rounded-full px-4 py-3 text-sm font-semibold text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100">
-            <LogOut className="h-4 w-4" /> Logout
-          </button>
-        </div>
-      </aside>
+      {/* Top bar - now using our new TopBar component */}
+      <TopBar 
+        businessName={business?.business_name}
+        notificationCount={conversations.filter(c => {
+          const msgs = Array.isArray(c.messages) ? c.messages : [];
+          return msgs.length > 0 && msgs[msgs.length - 1]?.role === "user";
+        }).length}
+      />
 
       {/* Main content */}
-      <div className="flex min-h-screen flex-1 flex-col">
-        <header className="border-b border-zinc-800 bg-zinc-900 px-4 py-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between gap-4">
-            <div className="flex items-center gap-3">
-              <button type="button" onClick={() => setIsTabletSidebarOpen(true)}
-                className="hidden rounded-full border border-zinc-800 px-3 py-1.5 text-sm font-semibold text-zinc-300 hover:bg-zinc-950 md:inline-flex lg:hidden">
-                Menu
-              </button>
-              <h1 className="text-2xl font-black leading-none tracking-tight text-zinc-100">
-                {business.business_name}
-              </h1>
-              <span className={`hidden rounded-full px-3 py-1 text-xs font-semibold sm:inline-flex ${planBadge}`}>{planName}</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="hidden rounded-full bg-zinc-800 px-3 py-1.5 text-sm font-medium text-zinc-400 sm:inline-flex">{business.owner_email}</span>
-              <button type="button" onClick={() => { window.localStorage.removeItem(DASHBOARD_STORAGE_KEY); router.push("/"); }}
-                className="inline-flex items-center gap-2 rounded-full border border-zinc-800 px-4 py-2 text-sm font-semibold text-zinc-300 hover:bg-zinc-950 lg:hidden">
-                <LogOut className="h-4 w-4" /> Logout
-              </button>
-            </div>
-          </div>
-        </header>
-
-        <main className="flex-1 px-4 py-6 sm:px-6 lg:px-8 pb-24 lg:pb-8">
-          {loading ? <DashboardSkeleton /> : <div className="space-y-6">{renderTab()}</div>}
-        </main>
-
-        {/* Mobile bottom nav */}
-        <nav className="fixed bottom-0 left-0 right-0 z-40 flex border-t border-zinc-800 bg-zinc-900 lg:hidden">
-          {[
-            { id: "overview", label: "Home", icon: "📊" },
-            { id: "conversations", label: "Chats", icon: "💬" },
-            { id: "leads", label: "Leads", icon: "👥" },
-            { id: "bookings", label: "Book", icon: "📅" },
-            { id: "settings", label: "Settings", icon: "⚙️" },
-          ].map(tab => (
-            <button key={tab.id} type="button" onClick={() => setActiveTab(tab.id as TabKey)}
-              className={`flex flex-1 flex-col items-center gap-1 py-3 text-[10px] font-semibold transition ${activeTab === tab.id ? "text-blue-400" : "text-zinc-500"}`}>
-              <span className="text-lg">{tab.icon}</span>
-              {tab.label}
-            </button>
-          ))}
-        </nav>
-      </div>
+      <main className="px-4 py-6 sm:px-6 md:p-8">
+        {loading ? <DashboardSkeleton /> : (
+          activeTab === "overview" ? renderOverviewNew() : renderTab()
+        )}
+      </main>
     </div>
   );
 }

@@ -3,6 +3,10 @@
 import Link from 'next/link'
 import Image from 'next/image'
 
+export const metadata = {
+  title: 'Restaurants | CypAI',
+}
+
 export default function RestaurantsPage() {
   return (
     <main className="min-h-screen bg-white">
@@ -35,19 +39,21 @@ export default function RestaurantsPage() {
       {/* Hero Section */}
       <section className="bg-[#1a1a2e] py-20 lg:py-28">
         <div className="mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
-          <h1 className="mb-6 text-4xl font-black leading-tight text-white sm:text-5xl lg:text-6xl">
-            Stop losing dinner reservations<br />
-            <span className="text-[#e8a020]">to a missed WhatsApp message.</span>
+          <span className="mb-4 inline-block rounded-full bg-[#e8a020]/20 px-4 py-2 text-sm font-semibold text-[#e8a020]">
+            🍽️ For Restaurants & Cafes in Cyprus
+          </span>
+          <h1 className="mb-6 text-4xl font-black leading-tight text-white md:text-5xl lg:text-6xl">
+            Full tables. Zero missed reservations.
           </h1>
-          <p className="mx-auto mb-10 max-w-2xl text-lg text-gray-300">
-            Your restaurant takes bookings through WhatsApp automatically. Full tables. Zero missed reservations. 24/7.
+          <p className="mx-auto mb-10 max-w-2xl text-lg text-white/70">
+            CypAI takes reservations on WhatsApp 24/7, answers menu questions in 5 languages, and reminds guests so they show up.
           </p>
           <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
             <Link
               href="/signup?plan=pro"
               className="rounded-xl bg-[#e8a020] px-8 py-4 text-lg font-bold text-[#1a1a2e] transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#d4920a] hover:shadow-lg hover:shadow-[#e8a020]/20"
             >
-              Start Free Trial — No Credit Card →
+              Start Free Trial — No Credit Card
             </Link>
             <Link
               href="/demo"
@@ -56,50 +62,46 @@ export default function RestaurantsPage() {
               See Live Demo →
             </Link>
           </div>
-          <div className="mt-6 flex flex-wrap items-center justify-center gap-4 text-sm text-gray-400">
+          <div className="mt-6 flex flex-wrap items-center justify-center gap-4 text-sm text-white/60">
             <span>✓ 7-day free trial</span>
             <span>·</span>
             <span>✓ Setup in 15 minutes</span>
             <span>·</span>
             <span>✓ Cancel anytime</span>
           </div>
-          <p className="mt-4 text-sm text-gray-400">
-            Join [X] Cyprus businesses already using CypAI
+          <p className="mt-4 text-sm text-white/60">
+            Join 200+ Cyprus businesses already using CypAI
           </p>
         </div>
       </section>
 
-      {/* Pain Section */}
+      {/* Pain Section - Sound familiar? */}
       <section className="bg-[#f8f9fb] py-16">
         <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
           <h2 className="mb-10 text-center text-3xl font-bold text-[#1a1a2e]">Sound familiar?</h2>
           <div className="space-y-4">
             <div className="flex items-start gap-4 rounded-xl bg-white p-5 shadow-sm">
-              <span className="text-2xl">👨‍🍳</span>
+              <span className="text-2xl">🍳</span>
               <div>
-                <p className="font-semibold text-[#1a1a2e]">Kitchen distractions</p>
-                <p className="mt-1 text-gray-600">Customers message about Saturday tables. You see it 3 hours later. Customer already booked elsewhere.</p>
+                <p className="font-semibold text-[#1a1a2e]">You're in the <strong>kitchen</strong> when reservation WhatsApps come in</p>
               </div>
             </div>
             <div className="flex items-start gap-4 rounded-xl bg-white p-5 shadow-sm">
-              <span className="text-2xl">🗣️</span>
+              <span className="text-2xl">🚫</span>
               <div>
-                <p className="font-semibold text-[#1a1a2e]">Language gaps with tourists</p>
-                <p className="mt-1 text-gray-600">Russian tourists ask about your menu in Russian. No one on staff speaks Russian.</p>
+                <p className="font-semibold text-[#1a1a2e]">Guests <strong>don't show up</strong> because no one sends a reminder</p>
               </div>
             </div>
             <div className="flex items-start gap-4 rounded-xl bg-white p-5 shadow-sm">
-              <span className="text-2xl">❌</span>
+              <span className="text-2xl">🌍</span>
               <div>
-                <p className="font-semibold text-[#1a1a2e]">No-shows</p>
-                <p className="mt-1 text-gray-600">No system to remind people of their bookings. Tables sit empty because customers forgot.</p>
+                <p className="font-semibold text-[#1a1a2e]"><strong>Russian and Arabic tourists</strong> can't communicate with your staff</p>
               </div>
             </div>
             <div className="flex items-start gap-4 rounded-xl bg-white p-5 shadow-sm">
-              <span className="text-2xl">📸</span>
+              <span className="text-2xl">📱</span>
               <div>
-                <p className="font-semibold text-[#1a1a2e]">Endless menu requests</p>
-                <p className="mt-1 text-gray-600">People ask for photos, prices, and dietary info every single day. Same questions, over and over.</p>
+                <p className="font-semibold text-[#1a1a2e]">You're on your phone answering <strong>the same questions</strong> every day</p>
               </div>
             </div>
           </div>
@@ -121,13 +123,13 @@ export default function RestaurantsPage() {
             </div>
             <div className="text-center">
               <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[#e8a020]/20 text-3xl mx-auto">2</div>
-              <h3 className="text-xl font-bold text-[#1a1a2e]">Connect your WhatsApp</h3>
-              <p className="mt-2 text-gray-600">Link your WhatsApp Business number. That's it — no website needed.</p>
+              <h3 className="text-xl font-bold text-[#1a1a2e]">Connect WhatsApp and your website</h3>
+              <p className="mt-2 text-gray-600">One line of code for the website widget. 2 minutes to connect your WhatsApp Business number.</p>
             </div>
             <div className="text-center">
               <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[#e8a020]/20 text-3xl mx-auto">3</div>
-              <h3 className="text-xl font-bold text-[#1a1a2e]">Watch reservations come in</h3>
-              <p className="mt-2 text-gray-600">CypAI handles bookings 24/7. You get confirmed reservations in your dashboard.</p>
+              <h3 className="text-xl font-bold text-[#1a1a2e]">Watch enquiries become bookings</h3>
+              <p className="mt-2 text-gray-600">CypAI handles bookings 24/7 in 5 languages. You review the dashboard and confirm reservations.</p>
             </div>
           </div>
         </div>
@@ -141,27 +143,27 @@ export default function RestaurantsPage() {
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             <div className="rounded-xl bg-white p-6 shadow-sm transition-all hover:shadow-md">
               <div className="mb-4 text-3xl">📅</div>
-              <h3 className="text-lg font-bold text-[#1a1a2e]">Automated Reservations</h3>
+              <h3 className="text-lg font-bold text-[#1a1a2e]">Reservation Booking via WhatsApp</h3>
               <p className="mt-2 text-gray-600">Customers book tables through WhatsApp. CypAI confirms instantly.</p>
             </div>
             <div className="rounded-xl bg-white p-6 shadow-sm transition-all hover:shadow-md">
               <div className="mb-4 text-3xl">🍽️</div>
-              <h3 className="text-lg font-bold text-[#1a1a2e]">Menu Questions Answered</h3>
+              <h3 className="text-lg font-bold text-[#1a1a2e]">Menu FAQ Bot</h3>
               <p className="mt-2 text-gray-600">AI answers dish questions, dietary info, and pricing instantly.</p>
             </div>
             <div className="rounded-xl bg-white p-6 shadow-sm transition-all hover:shadow-md">
               <div className="mb-4 text-3xl">🔔</div>
-              <h3 className="text-lg font-bold text-[#1a1a2e]">Reservation Reminders</h3>
+              <h3 className="text-lg font-bold text-[#1a1a2e]">Automated Reminders</h3>
               <p className="mt-2 text-gray-600">Automated reminders reduce no-shows. Tables stay full.</p>
             </div>
             <div className="rounded-xl bg-white p-6 shadow-sm transition-all hover:shadow-md">
               <div className="mb-4 text-3xl">🌍</div>
-              <h3 className="text-lg font-bold text-[#1a1a2e]">5 Languages</h3>
+              <h3 className="text-lg font-bold text-[#1a1a2e]">Multi-Language Support</h3>
               <p className="mt-2 text-gray-600">English, Turkish, Arabic, Russian, Greek — auto-detected.</p>
             </div>
             <div className="rounded-xl bg-white p-6 shadow-sm transition-all hover:shadow-md">
               <div className="mb-4 text-3xl">💌</div>
-              <h3 className="text-lg font-bold text-[#1a1a2e]">Re-engagement</h3>
+              <h3 className="text-lg font-bold text-[#1a1a2e]">Re-engagement Messages</h3>
               <p className="mt-2 text-gray-600">"We miss you!" automated messages to bring back past customers.</p>
             </div>
             <div className="rounded-xl bg-white p-6 shadow-sm transition-all hover:shadow-md">
@@ -184,7 +186,7 @@ export default function RestaurantsPage() {
             <span>🇷🇺</span>
             <span>🇬🇷</span>
           </div>
-          <p className="text-gray-600">Auto-detects language. Responds automatically. No translator needed.</p>
+          <p className="text-gray-600">Auto-detects language. Responds automatically.</p>
         </div>
       </section>
 
@@ -281,8 +283,7 @@ export default function RestaurantsPage() {
             </div>
           </div>
           <p className="mt-8 text-center text-sm text-gray-500">
-            Secure card payment powered by Paddle — trusted by 3,000+ software companies.<br />
-            Cancel anytime, no questions asked.
+            🔒 Secure payment by Paddle · 30-day money-back guarantee
           </p>
         </div>
       </section>
@@ -290,14 +291,14 @@ export default function RestaurantsPage() {
       {/* Final CTA */}
       <section className="bg-[#1a1a2e] py-16">
         <div className="mx-auto max-w-3xl px-4 text-center sm:px-6 lg:px-8">
-          <h2 className="text-3xl font-bold text-white">Set up before the summer season.<br />Takes 15 minutes.</h2>
+          <h2 className="text-3xl font-bold text-white">Set up before summer season.<br />Takes 15 minutes.</h2>
           <Link
             href="/signup?plan=pro"
             className="mt-8 inline-block rounded-xl bg-[#e8a020] px-8 py-4 text-lg font-bold text-[#1a1a2e] transition-all duration-200 hover:bg-[#d4920a] hover:shadow-lg hover:shadow-[#e8a020]/20"
           >
             Start Your Free Trial Now →
           </Link>
-          <p className="mt-4 text-sm text-gray-400">No credit card. No commitment. Cancel anytime.</p>
+          <p className="mt-4 text-sm text-gray-400">No credit card. Cancel anytime.</p>
         </div>
       </section>
 
@@ -314,12 +315,14 @@ export default function RestaurantsPage() {
                 className="h-7 w-auto"
               />
             </div>
-            <div className="flex gap-6 text-sm text-gray-600">
+            <div className="flex flex-wrap justify-center gap-6 text-sm text-gray-600">
               <Link href="/" className="hover:text-[#1a1a2e]">Home</Link>
               <Link href="#pricing" className="hover:text-[#1a1a2e]">Pricing</Link>
               <Link href="/demo" className="hover:text-[#1a1a2e]">Demo</Link>
               <Link href="/contact" className="hover:text-[#1a1a2e]">Contact</Link>
-              <Link href="/privacy" className="hover:text-[#1a1a2e]">Privacy</Link>
+              <Link href="/privacy" className="hover:text-[#1a1a2e]">Privacy Policy</Link>
+              <Link href="/terms" className="hover:text-[#1a1a2e]">Terms</Link>
+              <Link href="/refund-policy" className="hover:text-[#1a1a2e]">Refund Policy</Link>
             </div>
             <p className="text-sm text-gray-500">© 2025 CypAI. Built in Northern Cyprus.</p>
           </div>

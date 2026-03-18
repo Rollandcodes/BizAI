@@ -3,6 +3,10 @@
 import Link from 'next/link'
 import Image from 'next/image'
 
+export const metadata = {
+  title: 'Clinics | CypAI',
+}
+
 export default function ClinicsPage() {
   return (
     <main className="min-h-screen bg-white">
@@ -35,19 +39,21 @@ export default function ClinicsPage() {
       {/* Hero Section */}
       <section className="bg-[#1a1a2e] py-20 lg:py-28">
         <div className="mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
-          <h1 className="mb-6 text-4xl font-black leading-tight text-white sm:text-5xl lg:text-6xl">
-            Your clinic answers patients<br />
-            <span className="text-[#e8a020]">24/7. Your staff stays focused on care.</span>
+          <span className="mb-4 inline-block rounded-full bg-[#e8a020]/20 px-4 py-2 text-sm font-semibold text-[#e8a020]">
+            🏥 For Clinics & Gyms in Cyprus
+          </span>
+          <h1 className="mb-6 text-4xl font-black leading-tight text-white md:text-5xl lg:text-6xl">
+            Your clinic answers patients 24/7.<br />Your staff stays focused on care.
           </h1>
-          <p className="mx-auto mb-10 max-w-2xl text-lg text-gray-300">
-            Reduce admin. See more patients. CypAI handles appointment booking and FAQs automatically. GDPR-compliant.
+          <p className="mx-auto mb-10 max-w-2xl text-lg text-white/70">
+            CypAI handles appointment bookings, FAQ, and multilingual patient enquiries automatically — so your team focuses on patients, not phone calls.
           </p>
           <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
             <Link
               href="/signup?plan=pro"
               className="rounded-xl bg-[#e8a020] px-8 py-4 text-lg font-bold text-[#1a1a2e] transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#d4920a] hover:shadow-lg hover:shadow-[#e8a020]/20"
             >
-              Start Free Trial — No Credit Card →
+              Start Free Trial — No Credit Card
             </Link>
             <Link
               href="/demo"
@@ -56,20 +62,20 @@ export default function ClinicsPage() {
               See Live Demo →
             </Link>
           </div>
-          <div className="mt-6 flex flex-wrap items-center justify-center gap-4 text-sm text-gray-400">
+          <div className="mt-6 flex flex-wrap items-center justify-center gap-4 text-sm text-white/60">
             <span>✓ 7-day free trial</span>
             <span>·</span>
             <span>✓ Setup in 15 minutes</span>
             <span>·</span>
             <span>✓ GDPR Compliant</span>
           </div>
-          <p className="mt-4 text-sm text-gray-400">
-            Join [X] Cyprus businesses already using CypAI
+          <p className="mt-4 text-sm text-white/60">
+            Join 200+ Cyprus businesses already using CypAI
           </p>
         </div>
       </section>
 
-      {/* Pain Section */}
+      {/* Pain Section - Sound familiar? */}
       <section className="bg-[#f8f9fb] py-16">
         <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
           <h2 className="mb-10 text-center text-3xl font-bold text-[#1a1a2e]">Sound familiar?</h2>
@@ -77,29 +83,25 @@ export default function ClinicsPage() {
             <div className="flex items-start gap-4 rounded-xl bg-white p-5 shadow-sm">
               <span className="text-2xl">📞</span>
               <div>
-                <p className="font-semibold text-[#1a1a2e]">Staff distracted from clinical work</p>
-                <p className="mt-1 text-gray-600">Your team spends hours answering "opening hours, prices, which doctor is available" — instead of helping patients.</p>
+                <p className="font-semibold text-[#1a1a2e]">Staff spend hours answering <strong>the same questions</strong> by phone</p>
               </div>
             </div>
             <div className="flex items-start gap-4 rounded-xl bg-white p-5 shadow-sm">
               <span className="text-2xl">🌍</span>
               <div>
-                <p className="font-semibold text-[#1a1a2e]">International patients struggle to communicate</p>
-                <p className="mt-1 text-gray-600">Medical tourism patients from Russia, Middle East, Europe — they struggle in English or Greek.</p>
+                <p className="font-semibold text-[#1a1a2e]"><strong>International patients</strong> struggle to communicate in Greek or English</p>
               </div>
             </div>
             <div className="flex items-start gap-4 rounded-xl bg-white p-5 shadow-sm">
-              <span className="text-2xl">💸</span>
+              <span className="text-2xl">❌</span>
               <div>
-                <p className="font-semibold text-[#1a1a2e]">Costly no-shows</p>
-                <p className="mt-1 text-gray-600">A missed 30-minute consultation = lost revenue. No system to remind patients.</p>
+                <p className="font-semibold text-[#1a1a2e]"><strong>No-shows</strong> waste clinical time and revenue</p>
               </div>
             </div>
             <div className="flex items-start gap-4 rounded-xl bg-white p-5 shadow-sm">
               <span className="text-2xl">🌙</span>
               <div>
-                <p className="font-semibold text-[#1a1a2e]">After-hours silence</p>
-                <p className="mt-1 text-gray-600">Evening and weekend enquiries go unanswered. Patients go elsewhere.</p>
+                <p className="font-semibold text-[#1a1a2e]"><strong>After-hours enquiries</strong> go unanswered — patients go elsewhere</p>
               </div>
             </div>
           </div>
@@ -116,18 +118,18 @@ export default function ClinicsPage() {
           <div className="grid gap-8 md:grid-cols-3">
             <div className="text-center">
               <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[#e8a020]/20 text-3xl mx-auto">1</div>
-              <h3 className="text-xl font-bold text-[#1a1a2e]">Tell CypAI about your practice</h3>
-              <p className="mt-2 text-gray-600">Add services, prices, doctors, hours, policies. GDPR-compliant setup.</p>
+              <h3 className="text-xl font-bold text-[#1a1a2e]">Tell CypAI about your clinic</h3>
+              <p className="mt-2 text-gray-600">Add services, prices, doctors, hours, policies. Takes 10 minutes. GDPR-compliant setup.</p>
             </div>
             <div className="text-center">
               <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[#e8a020]/20 text-3xl mx-auto">2</div>
-              <h3 className="text-xl font-bold text-[#1a1a2e]">Connect WhatsApp and website</h3>
-              <p className="mt-2 text-gray-600">Link your WhatsApp Business. Add chat widget to your site.</p>
+              <h3 className="text-xl font-bold text-[#1a1a2e]">Connect WhatsApp and your website</h3>
+              <p className="mt-2 text-gray-600">One line of code for the website widget. 2 minutes to connect your WhatsApp Business number.</p>
             </div>
             <div className="text-center">
               <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[#e8a020]/20 text-3xl mx-auto">3</div>
-              <h3 className="text-xl font-bold text-[#1a1a2e]">Focus on patient care</h3>
-              <p className="mt-2 text-gray-600">AI handles bookings and FAQs. Your staff focuses on patients who need human help.</p>
+              <h3 className="text-xl font-bold text-[#1a1a2e]">Watch enquiries become bookings</h3>
+              <p className="mt-2 text-gray-600">AI handles bookings and FAQs 24/7. Your staff focuses on patients who need human help.</p>
             </div>
           </div>
         </div>
@@ -140,34 +142,34 @@ export default function ClinicsPage() {
           <p className="mx-auto mb-12 max-w-2xl text-center text-gray-600">Built specifically for clinics and gyms in Cyprus — GDPR compliant</p>
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             <div className="rounded-xl bg-white p-6 shadow-sm transition-all hover:shadow-md">
-              <div className="mb-4 text-3xl">❓</div>
-              <h3 className="text-lg font-bold text-[#1a1a2e]">FAQ Automation</h3>
-              <p className="mt-2 text-gray-600">Opening hours, prices, location, parking, what to bring — answered instantly.</p>
-            </div>
-            <div className="rounded-xl bg-white p-6 shadow-sm transition-all hover:shadow-md">
               <div className="mb-4 text-3xl">📅</div>
               <h3 className="text-lg font-bold text-[#1a1a2e]">Appointment Booking</h3>
               <p className="mt-2 text-gray-600">Patients book through WhatsApp or website. You confirm with one click.</p>
             </div>
             <div className="rounded-xl bg-white p-6 shadow-sm transition-all hover:shadow-md">
+              <div className="mb-4 text-3xl">❓</div>
+              <h3 className="text-lg font-bold text-[#1a1a2e]">FAQ Automation</h3>
+              <p className="mt-2 text-gray-600">Opening hours, prices, location, parking, what to bring — answered instantly.</p>
+            </div>
+            <div className="rounded-xl bg-white p-6 shadow-sm transition-all hover:shadow-md">
               <div className="mb-4 text-3xl">🔔</div>
-              <h3 className="text-lg font-bold text-[#1a1a2e]">Automated Reminders</h3>
+              <h3 className="text-lg font-bold text-[#1a1a2e]">Reminder System</h3>
               <p className="mt-2 text-gray-600">Reduce no-shows with appointment reminders sent automatically.</p>
             </div>
             <div className="rounded-xl bg-white p-6 shadow-sm transition-all hover:shadow-md">
               <div className="mb-4 text-3xl">🌍</div>
-              <h3 className="text-lg font-bold text-[#1a1a2e]">Multi-Language Support</h3>
+              <h3 className="text-lg font-bold text-[#1a1a2e]">Multi-Language</h3>
               <p className="mt-2 text-gray-600">English, Turkish, Arabic, Russian, Greek — for international patients.</p>
+            </div>
+            <div className="rounded-xl bg-white p-6 shadow-sm transition-all hover:shadow-md">
+              <div className="mb-4 text-3xl">🌙</div>
+              <h3 className="text-lg font-bold text-[#1a1a2e]">After-Hours Coverage</h3>
+              <p className="mt-2 text-gray-600">Evening and weekend enquiries answered automatically. Never miss a patient.</p>
             </div>
             <div className="rounded-xl bg-white p-6 shadow-sm transition-all hover:shadow-md">
               <div className="mb-4 text-3xl">🔒</div>
               <h3 className="text-lg font-bold text-[#1a1a2e]">GDPR Compliant</h3>
-              <p className="mt-2 text-gray-600">Built for EU/Cyprus regulations. Patient data handled securely.</p>
-            </div>
-            <div className="rounded-xl bg-white p-6 shadow-sm transition-all hover:shadow-md">
-              <div className="mb-4 text-3xl">📊</div>
-              <h3 className="text-lg font-bold text-[#1a1a2e]">CRM & Analytics</h3>
-              <p className="mt-2 text-gray-600">Track patient enquiries, conversion rates, and appointment history.</p>
+              <p className="mt-2 text-gray-600">Built for EU/Cyprus regulations. Patient data handled securely. 🇪🇺</p>
             </div>
           </div>
         </div>
@@ -184,7 +186,7 @@ export default function ClinicsPage() {
             <span>🇷🇺</span>
             <span>🇬🇷</span>
           </div>
-          <p className="text-gray-600">Auto-detects language. Responds automatically. No translator needed.</p>
+          <p className="text-gray-600">Auto-detects language. Responds automatically.</p>
         </div>
       </section>
 
@@ -203,7 +205,7 @@ export default function ClinicsPage() {
             </div>
             <div className="rounded-xl bg-white p-6 shadow-sm">
               <h3 className="text-lg font-semibold text-[#1a1a2e]">"Is it GDPR compliant?"</h3>
-              <p className="mt-2 text-gray-600">Yes. Built for EU/Cyprus regulations. Patient data is handled securely with full audit trails.</p>
+              <p className="mt-2 text-gray-600">Yes. Built for EU/Cyprus regulations. Clinics in the Republic of Cyprus are EU-regulated. Patient data is handled securely with full audit trails.</p>
             </div>
           </div>
         </div>
@@ -282,8 +284,7 @@ export default function ClinicsPage() {
             </div>
           </div>
           <p className="mt-8 text-center text-sm text-gray-500">
-            Secure card payment powered by Paddle — trusted by 3,000+ software companies.<br />
-            Cancel anytime, no questions asked.
+            🔒 Secure payment by Paddle · 30-day money-back guarantee
           </p>
         </div>
       </section>
@@ -291,14 +292,14 @@ export default function ClinicsPage() {
       {/* Final CTA */}
       <section className="bg-[#1a1a2e] py-16">
         <div className="mx-auto max-w-3xl px-4 text-center sm:px-6 lg:px-8">
-          <h2 className="text-3xl font-bold text-white">Reduce admin. See more patients.<br />Zero extra staff.</h2>
+          <h2 className="text-3xl font-bold text-white">Reduce admin.<br />See more patients.</h2>
           <Link
             href="/signup?plan=pro"
             className="mt-8 inline-block rounded-xl bg-[#e8a020] px-8 py-4 text-lg font-bold text-[#1a1a2e] transition-all duration-200 hover:bg-[#d4920a] hover:shadow-lg hover:shadow-[#e8a020]/20"
           >
             Start Your Free Trial Now →
           </Link>
-          <p className="mt-4 text-sm text-gray-400">No credit card. No commitment. Cancel anytime.</p>
+          <p className="mt-4 text-sm text-gray-400">No credit card. Cancel anytime.</p>
         </div>
       </section>
 
@@ -315,12 +316,14 @@ export default function ClinicsPage() {
                 className="h-7 w-auto"
               />
             </div>
-            <div className="flex gap-6 text-sm text-gray-600">
+            <div className="flex flex-wrap justify-center gap-6 text-sm text-gray-600">
               <Link href="/" className="hover:text-[#1a1a2e]">Home</Link>
               <Link href="#pricing" className="hover:text-[#1a1a2e]">Pricing</Link>
               <Link href="/demo" className="hover:text-[#1a1a2e]">Demo</Link>
               <Link href="/contact" className="hover:text-[#1a1a2e]">Contact</Link>
-              <Link href="/privacy" className="hover:text-[#1a1a2e]">Privacy</Link>
+              <Link href="/privacy" className="hover:text-[#1a1a2e]">Privacy Policy</Link>
+              <Link href="/terms" className="hover:text-[#1a1a2e]">Terms</Link>
+              <Link href="/refund-policy" className="hover:text-[#1a1a2e]">Refund Policy</Link>
             </div>
             <p className="text-sm text-gray-500">© 2025 CypAI. Built in Northern Cyprus.</p>
           </div>

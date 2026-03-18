@@ -3,6 +3,10 @@
 import Link from 'next/link'
 import Image from 'next/image'
 
+export const metadata = {
+  title: 'Barbershops | CypAI',
+}
+
 export default function BarbershopsPage() {
   return (
     <main className="min-h-screen bg-white">
@@ -35,19 +39,21 @@ export default function BarbershopsPage() {
       {/* Hero Section */}
       <section className="bg-[#1a1a2e] py-20 lg:py-28">
         <div className="mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
-          <h1 className="mb-6 text-4xl font-black leading-tight text-white sm:text-5xl lg:text-6xl">
-            Take bookings while you're cutting.<br />
-            <span className="text-[#e8a020]">Without touching your phone.</span>
+          <span className="mb-4 inline-block rounded-full bg-[#e8a020]/20 px-4 py-2 text-sm font-semibold text-[#e8a020]">
+            ✂️ For Barbershops & Salons in Cyprus
+          </span>
+          <h1 className="mb-6 text-4xl font-black leading-tight text-white md:text-5xl lg:text-6xl">
+            Take bookings while you're cutting hair.
           </h1>
-          <p className="mx-auto mb-10 max-w-2xl text-lg text-gray-300">
-            Your barbershop fills its own calendar. CypAI handles WhatsApp bookings 24/7. You just cut hair.
+          <p className="mx-auto mb-10 max-w-2xl text-lg text-white/70">
+            CypAI books appointments through WhatsApp automatically, sends reminders so clients show up, and fills empty slots — all without you touching your phone.
           </p>
           <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
             <Link
               href="/signup?plan=pro"
               className="rounded-xl bg-[#e8a020] px-8 py-4 text-lg font-bold text-[#1a1a2e] transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#d4920a] hover:shadow-lg hover:shadow-[#e8a020]/20"
             >
-              Start Free Trial — No Credit Card →
+              Start Free Trial — No Credit Card
             </Link>
             <Link
               href="/demo"
@@ -56,50 +62,46 @@ export default function BarbershopsPage() {
               See Live Demo →
             </Link>
           </div>
-          <div className="mt-6 flex flex-wrap items-center justify-center gap-4 text-sm text-gray-400">
+          <div className="mt-6 flex flex-wrap items-center justify-center gap-4 text-sm text-white/60">
             <span>✓ 7-day free trial</span>
             <span>·</span>
             <span>✓ Setup in 15 minutes</span>
             <span>·</span>
             <span>✓ Cancel anytime</span>
           </div>
-          <p className="mt-4 text-sm text-gray-400">
-            Join [X] Cyprus businesses already using CypAI
+          <p className="mt-4 text-sm text-white/60">
+            Join 200+ Cyprus businesses already using CypAI
           </p>
         </div>
       </section>
 
-      {/* Pain Section */}
+      {/* Pain Section - Sound familiar? */}
       <section className="bg-[#f8f9fb] py-16">
         <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
           <h2 className="mb-10 text-center text-3xl font-bold text-[#1a1a2e]">Sound familiar?</h2>
           <div className="space-y-4">
             <div className="flex items-start gap-4 rounded-xl bg-white p-5 shadow-sm">
-              <span className="text-2xl">✂️</span>
+              <span className="text-2xl">📵</span>
               <div>
-                <p className="font-semibold text-[#1a1a2e]">Mid-cut interruptions</p>
-                <p className="mt-1 text-gray-600">"Are you free at 3pm today?" while you're cutting someone's hair. Can't check or reply.</p>
+                <p className="font-semibold text-[#1a1a2e]">Clients message <strong>"are you free at 3pm?"</strong> while you're mid-cut</p>
               </div>
             </div>
             <div className="flex items-start gap-4 rounded-xl bg-white p-5 shadow-sm">
-              <span className="text-2xl">📅</span>
+              <span className="text-2xl">❌</span>
               <div>
-                <p className="font-semibold text-[#1a1a2e]">Double-bookings</p>
-                <p className="mt-1 text-gray-600">Managing appointments in your head or a notebook. Sometimes you get it wrong.</p>
+                <p className="font-semibold text-[#1a1a2e]"><strong>No-shows</strong> cost you money — no one sends reminders</p>
               </div>
             </div>
             <div className="flex items-start gap-4 rounded-xl bg-white p-5 shadow-sm">
-              <span className="text-2xl">💬</span>
+              <span className="text-2xl">🔁</span>
               <div>
-                <p className="font-semibold text-[#1a1a2e]">Endless price questions</p>
-                <p className="mt-1 text-gray-600">"How much for a fade?" "Haircut price?" Same questions via WhatsApp every single day.</p>
+                <p className="font-semibold text-[#1a1a2e]">You answer <strong>"how much for a haircut?"</strong> 20 times a day</p>
               </div>
             </div>
             <div className="flex items-start gap-4 rounded-xl bg-white p-5 shadow-sm">
-              <span className="text-2xl">👻</span>
+              <span className="text-2xl">📓</span>
               <div>
-                <p className="font-semibold text-[#1a1a2e]">No-shows</p>
-                <p className="mt-1 text-gray-600">You forget to remind clients. They don't show up. You lose money on empty slots.</p>
+                <p className="font-semibold text-[#1a1a2e]"><strong>Double-bookings</strong> happen because you manage it in your head</p>
               </div>
             </div>
           </div>
@@ -116,17 +118,17 @@ export default function BarbershopsPage() {
           <div className="grid gap-8 md:grid-cols-3">
             <div className="text-center">
               <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[#e8a020]/20 text-3xl mx-auto">1</div>
-              <h3 className="text-xl font-bold text-[#1a1a2e]">Tell CypAI your services</h3>
+              <h3 className="text-xl font-bold text-[#1a1a2e]">Tell CypAI about your barbershop</h3>
               <p className="mt-2 text-gray-600">Add your services, prices, and staff. Takes 10 minutes.</p>
             </div>
             <div className="text-center">
               <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[#e8a020]/20 text-3xl mx-auto">2</div>
-              <h3 className="text-xl font-bold text-[#1a1a2e]">Connect your WhatsApp</h3>
-              <p className="mt-2 text-gray-600">Link your WhatsApp Business. Customers message you like normal.</p>
+              <h3 className="text-xl font-bold text-[#1a1a2e]">Connect WhatsApp and your website</h3>
+              <p className="mt-2 text-gray-600">One line of code for the website widget. 2 minutes to connect your WhatsApp Business number.</p>
             </div>
             <div className="text-center">
               <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[#e8a020]/20 text-3xl mx-auto">3</div>
-              <h3 className="text-xl font-bold text-[#1a1a2e]">Watch the calendar fill</h3>
+              <h3 className="text-xl font-bold text-[#1a1a2e]">Watch enquiries become bookings</h3>
               <p className="mt-2 text-gray-600">CypAI books appointments automatically. You just show up and cut.</p>
             </div>
           </div>
@@ -141,18 +143,23 @@ export default function BarbershopsPage() {
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             <div className="rounded-xl bg-white p-6 shadow-sm transition-all hover:shadow-md">
               <div className="mb-4 text-3xl">📅</div>
-              <h3 className="text-lg font-bold text-[#1a1a2e]">WhatsApp Booking</h3>
+              <h3 className="text-lg font-bold text-[#1a1a2e]">Appointment Booking via WhatsApp</h3>
               <p className="mt-2 text-gray-600">Customers book appointments through WhatsApp. AI asks: what service, what time, which barber.</p>
             </div>
             <div className="rounded-xl bg-white p-6 shadow-sm transition-all hover:shadow-md">
               <div className="mb-4 text-3xl">🔔</div>
-              <h3 className="text-lg font-bold text-[#1a1a2e]">Auto Reminders</h3>
+              <h3 className="text-lg font-bold text-[#1a1a2e]">Automated Reminders</h3>
               <p className="mt-2 text-gray-600">Automatic appointment reminders 24 hours before. Reduce no-shows.</p>
             </div>
             <div className="rounded-xl bg-white p-6 shadow-sm transition-all hover:shadow-md">
               <div className="mb-4 text-3xl">💰</div>
-              <h3 className="text-lg font-bold text-[#1a1a2e]">Price List Automation</h3>
+              <h3 className="text-lg font-bold text-[#1a1a2e]">Price FAQ</h3>
               <p className="mt-2 text-gray-600">"How much for a fade?" — instant answer. No more repetitive messages.</p>
+            </div>
+            <div className="rounded-xl bg-white p-6 shadow-sm transition-all hover:shadow-md">
+              <div className="mb-4 text-3xl">❌</div>
+              <h3 className="text-lg font-bold text-[#1a1a2e]">No-Show Reduction</h3>
+              <p className="mt-2 text-gray-600">Automated reminders reduce no-shows and keep your calendar full.</p>
             </div>
             <div className="rounded-xl bg-white p-6 shadow-sm transition-all hover:shadow-md">
               <div className="mb-4 text-3xl">🔄</div>
@@ -160,14 +167,9 @@ export default function BarbershopsPage() {
               <p className="mt-2 text-gray-600">"Haven't seen you in 4 weeks" — automated messages to bring back clients.</p>
             </div>
             <div className="rounded-xl bg-white p-6 shadow-sm transition-all hover:shadow-md">
-              <div className="mb-4 text-3xl">👥</div>
-              <h3 className="text-lg font-bold text-[#1a1a2e]">Multi-Staff Calendar</h3>
+              <div className="mb-4 text-3xl">📓</div>
+              <h3 className="text-lg font-bold text-[#1a1a2e]">Availability Management</h3>
               <p className="mt-2 text-gray-600">Manage multiple barbers' schedules. Customers choose their preferred stylist.</p>
-            </div>
-            <div className="rounded-xl bg-white p-6 shadow-sm transition-all hover:shadow-md">
-              <div className="mb-4 text-3xl">🌍</div>
-              <h3 className="text-lg font-bold text-[#1a1a2e]">5 Languages</h3>
-              <p className="mt-2 text-gray-600">English, Turkish, Arabic, Russian, Greek. Handle tourist clients easily.</p>
             </div>
           </div>
         </div>
@@ -184,7 +186,7 @@ export default function BarbershopsPage() {
             <span>🇷🇺</span>
             <span>🇬🇷</span>
           </div>
-          <p className="text-gray-600">Auto-detects language. Responds automatically. No translator needed.</p>
+          <p className="text-gray-600">Auto-detects language. Responds automatically.</p>
         </div>
       </section>
 
@@ -281,8 +283,7 @@ export default function BarbershopsPage() {
             </div>
           </div>
           <p className="mt-8 text-center text-sm text-gray-500">
-            Secure card payment powered by Paddle — trusted by 3,000+ software companies.<br />
-            Cancel anytime, no questions asked.
+            🔒 Secure payment by Paddle · 30-day money-back guarantee
           </p>
         </div>
       </section>
@@ -290,14 +291,14 @@ export default function BarbershopsPage() {
       {/* Final CTA */}
       <section className="bg-[#1a1a2e] py-16">
         <div className="mx-auto max-w-3xl px-4 text-center sm:px-6 lg:px-8">
-          <h2 className="text-3xl font-bold text-white">Set up in 15 minutes before your next client.</h2>
+          <h2 className="text-3xl font-bold text-white">Set up in 15 minutes<br />before your next client.</h2>
           <Link
             href="/signup?plan=pro"
             className="mt-8 inline-block rounded-xl bg-[#e8a020] px-8 py-4 text-lg font-bold text-[#1a1a2e] transition-all duration-200 hover:bg-[#d4920a] hover:shadow-lg hover:shadow-[#e8a020]/20"
           >
             Start Your Free Trial Now →
           </Link>
-          <p className="mt-4 text-sm text-gray-400">No credit card. No commitment. Cancel anytime.</p>
+          <p className="mt-4 text-sm text-gray-400">No credit card. Cancel anytime.</p>
         </div>
       </section>
 
@@ -314,12 +315,14 @@ export default function BarbershopsPage() {
                 className="h-7 w-auto"
               />
             </div>
-            <div className="flex gap-6 text-sm text-gray-600">
+            <div className="flex flex-wrap justify-center gap-6 text-sm text-gray-600">
               <Link href="/" className="hover:text-[#1a1a2e]">Home</Link>
               <Link href="#pricing" className="hover:text-[#1a1a2e]">Pricing</Link>
               <Link href="/demo" className="hover:text-[#1a1a2e]">Demo</Link>
               <Link href="/contact" className="hover:text-[#1a1a2e]">Contact</Link>
-              <Link href="/privacy" className="hover:text-[#1a1a2e]">Privacy</Link>
+              <Link href="/privacy" className="hover:text-[#1a1a2e]">Privacy Policy</Link>
+              <Link href="/terms" className="hover:text-[#1a1a2e]">Terms</Link>
+              <Link href="/refund-policy" className="hover:text-[#1a1a2e]">Refund Policy</Link>
             </div>
             <p className="text-sm text-gray-500">© 2025 CypAI. Built in Northern Cyprus.</p>
           </div>

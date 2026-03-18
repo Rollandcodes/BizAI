@@ -3,6 +3,10 @@
 import Link from 'next/link'
 import Image from 'next/image'
 
+export const metadata = {
+  title: 'Student Housing | CypAI',
+}
+
 export default function StudentHousingPage() {
   return (
     <main className="min-h-screen bg-white">
@@ -35,19 +39,21 @@ export default function StudentHousingPage() {
       {/* Hero Section */}
       <section className="bg-[#1a1a2e] py-20 lg:py-28">
         <div className="mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
-          <h1 className="mb-6 text-4xl font-black leading-tight text-white sm:text-5xl lg:text-6xl">
-            International students message at 2am.<br />
-            <span className="text-[#e8a020]">CypAI answers. You sleep.</span>
+          <span className="mb-4 inline-block rounded-full bg-[#e8a020]/20 px-4 py-2 text-sm font-semibold text-[#e8a020]">
+            🎓 For Student Housing in Northern Cyprus
+          </span>
+          <h1 className="mb-6 text-4xl font-black leading-tight text-white md:text-5xl lg:text-6xl">
+            International students message at 2am.<br />CypAI answers. You sleep.
           </h1>
-          <p className="mx-auto mb-10 max-w-2xl text-lg text-gray-300">
-            Multi-language AI for student housing landlords in Northern Cyprus. Automate enquiries from EMU, NEU, GAU & CIU students. Never miss a tenant again.
+          <p className="mx-auto mb-10 max-w-2xl text-lg text-white/70">
+            Fill your rooms faster every semester. CypAI answers student enquiries in any language, books viewings automatically, and follows up with leads who didn't reply.
           </p>
           <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
             <Link
               href="/signup?plan=pro"
               className="rounded-xl bg-[#e8a020] px-8 py-4 text-lg font-bold text-[#1a1a2e] transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#d4920a] hover:shadow-lg hover:shadow-[#e8a020]/20"
             >
-              Start Free Trial — No Credit Card →
+              Start Free Trial — No Credit Card
             </Link>
             <Link
               href="/demo"
@@ -56,20 +62,20 @@ export default function StudentHousingPage() {
               See Live Demo →
             </Link>
           </div>
-          <div className="mt-6 flex flex-wrap items-center justify-center gap-4 text-sm text-gray-400">
+          <div className="mt-6 flex flex-wrap items-center justify-center gap-4 text-sm text-white/60">
             <span>✓ 7-day free trial</span>
             <span>·</span>
             <span>✓ Setup in 15 minutes</span>
             <span>·</span>
-            <span>✓ GDPR Compliant</span>
+            <span>✓ Cancel anytime</span>
           </div>
-          <p className="mt-4 text-sm text-gray-400">
-            Join [X] Cyprus landlords already using CypAI
+          <p className="mt-4 text-sm text-white/60">
+            Join 200+ Cyprus businesses already using CypAI
           </p>
         </div>
       </section>
 
-      {/* Pain Section */}
+      {/* Pain Section - Sound familiar? */}
       <section className="bg-[#f8f9fb] py-16">
         <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
           <h2 className="mb-10 text-center text-3xl font-bold text-[#1a1a2e]">Sound familiar?</h2>
@@ -77,36 +83,25 @@ export default function StudentHousingPage() {
             <div className="flex items-start gap-4 rounded-xl bg-white p-5 shadow-sm">
               <span className="text-2xl">🌍</span>
               <div>
-                <p className="font-semibold text-[#1a1a2e]">Language overload</p>
-                <p className="mt-1 text-gray-600">Students from Nigeria, Uganda, Pakistan, Iran, Turkey, Kazakhstan — all messaging in different languages at once. You're not a translator.</p>
+                <p className="font-semibold text-[#1a1a2e]">Students from <strong>Nigeria, Pakistan, Iran</strong> message in different languages</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-4 rounded-xl bg-white p-5 shadow-sm">
+              <span className="text-2xl">🕐</span>
+              <div>
+                <p className="font-semibold text-[#1a1a2e]">Students enquire from their <strong>home countries at odd hours</strong></p>
               </div>
             </div>
             <div className="flex items-start gap-4 rounded-xl bg-white p-5 shadow-sm">
               <span className="text-2xl">🔁</span>
               <div>
-                <p className="font-semibold text-[#1a1a2e]">Answering the same questions</p>
-                <p className="mt-1 text-gray-600">Every student asks: "How much is rent?", "Is utilities included?", "How far is it from university?", "Can I see photos?" — hundreds of times per month.</p>
+                <p className="font-semibold text-[#1a1a2e]">You answer <strong>"how much is rent?"</strong> and <strong>"is it near EMU?"</strong> all day</p>
               </div>
             </div>
             <div className="flex items-start gap-4 rounded-xl bg-white p-5 shadow-sm">
-              <span className="text-2xl">⏰</span>
+              <span className="text-2xl">📵</span>
               <div>
-                <p className="font-semibold text-[#1a1a2e]">Long lead times</p>
-                <p className="mt-1 text-gray-600">Students enquire 2-3 months before arriving. You answer now, they book elsewhere. You need to follow up — but who has time?</p>
-              </div>
-            </div>
-            <div className="flex items-start gap-4 rounded-xl bg-white p-5 shadow-sm">
-              <span className="text-2xl">📚</span>
-              <div>
-                <p className="font-semibold text-[#1a1a2e]">Peak season overwhelm</p>
-                <p className="mt-1 text-gray-600">September and February = message avalanche. Semester intake floods your WhatsApp. You can't keep up, you miss enquiries, you lose tenants.</p>
-              </div>
-            </div>
-            <div className="flex items-start gap-4 rounded-xl bg-white p-5 shadow-sm">
-              <span className="text-2xl">💸</span>
-              <div>
-                <p className="font-semibold text-[#1a1a2e]">Lost tenants = lost revenue</p>
-                <p className="mt-1 text-gray-600">Miss a message, respond too slow, or don't follow up — and the student goes to a faster landlord. Every empty room costs you.</p>
+                <p className="font-semibold text-[#1a1a2e]">You <strong>miss enquiries during intake season</strong> and lose tenants to faster landlords</p>
               </div>
             </div>
           </div>
@@ -124,17 +119,17 @@ export default function StudentHousingPage() {
             <div className="text-center">
               <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[#e8a020]/20 text-3xl mx-auto">1</div>
               <h3 className="text-xl font-bold text-[#1a1a2e]">Tell CypAI about your property</h3>
-              <p className="mt-2 text-gray-600">Add rent prices, utilities, rooms, location, distance to EMU, NEU, GAU, CIU. Set your policies.</p>
+              <p className="mt-2 text-gray-600">Add rent prices, utilities, rooms, location, distance to EMU, NEU, GAU, CIU. Takes 10 minutes.</p>
             </div>
             <div className="text-center">
               <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[#e8a020]/20 text-3xl mx-auto">2</div>
-              <h3 className="text-xl font-bold text-[#1a1a2e]">Connect WhatsApp</h3>
-              <p className="mt-2 text-gray-600">Link your WhatsApp Business. Students can message you anytime — CypAI replies instantly.</p>
+              <h3 className="text-xl font-bold text-[#1a1a2e]">Connect WhatsApp and your website</h3>
+              <p className="mt-2 text-gray-600">One line of code for the website widget. 2 minutes to connect your WhatsApp Business number.</p>
             </div>
             <div className="text-center">
               <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[#e8a020]/20 text-3xl mx-auto">3</div>
-              <h3 className="text-xl font-bold text-[#1a1a2e]">Relax — CypAI handles it</h3>
-              <p className="mt-2 text-gray-600">AI answers FAQs, books viewings, follows up with slow responders. You focus on your life.</p>
+              <h3 className="text-xl font-bold text-[#1a1a2e]">Watch enquiries become bookings</h3>
+              <p className="mt-2 text-gray-600">AI answers FAQs, books viewings, follows up automatically. You focus on your life.</p>
             </div>
           </div>
         </div>
@@ -148,33 +143,33 @@ export default function StudentHousingPage() {
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             <div className="rounded-xl bg-white p-6 shadow-sm transition-all hover:shadow-md">
               <div className="mb-4 text-3xl">🌍</div>
-              <h3 className="text-lg font-bold text-[#1a1a2e]">Multi-Language Responses</h3>
-              <p className="mt-2 text-gray-600">English, Turkish, Arabic, French, Hausa, Farsi — CypAI detects language and responds in the student's language automatically.</p>
-            </div>
-            <div className="rounded-xl bg-white p-6 shadow-sm transition-all hover:shadow-md">
-              <div className="mb-4 text-3xl">❓</div>
-              <h3 className="text-lg font-bold text-[#1a1a2e]">FAQ Automation</h3>
-              <p className="mt-2 text-gray-600">Rent prices, utilities included, deposit, distance to EMU/NEU/GAU/CIU, room photos, move-in dates — answered instantly.</p>
+              <h3 className="text-lg font-bold text-[#1a1a2e]">Multi-Language Student Enquiries</h3>
+              <p className="mt-2 text-gray-600">English, Turkish, Arabic, French, Hausa, Farsi — CypAI detects language and responds automatically.</p>
             </div>
             <div className="rounded-xl bg-white p-6 shadow-sm transition-all hover:shadow-md">
               <div className="mb-4 text-3xl">📅</div>
-              <h3 className="text-lg font-bold text-[#1a1a2e]">Viewing Appointments</h3>
+              <h3 className="text-lg font-bold text-[#1a1a2e]">Viewing Booking Automation</h3>
               <p className="mt-2 text-gray-600">Students book property viewings through WhatsApp. You get the booking — no back-and-forth.</p>
             </div>
             <div className="rounded-xl bg-white p-6 shadow-sm transition-all hover:shadow-md">
-              <div className="mb-4 text-3xl">📊</div>
-              <h3 className="text-lg font-bold text-[#1a1a2e]">Lead Management</h3>
-              <p className="mt-2 text-gray-600">Track all enquiries, see who booked, who cancelled, who went to competitors. Never lose a lead again.</p>
+              <div className="mb-4 text-3xl">💰</div>
+              <h3 className="text-lg font-bold text-[#1a1a2e]">Rent FAQ</h3>
+              <p className="mt-2 text-gray-600">Rent prices, utilities included, deposit, room photos — answered instantly.</p>
             </div>
             <div className="rounded-xl bg-white p-6 shadow-sm transition-all hover:shadow-md">
-              <div className="mb-4 text-3xl">🔔</div>
-              <h3 className="text-lg font-bold text-[#1a1a2e]">Follow-up Automation</h3>
-              <p className="mt-2 text-gray-600">Students not ready yet? CypAI follows up automatically before semester starts. "Still looking for accommodation?"</p>
+              <div className="mb-4 text-3xl">📍</div>
+              <h3 className="text-lg font-bold text-[#1a1a2e]">Location/Neighborhood Info</h3>
+              <p className="mt-2 text-gray-600">Distance to EMU, NEU, GAU, CIU, nearby shops, transport — answered automatically.</p>
             </div>
             <div className="rounded-xl bg-white p-6 shadow-sm transition-all hover:shadow-md">
-              <div className="mb-4 text-3xl">📱</div>
-              <h3 className="text-lg font-bold text-[#1a1a2e]">WhatsApp Integration</h3>
-              <p className="mt-2 text-gray-600">Students message you on WhatsApp — your primary channel. CypAI runs 24/7, even when you sleep.</p>
+              <div className="mb-4 text-3xl">🔄</div>
+              <h3 className="text-lg font-bold text-[#1a1a2e]">Follow-up with Unresponsive Leads</h3>
+              <p className="mt-2 text-gray-600">Students not ready yet? CypAI follows up automatically before semester starts.</p>
+            </div>
+            <div className="rounded-xl bg-white p-6 shadow-sm transition-all hover:shadow-md">
+              <div className="mb-4 text-3xl">📚</div>
+              <h3 className="text-lg font-bold text-[#1a1a2e]">Intake Season Readiness</h3>
+              <p className="mt-2 text-gray-600">September and February — CypAI handles the message avalanche while you sleep.</p>
             </div>
           </div>
         </div>
@@ -191,7 +186,7 @@ export default function StudentHousingPage() {
             <span>🇳🇬</span>
             <span>🇮🇷</span>
           </div>
-          <p className="text-gray-600">Auto-detects language. Responds automatically. No translator needed.</p>
+          <p className="text-gray-600">Auto-detects language. Responds automatically.</p>
         </div>
       </section>
 
@@ -205,7 +200,7 @@ export default function StudentHousingPage() {
             <span>🏛️ GAU</span>
             <span>🏛️ CIU</span>
           </div>
-          <p className="mt-4 text-gray-600">Students from Eastern Mediterranean, Near East, Girne American & Cyprus International University — all looking for housing.</p>
+          <p className="mt-4 text-gray-600">Students from Eastern Mediterranean University, Near East University, Girne American University & Cyprus International University — all looking for housing.</p>
         </div>
       </section>
 
@@ -220,7 +215,7 @@ export default function StudentHousingPage() {
             </div>
             <div className="rounded-xl bg-white p-6 shadow-sm">
               <h3 className="text-lg font-semibold text-[#1a1a2e]">"Students ask complicated questions"</h3>
-              <p className="mt-2 text-gray-600">CypAI handles FAQs: price, utilities, distance, photos, deposit. Complex questions — "Can I bring my pet?", "Is there parking?" — route to you automatically.</p>
+              <p className="mt-2 text-gray-600">CypAI handles FAQs: price, utilities, distance to EMU/NEU/GAU/CIU, photos, deposit. Complex questions — "Can I bring my pet?", "Is there parking?" — route to you automatically.</p>
             </div>
             <div className="rounded-xl bg-white p-6 shadow-sm">
               <h3 className="text-lg font-semibold text-[#1a1a2e]">"I manage fine myself"</h3>
@@ -247,8 +242,7 @@ export default function StudentHousingPage() {
                 <li>✓ 500 messages/month</li>
                 <li>✓ Website chat widget</li>
                 <li>✓ FAQ automation</li>
-                <li>✓ 5 language support</li>
-                <li>✓ GDPR compliant</li>
+                <li>✓ Multi-language support</li>
               </ul>
               <Link
                 href="/signup?plan=starter"
@@ -303,8 +297,7 @@ export default function StudentHousingPage() {
             </div>
           </div>
           <p className="mt-8 text-center text-sm text-gray-500">
-            Secure card payment powered by Paddle — trusted by 3,000+ software companies.<br />
-            Cancel anytime, no questions asked.
+            🔒 Secure payment by Paddle · 30-day money-back guarantee
           </p>
         </div>
       </section>
@@ -320,7 +313,7 @@ export default function StudentHousingPage() {
           >
             Start Your Free Trial Now →
           </Link>
-          <p className="mt-4 text-sm text-gray-400">No credit card. No commitment. Cancel anytime.</p>
+          <p className="mt-4 text-sm text-gray-400">No credit card. Cancel anytime.</p>
         </div>
       </section>
 
@@ -337,12 +330,14 @@ export default function StudentHousingPage() {
                 className="h-7 w-auto"
               />
             </div>
-            <div className="flex gap-6 text-sm text-gray-600">
+            <div className="flex flex-wrap justify-center gap-6 text-sm text-gray-600">
               <Link href="/" className="hover:text-[#1a1a2e]">Home</Link>
               <Link href="#pricing" className="hover:text-[#1a1a2e]">Pricing</Link>
               <Link href="/demo" className="hover:text-[#1a1a2e]">Demo</Link>
               <Link href="/contact" className="hover:text-[#1a1a2e]">Contact</Link>
-              <Link href="/privacy" className="hover:text-[#1a1a2e]">Privacy</Link>
+              <Link href="/privacy" className="hover:text-[#1a1a2e]">Privacy Policy</Link>
+              <Link href="/terms" className="hover:text-[#1a1a2e]">Terms</Link>
+              <Link href="/refund-policy" className="hover:text-[#1a1a2e]">Refund Policy</Link>
             </div>
             <p className="text-sm text-gray-500">© 2025 CypAI. Built in Northern Cyprus.</p>
           </div>

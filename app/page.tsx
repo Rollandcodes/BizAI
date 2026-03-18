@@ -104,60 +104,6 @@ const comparisonRows = [
   ['Monthly cost', 'From $29', '$100-300', '$0 lost'],
 ]
 
-const shippedUpgrades = [
-  {
-    title: 'Recovery Automation Dashboard',
-    detail: 'Track queued, sent, failed, and conversion lift with timeline and drill-down logs.',
-  },
-  {
-    title: 'Retry Policies by Event',
-    detail: 'Set retry limits and recovery windows independently for signup and payment abandonment.',
-  },
-  {
-    title: 'Failure Spike Alerting',
-    detail: 'Automatic alerting to email/webhook with cooldown controls and one-click test alerts.',
-  },
-  {
-    title: 'Signed Webhook Security',
-    detail: 'Webhook payloads can be signed and verified to secure automation workflows.',
-  },
-  {
-    title: 'Alert Log Analytics',
-    detail: 'Filter, paginate, date-range, and export alert logs to CSV without manual reporting.',
-  },
-  {
-    title: 'Paddle Billing Flow',
-    detail: 'Secure subscription checkout processed via Paddle with automatic tax handling and global compliance.',
-  },
-]
-
-const growthModules = [
-  {
-    title: 'Programmatic SEO pages',
-    detail: 'City, niche, and use-case landing pages to compound long-tail organic traffic.',
-  },
-  {
-    title: 'Competitor alternatives hub',
-    detail: 'Create high-intent comparison pages to capture bottom-funnel search demand.',
-  },
-  {
-    title: 'A/B testing engine',
-    detail: 'Run controlled experiments on headline, CTA, pricing, and signup flow variants.',
-  },
-  {
-    title: 'Signup and onboarding CRO',
-    detail: 'Reduce friction from registration to first lead captured with guided activation.',
-  },
-  {
-    title: 'Referral and affiliate automation',
-    detail: 'Add partner and customer referral loops with tracked payouts and attribution.',
-  },
-  {
-    title: 'Analytics tracking standardization',
-    detail: 'Unify product and marketing events across GA4, Mixpanel, and ad channels.',
-  },
-]
-
 const workflowTabs = {
   how: {
     title: 'How the system works',
@@ -226,8 +172,11 @@ export default function HomePage() {
         </div>
       ) : null}
 
+      {/* Amber top border */}
+      <div className="h-1 w-full bg-[#e8a020]" />
+
       <header
-        className={`sticky top-0 z-50 border-b border-zinc-800/50 bg-zinc-950/80 backdrop-blur-xl transition-shadow ${
+        className={`sticky top-0 z-50 border-b border-white/10 bg-[#1a1a2e]/80 backdrop-blur-xl transition-shadow ${
           scrolled ? 'shadow-lg shadow-black/30' : ''
         }`}
       >
@@ -247,34 +196,30 @@ export default function HomePage() {
             {[
               ['#features', 'Features'],
               ['#how-it-works', 'How It Works'],
-              ['#automation', 'Automation'],
-              ['#roadmap', 'Growth Modules'],
               ['#pricing', 'Pricing'],
-              ['/how-it-works', 'Docs'],
-              ['/whatsapp-sync', 'WhatsApp Sync'],
               ['/demo', 'Demo'],
-              ['#faq', 'FAQ'],
+              ['/how-it-works', 'Docs'],
               ['/contact', 'Contact'],
             ].map(([href, label]) => (
-              <a key={href} href={href} className="text-sm text-zinc-400 transition-colors hover:text-white">
+              <a key={href} href={href} className="text-sm text-white/70 transition-colors hover:text-[#e8a020]">
                 {label}
               </a>
             ))}
           </nav>
 
           <div className="flex items-center gap-3">
-            <Link href="/login" className="hidden text-sm text-zinc-400 transition-colors hover:text-white sm:block">
+            <Link href="/login" className="hidden text-sm text-white/70 transition-colors hover:text-white sm:block">
               Log in
             </Link>
             <Link
               href="/signup?plan=pro"
-              className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-blue-500"
+              className="rounded-full bg-[#e8a020] px-5 py-2 text-sm font-semibold text-[#1a1a2e] transition-colors hover:bg-[#d49020]"
             >
               Start Free Trial
             </Link>
             <button
               onClick={() => setMenuOpen((v) => !v)}
-              className="rounded-lg border border-zinc-700 px-2 py-1 text-zinc-300 md:hidden"
+              className="rounded-lg border border-white/20 px-2 py-1 text-white/70 md:hidden"
               aria-label="Toggle menu"
             >
               {menuOpen ? '✕' : '☰'}
@@ -283,51 +228,71 @@ export default function HomePage() {
         </div>
 
         {menuOpen ? (
-          <div className="border-t border-zinc-800 px-4 py-3 md:hidden">
+          <div className="border-t border-white/10 px-4 py-3 md:hidden">
             {[
               ['#features', 'Features'],
               ['#how-it-works', 'How It Works'],
-              ['#automation', 'Automation'],
-              ['#roadmap', 'Growth Modules'],
               ['#pricing', 'Pricing'],
-              ['/how-it-works', 'Docs'],
-              ['/whatsapp-sync', 'WhatsApp Sync'],
               ['/demo', 'Demo'],
-              ['#faq', 'FAQ'],
+              ['/how-it-works', 'Docs'],
               ['/contact', 'Contact'],
             ].map(([href, label]) => (
               <a
                 key={href}
                 href={href}
                 onClick={() => setMenuOpen(false)}
-                className="block rounded-lg px-3 py-2 text-sm text-zinc-300 hover:bg-zinc-900"
+                className="block rounded-lg px-3 py-2 text-sm text-white/70 hover:bg-white/10"
               >
                 {label}
               </a>
             ))}
+            <div className="mt-2 border-t border-white/10 pt-2">
+              <p className="px-3 text-xs text-white/40">Industries</p>
+              {[
+                ['/car-rentals', 'Car Rentals'],
+                ['/restaurants', 'Restaurants'],
+                ['/hotels', 'Hotels'],
+                ['/barbershops', 'Barbershops'],
+                ['/clinics', 'Clinics'],
+                ['/student-housing', 'Student Housing'],
+              ].map(([href, label]) => (
+                <a
+                  key={href}
+                  href={href}
+                  onClick={() => setMenuOpen(false)}
+                  className="block rounded-lg px-3 py-2 text-sm text-white/70 hover:bg-white/10"
+                >
+                  {label}
+                </a>
+              ))}
+            </div>
           </div>
         ) : null}
       </header>
 
-      <section className="relative overflow-hidden bg-zinc-950">
-        <div className="pointer-events-none absolute left-1/2 top-0 h-[600px] w-[800px] -translate-x-1/2 rounded-full bg-blue-600/5 blur-3xl" />
-        <div className="pointer-events-none absolute left-1/4 top-32 h-[400px] w-[400px] rounded-full bg-blue-600/5 blur-3xl" />
+      <section className="relative overflow-hidden bg-[#1a1a2e]">
+        {/* Animated gradient mesh */}
+        <div className="pointer-events-none absolute inset-0 overflow-hidden">
+          <div className="absolute -left-1/4 top-0 h-[600px] w-[600px] animate-pulse-slow rounded-full bg-[#e8a020]/10 blur-3xl" />
+          <div className="absolute -right-1/4 top-1/4 h-[500px] w-[500px] animate-pulse-slow rounded-full bg-[#1a1a2e]/20 blur-3xl" style={{ animationDelay: '3s' }} />
+        </div>
 
-        <div className="mx-auto max-w-7xl px-4 pb-16 pt-24 text-center sm:px-6 lg:px-8">
-          <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-blue-500/20 bg-blue-600/10 px-4 py-2 text-xs font-medium text-blue-400">
-            <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-blue-400" />
-            Built for Cyprus and MENA businesses
+        <div className="mx-auto relative z-10 max-w-7xl px-4 pb-16 pt-24 text-center sm:px-6 lg:px-8">
+          {/* Social proof badge - amber pill */}
+          <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-[#e8a020]/20 bg-[#e8a020]/10 px-4 py-2 text-xs font-medium text-[#e8a020]">
+            <span>🇨🇾</span>
+            Trusted by 200+ Cyprus businesses
           </div>
 
           <h1 className="mb-6 text-5xl font-black leading-[1.05] tracking-tight text-white sm:text-6xl lg:text-7xl">
             Never Miss
             <br />
-            <span className="bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent">
+            <span className="text-[#e8a020]">
               Another Customer
             </span>
           </h1>
 
-          <p className="mx-auto mb-10 max-w-2xl text-xl leading-relaxed text-zinc-400">
+          <p className="mx-auto mb-10 max-w-2xl text-xl leading-relaxed text-white/70">
             AI-powered customer service for car rentals, barbershops, hotels and restaurants in Northern Cyprus.
             Handles WhatsApp and website chat in 5 languages, 24/7.
           </p>
@@ -336,29 +301,29 @@ export default function HomePage() {
             <Link
               href="/signup?plan=pro"
               onClick={() => Analytics.heroCtaClicked('pro')}
-              className="rounded-xl bg-blue-600 px-8 py-4 text-lg font-bold text-white transition-all duration-200 hover:-translate-y-0.5 hover:bg-blue-500 hover:shadow-xl hover:shadow-blue-500/20"
+              className="rounded-full bg-[#e8a020] px-8 py-4 text-lg font-bold text-[#1a1a2e] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-[#e8a020]/20"
             >
-              Start Free Trial →
+              Start Free Trial — Free for 7 Days
             </Link>
             <Link
               href="/demo"
               onClick={() => Analytics.demoViewed()}
-              className="rounded-xl border border-zinc-700 bg-zinc-800 px-8 py-4 text-lg font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:bg-zinc-700"
+              className="rounded-full border border-white px-8 py-4 text-lg font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:bg-white/10"
             >
-              Try Live Demo
+              Watch Demo →
             </Link>
           </div>
 
-          <div className="flex flex-wrap items-center justify-center gap-6 text-sm text-zinc-500">
-            <span>✓ Setup in 15 minutes</span>
+          <div className="flex flex-wrap items-center justify-center gap-6 text-sm text-white/60">
+            <span>✓ No credit card</span>
             <span className="hidden sm:block">·</span>
-            <span>✓ No credit card required</span>
+            <span>✓ Setup in 15 minutes</span>
             <span className="hidden sm:block">·</span>
             <span>✓ Cancel anytime</span>
           </div>
-          <p className="mt-4 text-sm text-zinc-400">Join [X] Cyprus businesses already using CypAI</p>
 
-          <div className="mx-auto mt-16 max-w-4xl overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-900 shadow-2xl shadow-black/50">
+          {/* Dashboard preview with floating animation */}
+          <div className="mx-auto mt-16 max-w-4xl overflow-hidden rounded-2xl border border-white/10 bg-[#1a1a2e]/80 shadow-2xl shadow-black/50 animate-float">
             <div className="flex items-center gap-2 border-b border-zinc-700/50 bg-zinc-800/50 px-4 py-3">
               <div className="h-3 w-3 rounded-full bg-red-500/70" />
               <div className="h-3 w-3 rounded-full bg-yellow-500/70" />
@@ -471,6 +436,38 @@ export default function HomePage() {
                   ))}
                 </ul>
               </article>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Vertical Industry Links Section */}
+      <section className="bg-zinc-950 py-16">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <p className="text-center text-xs font-semibold uppercase tracking-[0.2em] text-zinc-500">Built for your industry</p>
+          <h2 className="mt-3 text-center text-2xl font-bold text-white">We build for your industry</h2>
+          <p className="mt-2 text-center text-sm text-zinc-400">Click your business type for a page built just for you.</p>
+          <div className="mt-8 grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-6">
+            {[
+              { emoji: '🚗', title: 'Car Rentals', href: '/car-rentals', desc: 'Never miss a WhatsApp booking again' },
+              { emoji: '🍽️', title: 'Restaurants', href: '/restaurants', desc: 'Fill tables, reduce no-shows automatically' },
+              { emoji: '🏨', title: 'Hotels & Guesthouses', href: '/hotels', desc: "Answer guests in their language, 24/7" },
+              { emoji: '✂️', title: 'Barbershops & Salons', href: '/barbershops', desc: 'Take appointments while you\'re cutting hair' },
+              { emoji: '🏥', title: 'Clinics & Gyms', href: '/clinics', desc: 'Reduce admin. See more patients.' },
+              { emoji: '🎓', title: 'Student Housing', href: '/student-housing', desc: 'Fill rooms faster every semester' },
+            ].map((vertical) => (
+              <Link
+                key={vertical.href}
+                href={vertical.href}
+                className="group flex flex-col items-center rounded-xl border border-gray-200 bg-white p-5 text-center transition-all hover:-translate-y-1 hover:shadow-lg"
+              >
+                <div className="text-4xl">{vertical.emoji}</div>
+                <h3 className="mt-2 font-semibold text-gray-900">{vertical.title}</h3>
+                <p className="mt-1 text-xs text-gray-500">{vertical.desc}</p>
+                <div className="mt-3 opacity-0 transition-opacity group-hover:opacity-100">
+                  <span className="text-[#e8a020]">→</span>
+                </div>
+              </Link>
             ))}
           </div>
         </div>
@@ -615,8 +612,7 @@ export default function HomePage() {
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-zinc-500">Pricing</p>
           <h2 className="mt-3 text-3xl font-black text-white sm:text-4xl">Simple pricing, no surprises</h2>
           <p className="mt-4 text-zinc-400">7-day free trial on all plans. No credit card required. Cancel anytime.</p>
-          <p className="mt-4 text-zinc-400">Secure card payment powered by Paddle — trusted by 3,000+ software companies.</p>
-          <p className="mt-1 text-xs text-zinc-500">Cancel anytime, no questions asked.</p>
+          <p className="mt-4 text-zinc-400">🔒 Secure payment by Paddle · 30-day money-back guarantee · Cancel anytime</p>
 
           <div className="mt-10 grid grid-cols-1 items-stretch gap-6 md:grid-cols-3">
             {[
@@ -649,12 +645,12 @@ export default function HomePage() {
                 key={plan.name}
                 className={`relative flex flex-col rounded-2xl bg-zinc-900 p-8 ${
                   plan.featured
-                    ? 'border-2 border-blue-500 shadow-xl shadow-blue-500/10'
+                    ? 'border-2 border-[#e8a020] shadow-xl shadow-[#e8a020]/10'
                     : 'border border-zinc-800'
                 }`}
               >
                 {plan.featured ? (
-                  <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-blue-600 px-4 py-1.5 text-xs font-bold text-white">
+                  <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-[#e8a020] px-4 py-1.5 text-xs font-bold text-[#1a1a2e]">
                     ⭐ Most Popular
                   </span>
                 ) : null}
@@ -674,10 +670,10 @@ export default function HomePage() {
                 </ul>
                 <Link
                   href={`/signup?plan=${plan.plan}`}
-                  className={`mt-auto rounded-xl px-6 py-3 text-center text-sm font-semibold transition-all ${
+                  className={`mt-auto rounded-full px-6 py-3 text-center text-sm font-semibold transition-all ${
                     plan.featured
-                      ? 'bg-blue-600 text-white hover:bg-blue-500 hover:shadow-lg hover:shadow-blue-500/25'
-                      : 'border border-zinc-700 bg-zinc-800 text-zinc-100 hover:bg-zinc-700'
+                      ? 'bg-[#e8a020] text-[#1a1a2e] hover:bg-[#d49020] hover:shadow-lg hover:shadow-[#e8a020]/25'
+                      : 'border border-white/20 bg-transparent text-white hover:bg-white/10'
                   }`}
                 >
                   Start Free Trial
@@ -688,25 +684,26 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="border-y border-zinc-800 bg-zinc-900 py-24">
+      <section className="bg-[#1a1a2e] py-24">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-zinc-500">Why businesses trust CypAI</p>
-          <h2 className="mt-3 text-3xl font-black text-white sm:text-4xl">Built for Cyprus, trusted by local businesses</h2>
+          <p className="text-center text-xs font-semibold uppercase tracking-[0.2em] text-white/60">Trusted by businesses across Cyprus</p>
+          <h2 className="mt-3 text-center text-3xl font-black text-white sm:text-4xl">Built for Cyprus, trusted by local businesses</h2>
           <div className="mt-10 grid grid-cols-2 gap-6 md:grid-cols-4">
             {[
-              ['[X]', 'Businesses using CypAI'],
+              ['200+', 'Businesses using CypAI'],
               ['5', 'Languages supported'],
-              ['<3s', 'Average response time'],
-              ['15min', 'Setup time'],
+              ['<3 sec', 'Average AI response time'],
+              ['15 min', 'Average setup time'],
             ].map(([stat, label]) => (
-              <article key={label} className="rounded-2xl border border-zinc-800 bg-zinc-950 p-6 text-center">
-                <div className="text-4xl font-black text-blue-400">{stat}</div>
-                <div className="mt-2 text-sm text-zinc-400">{label}</div>
+              <article key={label} className="group rounded-2xl border border-white/10 bg-white/5 p-6 text-center transition-all hover:-translate-y-1 hover:bg-white/10">
+                <div className="mx-auto h-1 w-10 rounded-full bg-[#e8a020]" />
+                <div className="mt-4 text-5xl font-black text-white">{stat}</div>
+                <div className="mt-2 text-sm text-white/80">{label}</div>
               </article>
             ))}
           </div>
           <div className="mt-8 text-center">
-            <p className="text-sm text-zinc-500">Join businesses across Kyrenia, Famagusta, Nicosia, and Limassol</p>
+            <p className="text-sm text-white/60">Built in Northern Cyprus. Designed for businesses that talk to international customers every day.</p>
           </div>
         </div>
       </section>
@@ -775,7 +772,7 @@ export default function HomePage() {
           <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
             <div>
               <div className="flex items-center gap-2">
-                <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600 text-sm">🤖</span>
+                <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#e8a020] text-sm">🤖</span>
                 <span className="text-lg font-bold text-white">CypAI</span>
               </div>
               <p className="mt-4 text-sm text-zinc-500">
@@ -791,28 +788,22 @@ export default function HomePage() {
             </div>
 
             <div>
-              <p className="text-sm font-semibold text-white">Product</p>
+              <p className="text-sm font-semibold text-white">Navigate</p>
               <div className="mt-3 space-y-2 text-sm text-zinc-500">
+                <Link href="/" className="block hover:text-white">Home</Link>
                 <a href="#features" className="block hover:text-white">Features</a>
-                <Link href="/how-it-works" className="block hover:text-white">How It Works</Link>
-                <Link href="/automation" className="block hover:text-white">Automation</Link>
-                <Link href="/integrations" className="block hover:text-white">Integrations</Link>
-                <Link href="/whatsapp-sync" className="block hover:text-white">WhatsApp Sync</Link>
                 <a href="#pricing" className="block hover:text-white">Pricing</a>
-                <Link href="/demo" className="block hover:text-white">Live Demo</Link>
-                <Link href="/dashboard" className="block hover:text-white">Dashboard</Link>
-                <Link href="/blog" className="block hover:text-white">Blog</Link>
+                <Link href="/demo" className="block hover:text-white">Demo</Link>
+                <Link href="/contact" className="block hover:text-white">Contact</Link>
               </div>
             </div>
 
             <div>
-              <p className="text-sm font-semibold text-white">Company</p>
+              <p className="text-sm font-semibold text-white">Legal</p>
               <div className="mt-3 space-y-2 text-sm text-zinc-500">
-                <Link href="/contact" className="block hover:text-white">Contact</Link>
                 <Link href="/privacy" className="block hover:text-white">Privacy Policy</Link>
-                <Link href="/terms" className="block hover:text-white">Terms</Link>
-                <Link href="/login" className="block hover:text-white">Client Login</Link>
-                <Link href="/affiliate" className="block hover:text-white">Affiliate Program</Link>
+                <Link href="/terms" className="block hover:text-white">Terms of Service</Link>
+                <Link href="/refund-policy" className="block hover:text-white">Refund Policy</Link>
               </div>
             </div>
 
@@ -829,8 +820,8 @@ export default function HomePage() {
           </div>
 
           <div className="mt-12 flex flex-col gap-2 border-t border-zinc-800 pt-8 text-sm text-zinc-500 sm:flex-row sm:items-center sm:justify-between">
-            <p>© 2026 CypAI. All rights reserved.</p>
-            <p>Made for Northern Cyprus 🇨🇾 · Kyrenia · Nicosia · Famagusta</p>
+            <p>© 2026 CypAI. Built in Northern Cyprus. 🇨🇾</p>
+            <p>Payments powered by Paddle</p>
           </div>
         </div>
       </footer>
