@@ -203,13 +203,13 @@ export default function Navbar() {
             <Link
               href="/login"
               onClick={() => setIsMenuOpen(false)}
-              className="block rounded-lg px-4 py-2 text-gray-700 hover:bg-gray-50"
+              className="block rounded-lg border border-gray-300 px-4 py-2 text-center font-medium text-gray-700 hover:bg-gray-50"
             >
               Log In
             </Link>
             <Link
               href="/signup?plan=pro"
-              className="mx-4 block rounded-xl bg-[#e8a020] py-3 text-center font-semibold text-[#1a1a2e] hover:bg-[#d49020]"
+              className="mx-4 mt-2 block rounded-xl bg-[#e8a020] py-3 text-center font-semibold text-[#1a1a2e] hover:bg-[#d49020]"
             >
               Start Free Trial
             </Link>
