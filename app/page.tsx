@@ -356,6 +356,7 @@ export default function HomePage() {
             <span className="hidden sm:block">·</span>
             <span>✓ Cancel anytime</span>
           </div>
+          <p className="mt-4 text-sm text-zinc-400">Join [X] Cyprus businesses already using CypAI</p>
 
           <div className="mx-auto mt-16 max-w-4xl overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-900 shadow-2xl shadow-black/50">
             <div className="flex items-center gap-2 border-b border-zinc-700/50 bg-zinc-800/50 px-4 py-3">
@@ -404,6 +405,33 @@ export default function HomePage() {
                 ))}
               </div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="bg-zinc-950 py-16">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <p className="text-center text-xs font-semibold uppercase tracking-[0.2em] text-zinc-500">Built for your industry</p>
+          <h2 className="mt-3 text-center text-2xl font-bold text-white">We build for your industry →</h2>
+          <div className="mt-8 grid grid-cols-2 gap-4 md:grid-cols-3">
+            {[
+              { emoji: '🚗', title: 'Car Rentals', href: '/car-rentals', desc: 'Never miss a booking' },
+              { emoji: '🍽️', title: 'Restaurants', href: '/restaurants', desc: 'Full tables, zero missed reservations' },
+              { emoji: '🏨', title: 'Hotels', href: '/hotels', desc: '24/7 guest service' },
+              { emoji: '✂️', title: 'Barbershops', href: '/barbershops', desc: 'Bookings while you cut' },
+              { emoji: '🏥', title: 'Clinics', href: '/clinics', desc: 'Less admin, more patients' },
+              { emoji: '🎓', title: 'Student Housing', href: '/student-housing', desc: 'Fill rooms faster' },
+            ].map((vertical) => (
+              <Link
+                key={vertical.href}
+                href={vertical.href}
+                className="group rounded-2xl border border-zinc-800 bg-zinc-900 p-5 transition-all hover:border-blue-500/50 hover:bg-zinc-800"
+              >
+                <div className="text-3xl">{vertical.emoji}</div>
+                <h3 className="mt-3 text-lg font-semibold text-white group-hover:text-blue-400">{vertical.title}</h3>
+                <p className="mt-1 text-sm text-zinc-500">{vertical.desc}</p>
+              </Link>
+            ))}
           </div>
         </div>
       </section>
@@ -537,56 +565,20 @@ export default function HomePage() {
 
       <section id="automation" className="bg-zinc-950 py-24">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-zinc-500">No manual work</p>
-          <h2 className="mt-3 text-3xl font-black text-white sm:text-4xl">Automation-first operations for B2B SaaS teams</h2>
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-zinc-500">Automation</p>
+          <h2 className="mt-3 text-3xl font-black text-white sm:text-4xl">Follow up automatically. Never lose a lead.</h2>
           <p className="mt-4 max-w-3xl text-zinc-400">
-            Run lead recovery, follow-ups, and failure monitoring automatically. Your team focuses on deals, not repetitive admin tasks.
+            CypAI automatically follows up with customers who enquired but didn't book. Recover lost revenue without manual work.
           </p>
-          <div className="mt-10 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <div className="mt-10 grid gap-4 md:grid-cols-3">
             {[
-              ['Abandonment Recovery', 'Automatically retries failed signup/payment flows based on policy rules.'],
-              ['Spike Monitoring', 'Triggers alerts to webhook/email when failure-rate thresholds are crossed.'],
-              ['Delivery Logs', 'Tracks every alert attempt with filters, date ranges, and CSV export.'],
-              ['Retry Controls', 'Per-event retry windows and max retries to reduce noisy manual intervention.'],
-              ['Policy Testing', 'Send test alerts and validate channels before production issues happen.'],
-              ['Secure Webhooks', 'HMAC-signed outgoing webhooks with verification support on your receiver.'],
+              ['Lead Recovery', 'Automatically follow up with customers who didn\'t complete their booking.'],
+              ['Booking Reminders', 'Send appointment reminders to reduce no-shows.'],
+              ['Re-engagement', 'Win back past customers with personalized messages.'],
             ].map(([title, text]) => (
               <article key={title} className="rounded-2xl border border-zinc-800 bg-zinc-900 p-5">
                 <h3 className="text-lg font-semibold text-white">{title}</h3>
                 <p className="mt-2 text-sm text-zinc-400">{text}</p>
-              </article>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="border-y border-zinc-800 bg-zinc-900 py-24">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-zinc-500">What we implemented</p>
-          <h2 className="mt-3 text-3xl font-black text-white sm:text-4xl">Recent platform upgrades shipped</h2>
-          <div className="mt-10 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {shippedUpgrades.map((item) => (
-              <article key={item.title} className="rounded-2xl border border-zinc-800 bg-zinc-950 p-5">
-                <h3 className="text-base font-bold text-white">{item.title}</h3>
-                <p className="mt-2 text-sm text-zinc-400">{item.detail}</p>
-              </article>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section id="roadmap" className="bg-zinc-950 py-24">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-zinc-500">Based on your growth skill stack</p>
-          <h2 className="mt-3 text-3xl font-black text-white sm:text-4xl">High-impact modules we can add next</h2>
-          <p className="mt-4 max-w-3xl text-zinc-400">
-            These are aligned with your B2B SaaS goals: more organic traffic, less manual work, and stronger conversion performance.
-          </p>
-          <div className="mt-10 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {growthModules.map((item) => (
-              <article key={item.title} className="rounded-2xl border border-zinc-800 bg-zinc-900 p-5">
-                <h3 className="text-base font-bold text-white">{item.title}</h3>
-                <p className="mt-2 text-sm text-zinc-400">{item.detail}</p>
               </article>
             ))}
           </div>
@@ -623,8 +615,8 @@ export default function HomePage() {
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-zinc-500">Pricing</p>
           <h2 className="mt-3 text-3xl font-black text-white sm:text-4xl">Simple pricing, no surprises</h2>
           <p className="mt-4 text-zinc-400">7-day free trial on all plans. No credit card required. Cancel anytime.</p>
-          <p className="mt-2 text-sm text-blue-300">We accept all major card payments via PayPal checkout. Stripe direct checkout is marked as coming soon.</p>
-          <p className="mt-1 text-xs text-zinc-500">Current receiver: PayPal. Coming soon: native Stripe checkout option.</p>
+          <p className="mt-4 text-zinc-400">Secure card payment powered by Paddle — trusted by 3,000+ software companies.</p>
+          <p className="mt-1 text-xs text-zinc-500">Cancel anytime, no questions asked.</p>
 
           <div className="mt-10 grid grid-cols-1 items-stretch gap-6 md:grid-cols-3">
             {[
@@ -677,8 +669,8 @@ export default function HomePage() {
                   {plan.list.map((item) => (
                     <li key={item}>✓ {item}</li>
                   ))}
-                  <li>✓ All major cards via PayPal checkout</li>
-                  <li>✓ Stripe direct checkout (coming soon)</li>
+                  <li>✓ Secure card payment via Paddle</li>
+                  <li>✓ Cancel anytime, no questions asked</li>
                 </ul>
                 <Link
                   href={`/signup?plan=${plan.plan}`}
@@ -698,27 +690,23 @@ export default function HomePage() {
 
       <section className="border-y border-zinc-800 bg-zinc-900 py-24">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-zinc-500">Testimonials</p>
-          <h2 className="mt-3 text-3xl font-black text-white sm:text-4xl">Trusted by Cyprus businesses</h2>
-          <div className="mt-10 grid grid-cols-1 gap-6 md:grid-cols-3">
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-zinc-500">Why businesses trust CypAI</p>
+          <h2 className="mt-3 text-3xl font-black text-white sm:text-4xl">Built for Cyprus, trusted by local businesses</h2>
+          <div className="mt-10 grid grid-cols-2 gap-6 md:grid-cols-4">
             {[
-              ['Kyrenia Car Rentals', 'Before CypAI I answered messages at midnight. Now bookings are handled automatically.', 'M.A.', 'Bookings up 40%'],
-              ['Bellapais Hotel', 'Guests message in multiple languages and CypAI handles each one perfectly.', 'A.K.', 'Zero missed inquiries'],
-              ['Studio One Barbershop', 'Saved me hours each week by handling repetitive questions instantly.', 'Y.O.', '2+ hours saved daily'],
-            ].map(([business, quote, initials, result]) => (
-              <article key={business} className="rounded-2xl border border-zinc-800 bg-zinc-950 p-7 transition-colors hover:border-zinc-700">
-                <div className="mb-4 text-lg text-yellow-400">★★★★★</div>
-                <p className="mb-6 text-sm italic leading-relaxed text-zinc-300">{quote}</p>
-                <div className="mb-5 flex items-center gap-3">
-                  <span className="flex h-10 w-10 items-center justify-center rounded-full bg-zinc-800 text-sm font-bold text-zinc-200">{initials}</span>
-                  <div>
-                    <p className="text-sm font-semibold text-white">{business}</p>
-                    <p className="text-xs text-zinc-500">Local business</p>
-                  </div>
-                </div>
-                <span className="rounded-full border border-green-500/20 bg-green-500/10 px-3 py-1 text-xs font-semibold text-green-400">{result}</span>
+              ['[X]', 'Businesses using CypAI'],
+              ['5', 'Languages supported'],
+              ['<3s', 'Average response time'],
+              ['15min', 'Setup time'],
+            ].map(([stat, label]) => (
+              <article key={label} className="rounded-2xl border border-zinc-800 bg-zinc-950 p-6 text-center">
+                <div className="text-4xl font-black text-blue-400">{stat}</div>
+                <div className="mt-2 text-sm text-zinc-400">{label}</div>
               </article>
             ))}
+          </div>
+          <div className="mt-8 text-center">
+            <p className="text-sm text-zinc-500">Join businesses across Kyrenia, Famagusta, Nicosia, and Limassol</p>
           </div>
         </div>
       </section>
