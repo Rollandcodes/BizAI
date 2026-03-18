@@ -2,9 +2,9 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 
 export const metadata: Metadata = {
-  title: 'Integrations | Website, WhatsApp, and PayPal',
+  title: 'Integrations | Website, WhatsApp, and Paddle',
   description:
-    'See how CypAI integrates with your website, WhatsApp, and PayPal checkout flow for B2B SaaS operations and customer support.',
+    'See how CypAI integrates with your website, WhatsApp, and Paddle checkout flow for B2B SaaS operations and customer support.',
   alternates: {
     canonical: 'https://www.cypai.app/integrations',
   },
@@ -22,9 +22,9 @@ const integrations = [
     value: 'Reduce response delays and centralize chat operations.',
   },
   {
-    name: 'PayPal Checkout',
-    summary: 'Subscription payments stay on PayPal for trusted billing collection.',
-    value: 'Keep your existing payment receiver setup and finance process.',
+    name: 'Paddle Checkout',
+    summary: 'Subscription payments processed securely via Paddle for trusted billing collection.',
+    value: 'Secure card payments with automatic tax handling and global compliance.',
   },
   {
     name: 'Webhook Endpoints',
@@ -75,7 +75,7 @@ export default function IntegrationsPage() {
             <li className="rounded-xl border border-zinc-800 bg-zinc-950 p-4">1. Create account and configure your business data.</li>
             <li className="rounded-xl border border-zinc-800 bg-zinc-950 p-4">2. Add widget code to your website and test your chat flow.</li>
             <li className="rounded-xl border border-zinc-800 bg-zinc-950 p-4">3. Connect WhatsApp and validate message templates.</li>
-            <li className="rounded-xl border border-zinc-800 bg-zinc-950 p-4">4. Confirm PayPal checkout for subscriptions and billing.</li>
+            <li className="rounded-xl border border-zinc-800 bg-zinc-950 p-4">4. Confirm Paddle checkout for subscriptions and billing.</li>
             <li className="rounded-xl border border-zinc-800 bg-zinc-950 p-4">5. Enable automation alerts and monitor logs in dashboard.</li>
           </ol>
         </div>

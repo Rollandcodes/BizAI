@@ -285,33 +285,15 @@ export async function POST(req: NextRequest) {
             console.error('[chat] booking email error:', emailErr);
           }
 
-            // PayPal order creation
+            // PayPal order creation - removed for Paddle migration
             try {
               // Only proceed if booking was inserted
               if (insertedBooking?.id) {
-                const { createPayPalOrder } = await import('@/app/actions/paypal');
-                const paypalOrder = await createPayPalOrder(
-                  insertedBooking.id,
-                  Number(bookingIntent.totalDays) * 50, // Example: €50 per day
-                  'EUR',
-                  `Booking for ${bookingIntent.name} (${bookingIntent.carType})`
-                );
-                // Persist PayPal order ID/status
-                await supabase
-                  .from('bookings')
-                  .update({
-                    paypal_order_id: paypalOrder.id,
-                    paypal_order_status: paypalOrder.status,
-                  })
-                  .eq('id', insertedBooking.id);
-                // Find approval link
-                const approvalLink = paypalOrder.links.find(l => l.rel === 'approve')?.href;
-                if (approvalLink) {
-                  finalMessage += `\n\nTo confirm your booking, please complete payment: ${approvalLink}`;
-                }
+                // Payment processing coming soon - team will contact for payment
+                finalMessage += '\n\nBooking confirmed! Our team will contact you shortly regarding payment.';
               }
             } catch (paypalErr) {
-              console.error('[chat] PayPal order error:', paypalErr);
+              console.error('[chat] Payment order error:', paypalErr);
               finalMessage += '\n\nBooking confirmed, but payment link could not be generated. Our team will contact you.';
             }
 

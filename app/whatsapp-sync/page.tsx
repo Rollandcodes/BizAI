@@ -50,7 +50,7 @@ const capabilities = [
   ['AI channel continuity', 'Same business context and policy engine across channels'],
   ['Automation hooks', 'Retry, alerts, and follow-up flows triggered from WhatsApp events'],
   ['Operational reporting', 'End-to-end logs for delivery, response quality, and conversion'],
-  ['Billing continuity', 'PayPal remains active receiver while Stripe direct checkout is coming soon'],
+  ['Billing continuity', 'Paddle handles secure checkout while additional payment options are being added'],
 ]
 
 export default function WhatsAppSyncPage() {

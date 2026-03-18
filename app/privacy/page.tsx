@@ -63,7 +63,7 @@ export default function PrivacyPage() {
                 <li className="flex gap-2"><span className="mt-1 text-blue-500">▸</span><span><strong>Account information</strong> — your business name and email address when you sign up.</span></li>
                 <li className="flex gap-2"><span className="mt-1 text-blue-500">▸</span><span><strong>Business configuration</strong> — the custom instructions, FAQs, and settings you add to train your AI.</span></li>
                 <li className="flex gap-2"><span className="mt-1 text-blue-500">▸</span><span><strong>Customer conversation data</strong> — messages exchanged through your AI widget, including any lead information customers voluntarily provide.</span></li>
-                <li className="flex gap-2"><span className="mt-1 text-blue-500">▸</span><span><strong>Payment information</strong> — subscription payments are processed entirely by PayPal. We never store or see your card details.</span></li>
+                <li className="flex gap-2"><span className="mt-1 text-blue-500">▸</span><span><strong>Payment information</strong> — subscription payments are processed entirely by Paddle. We never store or see your card details.</span></li>
                 <li className="flex gap-2"><span className="mt-1 text-blue-500">▸</span><span><strong>Usage data</strong> — basic analytics such as conversation counts and feature usage, to help us improve the service.</span></li>
               </ul>
             </section>

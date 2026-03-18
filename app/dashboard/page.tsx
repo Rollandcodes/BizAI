@@ -23,12 +23,13 @@ import {
   Plus, Send, Settings, ShieldCheck,
   TrendingUp, Users, X, type LucideIcon,
 } from "lucide-react";
-import { PayPalButtons, usePayPalScriptReducer } from "@paypal/react-paypal-js";
 
 import { supabase } from "@/lib/supabase";
 import type { Business, BookingRecord } from "@/lib/supabase";
 import { PLANS, planDisplayName, planBadgeClass, PLAN_MESSAGE_LIMITS } from "@/lib/plans";
 import { Analytics } from "@/lib/analytics";
+import { CheckoutButton } from "@/components/CheckoutButton";
+import { PaddlePlan } from "@/lib/paddle";
 import { formatDate, formatDateTime, downloadCsv, parseMessages, conversationPreview } from "@/lib/utils";
 
 import OnboardingWizard from "@/components/OnboardingWizard";
@@ -179,32 +180,17 @@ function UpgradeCheckoutButtons({ planId, email, onSuccess, onError }: {
   planId: "starter"|"pro"|"business"; email: string;
   onSuccess: () => Promise<void>; onError: (msg: string) => void;
 }) {
-  const [{ isPending }] = usePayPalScriptReducer();
-  if (isPending) return <div className="rounded-2xl border border-zinc-800 bg-zinc-950 px-4 py-3 text-sm text-zinc-400">Loading PayPal…</div>;
   return (
-    <PayPalButtons
-      style={{ layout: "vertical", color: "gold", shape: "rect", label: "pay" }}
-      forceReRender={[planId, email]}
-      createOrder={async () => {
-        const res = await fetch("/api/paypal/create-order", {
-          method: "POST", headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ planId, customerEmail: email }),
-        });
-        const data = await res.json() as { id?: string; error?: string };
-        if (!data.id) { onError(data.error ?? "Unable to create PayPal order"); throw new Error(data.error); }
-        return data.id;
-      }}
-      onApprove={async (d) => {
-        const res = await fetch("/api/paypal/capture-order", {
-          method: "POST", headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ orderID: d.orderID, planId, businessEmail: email }),
-        });
-        const result = await res.json() as { success?: boolean; error?: string };
-        if (!result.success) { onError(result.error ?? "Payment failed"); return; }
-        await onSuccess();
-      }}
-      onError={() => onError("Payment failed. Please try again.")}
-    />
+    <div className="space-y-3">
+      <p className="text-sm text-zinc-400">Secure checkout powered by Paddle</p>
+      <CheckoutButton
+        plan={planId as PaddlePlan}
+        userEmail={email}
+        className="w-full rounded-xl bg-blue-600 py-3 px-6 text-center font-semibold text-white hover:bg-blue-700"
+      >
+        Upgrade to {PLANS[planId]?.name ?? planId}
+      </CheckoutButton>
+    </div>
   );
 }
 

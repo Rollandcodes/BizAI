@@ -3,12 +3,9 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Check } from 'lucide-react';
-import {
-  PayPalButtons,
-  PayPalScriptProvider,
-  usePayPalScriptReducer,
-} from '@paypal/react-paypal-js';
 import { trackEvent } from '@/lib/analytics';
+import { CheckoutButton } from '@/components/CheckoutButton';
+import { PaddlePlan } from '@/lib/paddle';
 
 type PricingDictionary = {
   starter: string;
@@ -195,7 +192,7 @@ export function PricingGrid({ dictionary }: Props) {
 
         {/* Trust strip */}
         <div className="flex flex-wrap justify-center gap-6 mt-8 text-sm text-gray-500">
-          <span>🔒 Secure PayPal Payments</span>
+          <span>🔒 Secure Payments</span>
           <span>↩️ 7-Day Money Back Guarantee</span>
           <span>🇨🇾 Local Cyprus Support</span>
           <span>✓ Cancel Anytime</span>
@@ -225,11 +222,11 @@ export function PricingGrid({ dictionary }: Props) {
           className="fixed inset-0 z-[70] flex items-center justify-center bg-slate-900/55 px-4"
           role="dialog"
           aria-modal="true"
-          aria-labelledby="paypal-modal-title"
+          aria-labelledby="paddle-modal-title"
         >
           <div className="w-full max-w-lg rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl">
             <div className="mb-4 flex items-start justify-between gap-4">
-              <h3 id="paypal-modal-title" className="text-xl font-bold text-slate-900">
+              <h3 id="paddle-modal-title" className="text-xl font-bold text-slate-900">
                 Start Your {selectedPlan.title} Plan
               </h3>
               <button
@@ -264,106 +261,21 @@ export function PricingGrid({ dictionary }: Props) {
                 🎉 Payment successful! Setting up your account...
               </div>
             ) : (
-              <PayPalScriptProvider
-                options={{
-                  clientId: process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || '',
-                  currency: 'USD',
-                  intent: 'capture',
-                }}
-              >
-                <PayPalCheckoutButtons
-                  planId={selectedPlan.id}
-                  customerEmail={customerEmail}
-                  onPaymentError={setPaymentError}
-                  onSuccess={() => {
-                    setIsSuccess(true);
-                    window.setTimeout(() => {
-                      router.push('/dashboard');
-                    }, 900);
-                  }}
-                />
-              </PayPalScriptProvider>
+              <div className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
+                <p className="mb-3 font-medium text-slate-700">Complete your purchase securely with Paddle</p>
+                <CheckoutButton
+                  plan={selectedPlan.id as PaddlePlan}
+                  userEmail={customerEmail}
+                  className="mt-3 block w-full rounded-xl bg-blue-600 py-3 px-6 text-center font-semibold text-white hover:bg-blue-700"
+                >
+                  Secure Checkout
+                </CheckoutButton>
+              </div>
             )}
           </div>
         </div>
       ) : null}
     </div>
-  );
-}
-
-function PayPalCheckoutButtons({
-  planId,
-  customerEmail,
-  onPaymentError,
-  onSuccess,
-}: {
-  planId: 'starter' | 'pro' | 'business';
-  customerEmail: string;
-  onPaymentError: (message: string) => void;
-  onSuccess: () => void;
-}) {
-  const [{ isPending }] = usePayPalScriptReducer();
-
-  if (isPending) {
-    return (
-      <div className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
-        Loading secure PayPal checkout...
-      </div>
-    );
-  }
-
-  return (
-    <PayPalButtons
-      forceReRender={[planId, customerEmail]}
-      style={{ layout: 'vertical', color: 'gold', shape: 'rect', label: 'pay' }}
-      createOrder={async () => {
-        const email = customerEmail.trim();
-        if (!email) {
-          const msg = 'Please enter your business email before continuing.';
-          onPaymentError(msg);
-          throw new Error(msg);
-        }
-
-        const res = await fetch('/api/paypal/create-order', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ planId, customerEmail: email }),
-        });
-
-        const data = (await res.json()) as { id?: string; error?: string };
-        if (!res.ok || !data.id) {
-          const msg = data.error || 'Unable to create PayPal order.';
-          onPaymentError(msg);
-          throw new Error(msg);
-        }
-
-        return data.id;
-      }}
-      onApprove={async (data) => {
-        const email = customerEmail.trim();
-        const res = await fetch('/api/paypal/capture-order', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            orderID: data.orderID,
-            planId,
-            customerEmail: email,
-          }),
-        });
-
-        const result = (await res.json()) as { success?: boolean; error?: string };
-        if (!res.ok || !result.success) {
-          const msg = result.error || 'Payment failed';
-          onPaymentError(msg);
-          return;
-        }
-
-        onSuccess();
-      }}
-      onError={() => {
-        onPaymentError('Payment failed. Please try again.');
-      }}
-    />
   );
 }
 

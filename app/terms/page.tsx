@@ -82,11 +82,11 @@ export default function TermsPage() {
             <section id="payment-terms" className="scroll-mt-8">
               <h2 className="mb-4 text-xl font-bold text-white">3. Payment Terms</h2>
               <ul className="space-y-3 text-sm leading-relaxed">
-                <li className="flex gap-2"><span className="mt-1 text-blue-300">▸</span><span>Subscriptions are billed <strong>monthly</strong> via PayPal. Yearly billing is available at a 17% discount.</span></li>
+                <li className="flex gap-2"><span className="mt-1 text-blue-300">▸</span><span>Subscriptions are billed <strong>monthly</strong> via Paddle. Yearly billing is available at a 17% discount.</span></li>
                 <li className="flex gap-2"><span className="mt-1 text-blue-300">▸</span><span>All plans include a <strong>7-day free trial</strong>. Cancel before the trial ends and you will not be charged.</span></li>
                 <li className="flex gap-2"><span className="mt-1 text-blue-300">▸</span><span>After the trial, subscriptions renew automatically each month. You can cancel at any time from your dashboard.</span></li>
                 <li className="flex gap-2"><span className="mt-1 text-blue-300">▸</span><span>No refunds are issued after the trial period unless there has been a confirmed technical failure on our side (see Section 5).</span></li>
-                <li className="flex gap-2"><span className="mt-1 text-blue-300">▸</span><span>Prices are listed in USD. PayPal handles currency conversion.</span></li>
+                <li className="flex gap-2"><span className="mt-1 text-blue-300">▸</span><span>Prices are listed in USD. Paddle handles currency conversion.</span></li>
               </ul>
             </section>
 

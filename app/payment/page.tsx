@@ -4,9 +4,9 @@ import { Suspense, startTransition, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Check } from 'lucide-react';
-import { PayPalButtons, usePayPalScriptReducer } from '@paypal/react-paypal-js';
 import { PLANS } from '@/lib/plans';
-import { Analytics } from '@/lib/analytics';
+import { CheckoutButton } from '@/components/CheckoutButton';
+import { PaddlePlan } from '@/lib/paddle';
 
 type SignupData = {
   businessName?: string;
@@ -33,157 +33,27 @@ function getSignupEmail(signupData: SignupData | null) {
 function PaymentButtons({
   planId,
   signupData,
-  onSuccess,
 }: {
   planId: string;
   signupData: SignupData;
-  onSuccess: () => void;
 }) {
-  const [{ isPending, isRejected }] = usePayPalScriptReducer();
-  const [error, setError] = useState('');
-  const [processing, setProcessing] = useState(false);
   const plan = PLANS[planId] ?? PLANS.pro;
   const businessName = getBusinessName(signupData);
   const email = getSignupEmail(signupData);
 
-  if (isPending) {
-    return (
-      <div className="flex flex-col items-center gap-3 py-8">
-        <div className="h-10 w-10 animate-spin rounded-full border-4 border-blue-600 border-t-transparent" />
-        <p className="text-sm text-zinc-400">Loading secure payment...</p>
-      </div>
-    );
-  }
-
-  if (isRejected) {
-    return (
-      <div className="space-y-3">
-        <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-center">
-          <p className="mb-1 font-semibold text-red-600">⚠️ PayPal failed to load</p>
-          <p className="text-sm text-red-500">Check your internet connection and refresh</p>
-        </div>
-        <a
-          href={`https://wa.me/905338425559?text=${encodeURIComponent(`Hi! I want to sign up for CypAI ${plan.name} Plan ($${plan.price}/mo).\nBusiness: ${businessName}\nEmail: ${email}`)}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex w-full items-center justify-center gap-2 rounded-xl bg-green-500 py-4 font-bold text-white transition-all hover:bg-green-600"
-        >
-          💬 Complete via WhatsApp instead
-        </a>
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-3">
-      {error && (
-        <div className="rounded-xl border border-red-200 bg-red-50 p-3">
-          <p className="text-sm text-red-600">⚠️ {error}</p>
-        </div>
-      )}
-
-      {processing && (
-        <div className="flex items-center gap-3 rounded-xl border border-blue-200 bg-blue-50 p-3">
-          <div className="h-5 w-5 animate-spin rounded-full border-2 border-blue-600 border-t-transparent" />
-          <p className="text-sm font-medium text-blue-700">Processing your payment...</p>
-        </div>
-      )}
-
-      <PayPalButtons
-        style={{
-          layout: 'vertical',
-          color: 'blue',
-          shape: 'rect',
-          label: 'paypal',
-          height: 50,
-          tagline: false,
-        }}
-        disabled={processing}
-        createOrder={async () => {
-          setError('');
-          try {
-            const res = await fetch('/api/paypal/create-order', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                planId,
-                customerEmail: email,
-              }),
-            });
-            const data = (await res.json()) as { id?: string; error?: string };
-            if (data.error || !data.id) {
-              throw new Error(data.error || 'Failed to create order');
-            }
-            return data.id;
-          } catch (err) {
-            const message = err instanceof Error ? err.message : 'Failed to create order';
-            setError(message);
-            Analytics.paymentFailed(planId);
-            throw err;
-          }
-        }}
-        onApprove={async (data) => {
-          setProcessing(true);
-          try {
-            const res = await fetch('/api/paypal/capture-order', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                orderID: data.orderID,
-                planId,
-                signupData,
-              }),
-            });
-            const result = (await res.json()) as {
-              success?: boolean;
-              user?: { id?: string; email?: string; businessName?: string; plan?: string };
-              error?: string;
-            };
-            if (!result.success) {
-              throw new Error(result.error || 'Payment capture failed');
-            }
-            const userPayload = {
-              ...result.user,
-              businessName: result.user?.businessName || businessName,
-              email: result.user?.email || email,
-              plan: result.user?.plan || planId,
-            };
-            localStorage.setItem('bizai_user', JSON.stringify(userPayload));
-            localStorage.setItem('cypai_user', JSON.stringify(userPayload));
-            onSuccess();
-          } catch (err) {
-            setError(err instanceof Error ? err.message : 'Payment failed');
-            setProcessing(false);
-            Analytics.paymentFailed(planId);
-          }
-        }}
-        onError={(err) => {
-          console.error('PayPal error:', err);
-          setError('Payment failed. Please try again or contact us on WhatsApp.');
-          setProcessing(false);
-          Analytics.paymentFailed(planId);
-        }}
-        onCancel={() => {
-          setError('Payment cancelled. Try again when ready.');
-          setProcessing(false);
-        }}
-      />
-
-      <div className="flex items-center gap-3">
-        <div className="flex-1 border-t border-zinc-800" />
-        <span className="text-xs text-zinc-500">or</span>
-        <div className="flex-1 border-t border-zinc-800" />
+      <div className="rounded-xl border border-blue-200 bg-blue-50 p-4 text-center">
+        <p className="mb-1 font-semibold text-blue-600">🔒 Secure checkout powered by Paddle</p>
+        <p className="text-sm text-blue-500">Secure card payment with 7-day free trial</p>
       </div>
-
-      <a
-        href={`https://wa.me/905338425559?text=${encodeURIComponent(`Hi! I want to sign up for CypAI ${plan.name} Plan ($${plan.price}/mo).\nBusiness: ${businessName}\nEmail: ${email}`)}`}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="flex w-full items-center justify-center gap-2 rounded-xl border border-green-300 py-3 text-sm font-medium text-green-600 transition-colors hover:bg-green-50"
+      <CheckoutButton
+        plan={planId as PaddlePlan}
+        userEmail={email}
+        className="flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 py-4 font-bold text-white transition-all hover:bg-blue-700"
       >
-        💬 Pay manually via WhatsApp
-      </a>
-
+        Subscribe Now
+      </CheckoutButton>
       <div className="flex items-center justify-center gap-3 pt-1 text-xs text-zinc-500">
         <span>🔒 SSL Secured</span>
         <span>•</span>
@@ -191,10 +61,6 @@ function PaymentButtons({
         <span>•</span>
         <span>7-day trial</span>
       </div>
-
-      <p className="text-center text-xs text-zinc-500">
-        Secured by PayPal. CypAI never stores your card details.
-      </p>
     </div>
   );
 }
@@ -206,8 +72,6 @@ function PaymentContent() {
   const plan = PLANS[planId] ?? PLANS.pro;
 
   const [signupData, setSignupData] = useState<SignupData | null>(null);
-  const hasTrackedPaymentStart = useRef(false);
-  const paymentCompletedRef = useRef(false);
 
   useEffect(() => {
     try {
@@ -218,70 +82,8 @@ function PaymentContent() {
     }
   }, []);
 
-  useEffect(() => {
-    if (hasTrackedPaymentStart.current) return;
-    hasTrackedPaymentStart.current = true;
-    Analytics.paymentStarted(planId, Number(plan.price));
-  }, [plan.price, planId]);
-
-  function handleSuccess() {
-    paymentCompletedRef.current = true;
-    Analytics.paymentCompleted(planId, Number(plan.price));
-    router.push('/success');
-  }
-
   const businessName = getBusinessName(signupData);
   const email = getSignupEmail(signupData);
-
-  useEffect(() => {
-    const sendAbandonmentEvent = () => {
-      if (paymentCompletedRef.current) return;
-      if (!email.trim()) return;
-
-      Analytics.paymentFailed(planId);
-
-      const payload = {
-        eventType: 'abandoned_payment',
-        planId,
-        email: email.trim(),
-        businessName,
-        businessType: signupData?.businessType || '',
-        source: 'payment_page',
-      };
-
-      Analytics.paymentAbandoned(planId, Number(plan.price));
-
-      try {
-        const body = JSON.stringify(payload);
-        if (navigator.sendBeacon) {
-          navigator.sendBeacon('/api/automation', new Blob([body], { type: 'application/json' }));
-        } else {
-          fetch('/api/automation', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body,
-            keepalive: true,
-          }).catch(() => undefined);
-        }
-      } catch {
-        // Do nothing - abandonment tracking should never block UX.
-      }
-    };
-
-    const onVisibilityChange = () => {
-      if (document.visibilityState === 'hidden') {
-        sendAbandonmentEvent();
-      }
-    };
-
-    window.addEventListener('beforeunload', sendAbandonmentEvent);
-    document.addEventListener('visibilitychange', onVisibilityChange);
-
-    return () => {
-      document.removeEventListener('visibilitychange', onVisibilityChange);
-      window.removeEventListener('beforeunload', sendAbandonmentEvent);
-    };
-  }, [planId, email, businessName, signupData?.businessType]);
 
   return (
     <div className="flex min-h-screen flex-col bg-zinc-950 text-zinc-100">
@@ -336,7 +138,7 @@ function PaymentContent() {
                 </div>
               </div>
 
-<div className="my-5 border-t border-zinc-800" />
+              <div className="my-5 border-t border-zinc-800" />
 
               <div className="flex items-end justify-between">
                 <div>
@@ -351,7 +153,7 @@ function PaymentContent() {
 
               <div className="mt-5 space-y-2.5">
                 {[
-                  { icon: '🔒', text: 'Secure PayPal Payment' },
+                  { icon: '🔒', text: 'Secure Payment' },
                   { icon: '↩️', text: 'Cancel anytime, no contracts' },
                   { icon: '🇨🇾', text: 'Cyprus local support' },
                 ].map(({ icon, text }) => (
@@ -384,7 +186,7 @@ function PaymentContent() {
                   Pay securely without leaving CypAI
                 </p>
                 {signupData ? (
-                  <PaymentButtons planId={planId} signupData={signupData} onSuccess={handleSuccess} />
+                  <PaymentButtons planId={planId} signupData={signupData} />
                 ) : (
                   <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-4 text-sm text-amber-800">
                     <p className="font-semibold">Missing account details</p>
@@ -413,4 +215,3 @@ export default function PaymentPage() {
     </Suspense>
   );
 }
-

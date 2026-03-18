@@ -126,8 +126,8 @@ const shippedUpgrades = [
     detail: 'Filter, paginate, date-range, and export alert logs to CSV without manual reporting.',
   },
   {
-    title: 'PayPal Billing Flow',
-    detail: 'Subscription checkout is kept on PayPal so payout collection stays in your PayPal receiver.',
+    title: 'Paddle Billing Flow',
+    detail: 'Secure subscription checkout processed via Paddle with automatic tax handling and global compliance.',
   },
 ]
 

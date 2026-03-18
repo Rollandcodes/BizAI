@@ -76,7 +76,7 @@ export default function AutomationPage() {
             <li className="rounded-xl border border-zinc-800 bg-zinc-950 p-4">More recovered revenue from failed or abandoned funnels</li>
             <li className="rounded-xl border border-zinc-800 bg-zinc-950 p-4">Clear reporting with filterable audit-ready logs</li>
           </ul>
-          <p className="mt-6 text-sm text-blue-300">Billing and subscription checkout remain processed via PayPal.</p>
+          <p className="mt-6 text-sm text-blue-300">Billing and subscription checkout are securely processed via Paddle.</p>
         </div>
       </section>
 
