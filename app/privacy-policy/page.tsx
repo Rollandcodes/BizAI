@@ -51,10 +51,10 @@ export default function PrivacyPolicyPage() {
               <p className="mt-4">
                 <strong>Contact:</strong>{' '}
                 <a
-                  href="mailto:support@cypai.app"
+                  href="mailto:cypai.app@cypai.app"
                   className="text-[#e8a020] hover:underline"
                 >
-                  support@cypai.app
+                  cypai.app@cypai.app
                 </a>
               </p>
               <p className="mt-2">
@@ -205,10 +205,10 @@ export default function PrivacyPolicyPage() {
                 <li>
                   <strong>Correction</strong> — request data corrections by emailing{' '}
                   <a
-                    href="mailto:support@cypai.app"
+                    href="mailto:cypai.app@cypai.app"
                     className="text-[#e8a020] hover:underline"
                   >
-                    support@cypai.app
+                    cypai.app@cypai.app
                   </a>
                 </li>
                 <li>
@@ -292,10 +292,10 @@ export default function PrivacyPolicyPage() {
               <p className="mt-4">
                 <strong>Email:</strong>{' '}
                 <a
-                  href="mailto:support@cypai.app"
+                  href="mailto:cypai.app@cypai.app"
                   className="text-[#e8a020] hover:underline"
                 >
-                  support@cypai.app
+                  cypai.app@cypai.app
                 </a>
               </p>
               <p className="mt-2">

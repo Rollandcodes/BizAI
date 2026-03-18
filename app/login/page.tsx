@@ -176,7 +176,7 @@ export default function LoginPage() {
               </button>
 
               <p className="text-center text-xs text-gray-500">
-                Forgot email? <a href="mailto:support@cypai.app" className="text-[#e8a020] hover:underline">Contact support@cypai.app</a>
+                Forgot email? <a href="mailto:cypai.app@cypai.app" className="text-[#e8a020] hover:underline">Contact cypai.app@cypai.app</a>
               </p>
             </form>
 

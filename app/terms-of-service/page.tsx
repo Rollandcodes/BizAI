@@ -148,7 +148,7 @@ export default function TermsOfServicePage() {
               <ul className="list-inside list-disc space-y-2">
                 <li>We offer a 30-day money-back guarantee on all subscriptions</li>
                 <li>Refunds are processed back to your original payment method within 5-10 business days</li>
-                <li>To request a refund, email support@cypai.app</li>
+                <li>To request a refund, email cypai.app@cypai.app</li>
                 <li>See our full Refund Policy at <Link href="/refund-policy" className="text-[#e8a020] underline hover:no-underline">/refund-policy</Link></li>
               </ul>
             </section>
@@ -231,10 +231,10 @@ export default function TermsOfServicePage() {
                 <li>
                   Email:{' '}
                   <a
-                    href="mailto:support@cypai.app"
+                    href="mailto:cypai.app@cypai.app"
                     className="font-semibold text-[#e8a020] hover:underline"
                   >
-                    support@cypai.app
+                    cypai.app@cypai.app
                   </a>
                 </li>
                 <li>Response time: Within 24 hours on business days</li>

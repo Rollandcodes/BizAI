@@ -14,6 +14,8 @@ type FormState = {
   message: string
 }
 
+type SubmitStatus = 'idle' | 'loading' | 'success' | 'error'
+
 export default function ContactPage() {
   const [form, setForm] = useState<FormState>({
     name: '',
@@ -21,20 +23,40 @@ export default function ContactPage() {
     businessName: '',
     message: '',
   })
-  const [submitted, setSubmitted] = useState(false)
+  const [status, setStatus] = useState<SubmitStatus>('idle')
+  const [errorMessage, setErrorMessage] = useState('')
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }))
   }
 
-  function handleSubmit(e: FormEvent) {
+  async function handleSubmit(e: FormEvent) {
     e.preventDefault()
-    const subject = encodeURIComponent(`CypAI Inquiry from ${form.name} — ${form.businessName}`)
-    const body = encodeURIComponent(
-      `Name: ${form.name}\nEmail: ${form.email}\nBusiness: ${form.businessName}\n\nMessage:\n${form.message}`
-    )
-    window.open(`mailto:${CONTACT_EMAIL}?subject=${subject}&body=${body}`, '_blank')
-    setSubmitted(true)
+    setStatus('loading')
+    setErrorMessage('')
+
+    try {
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(form),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        setErrorMessage(data.error || 'Failed to send message')
+        setStatus('error')
+        return
+      }
+
+      setStatus('success')
+    } catch (error) {
+      setErrorMessage('Failed to send message. Please try again or contact us via WhatsApp.')
+      setStatus('error')
+    }
   }
 
   return (
@@ -64,7 +86,7 @@ export default function ContactPage() {
           <div className="text-center">
             <p className="text-xs font-medium uppercase tracking-widest text-zinc-500">Contact</p>
             <h1 className="mt-4 text-5xl font-black leading-none tracking-tight text-white sm:text-6xl">
-              Let&apos;s Talk About Your Business
+              Let's Talk About Your Business
             </h1>
             <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-zinc-400">
               We help businesses across Cyprus set up AI chat, lead capture, bookings, and follow-ups in days, not months.
@@ -73,20 +95,37 @@ export default function ContactPage() {
 
           <div className="mt-16 grid gap-8 lg:grid-cols-[1.2fr_0.8fr]">
             <div className="rounded-2xl border border-zinc-800 bg-zinc-900 p-8">
-              {submitted ? (
+              {status === 'success' ? (
                 <div className="py-10 text-center">
-                  <p className="text-xs font-medium uppercase tracking-widest text-zinc-500">Message Sent</p>
-                  <h2 className="mt-3 text-3xl font-black leading-tight text-white">Your email draft is ready</h2>
+                  <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-500/10">
+                    <svg className="h-8 w-8 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                  <p className="text-xs font-medium uppercase tracking-widest text-green-500">Message Sent</p>
+                  <h2 className="mt-3 text-3xl font-black leading-tight text-white">Thank you for reaching out!</h2>
                   <p className="mx-auto mt-4 max-w-md text-sm leading-relaxed text-zinc-400">
-                    Your email app should be open now. If not, send us directly at{' '}
-                    <a href={`mailto:${CONTACT_EMAIL}`} className="font-semibold text-white underline">
-                      {CONTACT_EMAIL}
-                    </a>
-                    .
+                    We've received your message and will get back to you within a few hours.
                   </p>
+                  <div className="mt-6 rounded-xl bg-green-500/10 border border-green-500/20 p-4">
+                    <p className="text-sm text-green-400">
+                      Need faster assistance? Chat with us on WhatsApp!
+                    </p>
+                    <a
+                      href={WA_LINK}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="mt-3 inline-flex rounded-xl bg-green-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-green-500"
+                    >
+                      Chat on WhatsApp
+                    </a>
+                  </div>
                   <button
                     type="button"
-                    onClick={() => setSubmitted(false)}
+                    onClick={() => {
+                      setStatus('idle')
+                      setForm({ name: '', email: '', businessName: '', message: '' })
+                    }}
                     className="mt-8 rounded-xl border border-zinc-700 px-6 py-2.5 text-sm font-semibold text-zinc-200 hover:border-zinc-600"
                   >
                     Send another message
@@ -94,6 +133,11 @@ export default function ContactPage() {
                 </div>
               ) : (
                 <form onSubmit={handleSubmit} className="space-y-5">
+                  {status === 'error' && (
+                    <div className="rounded-xl bg-red-500/10 border border-red-500/20 p-4">
+                      <p className="text-sm text-red-400">{errorMessage}</p>
+                    </div>
+                  )}
                   <p className="text-xs font-medium uppercase tracking-widest text-zinc-500">Send a Message</p>
 
                   <div className="grid gap-5 sm:grid-cols-2">
@@ -105,7 +149,8 @@ export default function ContactPage() {
                         value={form.name}
                         onChange={handleChange}
                         placeholder="Ahmed Yilmaz"
-                        className="h-12 w-full rounded-xl border border-zinc-700 bg-zinc-950 px-4 text-sm text-zinc-100 outline-none focus:border-blue-500"
+                        disabled={status === 'loading'}
+                        className="h-12 w-full rounded-xl border border-zinc-700 bg-zinc-950 px-4 text-sm text-zinc-100 outline-none focus:border-blue-500 disabled:opacity-50"
                       />
                     </Field>
                     <Field label="Email Address" required>
@@ -116,7 +161,8 @@ export default function ContactPage() {
                         value={form.email}
                         onChange={handleChange}
                         placeholder="you@business.com"
-                        className="h-12 w-full rounded-xl border border-zinc-700 bg-zinc-950 px-4 text-sm text-zinc-100 outline-none focus:border-blue-500"
+                        disabled={status === 'loading'}
+                        className="h-12 w-full rounded-xl border border-zinc-700 bg-zinc-950 px-4 text-sm text-zinc-100 outline-none focus:border-blue-500 disabled:opacity-50"
                       />
                     </Field>
                   </div>
@@ -128,7 +174,8 @@ export default function ContactPage() {
                       value={form.businessName}
                       onChange={handleChange}
                       placeholder="My Business"
-                      className="h-12 w-full rounded-xl border border-zinc-700 bg-zinc-950 px-4 text-sm text-zinc-100 outline-none focus:border-blue-500"
+                      disabled={status === 'loading'}
+                      className="h-12 w-full rounded-xl border border-zinc-700 bg-zinc-950 px-4 text-sm text-zinc-100 outline-none focus:border-blue-500 disabled:opacity-50"
                     />
                   </Field>
 
@@ -140,15 +187,17 @@ export default function ContactPage() {
                       value={form.message}
                       onChange={handleChange}
                       placeholder="Tell us what you want to automate first..."
-                      className="w-full resize-none rounded-2xl border border-zinc-700 bg-zinc-950 px-4 py-3 text-sm text-zinc-100 outline-none focus:border-blue-500"
+                      disabled={status === 'loading'}
+                      className="w-full resize-none rounded-2xl border border-zinc-700 bg-zinc-950 px-4 py-3 text-sm text-zinc-100 outline-none focus:border-blue-500 disabled:opacity-50"
                     />
                   </Field>
 
                   <button
                     type="submit"
-                    className="w-full rounded-xl bg-blue-600 py-3.5 text-sm font-semibold text-white transition-all hover:-translate-y-0.5 hover:bg-blue-500 hover:shadow-lg hover:shadow-blue-500/25"
+                    disabled={status === 'loading'}
+                    className="w-full rounded-xl bg-blue-600 py-3.5 text-sm font-semibold text-white transition-all hover:-translate-y-0.5 hover:bg-blue-500 hover:shadow-lg hover:shadow-blue-500/25 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
                   >
-                    Send Message
+                    {status === 'loading' ? 'Sending...' : 'Send Message'}
                   </button>
                 </form>
               )}
@@ -206,5 +255,3 @@ function Field({
     </label>
   )
 }
-
-

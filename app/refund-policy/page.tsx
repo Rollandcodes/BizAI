@@ -63,10 +63,10 @@ export default function RefundPolicyPage() {
               <p>
                 Email us at{' '}
                 <a
-                  href="mailto:support@cypai.app"
+                  href="mailto:cypai.app@cypai.app"
                   className="font-semibold text-[#e8a020] hover:underline"
                 >
-                  support@cypai.app
+                  cypai.app@cypai.app
                 </a>{' '}
                 with the subject line "Refund Request" and your account email address. We will process your refund within 5–10 business days back to your original payment method.
               </p>
@@ -107,10 +107,10 @@ export default function RefundPolicyPage() {
               <p>
                 Contact us at{' '}
                 <a
-                  href="mailto:support@cypai.app"
+                  href="mailto:cypai.app@cypai.app"
                   className="font-semibold text-[#e8a020] hover:underline"
                 >
-                  support@cypai.app
+                  cypai.app@cypai.app
                 </a>{' '}
                 and we will respond within 24 hours on business days.
               </p>

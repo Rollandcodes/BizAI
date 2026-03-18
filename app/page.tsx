@@ -708,6 +708,40 @@ export default function HomePage() {
           </div>
         </section>
 
+        {/* Mini Contact Strip */}
+        <section className="bg-[#16213e] border-t border-white/5 py-12">
+          <div className="mx-auto max-w-4xl px-4 text-center">
+            <p className="text-lg text-white/80 mb-6">
+              Questions? We reply within a few hours.
+            </p>
+            <div className="flex flex-wrap justify-center gap-4">
+              <a
+                href="mailto:cypai.app@cypai.app"
+                className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-6 py-3 text-sm font-semibold text-white hover:bg-white/10 transition-colors"
+              >
+                <span>📧</span>
+                Email
+              </a>
+              <a
+                href="https://wa.me/35799999999"
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-6 py-3 text-sm font-semibold text-white hover:bg-white/10 transition-colors"
+              >
+                <span>💬</span>
+                WhatsApp
+              </a>
+              <Link
+                href="/contact"
+                className="inline-flex items-center gap-2 rounded-xl bg-amber-500 px-6 py-3 text-sm font-semibold text-black hover:bg-amber-400 transition-colors"
+              >
+                Send a message
+                <span>→</span>
+              </Link>
+            </div>
+          </div>
+        </section>
+
         {/* Section 12: Footer */}
         <footer className="border-t border-white/10 bg-[#0a0f1e] py-16">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
