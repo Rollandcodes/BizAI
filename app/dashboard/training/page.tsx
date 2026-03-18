@@ -4,45 +4,30 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Brain, Save, RefreshCw, BookOpen, MessageSquare, Calendar, Settings, Check, AlertCircle } from "lucide-react";
 import { supabase } from "@/lib/supabase";
-import type { Business } from "@/lib/supabase";
-
-const DASHBOARD_STORAGE_KEY = "cypai-dashboard-email";
+import { useBusiness } from "@/contexts/BusinessContext";
+import { ChatSkeleton } from "@/components/dashboard/Skeleton";
 
 export default function TrainingPage() {
   const router = useRouter();
+  const { business, loading: contextLoading, isAuthenticated } = useBusiness();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [business, setBusiness] = useState<Business | null>(null);
   const [systemPrompt, setSystemPrompt] = useState("");
   const [saved, setSaved] = useState(false);
 
+  // Redirect if not authenticated
   useEffect(() => {
-    async function fetchData() {
-      const email = localStorage.getItem(DASHBOARD_STORAGE_KEY);
-      if (!email) {
-        router.push("/login");
-        return;
-      }
+    if (!contextLoading && !isAuthenticated) {
+      router.push("/login");
+    }
+  }, [contextLoading, isAuthenticated, router]);
 
-      // Get business by email
-      const { data: businessData } = await supabase
-        .from("businesses")
-        .select("*")
-        .eq("email", email)
-        .single();
-
-      if (!businessData) {
-        setLoading(false);
-        return;
-      }
-
-      setBusiness(businessData as Business);
-      setSystemPrompt(businessData.system_prompt || getDefaultPrompt(businessData.business_type));
+  useEffect(() => {
+    if (business) {
+      setSystemPrompt(business.system_prompt || getDefaultPrompt(business.business_type));
       setLoading(false);
     }
-
-    void fetchData();
-  }, [router]);
+  }, [business]);
 
   function getDefaultPrompt(businessType?: string | null) {
     const defaultPrompts: Record<string, string> = {
@@ -75,10 +60,10 @@ export default function TrainingPage() {
     }
   }
 
-  if (loading) {
+  if (contextLoading || loading) {
     return (
       <div className="flex h-[calc(100vh-200px)] items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#e8a020] border-t-transparent" />
+        <ChatSkeleton />
       </div>
     );
   }

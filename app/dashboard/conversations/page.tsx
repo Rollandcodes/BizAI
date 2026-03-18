@@ -3,52 +3,46 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
-import type { Business, Conversation } from "@/lib/supabase";
+import type { Conversation } from "@/lib/supabase";
+import { useBusiness } from "@/contexts/BusinessContext";
 import ConversationsTab from "@/components/dashboard/ConversationsTab";
-
-const DASHBOARD_STORAGE_KEY = "cypai-dashboard-email";
+import { ConversationsEmpty } from "@/components/dashboard/EmptyState";
+import { ChatSkeleton } from "@/components/dashboard/Skeleton";
 
 export default function ConversationsPage() {
   const router = useRouter();
-  const [loading, setLoading] = useState(true);
-  const [business, setBusiness] = useState<Business | null>(null);
+  const { business, loading: contextLoading, isAuthenticated } = useBusiness();
   const [conversations, setConversations] = useState<Conversation[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    async function fetchData() {
-      const email = localStorage.getItem(DASHBOARD_STORAGE_KEY);
-      if (!email) {
-        router.push("/login");
-        return;
-      }
+    // Redirect if not authenticated
+    if (!contextLoading && !isAuthenticated) {
+      router.push("/login");
+    }
+  }, [contextLoading, isAuthenticated, router]);
 
-      // Get business by email
-      const { data: businessData } = await supabase
-        .from("businesses")
-        .select("*")
-        .eq("email", email)
-        .single();
-
-      if (!businessData) {
+  useEffect(() => {
+    async function fetchConversations() {
+      if (!business) {
         setLoading(false);
         return;
       }
 
-      setBusiness(businessData as Business);
-
-      // Fetch conversations
       const { data: convData } = await supabase
         .from("conversations")
         .select("*")
-        .eq("business_id", businessData.id)
+        .eq("business_id", business.id)
         .order("created_at", { ascending: false });
 
       setConversations((convData as Conversation[]) ?? []);
       setLoading(false);
     }
 
-    void fetchData();
-  }, [router]);
+    if (business) {
+      void fetchConversations();
+    }
+  }, [business]);
 
   async function handleLeadContacted(leadId: string, contacted: boolean) {
     if (!business) return;
@@ -65,10 +59,10 @@ export default function ConversationsPage() {
     );
   }
 
-  if (loading) {
+  if (contextLoading || loading) {
     return (
       <div className="flex h-[calc(100vh-200px)] items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#e8a020] border-t-transparent" />
+        <ChatSkeleton />
       </div>
     );
   }
@@ -79,6 +73,11 @@ export default function ConversationsPage() {
         <p className="text-slate-500">No business found. Please log in again.</p>
       </div>
     );
+  }
+
+  // Show empty state if no conversations
+  if (conversations.length === 0) {
+    return <ConversationsEmpty />;
   }
 
   return (

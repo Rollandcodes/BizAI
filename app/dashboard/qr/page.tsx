@@ -3,45 +3,29 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { QrCode, Copy, Check, Download, Smartphone, MessageCircle, ExternalLink } from "lucide-react";
-import { supabase } from "@/lib/supabase";
-import type { Business } from "@/lib/supabase";
+import { useBusiness } from "@/contexts/BusinessContext";
 import QRCode from "react-qr-code";
-
-const DASHBOARD_STORAGE_KEY = "cypai-dashboard-email";
+import { ChatSkeleton } from "@/components/dashboard/Skeleton";
 
 export default function QRPage() {
   const router = useRouter();
+  const { business, loading: contextLoading, isAuthenticated } = useBusiness();
   const [loading, setLoading] = useState(true);
-  const [business, setBusiness] = useState<Business | null>(null);
   const [copiedChat, setCopiedChat] = useState(false);
   const [copiedWhatsApp, setCopiedWhatsApp] = useState(false);
 
+  // Redirect if not authenticated
   useEffect(() => {
-    async function fetchData() {
-      const email = localStorage.getItem(DASHBOARD_STORAGE_KEY);
-      if (!email) {
-        router.push("/login");
-        return;
-      }
+    if (!contextLoading && !isAuthenticated) {
+      router.push("/login");
+    }
+  }, [contextLoading, isAuthenticated, router]);
 
-      // Get business by email
-      const { data: businessData } = await supabase
-        .from("businesses")
-        .select("*")
-        .eq("email", email)
-        .single();
-
-      if (!businessData) {
-        setLoading(false);
-        return;
-      }
-
-      setBusiness(businessData as Business);
+  useEffect(() => {
+    if (business) {
       setLoading(false);
     }
-
-    void fetchData();
-  }, [router]);
+  }, [business]);
 
   const chatUrl = business ? `${typeof window !== "undefined" ? window.location.origin : "https://cypai.app"}/chat/${business.id}` : "";
   const whatsAppUrl = business?.whatsapp ? `https://wa.me/${business.whatsapp.replace(/\D/g, "")}` : "";
@@ -57,10 +41,10 @@ export default function QRPage() {
     }
   }
 
-  if (loading) {
+  if (contextLoading || loading) {
     return (
       <div className="flex h-[calc(100vh-200px)] items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#e8a020] border-t-transparent" />
+        <ChatSkeleton />
       </div>
     );
   }

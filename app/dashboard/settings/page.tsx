@@ -3,63 +3,52 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
-import type { Business } from "@/lib/supabase";
+import { useBusiness } from "@/contexts/BusinessContext";
 import SettingsTab from "@/components/dashboard/SettingsTab";
 import { planDisplayName } from "@/lib/plans";
-
-const DASHBOARD_STORAGE_KEY = "cypai-dashboard-email";
+import { ChatSkeleton } from "@/components/dashboard/Skeleton";
 
 export default function SettingsPage() {
   const router = useRouter();
+  const { business: contextBusiness, loading: contextLoading, isAuthenticated, refresh } = useBusiness();
   const [loading, setLoading] = useState(true);
-  const [business, setBusiness] = useState<Business | null>(null);
+  const [business, setBusiness] = useState(contextBusiness);
   const [toast, setToast] = useState<{ message: string; tone: "success" | "error" } | null>(null);
 
+  // Redirect if not authenticated
   useEffect(() => {
-    async function fetchData() {
-      const email = localStorage.getItem(DASHBOARD_STORAGE_KEY);
-      if (!email) {
-        router.push("/login");
-        return;
-      }
+    if (!contextLoading && !isAuthenticated) {
+      router.push("/login");
+    }
+  }, [contextLoading, isAuthenticated, router]);
 
-      // Get business by email
-      const { data: businessData } = await supabase
-        .from("businesses")
-        .select("*")
-        .eq("email", email)
-        .single();
-
-      if (!businessData) {
-        setLoading(false);
-        return;
-      }
-
-      setBusiness(businessData as Business);
+  useEffect(() => {
+    if (contextBusiness) {
+      setBusiness(contextBusiness);
       setLoading(false);
     }
-
-    void fetchData();
-  }, [router]);
+  }, [contextBusiness]);
 
   function handleSaved() {
     // Refresh business data after save
-    async function refreshData() {
-      const email = localStorage.getItem(DASHBOARD_STORAGE_KEY);
-      if (!email) return;
+    void refresh().then(() => {
+      // After refresh, fetch the updated data
+      async function fetchUpdated() {
+        const email = localStorage.getItem("cypai-dashboard-email");
+        if (!email) return;
 
-      const { data } = await supabase
-        .from("businesses")
-        .select("*")
-        .eq("email", email)
-        .single();
+        const { data } = await supabase
+          .from("businesses")
+          .select("*")
+          .eq("owner_email", email)
+          .single();
 
-      if (data) {
-        setBusiness(data as Business);
+        if (data) {
+          setBusiness(data as typeof data);
+        }
       }
-    }
-
-    void refreshData();
+      void fetchUpdated();
+    });
   }
 
   function showToast(message: string, tone: "success" | "error") {
@@ -67,10 +56,10 @@ export default function SettingsPage() {
     setTimeout(() => setToast(null), 3000);
   }
 
-  if (loading) {
+  if (contextLoading || loading) {
     return (
       <div className="flex h-[calc(100vh-200px)] items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#e8a020] border-t-transparent" />
+        <ChatSkeleton />
       </div>
     );
   }

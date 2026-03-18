@@ -1,49 +1,23 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { supabase } from "@/lib/supabase";
-import type { Business } from "@/lib/supabase";
+import { useBusiness } from "@/contexts/BusinessContext";
 import FollowUpsTab from "@/components/dashboard/FollowUpsTab";
-
-const DASHBOARD_STORAGE_KEY = "cypai-dashboard-email";
+import { ChatSkeleton } from "@/components/dashboard/Skeleton";
 
 export default function FollowUpsPage() {
   const router = useRouter();
-  const [loading, setLoading] = useState(true);
-  const [business, setBusiness] = useState<Business | null>(null);
+  const { business, loading: contextLoading, isAuthenticated } = useBusiness();
 
-  useEffect(() => {
-    async function fetchData() {
-      const email = localStorage.getItem(DASHBOARD_STORAGE_KEY);
-      if (!email) {
-        router.push("/login");
-        return;
-      }
+  // Redirect if not authenticated
+  if (!contextLoading && !isAuthenticated) {
+    router.push("/login");
+  }
 
-      // Get business by email
-      const { data: businessData } = await supabase
-        .from("businesses")
-        .select("*")
-        .eq("email", email)
-        .single();
-
-      if (!businessData) {
-        setLoading(false);
-        return;
-      }
-
-      setBusiness(businessData as Business);
-      setLoading(false);
-    }
-
-    void fetchData();
-  }, [router]);
-
-  if (loading) {
+  if (contextLoading) {
     return (
       <div className="flex h-[calc(100vh-200px)] items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#e8a020] border-t-transparent" />
+        <ChatSkeleton />
       </div>
     );
   }

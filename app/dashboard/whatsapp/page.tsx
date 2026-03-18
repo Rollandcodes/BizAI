@@ -4,43 +4,34 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Smartphone, Check, X, ExternalLink, Copy, RefreshCw, MessageCircle } from "lucide-react";
 import { supabase } from "@/lib/supabase";
-import type { Business } from "@/lib/supabase";
-
-const DASHBOARD_STORAGE_KEY = "cypai-dashboard-email";
+import { useBusiness } from "@/contexts/BusinessContext";
+import { ChatSkeleton } from "@/components/dashboard/Skeleton";
 
 export default function WhatsAppPage() {
   const router = useRouter();
-  const [loading, setLoading] = useState(true);
-  const [business, setBusiness] = useState<Business | null>(null);
+  const { business, loading: contextLoading, isAuthenticated } = useBusiness();
   const [whatsappEvents, setWhatsappEvents] = useState<unknown[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // Redirect if not authenticated
+  useEffect(() => {
+    if (!contextLoading && !isAuthenticated) {
+      router.push("/login");
+    }
+  }, [contextLoading, isAuthenticated, router]);
 
   useEffect(() => {
-    async function fetchData() {
-      const email = localStorage.getItem(DASHBOARD_STORAGE_KEY);
-      if (!email) {
-        router.push("/login");
-        return;
-      }
-
-      // Get business by email
-      const { data: businessData } = await supabase
-        .from("businesses")
-        .select("*")
-        .eq("email", email)
-        .single();
-
-      if (!businessData) {
+    async function fetchWhatsAppEvents() {
+      if (!business) {
         setLoading(false);
         return;
       }
-
-      setBusiness(businessData as Business);
 
       // Fetch recent WhatsApp events
       const { data: eventsData } = await supabase
         .from("whatsapp_events")
         .select("*")
-        .eq("business_id", businessData.id)
+        .eq("business_id", business.id)
         .order("created_at", { ascending: false })
         .limit(20);
 
@@ -48,15 +39,17 @@ export default function WhatsAppPage() {
       setLoading(false);
     }
 
-    void fetchData();
-  }, [router]);
+    if (business) {
+      void fetchWhatsAppEvents();
+    }
+  }, [business]);
 
   const isConnected = business?.whatsapp && business.whatsapp_phone_number_id;
 
-  if (loading) {
+  if (contextLoading || loading) {
     return (
       <div className="flex h-[calc(100vh-200px)] items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#e8a020] border-t-transparent" />
+        <ChatSkeleton />
       </div>
     );
   }
