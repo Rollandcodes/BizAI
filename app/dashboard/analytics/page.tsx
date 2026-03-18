@@ -8,10 +8,6 @@ import AnalyticsTab from "@/components/dashboard/AnalyticsTab";
 
 const DASHBOARD_STORAGE_KEY = "cypai-dashboard-email";
 
-export const metadata = {
-  title: "Analytics | Dashboard",
-};
-
 export default function AnalyticsPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);

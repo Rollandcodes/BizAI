@@ -8,10 +8,6 @@ import type { Business } from "@/lib/supabase";
 
 const DASHBOARD_STORAGE_KEY = "cypai-dashboard-email";
 
-export const metadata = {
-  title: "AI Training | Dashboard",
-};
-
 export default function TrainingPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);

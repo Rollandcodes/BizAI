@@ -8,10 +8,6 @@ import CRMTab from "@/components/dashboard/CRMTab";
 
 const DASHBOARD_STORAGE_KEY = "cypai-dashboard-email";
 
-export const metadata = {
-  title: "Leads & CRM | Dashboard",
-};
-
 export default function LeadsPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);

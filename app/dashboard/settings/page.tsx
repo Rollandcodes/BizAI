@@ -9,10 +9,6 @@ import { planDisplayName } from "@/lib/plans";
 
 const DASHBOARD_STORAGE_KEY = "cypai-dashboard-email";
 
-export const metadata = {
-  title: "Settings | Dashboard",
-};
-
 export default function SettingsPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);

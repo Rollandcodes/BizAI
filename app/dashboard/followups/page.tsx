@@ -8,10 +8,6 @@ import FollowUpsTab from "@/components/dashboard/FollowUpsTab";
 
 const DASHBOARD_STORAGE_KEY = "cypai-dashboard-email";
 
-export const metadata = {
-  title: "Follow-ups | Dashboard",
-};
-
 export default function FollowUpsPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);

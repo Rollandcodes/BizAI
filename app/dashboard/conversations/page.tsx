@@ -8,10 +8,6 @@ import ConversationsTab from "@/components/dashboard/ConversationsTab";
 
 const DASHBOARD_STORAGE_KEY = "cypai-dashboard-email";
 
-export const metadata = {
-  title: "Conversations | Dashboard",
-};
-
 export default function ConversationsPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);

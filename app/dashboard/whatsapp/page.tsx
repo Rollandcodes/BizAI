@@ -8,10 +8,6 @@ import type { Business } from "@/lib/supabase";
 
 const DASHBOARD_STORAGE_KEY = "cypai-dashboard-email";
 
-export const metadata = {
-  title: "WhatsApp | Dashboard",
-};
-
 export default function WhatsAppPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);

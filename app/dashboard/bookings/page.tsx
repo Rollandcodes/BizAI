@@ -8,10 +8,6 @@ import BookingsTab from "@/components/dashboard/BookingsTab";
 
 const DASHBOARD_STORAGE_KEY = "cypai-dashboard-email";
 
-export const metadata = {
-  title: "Bookings | Dashboard",
-};
-
 export default function BookingsPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);

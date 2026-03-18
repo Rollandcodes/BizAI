@@ -9,10 +9,6 @@ import QRCode from "react-qr-code";
 
 const DASHBOARD_STORAGE_KEY = "cypai-dashboard-email";
 
-export const metadata = {
-  title: "QR Codes | Dashboard",
-};
-
 export default function QRPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
