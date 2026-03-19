@@ -174,17 +174,25 @@ export default function BarbershopsPage() {
       </section>
 
       {/* Language Section */}
-      <section className="bg-white py-16">
+      <section className="bg-gray-50 py-16">
         <div className="mx-auto max-w-4xl px-4 text-center sm:px-6 lg:px-8">
           <h2 className="mb-4 text-3xl font-bold text-[#1a1a2e]">Your clients speak many languages.<br />CypAI speaks them all.</h2>
-          <div className="mb-6 flex flex-wrap items-center justify-center gap-6 text-3xl">
-            <span>🇬🇧</span>
-            <span>🇹🇷</span>
-            <span>🇸🇦</span>
-            <span>🇷🇺</span>
-            <span>🇬🇷</span>
+          <div className="flex flex-wrap justify-center gap-4 mt-6">
+            {[
+              { flag: '🇬🇧', code: 'EN', name: 'English' },
+              { flag: '🇹🇷', code: 'TR', name: 'Türkçe' },
+              { flag: '🇸🇦', code: 'AR', name: 'العربية' },
+              { flag: '🇷🇺', code: 'RU', name: 'Русский' },
+              { flag: '🇬🇷', code: 'GR', name: 'Ελληνικά' },
+            ].map((lang) => (
+              <div key={lang.code}
+                className="flex items-center gap-2 bg-white border border-gray-200 rounded-full px-4 py-2">
+                <span className="text-xl">{lang.flag}</span>
+                <span className="text-gray-800 font-medium text-sm">{lang.name}</span>
+              </div>
+            ))}
           </div>
-          <p className="text-gray-600">Auto-detects language. Responds automatically.</p>
+          <p className="mt-6 text-gray-600">Auto-detects language. Responds automatically.</p>
         </div>
       </section>
 
@@ -217,16 +225,16 @@ export default function BarbershopsPage() {
           <div className="grid gap-6 md:grid-cols-3">
             {/* Starter */}
             <div className="rounded-2xl border border-gray-200 bg-white p-8">
-              <p className="text-sm font-semibold uppercase text-gray-500">Starter</p>
-              <div className="mt-2 text-5xl font-black text-[#1a1a2e]">
-                $29<span className="ml-1 text-lg text-gray-500">/mo</span>
+              <p className="text-xs font-bold tracking-widest uppercase text-gray-500">Starter</p>
+              <div className="mt-2 text-5xl font-black text-gray-900">
+                $29<span className="ml-1 text-lg text-gray-400">/mo</span>
               </div>
               <p className="mt-3 text-sm text-gray-500">Perfect for single-barber shops</p>
-              <ul className="mt-6 space-y-3 text-sm">
-                <li>✓ 500 messages/month</li>
-                <li>✓ WhatsApp automation</li>
-                <li>✓ Price list automation</li>
-                <li>✓ 5 language support</li>
+              <ul className="mt-6 space-y-3">
+                <li className="flex items-start gap-2 text-gray-600 text-sm"><span className="text-amber-500 font-bold">✓</span> 500 messages/month</li>
+                <li className="flex items-start gap-2 text-gray-600 text-sm"><span className="text-amber-500 font-bold">✓</span> WhatsApp automation</li>
+                <li className="flex items-start gap-2 text-gray-600 text-sm"><span className="text-amber-500 font-bold">✓</span> Price list automation</li>
+                <li className="flex items-start gap-2 text-gray-600 text-sm"><span className="text-amber-500 font-bold">✓</span> 5 language support</li>
               </ul>
               <Link
                 href="/signup?plan=starter"
@@ -236,21 +244,21 @@ export default function BarbershopsPage() {
               </Link>
             </div>
             {/* Pro */}
-            <div className="relative rounded-2xl border-2 border-[#e8a020] bg-white p-8 shadow-xl">
+            <div className="relative rounded-2xl border-2 border-amber-500 bg-white p-8 shadow-xl">
               <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-[#e8a020] px-4 py-1.5 text-xs font-bold text-[#1a1a2e]">
                 ⭐ Most Popular
               </span>
-              <p className="text-sm font-semibold uppercase text-gray-500">Pro</p>
-              <div className="mt-2 text-5xl font-black text-[#1a1a2e]">
-                $79<span className="ml-1 text-lg text-gray-500">/mo</span>
+              <p className="text-xs font-bold tracking-widest uppercase text-gray-500">Pro</p>
+              <div className="mt-2 text-5xl font-black text-gray-900">
+                $79<span className="ml-1 text-lg text-gray-400">/mo</span>
               </div>
               <p className="mt-3 text-sm text-gray-500">For growing barbershops</p>
-              <ul className="mt-6 space-y-3 text-sm">
-                <li>✓ Unlimited messages</li>
-                <li>✓ Booking system</li>
-                <li>✓ Appointment reminders</li>
-                <li>✓ Multi-staff calendar</li>
-                <li>✓ Re-engagement automation</li>
+              <ul className="mt-6 space-y-3">
+                <li className="flex items-start gap-2 text-gray-600 text-sm"><span className="text-amber-500 font-bold">✓</span> Unlimited messages</li>
+                <li className="flex items-start gap-2 text-gray-600 text-sm"><span className="text-amber-500 font-bold">✓</span> Booking system</li>
+                <li className="flex items-start gap-2 text-gray-600 text-sm"><span className="text-amber-500 font-bold">✓</span> Appointment reminders</li>
+                <li className="flex items-start gap-2 text-gray-600 text-sm"><span className="text-amber-500 font-bold">✓</span> Multi-staff calendar</li>
+                <li className="flex items-start gap-2 text-gray-600 text-sm"><span className="text-amber-500 font-bold">✓</span> Re-engagement automation</li>
               </ul>
               <Link
                 href="/signup?plan=pro"
@@ -261,16 +269,16 @@ export default function BarbershopsPage() {
             </div>
             {/* Business */}
             <div className="rounded-2xl border border-gray-200 bg-white p-8">
-              <p className="text-sm font-semibold uppercase text-gray-500">Business</p>
-              <div className="mt-2 text-5xl font-black text-[#1a1a2e]">
-                $149<span className="ml-1 text-lg text-gray-500">/mo</span>
+              <p className="text-xs font-bold tracking-widest uppercase text-gray-500">Business</p>
+              <div className="mt-2 text-5xl font-black text-gray-900">
+                $149<span className="ml-1 text-lg text-gray-400">/mo</span>
               </div>
               <p className="mt-3 text-sm text-gray-500">For salon chains</p>
-              <ul className="mt-6 space-y-3 text-sm">
-                <li>✓ Everything in Pro</li>
-                <li>✓ Multi-location support</li>
-                <li>✓ Priority support</li>
-                <li>✓ SLA guarantee</li>
+              <ul className="mt-6 space-y-3">
+                <li className="flex items-start gap-2 text-gray-600 text-sm"><span className="text-amber-500 font-bold">✓</span> Everything in Pro</li>
+                <li className="flex items-start gap-2 text-gray-600 text-sm"><span className="text-amber-500 font-bold">✓</span> Multi-location support</li>
+                <li className="flex items-start gap-2 text-gray-600 text-sm"><span className="text-amber-500 font-bold">✓</span> Priority support</li>
+                <li className="flex items-start gap-2 text-gray-600 text-sm"><span className="text-amber-500 font-bold">✓</span> SLA guarantee</li>
               </ul>
               <Link
                 href="/signup?plan=business"
@@ -280,7 +288,7 @@ export default function BarbershopsPage() {
               </Link>
             </div>
           </div>
-          <p className="mt-8 text-center text-sm text-gray-500">
+          <p className="mt-8 text-center text-gray-400 text-sm">
             🔒 Secure payment by Paddle · 30-day money-back guarantee
           </p>
         </div>
