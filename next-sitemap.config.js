@@ -45,8 +45,5 @@ module.exports = {
       { userAgent: "*", allow: "/" },
       { userAgent: "*", disallow: ["/api/", "/dashboard/", "/widget/"] },
     ],
-    additionalSitemaps: [
-      "https://www.cypai.app/sitemap.xml",
-    ],
   },
 };
