@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { Plus_Jakarta_Sans, Geist } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
+import Script from 'next/script'
 import './globals.css'
 import { cn } from "@/lib/utils";
 import { AppProviders } from './providers';
@@ -152,6 +153,7 @@ export default function RootLayout({
         />
         <AppProviders>{children}</AppProviders>
         <Analytics />
+        <Script src="https://scripts.simpleanalyticscdn.com/latest.js" />
       </body>
     </html>
   )
