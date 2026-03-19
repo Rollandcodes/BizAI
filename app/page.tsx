@@ -794,6 +794,28 @@ export default function HomePage() {
                   <li><Link href="/refund-policy" className="text-sm text-white/60 hover:text-[#e8a020]">Refund Policy</Link></li>
                 </ul>
               </div>
+
+              {/* Connect */}
+              <div>
+                <h4 className="font-semibold text-white">Connect</h4>
+                <ul className="mt-4 space-y-2">
+                  <li>
+                    <a href="https://form.jotform.com/260776520378060" target="_blank" rel="noopener noreferrer" className="text-sm text-white/60 hover:text-[#e8a020]">
+                      Request Services ↗
+                    </a>
+                  </li>
+                  <li>
+                    <a href="https://www.linkedin.com/in/rolland-muhanguzi-507b6136a" target="_blank" rel="noopener noreferrer" className="text-sm text-white/60 hover:text-[#e8a020]">
+                      LinkedIn ↗
+                    </a>
+                  </li>
+                  <li>
+                    <a href="https://whop.com/joined/cynosurescales" target="_blank" rel="noopener noreferrer" className="text-sm text-white/60 hover:text-[#e8a020]">
+                      WHOP ↗
+                    </a>
+                  </li>
+                </ul>
+              </div>
             </div>
 
             <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-white/10 pt-8 md:flex-row">
