@@ -1,6 +1,6 @@
 /** @type {import('next-sitemap').IConfig} */
 module.exports = {
-  siteUrl: process.env.NEXT_PUBLIC_APP_URL || "https://www.cypai.app",
+  siteUrl: "https://www.cypai.app",
   generateRobotsTxt: true,
   changefreq: "weekly",
   priority: 0.7,
@@ -28,6 +28,17 @@ module.exports = {
     await config.transform(config, "/how-it-works"),
     await config.transform(config, "/alternatives"),
     await config.transform(config, "/integrations"),
+    // Vertical landing pages
+    await config.transform(config, "/car-rentals"),
+    await config.transform(config, "/restaurants"),
+    await config.transform(config, "/hotels"),
+    await config.transform(config, "/barbershops"),
+    await config.transform(config, "/clinics"),
+    await config.transform(config, "/student-housing"),
+    // Legal pages
+    await config.transform(config, "/privacy-policy"),
+    await config.transform(config, "/terms-of-service"),
+    await config.transform(config, "/refund-policy"),
   ],
   robotsTxtOptions: {
     policies: [
@@ -35,7 +46,7 @@ module.exports = {
       { userAgent: "*", disallow: ["/api/", "/dashboard/", "/widget/"] },
     ],
     additionalSitemaps: [
-      `${process.env.NEXT_PUBLIC_APP_URL || "https://www.cypai.app"}/sitemap.xml`,
+      "https://www.cypai.app/sitemap.xml",
     ],
   },
 };
