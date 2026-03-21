@@ -5,9 +5,9 @@ export const PADDLE_CONFIG = {
   clientToken: process.env.NEXT_PUBLIC_PADDLE_CLIENT_TOKEN!,
   apiKey: process.env.PADDLE_API_KEY!,
   webhookSecret: process.env.PADDLE_WEBHOOK_SECRET!,
-  environment: process.env.NODE_ENV === 'production'
-    ? 'production' as const
-    : 'sandbox' as const,
+  environment: (process.env.NEXT_PUBLIC_PADDLE_ENV || 'sandbox') as 'sandbox' | 'production',
+  // Backend environment (defaults to sandbox if not set)
+  env: (process.env.PADDLE_ENV || 'sandbox') as 'sandbox' | 'production',
 };
 
 export const PADDLE_PRICES = {
