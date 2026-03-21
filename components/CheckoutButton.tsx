@@ -27,22 +27,34 @@ export function CheckoutButton({
     }
 
     const priceId = PADDLE_PRICES[plan];
-    console.log('Opening checkout with:', { plan, priceId, userEmail });
+    console.log('Opening checkout with:', { 
+      plan, 
+      priceId, 
+      userEmail,
+      allPrices: PADDLE_PRICES 
+    });
 
     if (!priceId) {
-      console.error('Price ID not found for plan:', plan);
+      console.error('Price ID not found for plan:', plan, 'Available:', PADDLE_PRICES);
       alert('Configuration error: Price ID not set. Check environment variables.');
       return;
     }
 
     setLoading(true);
     try {
-      await paddle.Checkout.open({
+      const checkout = await paddle.Checkout.open({
         items: [{ priceId, quantity: 1 }],
         customer: userEmail ? { email: userEmail } : undefined,
+        settings: {
+          displayMode: 'overlay',
+          theme: 'light',
+          locale: 'en',
+        }
       });
+      console.log('Checkout opened:', checkout);
     } catch (error) {
       console.error('Checkout error:', error);
+      alert('Checkout failed. Check console for details.');
     } finally {
       setLoading(false);
     }
