@@ -1,13 +1,9 @@
 // app/api/paddle-webhook/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { Paddle } from '@paddle/paddle-node-sdk';
-import { PADDLE_CONFIG } from '@/lib/paddle';
 
-const paddle = new Paddle(process.env.PADDLE_API_KEY!, {
-  environment: PADDLE_CONFIG.env === 'production' 
-    ? 'production' as const
-    : 'sandbox' as const,
-});
+// Initialize Paddle - environment defaults based on NODE_ENV
+const paddle = new Paddle(process.env.PADDLE_API_KEY!);
 
 export const runtime = 'nodejs';
 
