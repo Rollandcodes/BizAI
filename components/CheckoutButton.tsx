@@ -26,10 +26,19 @@ export function CheckoutButton({
       return;
     }
 
+    const priceId = PADDLE_PRICES[plan];
+    console.log('Opening checkout with:', { plan, priceId, userEmail });
+
+    if (!priceId) {
+      console.error('Price ID not found for plan:', plan);
+      alert('Configuration error: Price ID not set. Check environment variables.');
+      return;
+    }
+
     setLoading(true);
     try {
       await paddle.Checkout.open({
-        items: [{ priceId: PADDLE_PRICES[plan], quantity: 1 }],
+        items: [{ priceId, quantity: 1 }],
         customer: userEmail ? { email: userEmail } : undefined,
       });
     } catch (error) {
