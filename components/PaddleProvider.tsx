@@ -21,6 +21,7 @@ export function PaddleProvider({ children }: { children: React.ReactNode }) {
       environment: PADDLE_CONFIG.environment,
       hasToken: !!PADDLE_CONFIG.clientToken,
       tokenPrefix: PADDLE_CONFIG.clientToken?.substring(0, 5),
+      tokenLength: PADDLE_CONFIG.clientToken?.length,
     });
 
     initializePaddle({
