@@ -45,6 +45,17 @@ async function provisionAdmin() {
         return;
       }
       userId = existingUser.id;
+      
+      // Auto-confirm email if it's an existing user
+      console.log(`Ensuring email is confirmed for user ${userId}...`);
+      const { error: confirmError } = await supabase.auth.admin.updateUserById(userId, {
+        email_confirm: true
+      });
+      if (confirmError) {
+        console.error("Failed to confirm existing user email:", confirmError);
+      } else {
+        console.log("User email confirmed successfully.");
+      }
     } else {
       console.error("Failed to create auth user:", authError);
       return;
