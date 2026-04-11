@@ -50,7 +50,7 @@ export function Header() {
               {link.label}
             </a>
           ))}
-          <Button asChild variant="outline">
+          <Button asChild variant="glass">
             <a href="/dashboard">Sign In</a>
           </Button>
           <Button asChild>

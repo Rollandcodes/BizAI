@@ -358,7 +358,7 @@ export function GlowyWavesHero() {
             <Button
               asChild
               size="lg"
-              variant="outline"
+              variant="glass"
               className="rounded-full border-border/40 bg-background/60 px-8 text-base text-foreground/80 backdrop-blur transition-all hover:border-border/60 hover:bg-background/70 dark:border-border/50 dark:bg-background/40 dark:text-foreground/70 dark:hover:border-border/70 dark:hover:bg-background/50"
             >
               <Link href="/blog">Explore stories</Link>
