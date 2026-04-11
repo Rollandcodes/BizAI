@@ -100,7 +100,7 @@ export default function SignupPage() {
                           onChange={(e) => setFormData({ ...formData, niche: e.target.value as NicheType })}
                         >
                           {Object.keys(AGENT_PACKS).map(n => (
-                            <option key={n} value={n}>{n}</option>
+                            <option key={n} value={n} className="text-black bg-white">{n}</option>
                           ))}
                         </select>
                       </div>
