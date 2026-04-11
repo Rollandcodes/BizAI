@@ -59,7 +59,7 @@ export function Header() {
         </div>
         <Button
           size="icon"
-          variant="outline"
+          variant="ghost"
           onClick={() => setOpen(!open)}
           className="md:hidden"
           aria-expanded={open}
@@ -86,7 +86,7 @@ export function Header() {
           ))}
         </div>
         <div className="flex flex-col gap-2">
-          <Button asChild variant="outline" className="w-full bg-transparent">
+          <Button asChild variant="ghost" className="w-full bg-transparent">
             <a href="/dashboard">Sign In</a>
           </Button>
           <Button asChild className="w-full">
