@@ -1,4 +1,4 @@
-import { createMiddlewareClient } from '@supabase/auth-helpers-nextjs'
+import { createServerClient } from '@supabase/auth-helpers-nextjs'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
@@ -14,7 +14,7 @@ export async function proxy(req: NextRequest) {
   res.headers.set('X-DNS-Prefetch-Control', 'off')
 
   // Supabase Auth Integration
-  const supabase = createMiddlewareClient({ req, res })
+  const supabase = createServerClient({ req, res })
 
   const {
     data: { session },
