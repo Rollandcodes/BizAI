@@ -181,7 +181,7 @@ All plans include access to our platform, lead generation tools, and dedicated s
                 href={plan.href}
                 className={cn(
                   buttonVariants({
-                    variant: "outline",
+                    variant: "ghost",
                   }),
                   "group relative w-full gap-2 overflow-hidden text-lg font-semibold tracking-tighter",
                   "transform-gpu ring-offset-current transition-all duration-300 ease-out hover:bg-primary hover:text-primary-foreground hover:ring-2 hover:ring-primary hover:ring-offset-1",
