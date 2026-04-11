@@ -1,6 +1,8 @@
 -- CypAI Rebuild V3.0 - Neural Schema Migration
 -- ============================================================================
 
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
+
 -- 1. Profiles Table (Linked to Auth Users)
 CREATE TABLE IF NOT EXISTS public.profiles (
   id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
