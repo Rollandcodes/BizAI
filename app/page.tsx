@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { motion } from 'framer-motion'
 import HeroScene from '@/components/home/HeroScene'
 import LiveLabDemo from '@/components/home/LiveLabDemo'
 import Link from 'next/link'
