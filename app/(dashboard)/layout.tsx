@@ -1,5 +1,6 @@
 import Sidebar from '@/components/dashboard/Sidebar'
 import TopBar from '@/components/dashboard/TopBar'
+import DashboardAgent from '@/components/dashboard/DashboardAgent'
 
 export default function DashboardLayout({
   children,
@@ -27,7 +28,8 @@ export default function DashboardLayout({
         </main>
       </div>
 
-      {/* Global Toast / Notification Layer can go here */}
+      {/* AI Assistant Widget */}
+      <DashboardAgent />
     </div>
   )
 }
