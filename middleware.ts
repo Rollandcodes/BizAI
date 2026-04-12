@@ -49,8 +49,9 @@ export default clerkMiddleware(async (auth, req: NextRequest) => {
     return redirectToSignIn({ returnBackUrl: req.url })
   }
 
-  // Authenticated users who haven't completed onboarding → send protected pages to /onboarding
-  if (isAuthenticated && !isApiRoute && !isOnboardingComplete(sessionClaims)) {
+  // Authenticated users who haven't completed onboarding can still view public pages.
+  // Only block access to protected app routes until onboarding is complete.
+  if (isAuthenticated && !isApiRoute && isProtectedRoute(req) && !isOnboardingComplete(sessionClaims)) {
     const onboardingUrl = new URL('/onboarding', req.url)
     return NextResponse.redirect(onboardingUrl)
   }

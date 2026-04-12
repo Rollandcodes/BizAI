@@ -13,7 +13,7 @@ export default function SignInPage() {
           <ArrowLeft className="h-4 w-4" />
           Back to home
         </Link>
-        <SignIn fallbackRedirectUrl="/dashboard" />
+        <SignIn fallbackRedirectUrl="/onboarding" />
       </div>
     </div>
   )
