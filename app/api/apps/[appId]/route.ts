@@ -8,9 +8,10 @@ const supabase = createClient(
 
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { appId: string } }
+  { params }: { params: Promise<{ appId: string }> }
 ) {
   try {
+    const { appId } = await params;
     const { businessId } = await req.json();
     if (!businessId) {
       return NextResponse.json({ error: 'businessId required' }, { status: 400 });
@@ -21,7 +22,7 @@ export async function DELETE(
       .from('installed_apps')
       .delete()
       .eq('business_id', businessId)
-      .eq('app_id', params.appId);
+      .eq('app_id', appId);
 
     return NextResponse.json({ success: true });
   } catch (err) {
