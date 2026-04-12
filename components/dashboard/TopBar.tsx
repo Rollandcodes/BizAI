@@ -21,7 +21,12 @@ export default function TopBar() {
   return (
     <header className="h-16 glass border-b border-white/5 flex items-center justify-between px-8 sticky top-0 z-40 backdrop-blur-xl">
       <div className="flex items-center gap-4 flex-1">
-        <button className="lg:hidden p-2 hover:bg-white/5 rounded-lg transition-colors">
+        <button
+          type="button"
+          aria-label="Open navigation menu"
+          title="Open navigation menu"
+          className="lg:hidden p-2 hover:bg-white/5 rounded-lg transition-colors"
+        >
           <Menu size={20} className="text-white/60" />
         </button>
         
@@ -36,7 +41,7 @@ export default function TopBar() {
       </div>
 
       <div className="flex items-center gap-4">
-        <Button variant="ghost" size="icon" className="relative group border-none">
+        <Button aria-label="Open notifications" title="Open notifications" variant="ghost" size="icon" className="relative group border-none">
           <Bell size={18} className="text-white/60 group-hover:text-white transition-colors" />
           <span className="absolute top-2 right-2 w-2 h-2 bg-primary rounded-full border-2 border-background shadow-[0_0_8px_rgba(184,255,71,0.5)]" />
         </Button>
@@ -66,7 +71,9 @@ export default function TopBar() {
 
         {/* Sign out */}
         <button
+          type="button"
           onClick={handleSignOut}
+          aria-label="Sign out"
           title="Sign out"
           className="p-2 rounded-full hover:bg-red-500/10 text-white/40 hover:text-red-400 transition-all"
         >

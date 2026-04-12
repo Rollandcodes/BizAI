@@ -26,25 +26,20 @@ export async function POST(req: NextRequest) {
 
     assertSupabaseConfig();
 
-    // Verify if business already exists
-    const { data: existingBusiness } = await supabase
-      .from("businesses")
-      .select("id")
-      .eq("owner_email", email.trim().toLowerCase())
-      .single();
+    const normalizedEmail = email.trim().toLowerCase();
+    const businessPayload = {
+      owner_email: normalizedEmail,
+      business_name: businessName,
+      business_type: niche,
+      onboarding_complete: true,
+      plan: "trial" as const,
+    };
 
-    if (existingBusiness) {
-      return NextResponse.json({ error: "Business already exists" }, { status: 400 });
-    }
-
-    // Insert new business details
+    // Create or update the user's business so onboarding stays idempotent.
     const { data: business, error } = await supabase
       .from("businesses")
-      .insert({
-        owner_email: email.trim().toLowerCase(),
-        business_name: businessName,
-        business_type: niche, // Storing 'niche' under 'business_type'
-        plan: "trial"
+      .upsert(businessPayload, {
+        onConflict: "owner_email",
       })
       .select()
       .single();

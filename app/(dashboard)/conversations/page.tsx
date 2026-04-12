@@ -101,7 +101,7 @@ export default function ConversationsPage() {
         </div>
 
         {/* Messages */}
-        <div className="flex-1 p-8 space-y-6 overflow-y-auto bg-repeat bg-center opacity-40" style={{ backgroundImage: "url('/noise.png')" }}>
+        <div className="flex-1 p-8 space-y-6 overflow-y-auto bg-repeat bg-center bg-[url('/noise.png')] opacity-40">
           <div className="flex justify-start">
             <div className="max-w-[70%] p-4 rounded-2xl rounded-tl-none bg-primary/10 border border-primary/20 text-sm leading-relaxed">
               Hello Maria! Welcome to Limassol Suites. I am your AI concierge. How can I assist you today? 🇨🇾

@@ -112,8 +112,8 @@ export default function Home() {
                       />
                     </div>
                     <div className="space-y-2">
-                      <label className="text-[10px] uppercase tracking-widest text-white/40 font-mono ml-4">Business Type</label>
-                      <select className="w-full bg-white/5 border border-white/10 rounded-full py-3 px-6 text-sm focus:outline-none focus:border-electric-lime transition-colors appearance-none">
+                      <label htmlFor="business-type" className="text-[10px] uppercase tracking-widest text-white/40 font-mono ml-4">Business Type</label>
+                      <select id="business-type" className="w-full bg-white/5 border border-white/10 rounded-full py-3 px-6 text-sm focus:outline-none focus:border-electric-lime transition-colors appearance-none">
                         <option>Real Estate Agency</option>
                         <option>Restaurant Group</option>
                         <option>Car Rental</option>

@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useUser } from "@clerk/nextjs";
 import { AGENT_PACKS, NicheType } from "@/lib/agentPacks";
-import { Sparkles, ArrowRight } from "lucide-react";
+import { Sparkles, ArrowRight, ArrowLeft } from "lucide-react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 
@@ -70,6 +70,13 @@ export default function OnboardingPage() {
         animate={{ opacity: 1, y: 0 }}
         className="relative z-10 w-full max-w-xl"
       >
+        <div className="mb-6 flex items-center justify-between">
+          <Link href="/" className="inline-flex items-center gap-2 text-sm font-medium text-white/70 transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40 rounded-full px-2 py-1">
+            <ArrowLeft className="h-4 w-4" />
+            Back to home
+          </Link>
+        </div>
+
         <div className="text-center mb-10">
           <div className="inline-flex items-center gap-2 mb-6 group">
             <div className="w-10 h-10 bg-electric-lime rounded-xl glow-lime flex items-center justify-center">

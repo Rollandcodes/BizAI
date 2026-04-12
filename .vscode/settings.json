@@ -1,6 +1,7 @@
 {
   "files.associations": {
-    "*.sql": "sql"
+    "*.sql": "sql",
+    "supabase-schema.sql": "postgresql"
   },
   "[sql]": {
     "editor.defaultFormatter": "mtxr.sqltools"

@@ -227,13 +227,14 @@ export async function POST(request: NextRequest) {
     const businessName = normalizeString(payload.businessName);
     const dedupeKey = buildDedupeKey(eventType, recipientEmail, planId);
     const template = buildRecoveryTemplate({ eventType, planId, businessName });
+    const queuePayload = businessName ? { businessName } : {};
 
     const insertResult = await insertQueueRecord({
       event_type: eventType,
       dedupe_key: dedupeKey,
       recipient_email: recipientEmail,
       plan_id: planId,
-      payload: { businessName },
+      payload: queuePayload,
       status: 'queued',
       email_subject: template.subject,
       email_body: template.body,

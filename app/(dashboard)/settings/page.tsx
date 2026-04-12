@@ -67,8 +67,9 @@ export default function SettingsPage() {
                 <Input label="Tax ID (optional)" placeholder="e.g. CY10092831" />
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-medium text-white/70 ml-1">Company Address</label>
+                <label htmlFor="company-address" className="text-sm font-medium text-white/70 ml-1">Company Address</label>
                 <textarea 
+                  id="company-address"
                   className="w-full h-24 bg-white/5 border border-white/10 rounded-xl p-4 text-sm text-white focus:outline-none focus:border-primary/50 transition-all resize-none font-medium"
                   defaultValue="Makarios III Ave 12, Office 302, Limassol, 3025, Cyprus"
                 />

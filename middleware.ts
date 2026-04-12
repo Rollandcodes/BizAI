@@ -32,6 +32,7 @@ const isAuthRoute = createRouteMatcher([
 export default clerkMiddleware(async (auth, req: NextRequest) => {
   const { userId, sessionClaims, redirectToSignIn } = await auth()
   const isAuthenticated = !!userId
+  const isApiRoute = req.nextUrl.pathname.startsWith('/api/')
 
   // Clerk's own sign-in/sign-up pages — let them through
   if (isAuthRoute(req)) {
@@ -48,8 +49,8 @@ export default clerkMiddleware(async (auth, req: NextRequest) => {
     return redirectToSignIn({ returnBackUrl: req.url })
   }
 
-  // Authenticated users who haven't completed onboarding → send to /onboarding
-  if (isAuthenticated && !isOnboardingComplete(sessionClaims)) {
+  // Authenticated users who haven't completed onboarding → send protected pages to /onboarding
+  if (isAuthenticated && !isApiRoute && !isOnboardingComplete(sessionClaims)) {
     const onboardingUrl = new URL('/onboarding', req.url)
     return NextResponse.redirect(onboardingUrl)
   }
