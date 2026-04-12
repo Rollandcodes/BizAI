@@ -33,10 +33,10 @@ export default function Home() {
           <Link href="#pricing" className="hover:text-white transition-colors">Pricing</Link>
         </div>
         <div className="flex items-center gap-4">
-          <Link href="/login" className="text-sm font-medium text-white/60 hover:text-white transition-colors">
+          <Link href="/sign-in" className="text-sm font-medium text-white/60 hover:text-white transition-colors">
             Login
           </Link>
-          <Link href="/signup" className="btn-primary py-2 px-6">
+          <Link href="/sign-up" className="btn-primary py-2 px-6">
             Get Started
           </Link>
         </div>
@@ -60,7 +60,7 @@ export default function Home() {
         </p>
 
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-slide-up [animation-delay:300ms]">
-          <Link href="/signup" className="btn-primary w-full sm:w-auto text-lg">
+          <Link href="/sign-up" className="btn-primary w-full sm:w-auto text-lg">
             Deploy Your Agent Free
           </Link>
           <Link href="#lab" className="btn-ghost w-full sm:w-auto text-lg px-8 py-3">
@@ -162,7 +162,7 @@ export default function Home() {
             <ul className="space-y-2 text-sm text-white/40">
               <li><Link href="#features">Agent Packs</Link></li>
               <li><Link href="#lab">Live Lab</Link></li>
-              <li><Link href="/signup">Free Deployment</Link></li>
+              <li><Link href="/sign-up">Free Deployment</Link></li>
             </ul>
           </div>
           <div>
@@ -192,3 +192,4 @@ export default function Home() {
     </main>
   )
 }
+

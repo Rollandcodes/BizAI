@@ -179,3 +179,4 @@ export default function AgentTrainingPage() {
 function cn(...classes: any[]) {
   return classes.filter(Boolean).join(' ')
 }
+

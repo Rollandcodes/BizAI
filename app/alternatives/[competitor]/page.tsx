@@ -127,7 +127,7 @@ export default async function AlternativePage({ params }: PageProps) {
             <p className="mt-5 text-lg leading-8 text-zinc-300">{comp.tagline}</p>
             <div className="mt-8 flex flex-wrap gap-4">
               <Link
-                href="/signup"
+                href="/sign-up"
                 className="rounded-2xl bg-blue-600 px-8 py-3.5 text-sm font-bold text-white transition hover:-translate-y-0.5 hover:bg-blue-500 hover:shadow-lg hover:shadow-blue-500/25"
               >
                 Try CypAI Free →
@@ -257,7 +257,7 @@ export default async function AlternativePage({ params }: PageProps) {
           </p>
           <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
             <Link
-              href="/signup"
+              href="/sign-up"
               className="rounded-2xl bg-white px-8 py-3.5 text-sm font-bold text-blue-700 transition hover:-translate-y-0.5 hover:shadow-xl"
             >
               Start Free Trial →

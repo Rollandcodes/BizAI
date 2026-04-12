@@ -57,7 +57,7 @@ export default function ClinicHowItWorksPage() {
             This page explains, in simple language, how clinics can use CypAI to answer patient questions and organize appointment requests without technical complexity.
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
-            <Link href="/signup" className="rounded-xl bg-emerald-600 px-5 py-3 text-sm font-semibold text-white hover:bg-emerald-500">
+            <Link href="/sign-up" className="rounded-xl bg-emerald-600 px-5 py-3 text-sm font-semibold text-white hover:bg-emerald-500">
               Start Free Trial
             </Link>
             <Link href="/setup" className="rounded-xl border border-zinc-700 px-5 py-3 text-sm font-semibold text-zinc-200 hover:bg-zinc-900">
@@ -128,3 +128,4 @@ export default function ClinicHowItWorksPage() {
     </main>
   );
 }
+

@@ -146,7 +146,7 @@ export default function PricingPage() {
               Perfect for small businesses getting started with AI customer service.
             </p>
             <Link
-              href="/signup?plan=starter"
+              href="/sign-up"
               className="block w-full py-3 px-6 rounded-xl border border-white/10 text-center font-medium hover:bg-white/5 transition-colors"
             >
               Start Free Trial
@@ -175,7 +175,7 @@ export default function PricingPage() {
               For growing businesses that need more power and automation.
             </p>
             <Link
-              href="/signup?plan=pro"
+              href="/sign-up"
               className="block w-full py-3 px-6 rounded-xl bg-amber-500 text-black text-center font-bold hover:bg-amber-400 transition-colors"
             >
               Start Free Trial
@@ -201,7 +201,7 @@ export default function PricingPage() {
               For large organizations needing advanced features and support.
             </p>
             <Link
-              href="/signup?plan=business"
+              href="/sign-up"
               className="block w-full py-3 px-6 rounded-xl border border-white/10 text-center font-medium hover:bg-white/5 transition-colors"
             >
               Start Free Trial
@@ -309,7 +309,7 @@ export default function PricingPage() {
       <div className="text-center pb-20">
         <p className="text-gray-400 mb-4">Still not sure? Try it free.</p>
         <Link
-          href="/signup?plan=pro"
+          href="/sign-up"
           className="inline-block px-8 py-4 rounded-xl bg-amber-500 text-black font-bold hover:bg-amber-400 transition-colors"
         >
           Start Free Trial
@@ -318,3 +318,4 @@ export default function PricingPage() {
     </div>
   );
 }
+

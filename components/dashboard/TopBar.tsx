@@ -1,9 +1,23 @@
 'use client'
 import { motion } from 'framer-motion'
-import { Search, Bell, Menu, Sparkles, User } from 'lucide-react'
+import { Search, Bell, Menu, Sparkles, LogOut } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { useClerk, useUser } from '@clerk/nextjs'
+import { useRouter } from 'next/navigation'
 
 export default function TopBar() {
+  const { signOut } = useClerk()
+  const { user } = useUser()
+  const router = useRouter()
+
+  const displayName = user?.fullName || user?.firstName || user?.emailAddresses[0]?.emailAddress || 'User'
+  const initials = (user?.firstName?.[0] ?? '') + (user?.lastName?.[0] ?? '') || displayName[0]?.toUpperCase() || 'U'
+
+  const handleSignOut = async () => {
+    await signOut()
+    router.push('/sign-in')
+  }
+
   return (
     <header className="h-16 glass border-b border-white/5 flex items-center justify-between px-8 sticky top-0 z-40 backdrop-blur-xl">
       <div className="flex items-center gap-4 flex-1">
@@ -29,20 +43,35 @@ export default function TopBar() {
 
         <div className="h-6 w-[1px] bg-white/10 mx-2" />
 
+        {/* User info */}
         <motion.div 
-          whileHover={{ scale: 1.05 }}
+          whileHover={{ scale: 1.02 }}
           className="flex items-center gap-3 px-3 py-1.5 rounded-full glass border-white/5 cursor-pointer hover:border-primary/30 transition-all group"
         >
           <div className="text-right hidden sm:block">
-            <p className="text-xs font-bold text-white">Rolland Tech</p>
+            <p className="text-xs font-bold text-white">{displayName}</p>
             <p className="text-[10px] text-primary flex items-center justify-end gap-1">
-              Admin <Sparkles size={10} />
+              Active <Sparkles size={10} />
             </p>
           </div>
           <div className="w-8 h-8 rounded-full bg-primary/20 border border-primary/30 flex items-center justify-center">
-            <User size={16} className="text-primary" />
+            {user?.imageUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={user.imageUrl} alt={displayName} className="w-full h-full rounded-full object-cover" />
+            ) : (
+              <span className="text-xs font-bold text-primary">{initials}</span>
+            )}
           </div>
         </motion.div>
+
+        {/* Sign out */}
+        <button
+          onClick={handleSignOut}
+          title="Sign out"
+          className="p-2 rounded-full hover:bg-red-500/10 text-white/40 hover:text-red-400 transition-all"
+        >
+          <LogOut size={16} />
+        </button>
       </div>
     </header>
   )

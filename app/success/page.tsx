@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { startTransition, useEffect, useState } from 'react';
 import { Check } from 'lucide-react';
@@ -11,7 +11,7 @@ type BizUser = {
   plan?: string;
 };
 
-// ── Confetti ───────────────────────────────────────────────────────────────
+// -- Confetti ---------------------------------------------------------------
 
 const CONFETTI_COLORS = ['#3b82f6', '#22c55e', '#facc15', '#ec4899', '#8b5cf6', '#f97316'];
 
@@ -52,7 +52,7 @@ function Confetti() {
   );
 }
 
-// ── Page ───────────────────────────────────────────────────────────────────
+// -- Page -------------------------------------------------------------------
 
 export default function SuccessPage() {
   const [user, setUser] = useState<BizUser>({});
@@ -96,7 +96,7 @@ export default function SuccessPage() {
 
         {/* Heading */}
         <div className="mb-8 text-center">
-          <h1 className="text-3xl font-extrabold text-white md:text-4xl">🎉 You&apos;re all set!</h1>
+          <h1 className="text-3xl font-extrabold text-white md:text-4xl">?? You&apos;re all set!</h1>
           <p className="mt-2 text-lg font-semibold text-zinc-300">
             Welcome to CypAI,{' '}
             <span className="text-blue-400">{businessName}</span>
@@ -116,7 +116,7 @@ export default function SuccessPage() {
             ].map(({ done, label }) => (
               <li key={label} className="flex items-center gap-3 px-6 py-3.5">
                 <span className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-xs ${done ? 'bg-emerald-100 text-emerald-600' : 'bg-amber-50 text-amber-500'}`}>
-                  {done ? '✅' : '⏳'}
+                  {done ? '?' : '?'}
                 </span>
                 <span className={`text-sm font-medium ${done ? 'text-zinc-100' : 'text-zinc-400'}`}>{label}</span>
               </li>
@@ -147,7 +147,7 @@ export default function SuccessPage() {
               href="mailto:cypai.app@cypai.app"
               className="inline-flex items-center gap-1.5 rounded-lg border border-zinc-700 px-4 py-2 text-sm font-semibold text-zinc-200 transition hover:bg-zinc-800"
             >
-              📧 Email Us
+              ?? Email Us
             </a>
             <a
               href="https://wa.me/905338425559"
@@ -155,7 +155,7 @@ export default function SuccessPage() {
               rel="noopener noreferrer"
               className="inline-flex items-center gap-1.5 rounded-lg border border-[#25D366] px-4 py-2 text-sm font-semibold text-[#1a9e4a] transition hover:bg-green-50"
             >
-              💬 WhatsApp Us
+              ?? WhatsApp Us
             </a>
           </div>
         </div>
@@ -165,7 +165,7 @@ export default function SuccessPage() {
           href={dashboardHref}
           className="flex w-full items-center justify-center rounded-xl bg-blue-600 py-3.5 text-sm font-bold text-white shadow-sm transition hover:bg-blue-700 active:scale-[0.99]"
         >
-          Go to Your Dashboard →
+          Go to Your Dashboard ?
         </a>
           <p className="mt-3 text-center text-xs text-zinc-500">
           Bookmark your dashboard link for easy access
@@ -182,3 +182,4 @@ export default function SuccessPage() {
     </main>
   );
 }
+

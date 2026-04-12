@@ -26,7 +26,7 @@ export default function LandingFooter() {
               Join 500+ ambitious businesses in Cyprus and MENA already using CypAI to scale their growth. Free forever.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <Link href="/signup">
+              <Link href="/sign-up">
                 <Button size="lg" className="h-16 px-12 text-xl shadow-[0_0_40px_rgba(184,255,71,0.2)]">
                   Start Building Free <ArrowRight className="ml-2 w-6 h-6" />
                 </Button>

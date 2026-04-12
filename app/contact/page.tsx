@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useState, type FormEvent } from 'react'
 import Link from 'next/link'
@@ -64,17 +64,17 @@ export default function ContactPage() {
       <nav className="sticky top-0 z-40 border-b border-zinc-800 bg-zinc-950/90 backdrop-blur">
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
           <Link href="/" className="flex items-center gap-2 text-base font-semibold text-white">
-            <span>🤖</span>
+            <span>??</span>
             <span>CypAI</span>
           </Link>
           <div className="flex items-center gap-3">
             <Link href="/pricing" className="hidden text-sm text-zinc-400 hover:text-white sm:block">
               Pricing
             </Link>
-            <Link href="/login" className="hidden text-sm text-zinc-400 hover:text-white sm:block">
+            <Link href="/sign-in" className="hidden text-sm text-zinc-400 hover:text-white sm:block">
               Log In
             </Link>
-            <Link href="/signup?plan=pro" className="rounded-xl bg-blue-600 px-5 py-2 text-sm font-semibold text-white transition-all hover:-translate-y-0.5 hover:bg-blue-500 hover:shadow-lg hover:shadow-blue-500/25">
+            <Link href="/sign-up" className="rounded-xl bg-blue-600 px-5 py-2 text-sm font-semibold text-white transition-all hover:-translate-y-0.5 hover:bg-blue-500 hover:shadow-lg hover:shadow-blue-500/25">
               Start Free Trial
             </Link>
           </div>
@@ -212,7 +212,7 @@ export default function ContactPage() {
                 <a href={WA_LINK} target="_blank" rel="noreferrer" className="mt-2 block text-sm font-semibold text-white">
                   {WA_NUMBER}
                 </a>
-                <p className="mt-2 text-sm text-zinc-400">Nicosia, Northern Cyprus 🇨🇾</p>
+                <p className="mt-2 text-sm text-zinc-400">Nicosia, Northern Cyprus ????</p>
               </div>
 
               <div className="rounded-2xl border border-zinc-800 bg-zinc-900 p-6">
@@ -255,3 +255,4 @@ function Field({
     </label>
   )
 }
+

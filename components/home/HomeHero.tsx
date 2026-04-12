@@ -49,7 +49,7 @@ export default function HomeHero() {
           transition={{ duration: 0.6, delay: 0.3 }}
           className="flex flex-col sm:flex-row items-center justify-center gap-4"
         >
-          <Link href="/signup">
+          <Link href="/sign-up">
             <Button size="lg" className="w-full sm:w-auto h-14 px-10 text-lg group shadow-[0_0_30px_rgba(184,255,71,0.2)]">
               Build Your Agent Free
               <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />

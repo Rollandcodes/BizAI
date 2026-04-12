@@ -111,13 +111,13 @@ export function Navigation() {
         {/* CTA Buttons */}
         <div className="flex items-center gap-3">
           <Link 
-            href="/login" 
+            href="/sign-in" 
             className="hidden text-sm font-medium text-amber-400 transition-colors hover:text-amber-300 sm:block"
           >
             Log In
           </Link>
           <Link
-            href="/signup?plan=pro"
+            href="/sign-up"
             className="rounded-full bg-[#e8a020] px-5 py-2 text-sm font-semibold text-[#1a1a2e] shadow-[0_0_30px_rgba(232,160,32,0.4)] transition-all hover:bg-[#f59e0b] hover:shadow-[0_0_50px_rgba(232,160,32,0.7)] hover:scale-105"
           >
             Start Free Trial

@@ -1,40 +1,55 @@
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server'
 import { NextRequest, NextResponse } from 'next/server'
 
-// Define which routes need auth protection.
+// Routes requiring the user to be authenticated
 const isProtectedRoute = createRouteMatcher([
   '/dashboard(.*)',
   '/conversations(.*)',
   '/agent(.*)',
   '/channels(.*)',
   '/settings(.*)',
-  '/api/dashboard(.*)'
+  '/api/dashboard(.*)',
 ])
-const isOnboardingRoute = createRouteMatcher(['/onboarding(.*)'])
+
+// Routes that are part of the onboarding flow itself — never redirect these
+const isOnboardingRoute = createRouteMatcher([
+  '/onboarding(.*)',
+  '/api/onboarding(.*)', // ← critical: must NOT be redirected to /onboarding
+])
+
+// Public auth routes — Clerk handles these, no custom redirect needed
+const isAuthRoute = createRouteMatcher([
+  '/sign-in(.*)',
+  '/sign-up(.*)',
+])
 
 export default clerkMiddleware(async (auth, req: NextRequest) => {
   const { userId, sessionClaims, redirectToSignIn } = await auth()
   const isAuthenticated = !!userId
 
-  // For users visiting /onboarding, don't try to redirect them somewhere else
-  if (isAuthenticated && isOnboardingRoute(req)) {
-    // Continue running, we handle redirecting away from onboarding inside app/onboarding/layout.tsx
-  } else if (isAuthenticated && !sessionClaims?.metadata?.onboardingComplete) {
-    // Catch users who do not have `onboardingComplete: true` in their publicMetadata
-    // Redirect them to the /onboarding route to complete onboarding
+  // Clerk's own sign-in/sign-up pages — let them through
+  if (isAuthRoute(req)) {
+    return NextResponse.next()
+  }
+
+  // Onboarding routes (page + API) — let authenticated users through freely
+  if (isOnboardingRoute(req) && isAuthenticated) {
+    return NextResponse.next()
+  }
+
+  // Authenticated users who haven't completed onboarding → send to /onboarding
+  if (isAuthenticated && !sessionClaims?.metadata?.onboardingComplete) {
     const onboardingUrl = new URL('/onboarding', req.url)
     return NextResponse.redirect(onboardingUrl)
   }
 
-  // If the route matches our protected routes, require auth
+  // Protected routes require authentication
   if (isProtectedRoute(req) && !isAuthenticated) {
     return redirectToSignIn({ returnBackUrl: req.url })
   }
-  
-  // We get the NextResponse to append custom headers
-  const res = NextResponse.next()
 
-  // Security Headers from original proxy.ts
+  // Apply security headers to all responses
+  const res = NextResponse.next()
   res.headers.set('X-Frame-Options', 'ALLOWALL')
   res.headers.set('Content-Security-Policy', 'frame-ancestors *;')
   res.headers.set('X-Content-Type-Options', 'nosniff')

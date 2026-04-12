@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { FormEvent, useMemo, useState } from 'react';
 
@@ -178,4 +178,5 @@ export default function AffiliatePage() {
     </main>
   );
 }
+
 

@@ -57,7 +57,7 @@ export default function CarSalesHowItWorksPage() {
             If you sell cars, this page explains how CypAI helps you answer buyer questions quickly, qualify real leads, and schedule test drives without extra admin work.
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
-            <Link href="/signup" className="rounded-xl bg-teal-600 px-5 py-3 text-sm font-semibold text-white hover:bg-teal-500">
+            <Link href="/sign-up" className="rounded-xl bg-teal-600 px-5 py-3 text-sm font-semibold text-white hover:bg-teal-500">
               Start Free Trial
             </Link>
             <Link href="/setup" className="rounded-xl border border-zinc-700 px-5 py-3 text-sm font-semibold text-zinc-200 hover:bg-zinc-900">
@@ -128,3 +128,4 @@ export default function CarSalesHowItWorksPage() {
     </main>
   );
 }
+

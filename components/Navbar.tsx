@@ -112,13 +112,13 @@ export default function Navbar() {
 
           <div className="flex items-center gap-3">
             <Link
-              href="/login"
+              href="/sign-in"
               className="hidden rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 sm:block"
             >
               Log In
             </Link>
             <Link
-              href="/signup?plan=pro"
+              href="/sign-up"
               className="rounded-full bg-[#e8a020] px-5 py-2 text-sm font-semibold text-[#1a1a2e] transition-all hover:scale-105 hover:bg-[#d49020]"
             >
               Start Free Trial
@@ -201,14 +201,14 @@ export default function Navbar() {
               Contact
             </Link>
             <Link
-              href="/login"
+              href="/sign-in"
               onClick={() => setIsMenuOpen(false)}
               className="block rounded-lg border border-gray-300 px-4 py-2 text-center font-medium text-gray-700 hover:bg-gray-50"
             >
               Log In
             </Link>
             <Link
-              href="/signup?plan=pro"
+              href="/sign-up"
               className="mx-4 mt-2 block rounded-xl bg-[#e8a020] py-3 text-center font-semibold text-[#1a1a2e] hover:bg-[#d49020]"
             >
               Start Free Trial

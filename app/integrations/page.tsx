@@ -112,7 +112,7 @@ export default function IntegrationsPage() {
 
       <section className="py-16">
         <div className="mx-auto flex max-w-6xl flex-wrap gap-2 px-4 sm:px-6 lg:px-8">
-          <Link href="/signup?plan=pro" className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-500">
+          <Link href="/sign-up" className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-500">
             Start free trial
           </Link>
           <Link href="/how-it-works" className="rounded-lg border border-zinc-700 px-4 py-2 text-sm font-semibold hover:bg-zinc-900">
@@ -126,3 +126,4 @@ export default function IntegrationsPage() {
     </main>
   )
 }
+

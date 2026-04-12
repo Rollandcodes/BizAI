@@ -26,7 +26,7 @@ export default function ClinicsPage() {
             <Link href="/demo" className="text-sm text-gray-600 transition-colors hover:text-[#1a1a2e]">Demo</Link>
           </nav>
           <Link
-            href="/signup?plan=pro"
+            href="/sign-up"
             className="rounded-lg bg-[#e8a020] px-4 py-2 text-sm font-semibold text-[#1a1a2e] transition-colors hover:bg-[#d4920a]"
           >
             Start Free Trial
@@ -48,7 +48,7 @@ export default function ClinicsPage() {
           </p>
           <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
             <Link
-              href="/signup?plan=pro"
+              href="/sign-up"
               className="rounded-xl bg-[#e8a020] px-8 py-4 text-lg font-bold text-[#1a1a2e] transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#d4920a] hover:shadow-lg hover:shadow-[#e8a020]/20"
             >
               Start Free Trial — No Credit Card
@@ -238,7 +238,7 @@ export default function ClinicsPage() {
                 <li className="flex items-start gap-2 text-gray-600 text-sm"><span className="text-amber-500 font-bold">✓</span> GDPR compliant</li>
               </ul>
               <Link
-                href="/signup?plan=starter"
+                href="/sign-up"
                 className="mt-8 block rounded-xl border border-gray-300 px-6 py-3 text-center font-semibold text-[#1a1a2e] transition-colors hover:bg-gray-50"
               >
                 Start Free Trial
@@ -262,7 +262,7 @@ export default function ClinicsPage() {
                 <li className="flex items-start gap-2 text-gray-600 text-sm"><span className="text-amber-500 font-bold">✓</span> Full CRM</li>
               </ul>
               <Link
-                href="/signup?plan=pro"
+                href="/sign-up"
                 className="mt-8 block rounded-xl bg-[#e8a020] px-6 py-3 text-center font-semibold text-[#1a1a2e] transition-colors hover:bg-[#d4920a]"
               >
                 Start Free Trial
@@ -282,7 +282,7 @@ export default function ClinicsPage() {
                 <li className="flex items-start gap-2 text-gray-600 text-sm"><span className="text-amber-500 font-bold">✓</span> SLA guarantee</li>
               </ul>
               <Link
-                href="/signup?plan=business"
+                href="/sign-up"
                 className="mt-8 block rounded-xl border border-gray-300 px-6 py-3 text-center font-semibold text-[#1a1a2e] transition-colors hover:bg-gray-50"
               >
                 Start Free Trial
@@ -300,7 +300,7 @@ export default function ClinicsPage() {
         <div className="mx-auto max-w-3xl px-4 text-center sm:px-6 lg:px-8">
           <h2 className="text-3xl font-bold text-white">Reduce admin.<br />See more patients.</h2>
           <Link
-            href="/signup?plan=pro"
+            href="/sign-up"
             className="mt-8 inline-block rounded-xl bg-[#e8a020] px-8 py-4 text-lg font-bold text-[#1a1a2e] transition-all duration-200 hover:bg-[#d4920a] hover:shadow-lg hover:shadow-[#e8a020]/20"
           >
             Start Your Free Trial Now →
@@ -338,3 +338,4 @@ export default function ClinicsPage() {
     </main>
   )
 }
+

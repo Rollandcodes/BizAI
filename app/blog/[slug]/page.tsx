@@ -248,7 +248,7 @@ export default async function BlogPostPage({ params }: PageProps) {
             CypAI helps 200+ businesses in Cyprus capture more leads and serve customers better with AI-powered WhatsApp and website chat.
           </p>
           <Link
-            href="/signup?plan=pro"
+            href="/sign-up"
             className="mt-6 inline-flex rounded-xl bg-amber-500 px-6 py-3 text-sm font-semibold text-[#0a0f1e] transition-all hover:-translate-y-0.5 hover:bg-amber-400 hover:shadow-lg hover:shadow-amber-500/25"
           >
             Start Free Trial →

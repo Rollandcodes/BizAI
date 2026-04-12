@@ -106,7 +106,7 @@ export default function SetupPage() {
             This page is made for non-technical business owners. No jargon. No confusing instructions. Just the exact steps you need to get CypAI working in your business.
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
-            <Link href="/signup" className="rounded-xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white hover:bg-blue-500">
+            <Link href="/sign-up" className="rounded-xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white hover:bg-blue-500">
               Start Free Trial
             </Link>
             <Link href="/how-it-works" className="rounded-xl border border-zinc-700 px-5 py-3 text-sm font-semibold text-zinc-200 hover:bg-zinc-900">
@@ -224,3 +224,4 @@ export default function SetupPage() {
     </main>
   );
 }
+

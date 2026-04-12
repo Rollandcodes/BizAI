@@ -29,10 +29,10 @@ export default function LandingNavbar() {
       </div>
 
       <div className="flex items-center gap-4">
-        <Link href="/login">
+        <Link href="/sign-in">
           <Button variant="ghost" size="sm" className="hidden sm:flex text-white/80 border-white/10">Log in</Button>
         </Link>
-        <Link href="/signup">
+        <Link href="/sign-up">
           <Button variant="primary" size="sm" className="shadow-[0_0_15px_rgba(184,255,71,0.3)]">Get Started</Button>
         </Link>
       </div>
