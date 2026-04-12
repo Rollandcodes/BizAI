@@ -9,41 +9,62 @@ export default function LiveLabDemo() {
   const [messages, setMessages] = useState<{ role: 'ai' | 'user', text: string }[]>([])
   const [input, setInput] = useState('')
   const [replying, setReplying] = useState(false)
+  const [error, setError] = useState('')
   
   const pack = AGENT_PACKS[activeNiche]
 
-  const quickReplies: Record<NicheType, string> = {
-    'Real Estate': 'Absolutely. I can share 3 matching listings and arrange a viewing this week.',
-    'Car Rental': 'Great choice. I can lock a car now and send booking confirmation to your WhatsApp.',
-    'Clinics': 'We can schedule an appointment for you. Please share your preferred day and time.',
-    'Hotels': 'We have availability for your dates. Would you like a city view or sea view room?',
-    'Apartments': 'Yes, we have rooms available near campus. I can send photos and pricing now.',
-    'Universities': 'We can support admissions and FAQ automation. Would you like a quick demo flow?',
-    'Small Shops': 'We can help automate replies and orders. Want to start with WhatsApp integration?',
-    'Plumbers': 'Understood. We can dispatch a technician quickly. Please share your location.',
-    'Contractors': 'We can schedule a site visit and quote. What service do you need first?',
-    'Startups': 'Great fit. We can launch your support agent this week with custom workflows.',
+  // Map NicheType to API niche values
+  const nicheToApiKey: Record<NicheType, string> = {
+    'Real Estate': 'real_estate',
+    'Car Rental': 'car_rental',
+    'Clinics': 'clinic',
+    'Hotels': 'hotel',
+    'Apartments': 'student_accommodation',
+    'Universities': 'student_accommodation',
+    'Small Shops': 'small_shop',
+    'Plumbers': 'plumber',
+    'Contractors': 'contractor',
+    'Startups': 'startup',
   }
 
   useEffect(() => {
     setMessages([{ role: 'ai', text: pack.welcome_message }])
     setInput('')
     setReplying(false)
+    setError('')
     
-    // Auto-reply simulation for demo effect
-    const timer = setTimeout(() => {
+    // Auto-reply simulation for demo effect with real API
+    const timer = setTimeout(async () => {
       if (activeNiche === 'Car Rental') {
-        setMessages(prev => [...prev, 
-          { role: 'user', text: 'I need a car for tomorrow at Ercan Airport.' },
-          { role: 'ai', text: 'Excellent! I can arrange that. We have a Ford Focus available for €35/day. Would you like to reserve it? I just need your WhatsApp number to send the booking link.' }
-        ])
+        const demoMessage = 'I need a car for tomorrow at Ercan Airport.'
+        setMessages(prev => [...prev, { role: 'user', text: demoMessage }])
+        
+        try {
+          const res = await fetch('/api/chat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              message: demoMessage,
+              niche: nicheToApiKey[activeNiche],
+              businessId: 'demo',
+              businessName: pack.name,
+            }),
+          })
+
+          if (res.ok) {
+            const data = await res.json() as { message?: string }
+            setMessages(prev => [...prev, { role: 'ai', text: data.message || 'How can I help you?' }])
+          }
+        } catch (err) {
+          console.error('Demo API error:', err)
+        }
       }
     }, 2000)
 
     return () => clearTimeout(timer)
-  }, [activeNiche, pack.welcome_message])
+  }, [activeNiche, pack])
 
-  const handleSend = (e: React.FormEvent) => {
+  const handleSend = async (e: React.FormEvent) => {
     e.preventDefault()
     const text = input.trim()
     if (!text || replying) {
@@ -53,11 +74,34 @@ export default function LiveLabDemo() {
     setMessages((prev) => [...prev, { role: 'user', text }])
     setInput('')
     setReplying(true)
+    setError('')
 
-    setTimeout(() => {
-      setMessages((prev) => [...prev, { role: 'ai', text: quickReplies[activeNiche] }])
+    try {
+      const res = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          message: text,
+          niche: nicheToApiKey[activeNiche],
+          businessId: 'demo',
+          businessName: pack.name,
+        }),
+      })
+
+      if (!res.ok) {
+        throw new Error(`API error: ${res.status}`)
+      }
+
+      const data = await res.json() as { message?: string; degraded?: boolean }
+      const aiReply = data.message || 'I experienced a temporary issue. How can I help you?'
+      setMessages((prev) => [...prev, { role: 'ai', text: aiReply }])
+    } catch (err) {
+      console.error('Chat error:', err)
+      setError('AI temporarily unavailable. Please try again.')
+      setMessages((prev) => prev.slice(0, -1)) // Remove the user message on error
+    } finally {
       setReplying(false)
-    }, 800)
+    }
   }
 
   return (
@@ -110,6 +154,11 @@ export default function LiveLabDemo() {
 
           {/* Chat Body */}
           <div className="flex-1 overflow-y-auto p-6 space-y-4">
+            {error && (
+              <div className="bg-red-500/20 border border-red-500/30 text-red-200 px-4 py-2 rounded text-sm">
+                {error}
+              </div>
+            )}
             <AnimatePresence initial={false}>
               {messages.map((msg, i) => (
                 <motion.div
