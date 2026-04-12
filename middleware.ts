@@ -1,5 +1,6 @@
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server'
 import { NextRequest, NextResponse } from 'next/server'
+import { isOnboardingComplete } from '@/lib/clerk-auth'
 
 // Routes requiring the user to be authenticated
 const isProtectedRoute = createRouteMatcher([
@@ -9,6 +10,11 @@ const isProtectedRoute = createRouteMatcher([
   '/channels(.*)',
   '/settings(.*)',
   '/api/dashboard(.*)',
+  '/api/business(.*)',
+  '/api/conversations(.*)',
+  '/api/orders(.*)',
+  '/api/booking-history(.*)',
+  '/api/audit(.*)',
 ])
 
 // Routes that are part of the onboarding flow itself — never redirect these
@@ -38,7 +44,7 @@ export default clerkMiddleware(async (auth, req: NextRequest) => {
   }
 
   // Authenticated users who haven't completed onboarding → send to /onboarding
-  if (isAuthenticated && !sessionClaims?.metadata?.onboardingComplete) {
+  if (isAuthenticated && !isOnboardingComplete(sessionClaims)) {
     const onboardingUrl = new URL('/onboarding', req.url)
     return NextResponse.redirect(onboardingUrl)
   }

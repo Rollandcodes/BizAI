@@ -7,7 +7,7 @@ export default function SignInPage() {
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-electric-lime/10 blur-[120px] rounded-full pointer-events-none" />
       
       <div className="relative z-10 w-full max-w-md flex flex-col items-center">
-        <SignIn />
+        <SignIn fallbackRedirectUrl="/dashboard" />
       </div>
     </div>
   )

@@ -11,52 +11,8 @@ type BizUser = {
   plan?: string;
 };
 
-// -- Confetti ---------------------------------------------------------------
-
-const CONFETTI_COLORS = ['#3b82f6', '#22c55e', '#facc15', '#ec4899', '#8b5cf6', '#f97316'];
-
-const CONFETTI_PIECES: {
-  left: number;
-  size: number;
-  delay: number;
-  duration: number;
-  color: string;
-  rotate: number;
-}[] = Array.from({ length: 20 }, (_, i) => ({
-  left:     (i * 4.8 + (i % 3) * 3.1) % 100,
-  size:     6 + (i % 5) * 2,
-  delay:    (i % 9) * 110,
-  duration: 2000 + (i % 7) * 250,
-  color:    CONFETTI_COLORS[i % CONFETTI_COLORS.length]!,
-  rotate:   (i % 12) * 30,
-}));
-
-function Confetti() {
-  return (
-    <div aria-hidden="true" className="pointer-events-none fixed inset-0 overflow-hidden">
-      {CONFETTI_PIECES.map((p, i) => (
-        <span
-          key={i}
-          className="absolute top-[-3%] rounded-sm"
-          style={{
-            left:            `${p.left}%`,
-            width:           p.size,
-            height:          p.size,
-            backgroundColor: p.color,
-            transform:       `rotate(${p.rotate}deg)`,
-            animation:       `confetti-fall ${p.duration}ms ease-out ${p.delay}ms forwards`,
-          }}
-        />
-      ))}
-    </div>
-  );
-}
-
-// -- Page -------------------------------------------------------------------
-
 export default function SuccessPage() {
   const [user, setUser] = useState<BizUser>({});
-  const [showConfetti, setShowConfetti] = useState(true);
 
   useEffect(() => {
     try {
@@ -69,27 +25,19 @@ export default function SuccessPage() {
     } catch {
       // ignore
     }
-    const t = setTimeout(() => setShowConfetti(false), 4500);
-    return () => clearTimeout(t);
+    return undefined;
   }, []);
 
   const businessName = user.businessName ?? 'your business';
-  const email        = user.email ?? '';
-  const dashboardHref = email
-    ? `/dashboard?email=${encodeURIComponent(email)}`
-    : '/dashboard';
+  const email = user.email ?? '';
+  const dashboardHref = '/dashboard';
 
   return (
     <main className="relative flex min-h-screen flex-col items-center justify-start bg-zinc-950 px-4 py-16 text-zinc-100">
-      {showConfetti && <Confetti />}
-
       <div className="w-full max-w-lg">
         {/* Checkmark */}
         <div className="mb-8 flex justify-center">
-          <div
-            className="flex h-20 w-20 items-center justify-center rounded-full bg-emerald-500 shadow-lg shadow-emerald-200"
-            style={{ animation: 'success-pop 0.5s cubic-bezier(0.34,1.56,0.64,1) both' }}
-          >
+          <div className="success-pop flex h-20 w-20 items-center justify-center rounded-full bg-emerald-500 shadow-lg shadow-emerald-200">
             <Check className="h-9 w-9 stroke-[3] text-white" />
           </div>
         </div>
@@ -167,18 +115,10 @@ export default function SuccessPage() {
         >
           Go to Your Dashboard ?
         </a>
-          <p className="mt-3 text-center text-xs text-zinc-500">
+        <p className="mt-3 text-center text-xs text-zinc-500">
           Bookmark your dashboard link for easy access
         </p>
       </div>
-
-      {/* Inline keyframe for checkmark pop */}
-      <style>{`
-        @keyframes success-pop {
-          from { opacity: 0; transform: scale(0.4); }
-          to   { opacity: 1; transform: scale(1);   }
-        }
-      `}</style>
     </main>
   );
 }

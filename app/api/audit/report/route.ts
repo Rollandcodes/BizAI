@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import OpenAI from 'openai';
 import { createServerClient } from '@/lib/supabase';
+import { getAuthenticatedUser, hasAgencyAccess } from '@/lib/clerk-auth';
 
 type ConversationRow = {
   id: string;
@@ -49,8 +50,27 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     return NextResponse.json({ error: 'Missing businessId' }, { status: 400 });
   }
 
+  const authUser = await getAuthenticatedUser();
+  if (!authUser?.email) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
   try {
     const supabase = createServerClient();
+    const { data: businessAccess, error: businessAccessError } = await supabase
+      .from('businesses')
+      .select('id, owner_email')
+      .eq('id', businessId)
+      .single();
+
+    if (businessAccessError || !businessAccess) {
+      return NextResponse.json({ error: 'Business not found' }, { status: 404 });
+    }
+
+    if (!hasAgencyAccess(authUser.email) && businessAccess.owner_email !== authUser.email) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    }
+
     const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
 
     // Fetch conversations + business in parallel

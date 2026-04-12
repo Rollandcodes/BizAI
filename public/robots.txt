@@ -9,8 +9,7 @@ Disallow: /dashboard/
 Disallow: /widget/
 
 # Host
-Host: https://biz-ai-u4n3.vercel.app/
+Host: https://www.cypai.app
 
 # Sitemaps
-Sitemap: https://biz-ai-u4n3.vercel.app/sitemap.xml
-Sitemap: https://biz-ai-u4n3.vercel.app//sitemap.xml
+Sitemap: https://www.cypai.app/sitemap.xml

@@ -1,38 +1,18 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { assertSupabaseConfig, createServerClient } from "@/lib/supabase";
+import { getAuthenticatedUser } from "@/lib/clerk-auth";
 
 const supabase = createServerClient();
 
-/**
- * GET /api/dashboard/business
- * 
- * Returns the current user's business data based on email query parameter.
- * Uses owner_email field (not email) to query the businesses table.
- * 
- * Query params:
- * - email: The owner's email address (required)
- * 
- * Returns:
- * - 200: { business: Business }
- * - 400: { error: "email required" }
- * - 401: Unauthorized (not authenticated)
- * - 404: { error: "No account found" }
- * - 500: { error: "Internal server error" }
- */
-import { currentUser } from "@clerk/nextjs/server";
-
-export async function GET(req: NextRequest) {
+export async function GET() {
   try {
     assertSupabaseConfig();
-    
-    const clerkUser = await currentUser();
-    const email = clerkUser?.emailAddresses[0]?.emailAddress?.trim().toLowerCase();
 
-    if (!email) {
-      return NextResponse.json({ error: "email required" }, { status: 400 });
+    const authUser = await getAuthenticatedUser();
+    if (!authUser?.email) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Fetch business by owner_email (not email - that's the bug in the sub-pages)
     const { data: business, error } = await supabase
       .from("businesses")
       .select(`
@@ -62,11 +42,10 @@ export async function GET(req: NextRequest) {
         referral_code,
         created_at
       `)
-      .eq("owner_email", email)
+      .eq("owner_email", authUser.email)
       .single();
 
     if (error || !business) {
-      console.log("[dashboard/business] No business found for email:", email, "error:", error);
       return NextResponse.json({ error: "No account found" }, { status: 404 });
     }
 

@@ -10,7 +10,7 @@ import Link from "next/link";
 
 export default function OnboardingPage() {
   const router = useRouter();
-  const { user } = useUser();
+  const { user, isLoaded } = useUser();
   const [formData, setFormData] = useState({
     businessName: "",
     niche: "Real Estate" as NicheType,
@@ -20,6 +20,13 @@ export default function OnboardingPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!user) {
+      setError("Your session expired. Please sign in again.");
+      router.replace("/sign-in");
+      return;
+    }
+
     setLoading(true);
     setError(null);
 
@@ -38,12 +45,20 @@ export default function OnboardingPage() {
       // Forces a token refresh and refreshes the `User` object so our metadata updates are pulled
       await user?.reload();
       
-      router.push("/dashboard");
-    } catch (err: any) {
-      setError(err.message);
+      router.replace("/dashboard");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to finish onboarding");
       setLoading(false);
     }
   };
+
+  if (!isLoaded) {
+    return (
+      <div className="min-h-screen bg-[#050510] flex items-center justify-center text-white/60">
+        Loading your session...
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#050510] flex items-center justify-center p-6 relative overflow-hidden">
@@ -71,8 +86,9 @@ export default function OnboardingPage() {
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <label className="text-[10px] uppercase tracking-widest text-white/40 font-mono ml-4">Business Name</label>
+                  <label htmlFor="business-name" className="text-[10px] uppercase tracking-widest text-white/40 font-mono ml-4">Business Name</label>
                   <input 
+                    id="business-name"
                     type="text" 
                     placeholder="e.g. Girne Estates"
                     className="w-full bg-white/5 border border-white/10 rounded-full py-3 px-6 text-sm focus:outline-none focus:border-electric-lime transition-all"
@@ -82,8 +98,10 @@ export default function OnboardingPage() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-[10px] uppercase tracking-widest text-white/40 font-mono ml-4">Industry Niche</label>
+                  <label htmlFor="industry-niche" className="text-[10px] uppercase tracking-widest text-white/40 font-mono ml-4">Industry Niche</label>
                   <select 
+                    id="industry-niche"
+                    aria-label="Industry Niche"
                     className="w-full bg-white/5 border border-white/10 rounded-full py-3 px-6 text-sm focus:outline-none focus:border-electric-lime transition-all"
                     value={formData.niche}
                     onChange={(e) => setFormData({ ...formData, niche: e.target.value as NicheType })}

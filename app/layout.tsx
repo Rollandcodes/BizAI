@@ -35,14 +35,14 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <ClerkProvider>
-      <html lang="en" className="dark">
-        <body className={`${inter.variable} ${spaceGrotesk.variable} ${jetbrainsMono.variable} font-sans selection:bg-primary/30 selection:text-white`}>
+    <html lang="en" className="dark">
+      <body className={`${inter.variable} ${spaceGrotesk.variable} ${jetbrainsMono.variable} font-sans selection:bg-primary/30 selection:text-white`}>
+        <ClerkProvider>
           {children}
-          <Analytics />
-        </body>
-      </html>
-    </ClerkProvider>
+        </ClerkProvider>
+        <Analytics />
+      </body>
+    </html>
   )
 }
 

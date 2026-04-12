@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { getAuthenticatedUser, hasAgencyAccess } from "@/lib/clerk-auth";
 
 function admin() {
   return createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
@@ -11,6 +12,11 @@ export async function PATCH(
 ) {
   try {
     const { conversationId } = await params;
+    const authUser = await getAuthenticatedUser();
+    if (!authUser?.email) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const body = await req.json() as {
       businessId?: string;
       leadContacted?: boolean;
@@ -25,6 +31,21 @@ export async function PATCH(
       return NextResponse.json({ error: "businessId required" }, { status: 400 });
     }
 
+    const supabase = admin();
+    const { data: business, error: businessError } = await supabase
+      .from("businesses")
+      .select("id, owner_email")
+      .eq("id", businessId)
+      .single();
+
+    if (businessError || !business) {
+      return NextResponse.json({ error: "Business not found" }, { status: 404 });
+    }
+
+    if (!hasAgencyAccess(authUser.email) && business.owner_email !== authUser.email) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
     const updates: Record<string, unknown> = {};
     if (leadContacted !== undefined) updates.lead_contacted = leadContacted;
     if (contactStatus !== undefined) updates.contact_status = contactStatus;
@@ -35,7 +56,6 @@ export async function PATCH(
       return NextResponse.json({ error: "No updates provided" }, { status: 400 });
     }
 
-    const supabase = admin();
     const { data, error } = await supabase
       .from("conversations")
       .update(updates)
@@ -58,6 +78,11 @@ export async function GET(
   { params }: { params: Promise<{ conversationId: string }> }
 ) {
   const { conversationId } = await params;
+  const authUser = await getAuthenticatedUser();
+  if (!authUser?.email) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   const supabase = admin();
   const { data, error } = await supabase
     .from("conversations")
@@ -66,5 +91,20 @@ export async function GET(
     .single();
 
   if (error || !data) return NextResponse.json({ error: "Not found" }, { status: 404 });
+
+  const { data: business, error: businessError } = await supabase
+    .from("businesses")
+    .select("id, owner_email")
+    .eq("id", data.business_id)
+    .single();
+
+  if (businessError || !business) {
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
+
+  if (!hasAgencyAccess(authUser.email) && business.owner_email !== authUser.email) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+
   return NextResponse.json({ conversation: data });
 }

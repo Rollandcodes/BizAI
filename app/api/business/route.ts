@@ -1,45 +1,79 @@
 import { NextRequest, NextResponse } from "next/server";
 import { assertSupabaseConfig, createServerClient } from "@/lib/supabase";
+import { getAuthenticatedUser, hasAgencyAccess, normalizeEmail } from "@/lib/clerk-auth";
 
 const supabase = createServerClient();
 
-function getAgencyEmails(): string[] {
-  return (process.env.AGENCY_ALLOWED_EMAILS ?? "")
-    .split(",")
-    .map(e => e.trim().toLowerCase())
-    .filter(Boolean);
-}
+const SAFE_UPDATE_FIELDS = new Set([
+  "business_name",
+  "business_type",
+  "owner_name",
+  "whatsapp",
+  "whatsapp_phone_number_id",
+  "website",
+  "widget_color",
+  "widget_position",
+  "welcome_message",
+  "business_hours",
+  "languages",
+  "pricing_info",
+  "common_questions_text",
+  "additional_info",
+  "custom_faqs",
+  "system_prompt",
+]);
 
-function hasAgencyAccess(email?: string | null): boolean {
-  if (!email) return false;
-  return getAgencyEmails().includes(email.trim().toLowerCase());
+function pickSafeUpdates(updates: Record<string, unknown>) {
+  const normalized: Record<string, unknown> = {};
+
+  for (const [key, value] of Object.entries(updates)) {
+    if (!SAFE_UPDATE_FIELDS.has(key) || value === undefined) {
+      continue;
+    }
+    normalized[key] = value;
+  }
+
+  return normalized;
 }
 
 export async function GET(req: NextRequest) {
   try {
     assertSupabaseConfig();
-    const { searchParams } = new URL(req.url);
-    const email = searchParams.get("email")?.trim().toLowerCase();
-    const businessId = searchParams.get("businessId")?.trim();
 
-    if (!email && !businessId) {
+    const authUser = await getAuthenticatedUser();
+    if (!authUser?.email) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const { searchParams } = new URL(req.url);
+    const requestedEmail = normalizeEmail(searchParams.get("email"));
+    const businessId = searchParams.get("businessId")?.trim();
+    const targetEmail = requestedEmail ?? authUser.email;
+
+    if (requestedEmail && requestedEmail !== authUser.email && !hasAgencyAccess(authUser.email)) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
+    if (!businessId && !targetEmail) {
       return NextResponse.json({ error: "email or businessId required" }, { status: 400 });
     }
 
-    // Fetch business
     const query = supabase
       .from("businesses")
       .select("id,owner_email,business_name,business_type,owner_name,whatsapp,whatsapp_phone_number_id,website,widget_color,widget_position,welcome_message,business_hours,languages,pricing_info,common_questions_text,additional_info,custom_faqs,onboarding_complete,plan,plan_expires_at,paypal_subscription_id,system_prompt,referral_code,message_count_month");
 
     const { data: business, error } = businessId
       ? await query.eq("id", businessId).single()
-      : await query.eq("owner_email", email!).single();
+      : await query.eq("owner_email", targetEmail).single();
 
     if (error || !business) {
       return NextResponse.json({ business: null, error: "No account found" }, { status: 404 });
     }
 
-    // Stats
+    if (!hasAgencyAccess(authUser.email) && business.owner_email !== authUser.email) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
     const [convResult, monthlyResult] = await Promise.all([
       supabase
         .from("conversations")
@@ -53,10 +87,9 @@ export async function GET(req: NextRequest) {
     ]);
 
     const totalConversations = convResult.count ?? 0;
-    const leadsCaptured = (convResult.data ?? []).filter(c => c.lead_captured).length;
+    const leadsCaptured = (convResult.data ?? []).filter((conversation) => conversation.lead_captured).length;
     const monthlyConversations = monthlyResult.count ?? 0;
 
-    // Conversations
     const { data: conversations } = await supabase
       .from("conversations")
       .select("id,created_at,customer_name,customer_phone,channel,lead_captured,lead_contacted,messages")
@@ -64,10 +97,8 @@ export async function GET(req: NextRequest) {
       .order("created_at", { ascending: false })
       .limit(100);
 
-    // Leads
-    const leads = (conversations ?? []).filter(c => c.lead_captured);
+    const leads = (conversations ?? []).filter((conversation) => conversation.lead_captured);
 
-    // WhatsApp events
     const { data: whatsappEvents } = await supabase
       .from("whatsapp_message_events")
       .select("id,session_id,direction,whatsapp_message_id,from_number,body_text,delivery_status,error_message,created_at")
@@ -81,7 +112,7 @@ export async function GET(req: NextRequest) {
         customInstructions: business.system_prompt,
         customFaqs: business.custom_faqs ?? [],
       },
-      agencyAccess: hasAgencyAccess(business.owner_email),
+      agencyAccess: hasAgencyAccess(authUser.email),
       stats: {
         totalConversations,
         leadsCaptured,
@@ -100,19 +131,58 @@ export async function GET(req: NextRequest) {
 
 export async function PATCH(req: NextRequest) {
   try {
-    const body = await req.json() as Record<string, unknown>;
-    const { businessId, email, ...updates } = body as { businessId?: string; email?: string } & Record<string, unknown>;
+    assertSupabaseConfig();
 
-    if (!businessId && !email) {
+    const authUser = await getAuthenticatedUser();
+    if (!authUser?.email) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const body = (await req.json()) as Record<string, unknown>;
+    const businessId = typeof body.businessId === "string" ? body.businessId.trim() : "";
+    const requestedEmail = normalizeEmail(typeof body.email === "string" ? body.email : null);
+    const updates = pickSafeUpdates(body);
+
+    if (!businessId && !requestedEmail) {
       return NextResponse.json({ error: "businessId or email required" }, { status: 400 });
     }
 
-    const query = supabase.from("businesses").update(updates);
-    const { data, error } = businessId
-      ? await query.eq("id", businessId).select().single()
-      : await query.eq("owner_email", (email as string).toLowerCase()).select().single();
+    if (requestedEmail && requestedEmail !== authUser.email && !hasAgencyAccess(authUser.email)) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
 
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    if (Object.keys(updates).length === 0) {
+      return NextResponse.json({ error: "No valid updates provided" }, { status: 400 });
+    }
+
+    const lookupQuery = supabase
+      .from("businesses")
+      .select("id,owner_email")
+      .limit(1);
+
+    const { data: business, error: lookupError } = businessId
+      ? await lookupQuery.eq("id", businessId).single()
+      : await lookupQuery.eq("owner_email", requestedEmail ?? authUser.email).single();
+
+    if (lookupError || !business) {
+      return NextResponse.json({ error: "No account found" }, { status: 404 });
+    }
+
+    if (!hasAgencyAccess(authUser.email) && business.owner_email !== authUser.email) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
+    const { data, error } = await supabase
+      .from("businesses")
+      .update(updates)
+      .eq("id", business.id)
+      .select()
+      .single();
+
+    if (error) {
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
     return NextResponse.json({ business: data });
   } catch (err) {
     console.error("[business PATCH]", err);

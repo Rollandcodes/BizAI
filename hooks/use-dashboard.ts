@@ -1,7 +1,6 @@
 "use client";
 import { useCallback, useState } from "react";
-import { supabase } from "@/lib/supabase";
-import type { Business, Conversation, BookingRecord } from "@/lib/supabase";
+import type { Business, Conversation } from "@/lib/supabase";
 
 export interface DashboardStats {
   totalConversations: number;
@@ -27,15 +26,13 @@ export function useDashboard() {
   const [error, setError]       = useState("");
   const [businessId, setBusinessId] = useState("");
 
-  const load = useCallback(async (params: { email?: string; businessId?: string }) => {
+  const load = useCallback(async () => {
     setLoading(true);
     setError("");
     try {
-      const query = new URLSearchParams();
-      if (params.email)      query.set("email",      params.email);
-      if (params.businessId) query.set("businessId", params.businessId);
-
-      const res = await fetch(`/api/business?${query}`);
+      const res = await fetch("/api/dashboard/business", {
+        credentials: "include",
+      });
       const json = await res.json() as DashboardData & { error?: string };
 
       if (!res.ok || !json.business) {
@@ -59,11 +56,8 @@ export function useDashboard() {
   }, []);
 
   const refresh = useCallback(async () => {
-    if (businessId) return load({ businessId });
-    const email = typeof window !== "undefined" ? localStorage.getItem(STORAGE_KEY) ?? "" : "";
-    if (email) return load({ email });
-    return false;
-  }, [businessId, load]);
+    return load();
+  }, [load]);
 
   const updateLead = useCallback(async (leadId: string, nextContacted: boolean) => {
     setData(prev => {
@@ -73,15 +67,23 @@ export function useDashboard() {
       return { ...prev, conversations: patch(prev.conversations), leads: patch(prev.leads) };
     });
     try {
-      await supabase
-        .from("conversations")
-        .update({ lead_contacted: nextContacted })
-        .eq("id", leadId);
+      const response = await fetch("/api/conversations/" + encodeURIComponent(leadId), {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          businessId,
+          leadContacted: nextContacted,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to update lead status");
+      }
     } catch {
       // Revert optimistic update on failure
       await refresh();
     }
-  }, [refresh]);
+  }, [businessId, refresh]);
 
   return { data, loading, error, businessId, load, refresh, updateLead };
 }

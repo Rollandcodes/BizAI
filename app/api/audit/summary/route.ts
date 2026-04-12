@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@/lib/supabase';
+import { getAuthenticatedUser, hasAgencyAccess } from '@/lib/clerk-auth';
 
 type ConversationRow = {
   id: string;
@@ -39,8 +40,27 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     return NextResponse.json({ error: 'Missing businessId' }, { status: 400 });
   }
 
+  const authUser = await getAuthenticatedUser();
+  if (!authUser?.email) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
   try {
     const supabase = createServerClient();
+    const { data: business, error: businessError } = await supabase
+      .from('businesses')
+      .select('id, owner_email')
+      .eq('id', businessId)
+      .single();
+
+    if (businessError || !business) {
+      return NextResponse.json({ error: 'Business not found' }, { status: 404 });
+    }
+
+    if (!hasAgencyAccess(authUser.email) && business.owner_email !== authUser.email) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    }
+
     const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
 
     const { data, error } = await supabase
