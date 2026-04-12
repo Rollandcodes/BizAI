@@ -27,13 +27,13 @@ export default function Home() {
           <div className="w-8 h-8 bg-electric-lime rounded-lg glow-lime group-hover:rotate-12 transition-transform" />
           <span className="font-display text-2xl font-bold tracking-tighter">CypAI</span>
         </Link>
-        <div className="hidden md:flex items-center gap-8 text-sm font-medium text-white/60">
+        <div className="hidden md:flex items-center gap-8 text-sm font-medium text-white/80">
           <Link href="#features" className="hover:text-white transition-colors">Agents</Link>
           <Link href="#lab" className="hover:text-white transition-colors">Lab</Link>
           <Link href="#pricing" className="hover:text-white transition-colors">Pricing</Link>
         </div>
         <div className="flex items-center gap-4">
-          <Link href="/sign-in" className="text-sm font-medium text-white/60 hover:text-white transition-colors">
+          <Link href="/sign-in" className="text-sm font-medium text-white/80 hover:text-white transition-colors">
             Login
           </Link>
           <Link href="/sign-up" className="btn-primary py-2 px-6">
@@ -54,7 +54,7 @@ export default function Home() {
           <span className="text-gradient-lime">Born in Cyprus</span>
         </h1>
         
-        <p className="max-w-2xl mx-auto text-lg text-white/60 font-sans mb-12 animate-slide-up [animation-delay:200ms]">
+        <p className="max-w-2xl mx-auto text-lg text-white/80 font-sans mb-12 animate-slide-up [animation-delay:200ms]">
           The first AI sales ecosystem designed for the Northern Cyprus market. 
           Capture, qualify, and convert leads across WhatsApp, Instagram, and Web 24/7.
         </p>
@@ -75,10 +75,10 @@ export default function Home() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
                 <div className="text-left space-y-4">
                   <h3 className="text-3xl font-display font-bold">Neural <span className="text-electric-lime">Bridge</span></h3>
-                  <p className="text-white/60 text-sm">
+                  <p className="text-white/80 text-sm">
                     Want a custom enterprise agent built for your multi-location business? Our engineering team builds advanced neural bridges for complex operations in Lefke, Girne, and Magusa.
                   </p>
-                  <ul className="space-y-2 text-xs font-mono text-white/40 uppercase tracking-widest">
+                  <ul className="space-y-2 text-xs font-mono text-white/70 uppercase tracking-widest">
                     <li className="flex items-center gap-2">
                       <div className="w-1.5 h-1.5 rounded-full bg-electric-lime" /> Custom Training
                     </li>
@@ -103,7 +103,7 @@ export default function Home() {
                 ) : (
                   <form onSubmit={handleSubmit} className="space-y-4 text-left">
                     <div className="space-y-2">
-                      <label className="text-[10px] uppercase tracking-widest text-white/40 font-mono ml-4">Full Name</label>
+                      <label className="text-[10px] uppercase tracking-widest text-white/70 font-mono ml-4">Full Name</label>
                       <input 
                         required
                         type="text" 
@@ -112,16 +112,16 @@ export default function Home() {
                       />
                     </div>
                     <div className="space-y-2">
-                      <label htmlFor="business-type" className="text-[10px] uppercase tracking-widest text-white/40 font-mono ml-4">Business Type</label>
+                      <label htmlFor="business-type" className="text-[10px] uppercase tracking-widest text-white/70 font-mono ml-4">Business Type</label>
                       <select id="business-type" className="w-full bg-white/5 border border-white/10 rounded-full py-3 px-6 text-sm focus:outline-none focus:border-electric-lime transition-colors appearance-none">
-                        <option>Real Estate Agency</option>
-                        <option>Restaurant Group</option>
-                        <option>Car Rental</option>
-                        <option>Other</option>
+                        <option className="text-black bg-white">Real Estate Agency</option>
+                        <option className="text-black bg-white">Restaurant Group</option>
+                        <option className="text-black bg-white">Car Rental</option>
+                        <option className="text-black bg-white">Other</option>
                       </select>
                     </div>
                     <div className="space-y-2">
-                      <label className="text-[10px] uppercase tracking-widest text-white/40 font-mono ml-4">Phone / WhatsApp</label>
+                      <label className="text-[10px] uppercase tracking-widest text-white/70 font-mono ml-4">Phone / WhatsApp</label>
                       <input 
                         required
                         type="tel" 
@@ -140,9 +140,40 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Agent Packs Section */}
+      <section id="features" className="relative z-10 px-6 py-16 max-w-7xl mx-auto border-t border-white/5">
+        <div className="text-center mb-10">
+          <h2 className="text-3xl md:text-4xl font-display font-bold">Agent Packs Built For Your Industry</h2>
+          <p className="text-white/80 mt-3 max-w-2xl mx-auto">
+            Pre-trained AI agents for real estate, hospitality, clinics, rentals, and local service businesses in Cyprus.
+          </p>
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          {['Real Estate', 'Restaurants', 'Hotels', 'Car Rentals', 'Clinics', 'Barbershops', 'Student Housing', 'Agencies'].map((item) => (
+            <div key={item} className="rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3 text-center text-sm font-medium text-white/85">
+              {item}
+            </div>
+          ))}
+        </div>
+      </section>
+
       {/* Lab Section */}
       <section id="lab" className="relative z-10 px-6 max-w-7xl mx-auto border-t border-white/5">
         <LiveLabDemo />
+      </section>
+
+      {/* Pricing Section */}
+      <section id="pricing" className="relative z-10 px-6 py-20 max-w-7xl mx-auto border-t border-white/5">
+        <div className="max-w-3xl mx-auto text-center space-y-5">
+          <h2 className="text-3xl md:text-4xl font-display font-bold">Pricing & Waitlist</h2>
+          <p className="text-white/80">
+            Choose a plan or join the priority waitlist to get white-glove setup support.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link href="/pricing" className="btn-ghost px-8 py-3 text-base">View Pricing</Link>
+            <Link href="/sign-up" className="btn-primary px-8 py-3 text-base">Join Waitlist</Link>
+          </div>
+        </div>
       </section>
 
       {/* Footer */}
@@ -158,24 +189,24 @@ export default function Home() {
             </p>
           </div>
           <div>
-            <h4 className="font-display font-bold mb-4 uppercase text-[10px] tracking-widest text-white/60">Product</h4>
-            <ul className="space-y-2 text-sm text-white/40">
+            <h4 className="font-display font-bold mb-4 uppercase text-[10px] tracking-widest text-white/70">Product</h4>
+            <ul className="space-y-2 text-sm text-white/70">
               <li><Link href="#features">Agent Packs</Link></li>
               <li><Link href="#lab">Live Lab</Link></li>
               <li><Link href="/sign-up">Free Deployment</Link></li>
             </ul>
           </div>
           <div>
-            <h4 className="font-display font-bold mb-4 uppercase text-[10px] tracking-widest text-white/60">Localized</h4>
-            <ul className="space-y-2 text-sm text-white/40">
+            <h4 className="font-display font-bold mb-4 uppercase text-[10px] tracking-widest text-white/70">Localized</h4>
+            <ul className="space-y-2 text-sm text-white/70">
               <li>Kyrenia/Girne</li>
               <li>Nicosia/Lefkoşa</li>
               <li>Famagusta/Mağusa</li>
             </ul>
           </div>
           <div>
-            <h4 className="font-display font-bold mb-4 uppercase text-[10px] tracking-widest text-white/60">Company</h4>
-            <ul className="space-y-2 text-sm text-white/40">
+            <h4 className="font-display font-bold mb-4 uppercase text-[10px] tracking-widest text-white/70">Company</h4>
+            <ul className="space-y-2 text-sm text-white/70">
               <li>Terms of Service</li>
               <li>Privacy Engine</li>
             </ul>

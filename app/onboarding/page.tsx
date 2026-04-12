@@ -85,7 +85,7 @@ export default function OnboardingPage() {
             <span className="font-display text-3xl font-bold tracking-tighter text-white">CypAI</span>
           </div>
           <h2 className="text-2xl font-display font-medium text-white/90">Almost there!</h2>
-          <p className="text-white/40 text-sm mt-2">Initialize your Business Neural Agent</p>
+          <p className="text-white/75 text-sm mt-2">Initialize your Business Neural Agent</p>
         </div>
 
         <div className="glass p-1 border-white/10">
@@ -93,7 +93,7 @@ export default function OnboardingPage() {
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <label htmlFor="business-name" className="text-[10px] uppercase tracking-widest text-white/40 font-mono ml-4">Business Name</label>
+                  <label htmlFor="business-name" className="text-[10px] uppercase tracking-widest text-white/70 font-mono ml-4">Business Name</label>
                   <input 
                     id="business-name"
                     type="text" 
@@ -105,7 +105,7 @@ export default function OnboardingPage() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <label htmlFor="industry-niche" className="text-[10px] uppercase tracking-widest text-white/40 font-mono ml-4">Industry Niche</label>
+                  <label htmlFor="industry-niche" className="text-[10px] uppercase tracking-widest text-white/70 font-mono ml-4">Industry Niche</label>
                   <select 
                     id="industry-niche"
                     aria-label="Industry Niche"
@@ -124,7 +124,7 @@ export default function OnboardingPage() {
                 <div className="w-8 h-8 rounded-full bg-electric-lime/10 flex items-center justify-center shrink-0">
                   <Sparkles className="w-4 h-4 text-electric-lime" />
                 </div>
-                <p className="text-xs text-white/60 leading-relaxed font-sans mt-0.5">
+                <p className="text-xs text-white/80 leading-relaxed font-sans mt-0.5">
                   <span className="text-white font-bold">Automatic Pack:</span> Based on your niche, we'll pre-train your agent with localized market intelligence.
                 </p>
               </div>
