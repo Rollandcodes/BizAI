@@ -253,6 +253,7 @@ function ChatWidget({
                 ? 'fixed inset-0 z-50 flex h-[100vh] w-[100vw] flex-col bg-white'
                 : 'fixed bottom-4 right-4 z-50 flex w-96 max-h-[600px] flex-col overflow-hidden rounded-2xl bg-white shadow-2xl'
           }
+          // eslint-disable-next-line -- CSS variable required for dynamic widget color theming
           style={{ '--bizai-color': primaryColor } as React.CSSProperties}
         >
           {/* Header */}

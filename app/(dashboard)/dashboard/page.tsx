@@ -29,6 +29,7 @@ export default function DashboardPage() {
             </div>
             <div className="w-10 h-1 h-[24px] bg-white/5 rounded-full overflow-hidden flex gap-0.5 items-end px-1 pb-1">
               {[0.4, 0.7, 0.5, 0.9, 0.6].map((h, i) => (
+                // eslint-disable-next-line -- Dynamic data visualization heights computed at runtime
                 <div key={i} className="flex-1 bg-electric-lime" style={{ height: `${h * 100}%` }} />
               ))}
             </div>

@@ -363,13 +363,15 @@ export default function CalendarTab({ businessId }: { businessId: string }) {
                     <div key={rule.id} className="rounded-lg border border-slate-200 bg-white p-4">
                       <div className="grid grid-cols-1 gap-3 md:grid-cols-5 md:items-center">
                         <div>
-                          <label className="text-xs font-semibold text-slate-700">Day</label>
+                          <label htmlFor={`day-${rule.id}`} className="text-xs font-semibold text-slate-700">Day</label>
                           <select
+                            id={`day-${rule.id}`}
                             value={rule.day_of_week}
                             onChange={(e) =>
                               handleUpdateAvailability({ ...rule, day_of_week: parseInt(e.target.value) })
                             }
-                            className="mt-1 w-full rounded border border-slate-300 px-2 py-1 text-sm"
+                            className="mt-1 w-full rounded border border-slate-300 px-2 py-1 text-sm text-slate-900"
+                            aria-label="Select day of week"
                           >
                             {DAYS_OF_WEEK.map((day, idx) => (
                               <option key={idx} value={idx}>
@@ -379,29 +381,35 @@ export default function CalendarTab({ businessId }: { businessId: string }) {
                           </select>
                         </div>
                         <div>
-                          <label className="text-xs font-semibold text-slate-700">Start</label>
+                          <label htmlFor={`start-${rule.id}`} className="text-xs font-semibold text-slate-700">Start</label>
                           <input
+                            id={`start-${rule.id}`}
                             type="time"
                             value={rule.start_time}
                             onChange={(e) => handleUpdateAvailability({ ...rule, start_time: e.target.value })}
-                            className="mt-1 w-full rounded border border-slate-300 px-2 py-1 text-sm"
+                            className="mt-1 w-full rounded border border-slate-300 px-2 py-1 text-sm text-slate-900"
+                            aria-label="Start time"
                           />
                         </div>
                         <div>
-                          <label className="text-xs font-semibold text-slate-700">End</label>
+                          <label htmlFor={`end-${rule.id}`} className="text-xs font-semibold text-slate-700">End</label>
                           <input
+                            id={`end-${rule.id}`}
                             type="time"
                             value={rule.end_time}
                             onChange={(e) => handleUpdateAvailability({ ...rule, end_time: e.target.value })}
-                            className="mt-1 w-full rounded border border-slate-300 px-2 py-1 text-sm"
+                            className="mt-1 w-full rounded border border-slate-300 px-2 py-1 text-sm text-slate-900"
+                            aria-label="End time"
                           />
                         </div>
                         <div>
-                          <label className="text-xs font-semibold text-slate-700">Status</label>
+                          <label htmlFor={`status-${rule.id}`} className="text-xs font-semibold text-slate-700">Status</label>
                           <select
+                            id={`status-${rule.id}`}
                             value={rule.is_active ? 'active' : 'inactive'}
                             onChange={(e) => handleUpdateAvailability({ ...rule, is_active: e.target.value === 'active' })}
-                            className="mt-1 w-full rounded border border-slate-300 px-2 py-1 text-sm"
+                            className="mt-1 w-full rounded border border-slate-300 px-2 py-1 text-sm text-slate-900"
+                            aria-label="Availability status"
                           >
                             <option value="active">Active</option>
                             <option value="inactive">Inactive</option>
@@ -441,10 +449,11 @@ export default function CalendarTab({ businessId }: { businessId: string }) {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-slate-900">
+                  <label htmlFor="sync-frequency" className="block text-sm font-semibold text-slate-900">
                     Sync frequency (minutes)
                   </label>
                   <input
+                    id="sync-frequency"
                     type="number"
                     value={preferences.sync_frequency_minutes}
                     onChange={(e) =>
@@ -452,16 +461,18 @@ export default function CalendarTab({ businessId }: { businessId: string }) {
                     }
                     min={5}
                     max={60}
-                    className="mt-1 w-full rounded border border-slate-300 px-3 py-2 text-sm"
+                    className="mt-1 w-full rounded border border-slate-300 px-3 py-2 text-sm text-slate-900"
+                    aria-label="Sync frequency in minutes"
                   />
                   <p className="mt-1 text-xs text-slate-500">How often to check for calendar updates</p>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-slate-900">
+                  <label htmlFor="sync-buffer" className="block text-sm font-semibold text-slate-900">
                     Buffer time before/after bookings (minutes)
                   </label>
                   <input
+                    id="sync-buffer"
                     type="number"
                     value={preferences.sync_buffer_minutes}
                     onChange={(e) =>
@@ -469,16 +480,18 @@ export default function CalendarTab({ businessId }: { businessId: string }) {
                     }
                     min={0}
                     max={120}
-                    className="mt-1 w-full rounded border border-slate-300 px-3 py-2 text-sm"
+                    className="mt-1 w-full rounded border border-slate-300 px-3 py-2 text-sm text-slate-900"
+                    aria-label="Buffer time in minutes"
                   />
                   <p className="mt-1 text-xs text-slate-500">Block time before/after each booking for travel/setup</p>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-slate-900">
+                  <label htmlFor="booking-days-ahead" className="block text-sm font-semibold text-slate-900">
                     Allow bookings up to X days ahead
                   </label>
                   <input
+                    id="booking-days-ahead"
                     type="number"
                     value={preferences.allowed_booking_days_ahead}
                     onChange={(e) =>
@@ -486,15 +499,17 @@ export default function CalendarTab({ businessId }: { businessId: string }) {
                     }
                     min={1}
                     max={90}
-                    className="mt-1 w-full rounded border border-slate-300 px-3 py-2 text-sm"
+                    className="mt-1 w-full rounded border border-slate-300 px-3 py-2 text-sm text-slate-900"
+                    aria-label="Maximum days ahead for booking"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-slate-900">
+                  <label htmlFor="min-hours-ahead" className="block text-sm font-semibold text-slate-900">
                     Minimum hours ahead to book
                   </label>
                   <input
+                    id="min-hours-ahead"
                     type="number"
                     value={preferences.min_booking_hours_ahead}
                     onChange={(e) =>
@@ -503,7 +518,8 @@ export default function CalendarTab({ businessId }: { businessId: string }) {
                     min={0}
                     max={168}
                     step="0.5"
-                    className="mt-1 w-full rounded border border-slate-300 px-3 py-2 text-sm"
+                    className="mt-1 w-full rounded border border-slate-300 px-3 py-2 text-sm text-slate-900"
+                    aria-label="Minimum hours ahead required to book"
                   />
                   <p className="mt-1 text-xs text-slate-500">Customers must book at least this many hours in advance</p>
                 </div>
