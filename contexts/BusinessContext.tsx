@@ -2,9 +2,8 @@
 
 import { createContext, useContext, useEffect, useState, useCallback, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
+import { useUser } from "@clerk/nextjs";
 import type { Business, BusinessPlan } from "@/lib/supabase";
-
-const DASHBOARD_STORAGE_KEY = "cypai-dashboard-email";
 
 export interface BusinessContextValue {
   business: Business | null;
@@ -33,16 +32,17 @@ interface BusinessProviderProps {
 
 export function BusinessProvider({ children }: BusinessProviderProps) {
   const router = useRouter();
+  const { isLoaded, isSignedIn, user } = useUser();
   const [business, setBusiness] = useState<Business | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const fetchBusiness = useCallback(async () => {
-    const email = typeof window !== "undefined" ? localStorage.getItem(DASHBOARD_STORAGE_KEY) : null;
-    
-    if (!email) {
+    // Wait until Clerk user is fully loaded
+    if (!isLoaded) return;
+
+    if (!isSignedIn) {
       setLoading(false);
-      setError("Not authenticated");
       return;
     }
 
@@ -50,14 +50,17 @@ export function BusinessProvider({ children }: BusinessProviderProps) {
       setLoading(true);
       setError(null);
       
-      const response = await fetch(`/api/dashboard/business?email=${encodeURIComponent(email)}`);
+      const response = await fetch(`/api/dashboard/business`);
       
       if (response.status === 401) {
-        // Not authenticated - redirect to login
-        if (typeof window !== "undefined") {
-          localStorage.removeItem(DASHBOARD_STORAGE_KEY);
-          router.push("/login");
-        }
+        // Not authenticated
+        router.push("/sign-in");
+        return;
+      }
+
+      if (response.status === 404) {
+        // No business found, redirect to onboarding
+        router.push("/onboarding");
         return;
       }
       
@@ -78,7 +81,7 @@ export function BusinessProvider({ children }: BusinessProviderProps) {
     } finally {
       setLoading(false);
     }
-  }, [router]);
+  }, [router, isLoaded, isSignedIn]);
 
   useEffect(() => {
     void fetchBusiness();
@@ -86,13 +89,13 @@ export function BusinessProvider({ children }: BusinessProviderProps) {
 
   const value: BusinessContextValue = {
     business,
-    loading,
+    loading: loading || !isLoaded,
     error,
-    isAuthenticated: !!business,
+    isAuthenticated: isSignedIn && !!business,
     refresh: fetchBusiness,
     plan: business?.plan ?? "trial",
     businessName: business?.business_name ?? "",
-    businessEmail: business?.owner_email ?? "",
+    businessEmail: business?.owner_email ?? user?.emailAddresses[0]?.emailAddress ?? "",
   };
 
   return (

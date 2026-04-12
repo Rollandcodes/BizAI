@@ -19,12 +19,14 @@ const supabase = createServerClient();
  * - 404: { error: "No account found" }
  * - 500: { error: "Internal server error" }
  */
+import { currentUser } from "@clerk/nextjs/server";
+
 export async function GET(req: NextRequest) {
   try {
     assertSupabaseConfig();
     
-    const { searchParams } = new URL(req.url);
-    const email = searchParams.get("email")?.trim().toLowerCase();
+    const clerkUser = await currentUser();
+    const email = clerkUser?.emailAddresses[0]?.emailAddress?.trim().toLowerCase();
 
     if (!email) {
       return NextResponse.json({ error: "email required" }, { status: 400 });
