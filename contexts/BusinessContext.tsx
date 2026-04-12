@@ -91,7 +91,7 @@ export function BusinessProvider({ children }: BusinessProviderProps) {
     business,
     loading: loading || !isLoaded,
     error,
-    isAuthenticated: isSignedIn && !!business,
+    isAuthenticated: !!isSignedIn && !!business,
     refresh: fetchBusiness,
     plan: business?.plan ?? "trial",
     businessName: business?.business_name ?? "",
