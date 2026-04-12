@@ -43,6 +43,11 @@ export default clerkMiddleware(async (auth, req: NextRequest) => {
     return NextResponse.next()
   }
 
+  // Onboarding routes require authentication
+  if (isOnboardingRoute(req) && !isAuthenticated) {
+    return redirectToSignIn({ returnBackUrl: req.url })
+  }
+
   // Authenticated users who haven't completed onboarding → send to /onboarding
   if (isAuthenticated && !isOnboardingComplete(sessionClaims)) {
     const onboardingUrl = new URL('/onboarding', req.url)

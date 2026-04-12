@@ -38,12 +38,12 @@ function pickSafeUpdates(updates: Record<string, unknown>) {
 
 export async function GET(req: NextRequest) {
   try {
-    assertSupabaseConfig();
-
     const authUser = await getAuthenticatedUser();
     if (!authUser?.email) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+
+    assertSupabaseConfig();
 
     const { searchParams } = new URL(req.url);
     const requestedEmail = normalizeEmail(searchParams.get("email"));
@@ -131,12 +131,12 @@ export async function GET(req: NextRequest) {
 
 export async function PATCH(req: NextRequest) {
   try {
-    assertSupabaseConfig();
-
     const authUser = await getAuthenticatedUser();
     if (!authUser?.email) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+
+    assertSupabaseConfig();
 
     const body = (await req.json()) as Record<string, unknown>;
     const businessId = typeof body.businessId === "string" ? body.businessId.trim() : "";

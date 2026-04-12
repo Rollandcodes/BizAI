@@ -90,6 +90,17 @@ type AlertLogDateRange = {
   to: string | null;
 };
 
+type AlertLogFilters = {
+  trigger: AlertLogTriggerFilter;
+  outcome: AlertLogOutcomeFilter;
+  dateRange: AlertLogDateRange;
+  exportCsv: boolean;
+  page: number;
+  pageSize: number;
+  fromRaw: string | null;
+  toRaw: string | null;
+};
+
 const DEFAULT_RETRY_POLICY: RetryPolicy = {
   maxRetries: 3,
   retryWindowHours: 72,
@@ -177,6 +188,76 @@ function normalizeDateEnd(value: string | null): string | null {
   const iso = `${value}T23:59:59.999Z`;
   const parsed = Date.parse(iso);
   return Number.isFinite(parsed) ? new Date(parsed).toISOString() : null;
+}
+
+function parseAlertLogFilters(searchParams: URLSearchParams): AlertLogFilters {
+  const fromRaw = searchParams.get('alertLogFrom');
+  const toRaw = searchParams.get('alertLogTo');
+
+  return {
+    trigger: toAlertLogTriggerFilter(searchParams.get('alertLogTrigger')),
+    outcome: toAlertLogOutcomeFilter(searchParams.get('alertLogOutcome')),
+    dateRange: {
+      from: normalizeDateStart(fromRaw),
+      to: normalizeDateEnd(toRaw),
+    },
+    exportCsv: searchParams.get('alertLogsExport') === 'csv',
+    page: normalizePositiveInt(Number(searchParams.get('alertLogPage') || 1), 1, 1, 5000),
+    pageSize: normalizePositiveInt(Number(searchParams.get('alertLogPageSize') || 10), 10, 5, 50),
+    fromRaw,
+    toRaw,
+  };
+}
+
+function buildTrendOverview(trendRows: Array<{ status: string | null; created_at: string | null }>) {
+  const trend = {
+    windowDays: 7,
+    sent: 0,
+    failed: 0,
+    queued: 0,
+    successRate: 0,
+  };
+
+  const timelineMap = new Map<string, { day: string; sent: number; failed: number; queued: number; total: number }>();
+  for (let i = 6; i >= 0; i -= 1) {
+    const date = new Date(Date.now() - i * 24 * 60 * 60 * 1000);
+    const dayKey = date.toISOString().slice(0, 10);
+    timelineMap.set(dayKey, {
+      day: dayKey,
+      sent: 0,
+      failed: 0,
+      queued: 0,
+      total: 0,
+    });
+  }
+
+  for (const row of trendRows) {
+    if (row.status === 'queued') trend.queued += 1;
+    if (row.status === 'sent') trend.sent += 1;
+    if (row.status === 'failed') trend.failed += 1;
+
+    const dayKey = typeof row.created_at === 'string' ? row.created_at.slice(0, 10) : '';
+    const dayEntry = timelineMap.get(dayKey);
+    if (!dayEntry) {
+      continue;
+    }
+
+    if (row.status === 'queued') dayEntry.queued += 1;
+    if (row.status === 'sent') dayEntry.sent += 1;
+    if (row.status === 'failed') dayEntry.failed += 1;
+    dayEntry.total += 1;
+  }
+
+  const attempts = trend.sent + trend.failed;
+  trend.successRate = attempts > 0 ? Number(((trend.sent / attempts) * 100).toFixed(1)) : 0;
+  const failureRate = attempts > 0 ? Number(((trend.failed / attempts) * 100).toFixed(1)) : 0;
+
+  return {
+    trend,
+    attempts,
+    failureRate,
+    timeline: Array.from(timelineMap.values()),
+  };
 }
 
 function buildAlertLogsCsv(records: AlertLogRecord[]): string {
@@ -1229,30 +1310,20 @@ export async function GET(request: NextRequest) {
   const alertPolicy = await getAlertPolicy();
   const policies = await getRetryPoliciesMap();
   const eventTypeFilter = toEventType(request.nextUrl.searchParams.get('eventType'));
-  const alertLogTrigger = toAlertLogTriggerFilter(request.nextUrl.searchParams.get('alertLogTrigger'));
-  const alertLogOutcome = toAlertLogOutcomeFilter(request.nextUrl.searchParams.get('alertLogOutcome'));
-  const alertLogFromRaw = request.nextUrl.searchParams.get('alertLogFrom');
-  const alertLogToRaw = request.nextUrl.searchParams.get('alertLogTo');
-  const alertLogDateRange: AlertLogDateRange = {
-    from: normalizeDateStart(alertLogFromRaw),
-    to: normalizeDateEnd(alertLogToRaw),
-  };
-  const alertLogsExport = request.nextUrl.searchParams.get('alertLogsExport') === 'csv';
-  const alertLogPage = normalizePositiveInt(Number(request.nextUrl.searchParams.get('alertLogPage') || 1), 1, 1, 5000);
-  const alertLogPageSize = normalizePositiveInt(Number(request.nextUrl.searchParams.get('alertLogPageSize') || 10), 10, 5, 50);
+  const alertLogFilters = parseAlertLogFilters(request.nextUrl.searchParams);
 
-  if (alertLogsExport) {
+  if (alertLogFilters.exportCsv) {
     const alertLogsPage = await getAlertLogsPage({
-      trigger: alertLogTrigger,
-      outcome: alertLogOutcome,
-      dateRange: alertLogDateRange,
+      trigger: alertLogFilters.trigger,
+      outcome: alertLogFilters.outcome,
+      dateRange: alertLogFilters.dateRange,
       page: 1,
       pageSize: 5000,
     });
 
     const csv = buildAlertLogsCsv(alertLogsPage.records);
     const dateSuffix = new Date().toISOString().slice(0, 10);
-    const fileName = `cypai-alert-logs-${alertLogTrigger}-${alertLogOutcome}-${dateSuffix}.csv`;
+    const fileName = `cypai-alert-logs-${alertLogFilters.trigger}-${alertLogFilters.outcome}-${dateSuffix}.csv`;
 
     return new NextResponse(csv, {
       status: 200,
@@ -1316,46 +1387,9 @@ export async function GET(request: NextRequest) {
     if (row.status === 'failed') summary.failed += 1;
   }
 
-  const trend = {
-    windowDays: 7,
-    sent: 0,
-    failed: 0,
-    queued: 0,
-    successRate: 0,
-  };
-
-  const timelineMap = new Map<string, { day: string; sent: number; failed: number; queued: number; total: number }>();
-  for (let i = 6; i >= 0; i -= 1) {
-    const date = new Date(Date.now() - i * 24 * 60 * 60 * 1000);
-    const dayKey = date.toISOString().slice(0, 10);
-    timelineMap.set(dayKey, {
-      day: dayKey,
-      sent: 0,
-      failed: 0,
-      queued: 0,
-      total: 0,
-    });
-  }
-
-  for (const row of trendData || []) {
-    if (row.status === 'queued') trend.queued += 1;
-    if (row.status === 'sent') trend.sent += 1;
-    if (row.status === 'failed') trend.failed += 1;
-
-    const dayKey = typeof row.created_at === 'string' ? row.created_at.slice(0, 10) : '';
-    const dayEntry = timelineMap.get(dayKey);
-    if (dayEntry) {
-      if (row.status === 'queued') dayEntry.queued += 1;
-      if (row.status === 'sent') dayEntry.sent += 1;
-      if (row.status === 'failed') dayEntry.failed += 1;
-      dayEntry.total += 1;
-    }
-  }
-
-  const attempts = trend.sent + trend.failed;
-  trend.successRate = attempts > 0 ? Number(((trend.sent / attempts) * 100).toFixed(1)) : 0;
-
-  const failureRate = attempts > 0 ? Number(((trend.failed / attempts) * 100).toFixed(1)) : 0;
+  const { trend, attempts, failureRate, timeline } = buildTrendOverview(
+    (trendData || []) as Array<{ status: string | null; created_at: string | null }>
+  );
   const lastAlertAtMs = Date.parse(alertPolicy.lastAlertAt || '');
   const cooldownMs = alertPolicy.cooldownMinutes * 60 * 1000;
   const cooldownActive = Number.isFinite(lastAlertAtMs) ? Date.now() - lastAlertAtMs < cooldownMs : false;
@@ -1398,11 +1432,11 @@ export async function GET(request: NextRequest) {
   }
 
   const alertLogsPage = await getAlertLogsPage({
-    trigger: alertLogTrigger,
-    outcome: alertLogOutcome,
-    dateRange: alertLogDateRange,
-    page: alertLogPage,
-    pageSize: alertLogPageSize,
+    trigger: alertLogFilters.trigger,
+    outcome: alertLogFilters.outcome,
+    dateRange: alertLogFilters.dateRange,
+    page: alertLogFilters.page,
+    pageSize: alertLogFilters.pageSize,
   });
 
   return NextResponse.json({
@@ -1423,10 +1457,10 @@ export async function GET(request: NextRequest) {
       pageSize: alertLogsPage.pageSize,
       total: alertLogsPage.total,
       totalPages: alertLogsPage.totalPages,
-      trigger: alertLogTrigger,
-      outcome: alertLogOutcome,
-      from: alertLogFromRaw,
-      to: alertLogToRaw,
+      trigger: alertLogFilters.trigger,
+      outcome: alertLogFilters.outcome,
+      from: alertLogFilters.fromRaw,
+      to: alertLogFilters.toRaw,
     },
     alertState: {
       attempts,
@@ -1438,7 +1472,7 @@ export async function GET(request: NextRequest) {
       reason: alertReason,
       dispatch: alertDispatch,
     },
-    timeline: Array.from(timelineMap.values()),
+    timeline,
     recent: data || [],
   });
 }

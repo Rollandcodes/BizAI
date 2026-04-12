@@ -6,12 +6,12 @@ const supabase = createServerClient();
 
 export async function GET() {
   try {
-    assertSupabaseConfig();
-
     const authUser = await getAuthenticatedUser();
     if (!authUser?.email) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+
+    assertSupabaseConfig();
 
     const { data: business, error } = await supabase
       .from("businesses")
