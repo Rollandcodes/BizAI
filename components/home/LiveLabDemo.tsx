@@ -14,18 +14,15 @@ export default function LiveLabDemo() {
 
   const quickReplies: Record<NicheType, string> = {
     'Real Estate': 'Absolutely. I can share 3 matching listings and arrange a viewing this week.',
-    'Restaurants': 'Yes. We can book your table now. How many guests and what time do you prefer?',
-    'Hotels': 'We have availability for your dates. Would you like a city view or sea view room?',
     'Car Rental': 'Great choice. I can lock a car now and send booking confirmation to your WhatsApp.',
     'Clinics': 'We can schedule an appointment for you. Please share your preferred day and time.',
-    'Barbershop': 'Perfect, we have a slot open tomorrow afternoon. Would you like to confirm it?',
-    'Student Housing': 'Yes, we have rooms available near campus. I can send photos and pricing now.',
-    'Contractors': 'We can schedule a site visit and quote. What service do you need first?',
-    'Plumbers': 'Understood. We can dispatch a technician quickly. Please share your location.',
-    'Small Shops': 'We can help automate replies and orders. Want to start with WhatsApp integration?',
-    'Startups': 'Great fit. We can launch your support agent this week with custom workflows.',
-    'Apartments': 'I can share available apartment units and arrange a viewing schedule.',
+    'Hotels': 'We have availability for your dates. Would you like a city view or sea view room?',
+    'Apartments': 'Yes, we have rooms available near campus. I can send photos and pricing now.',
     'Universities': 'We can support admissions and FAQ automation. Would you like a quick demo flow?',
+    'Small Shops': 'We can help automate replies and orders. Want to start with WhatsApp integration?',
+    'Plumbers': 'Understood. We can dispatch a technician quickly. Please share your location.',
+    'Contractors': 'We can schedule a site visit and quote. What service do you need first?',
+    'Startups': 'Great fit. We can launch your support agent this week with custom workflows.',
   }
 
   useEffect(() => {
