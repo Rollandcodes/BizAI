@@ -1,340 +1,71 @@
+import type { Metadata } from 'next'
 import Link from 'next/link'
-import Image from 'next/image'
 
-export const metadata = {
-  title: 'Barbershops | CypAI',
+export const metadata: Metadata = {
+  title: 'High-Yield Real Estate & Residency | CypAI',
+  description: 'CypAI helps Northern Cyprus property teams qualify investor buyers and residency-led enquiries with multilingual, law-aware lead recovery.',
 }
 
-export default function BarbershopsPage() {
+const pillars = [
+  'Investor qualification',
+  'Residency intent capture',
+  '2026 law-aware responses',
+  'Multilingual triage in 5 languages',
+]
+
+const examples = [
+  'I want a high-yield apartment under €200k.',
+  'Can you explain the 5-year residency route?',
+  'I am relocating with my family this year.',
+  'What is the best WhatsApp number for a portfolio review?',
+]
+
+export default function RealEstateResidencyPage() {
   return (
-    <main className="min-h-screen bg-white">
-      {/* Navigation */}
-      <header className="sticky top-0 z-50 border-b border-gray-200 bg-white/95 backdrop-blur-sm">
-        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-          <Link href="/" className="flex items-center" aria-label="CypAI Home">
-            <Image
-              src="/images/cypai-logo.png"
-              alt="CypAI"
-              width={160}
-              height={48}
-              className="h-8 w-auto"
-            />
-          </Link>
-          <nav className="hidden items-center gap-8 md:flex">
-            <a href="#features" className="text-sm text-gray-600 transition-colors hover:text-[#1a1a2e]">Features</a>
-            <a href="#pricing" className="text-sm text-gray-600 transition-colors hover:text-[#1a1a2e]">Pricing</a>
-            <Link href="/demo" className="text-sm text-gray-600 transition-colors hover:text-[#1a1a2e]">Demo</Link>
-          </nav>
-          <Link
-            href="/sign-up"
-            className="rounded-lg bg-[#e8a020] px-4 py-2 text-sm font-semibold text-[#1a1a2e] transition-colors hover:bg-[#d4920a]"
-          >
-            Start Free Trial
-          </Link>
-        </div>
-      </header>
-
-      {/* Hero Section */}
-      <section className="bg-[#1a1a2e] py-20 lg:py-28">
-        <div className="mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
-          <span className="mb-4 inline-block rounded-full bg-[#e8a020]/20 px-4 py-2 text-sm font-semibold text-[#e8a020]">
-            ✂️ For Barbershops & Salons in Cyprus
-          </span>
-          <h1 className="mb-6 text-4xl font-black leading-tight text-white md:text-5xl lg:text-6xl">
-            Take bookings while you're cutting hair.
-          </h1>
-          <p className="mx-auto mb-10 max-w-2xl text-lg text-white/70">
-            CypAI books appointments through WhatsApp automatically, sends reminders so clients show up, and fills empty slots — all without you touching your phone.
-          </p>
-          <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
-            <Link
-              href="/sign-up"
-              className="rounded-xl bg-[#e8a020] px-8 py-4 text-lg font-bold text-[#1a1a2e] transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#d4920a] hover:shadow-lg hover:shadow-[#e8a020]/20"
-            >
-              Start Free Trial — No Credit Card
-            </Link>
-            <Link
-              href="/demo"
-              className="rounded-xl border border-gray-600 bg-transparent px-8 py-4 text-lg font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:bg-gray-800"
-            >
-              See Live Demo →
-            </Link>
-          </div>
-          <div className="mt-6 flex flex-wrap items-center justify-center gap-4 text-sm text-white/60">
-            <span>✓ 7-day free trial</span>
-            <span>·</span>
-            <span>✓ Setup in 15 minutes</span>
-            <span>·</span>
-            <span>✓ Cancel anytime</span>
-          </div>
-          <p className="mt-4 text-sm text-white/60">
-            Join 200+ Cyprus businesses already using CypAI
-          </p>
-        </div>
-      </section>
-
-      {/* Pain Section - Sound familiar? */}
-      <section className="bg-[#f8f9fb] py-16">
-        <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
-          <h2 className="mb-10 text-center text-3xl font-bold text-[#1a1a2e]">Sound familiar?</h2>
-          <div className="space-y-4">
-            <div className="flex items-start gap-4 rounded-xl bg-white p-5 shadow-sm">
-              <span className="text-2xl">📵</span>
-              <div>
-                <p className="font-semibold text-[#1a1a2e]">Clients message <strong>"are you free at 3pm?"</strong> while you're mid-cut</p>
-              </div>
-            </div>
-            <div className="flex items-start gap-4 rounded-xl bg-white p-5 shadow-sm">
-              <span className="text-2xl">❌</span>
-              <div>
-                <p className="font-semibold text-[#1a1a2e]"><strong>No-shows</strong> cost you money — no one sends reminders</p>
-              </div>
-            </div>
-            <div className="flex items-start gap-4 rounded-xl bg-white p-5 shadow-sm">
-              <span className="text-2xl">🔁</span>
-              <div>
-                <p className="font-semibold text-[#1a1a2e]">You answer <strong>"how much for a haircut?"</strong> 20 times a day</p>
-              </div>
-            </div>
-            <div className="flex items-start gap-4 rounded-xl bg-white p-5 shadow-sm">
-              <span className="text-2xl">📓</span>
-              <div>
-                <p className="font-semibold text-[#1a1a2e]"><strong>Double-bookings</strong> happen because you manage it in your head</p>
-              </div>
-            </div>
-          </div>
-          <p className="mt-8 text-center text-lg font-semibold text-[#1a1a2e]">
-            CypAI fixes all of this. <span className="text-[#e8a020]">Automatically.</span>
-          </p>
-        </div>
-      </section>
-
-      {/* How It Works */}
-      <section className="bg-white py-16">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <h2 className="mb-12 text-center text-3xl font-bold text-[#1a1a2e]">How it works</h2>
-          <div className="grid gap-8 md:grid-cols-3">
-            <div className="text-center">
-              <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[#e8a020]/20 text-3xl mx-auto">1</div>
-              <h3 className="text-xl font-bold text-[#1a1a2e]">Tell CypAI about your barbershop</h3>
-              <p className="mt-2 text-gray-600">Add your services, prices, and staff. Takes 10 minutes.</p>
-            </div>
-            <div className="text-center">
-              <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[#e8a020]/20 text-3xl mx-auto">2</div>
-              <h3 className="text-xl font-bold text-[#1a1a2e]">Connect WhatsApp and your website</h3>
-              <p className="mt-2 text-gray-600">One line of code for the website widget. 2 minutes to connect your WhatsApp Business number.</p>
-            </div>
-            <div className="text-center">
-              <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[#e8a020]/20 text-3xl mx-auto">3</div>
-              <h3 className="text-xl font-bold text-[#1a1a2e]">Watch enquiries become bookings</h3>
-              <p className="mt-2 text-gray-600">CypAI books appointments automatically. You just show up and cut.</p>
-            </div>
+    <main className="min-h-screen bg-zinc-950 text-zinc-100">
+      <section className="border-b border-zinc-800 py-20">
+        <div className="mx-auto max-w-5xl px-6 text-center sm:px-10">
+          <p className="inline-flex rounded-full border border-blue-500/20 bg-blue-600/10 px-4 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-blue-400">Real Estate & Residency</p>
+          <h1 className="mt-5 text-4xl font-extrabold leading-tight sm:text-5xl">Convert investor interest into qualified property and residency leads.</h1>
+          <p className="mx-auto mt-5 max-w-3xl text-lg leading-8 text-zinc-400">CypAI is built for Northern Cyprus agencies that need fast qualification, stronger follow-up, and fewer cold leads from international buyers.</p>
+          <div className="mt-8 flex flex-wrap justify-center gap-3">
+            <Link href="/demo" className="rounded-xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white hover:bg-blue-500">See Live Demo</Link>
+            <Link href="/sign-up" className="rounded-xl border border-zinc-700 px-5 py-3 text-sm font-semibold text-zinc-200 hover:bg-zinc-900">Book a Demo</Link>
           </div>
         </div>
       </section>
 
-      {/* Features Section */}
-      <section id="features" className="bg-[#f8f9fb] py-16">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <h2 className="mb-4 text-center text-3xl font-bold text-[#1a1a2e]">Everything barbershops need</h2>
-          <p className="mx-auto mb-12 max-w-2xl text-center text-gray-600">Built specifically for barbershops and salons in Cyprus</p>
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            <div className="rounded-xl bg-white p-6 shadow-sm transition-all hover:shadow-md">
-              <div className="mb-4 text-3xl">📅</div>
-              <h3 className="text-lg font-bold text-[#1a1a2e]">Appointment Booking via WhatsApp</h3>
-              <p className="mt-2 text-gray-600">Customers book appointments through WhatsApp. AI asks: what service, what time, which barber.</p>
-            </div>
-            <div className="rounded-xl bg-white p-6 shadow-sm transition-all hover:shadow-md">
-              <div className="mb-4 text-3xl">🔔</div>
-              <h3 className="text-lg font-bold text-[#1a1a2e]">Automated Reminders</h3>
-              <p className="mt-2 text-gray-600">Automatic appointment reminders 24 hours before. Reduce no-shows.</p>
-            </div>
-            <div className="rounded-xl bg-white p-6 shadow-sm transition-all hover:shadow-md">
-              <div className="mb-4 text-3xl">💰</div>
-              <h3 className="text-lg font-bold text-[#1a1a2e]">Price FAQ</h3>
-              <p className="mt-2 text-gray-600">"How much for a fade?" — instant answer. No more repetitive messages.</p>
-            </div>
-            <div className="rounded-xl bg-white p-6 shadow-sm transition-all hover:shadow-md">
-              <div className="mb-4 text-3xl">❌</div>
-              <h3 className="text-lg font-bold text-[#1a1a2e]">No-Show Reduction</h3>
-              <p className="mt-2 text-gray-600">Automated reminders reduce no-shows and keep your calendar full.</p>
-            </div>
-            <div className="rounded-xl bg-white p-6 shadow-sm transition-all hover:shadow-md">
-              <div className="mb-4 text-3xl">🔄</div>
-              <h3 className="text-lg font-bold text-[#1a1a2e]">Re-engagement</h3>
-              <p className="mt-2 text-gray-600">"Haven't seen you in 4 weeks" — automated messages to bring back clients.</p>
-            </div>
-            <div className="rounded-xl bg-white p-6 shadow-sm transition-all hover:shadow-md">
-              <div className="mb-4 text-3xl">📓</div>
-              <h3 className="text-lg font-bold text-[#1a1a2e]">Availability Management</h3>
-              <p className="mt-2 text-gray-600">Manage multiple barbers' schedules. Customers choose their preferred stylist.</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Language Section */}
-      <section className="bg-gray-50 py-16">
-        <div className="mx-auto max-w-4xl px-4 text-center sm:px-6 lg:px-8">
-          <h2 className="mb-4 text-3xl font-bold text-[#1a1a2e]">Your clients speak many languages.<br />CypAI speaks them all.</h2>
-          <div className="flex flex-wrap justify-center gap-4 mt-6">
-            {[
-              { flag: '🇬🇧', code: 'EN', name: 'English' },
-              { flag: '🇹🇷', code: 'TR', name: 'Türkçe' },
-              { flag: '🇸🇦', code: 'AR', name: 'العربية' },
-              { flag: '🇷🇺', code: 'RU', name: 'Русский' },
-              { flag: '🇬🇷', code: 'GR', name: 'Ελληνικά' },
-            ].map((lang) => (
-              <div key={lang.code}
-                className="flex items-center gap-2 bg-white border border-gray-200 rounded-full px-4 py-2">
-                <span className="text-xl">{lang.flag}</span>
-                <span className="text-gray-800 font-medium text-sm">{lang.name}</span>
-              </div>
+      <section className="py-14">
+        <div className="mx-auto max-w-5xl px-6 sm:px-10">
+          <div className="grid gap-4 md:grid-cols-2">
+            {pillars.map((pillar) => (
+              <div key={pillar} className="rounded-2xl border border-zinc-800 bg-zinc-900 p-5 text-sm text-zinc-200">{pillar}</div>
             ))}
           </div>
-          <p className="mt-6 text-gray-600">Auto-detects language. Responds automatically.</p>
         </div>
       </section>
 
-      {/* Objection Handling */}
-      <section className="bg-[#f8f9fb] py-16">
-        <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
-          <h2 className="mb-8 text-center text-3xl font-bold text-[#1a1a2e]">Common questions</h2>
-          <div className="space-y-6">
-            <div className="rounded-xl bg-white p-6 shadow-sm">
-              <h3 className="text-lg font-semibold text-[#1a1a2e]">"I use a booking app already"</h3>
-              <p className="mt-2 text-gray-600">CypAI connects your WhatsApp to your booking system. Customers don't have to download an app — they just message you on WhatsApp like always.</p>
-            </div>
-            <div className="rounded-xl bg-white p-6 shadow-sm">
-              <h3 className="text-lg font-semibold text-[#1a1a2e]">"My regulars just call me"</h3>
-              <p className="mt-2 text-gray-600">True for some. But new customers and younger clients always message first. CypAI captures the ones you're currently missing.</p>
-            </div>
-            <div className="rounded-xl bg-white p-6 shadow-sm">
-              <h3 className="text-lg font-semibold text-[#1a1a2e]">"Won't it confuse customers?"</h3>
-              <p className="mt-2 text-gray-600">No. It feels like texting a smart receptionist who knows your prices and availability. Customers love it.</p>
-            </div>
+      <section className="border-y border-zinc-800 bg-zinc-900 py-14">
+        <div className="mx-auto max-w-5xl px-6 sm:px-10">
+          <h2 className="text-3xl font-extrabold text-white">Real messages CypAI can handle for agencies</h2>
+          <ul className="mt-6 space-y-3">
+            {examples.map((example) => (
+              <li key={example} className="rounded-xl border border-zinc-800 bg-zinc-950 px-4 py-3 text-sm text-zinc-300">“{example}”</li>
+            ))}
+          </ul>
+        </div>
+      </section>
+
+      <section className="py-16">
+        <div className="mx-auto max-w-4xl px-6 text-center sm:px-10">
+          <h2 className="text-3xl font-extrabold text-white">Result you should expect</h2>
+          <p className="mx-auto mt-4 max-w-3xl text-base leading-8 text-zinc-400">Faster replies, fewer missed investor leads, and cleaner qualification data before your sales team follows up.</p>
+          <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+            <Link href="#" className="rounded-xl border border-zinc-700 px-5 py-3 text-sm font-semibold text-zinc-200 hover:bg-zinc-900">View Market Fit</Link>
+            <Link href="/pricing" className="rounded-xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white hover:bg-blue-500">View Plans</Link>
           </div>
         </div>
       </section>
-
-      {/* Pricing Section */}
-      <section id="pricing" className="bg-white py-16">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <h2 className="mb-4 text-center text-3xl font-bold text-[#1a1a2e]">Simple pricing</h2>
-          <p className="mb-12 text-center text-gray-600">7-day free trial on all plans. No credit card required.</p>
-          <div className="grid gap-6 md:grid-cols-3">
-            {/* Starter */}
-            <div className="rounded-2xl border border-gray-200 bg-white p-8">
-              <p className="text-xs font-bold tracking-widest uppercase text-gray-500">Starter</p>
-              <div className="mt-2 text-5xl font-black text-gray-900">
-                $29<span className="ml-1 text-lg text-gray-400">/mo</span>
-              </div>
-              <p className="mt-3 text-sm text-gray-500">Perfect for single-barber shops</p>
-              <ul className="mt-6 space-y-3">
-                <li className="flex items-start gap-2 text-gray-600 text-sm"><span className="text-amber-500 font-bold">✓</span> 500 messages/month</li>
-                <li className="flex items-start gap-2 text-gray-600 text-sm"><span className="text-amber-500 font-bold">✓</span> WhatsApp automation</li>
-                <li className="flex items-start gap-2 text-gray-600 text-sm"><span className="text-amber-500 font-bold">✓</span> Price list automation</li>
-                <li className="flex items-start gap-2 text-gray-600 text-sm"><span className="text-amber-500 font-bold">✓</span> 5 language support</li>
-              </ul>
-              <Link
-                href="/sign-up"
-                className="mt-8 block rounded-xl border border-gray-300 px-6 py-3 text-center font-semibold text-[#1a1a2e] transition-colors hover:bg-gray-50"
-              >
-                Start Free Trial
-              </Link>
-            </div>
-            {/* Pro */}
-            <div className="relative rounded-2xl border-2 border-amber-500 bg-white p-8 shadow-xl">
-              <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-[#e8a020] px-4 py-1.5 text-xs font-bold text-[#1a1a2e]">
-                ⭐ Most Popular
-              </span>
-              <p className="text-xs font-bold tracking-widest uppercase text-gray-500">Pro</p>
-              <div className="mt-2 text-5xl font-black text-gray-900">
-                $79<span className="ml-1 text-lg text-gray-400">/mo</span>
-              </div>
-              <p className="mt-3 text-sm text-gray-500">For growing barbershops</p>
-              <ul className="mt-6 space-y-3">
-                <li className="flex items-start gap-2 text-gray-600 text-sm"><span className="text-amber-500 font-bold">✓</span> Unlimited messages</li>
-                <li className="flex items-start gap-2 text-gray-600 text-sm"><span className="text-amber-500 font-bold">✓</span> Booking system</li>
-                <li className="flex items-start gap-2 text-gray-600 text-sm"><span className="text-amber-500 font-bold">✓</span> Appointment reminders</li>
-                <li className="flex items-start gap-2 text-gray-600 text-sm"><span className="text-amber-500 font-bold">✓</span> Multi-staff calendar</li>
-                <li className="flex items-start gap-2 text-gray-600 text-sm"><span className="text-amber-500 font-bold">✓</span> Re-engagement automation</li>
-              </ul>
-              <Link
-                href="/sign-up"
-                className="mt-8 block rounded-xl bg-[#e8a020] px-6 py-3 text-center font-semibold text-[#1a1a2e] transition-colors hover:bg-[#d4920a]"
-              >
-                Start Free Trial
-              </Link>
-            </div>
-            {/* Business */}
-            <div className="rounded-2xl border border-gray-200 bg-white p-8">
-              <p className="text-xs font-bold tracking-widest uppercase text-gray-500">Business</p>
-              <div className="mt-2 text-5xl font-black text-gray-900">
-                $149<span className="ml-1 text-lg text-gray-400">/mo</span>
-              </div>
-              <p className="mt-3 text-sm text-gray-500">For salon chains</p>
-              <ul className="mt-6 space-y-3">
-                <li className="flex items-start gap-2 text-gray-600 text-sm"><span className="text-amber-500 font-bold">✓</span> Everything in Pro</li>
-                <li className="flex items-start gap-2 text-gray-600 text-sm"><span className="text-amber-500 font-bold">✓</span> Multi-location support</li>
-                <li className="flex items-start gap-2 text-gray-600 text-sm"><span className="text-amber-500 font-bold">✓</span> Priority support</li>
-                <li className="flex items-start gap-2 text-gray-600 text-sm"><span className="text-amber-500 font-bold">✓</span> SLA guarantee</li>
-              </ul>
-              <Link
-                href="/sign-up"
-                className="mt-8 block rounded-xl border border-gray-300 px-6 py-3 text-center font-semibold text-[#1a1a2e] transition-colors hover:bg-gray-50"
-              >
-                Start Free Trial
-              </Link>
-            </div>
-          </div>
-          <p className="mt-8 text-center text-gray-400 text-sm">
-            🔒 Secure payment by Paddle · 30-day money-back guarantee
-          </p>
-        </div>
-      </section>
-
-      {/* Final CTA */}
-      <section className="bg-[#1a1a2e] py-16">
-        <div className="mx-auto max-w-3xl px-4 text-center sm:px-6 lg:px-8">
-          <h2 className="text-3xl font-bold text-white">Set up in 15 minutes<br />before your next client.</h2>
-          <Link
-            href="/sign-up"
-            className="mt-8 inline-block rounded-xl bg-[#e8a020] px-8 py-4 text-lg font-bold text-[#1a1a2e] transition-all duration-200 hover:bg-[#d4920a] hover:shadow-lg hover:shadow-[#e8a020]/20"
-          >
-            Start Your Free Trial Now →
-          </Link>
-          <p className="mt-4 text-sm text-gray-400">No credit card. Cancel anytime.</p>
-        </div>
-      </section>
-
-      {/* Footer */}
-      <footer className="bg-[#f8f9fb] py-12">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col items-center justify-between gap-6 md:flex-row">
-            <div className="flex items-center gap-2">
-              <Image
-                src="/images/cypai-logo.png"
-                alt="CypAI"
-                width={120}
-                height={36}
-                className="h-7 w-auto"
-              />
-            </div>
-            <div className="flex flex-wrap justify-center gap-6 text-sm text-gray-600">
-              <Link href="/" className="hover:text-[#1a1a2e]">Home</Link>
-              <Link href="#pricing" className="hover:text-[#1a1a2e]">Pricing</Link>
-              <Link href="/demo" className="hover:text-[#1a1a2e]">Demo</Link>
-              <Link href="/contact" className="hover:text-[#1a1a2e]">Contact</Link>
-              <Link href="/privacy" className="hover:text-[#1a1a2e]">Privacy Policy</Link>
-              <Link href="/terms" className="hover:text-[#1a1a2e]">Terms</Link>
-              <Link href="/refund-policy" className="hover:text-[#1a1a2e]">Refund Policy</Link>
-            </div>
-            <p className="text-sm text-gray-500">© 2025 CypAI. Built in Northern Cyprus.</p>
-          </div>
-        </div>
-      </footer>
     </main>
   )
 }
-

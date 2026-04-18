@@ -29,55 +29,54 @@ Supported languages:
 Never mix languages in the same response.`;
 
 // ============================================================================
-// Car Rental Configuration
+// Medical Tourism Configuration
 // ============================================================================
 const CAR_RENTAL: NicheConfig = {
-  systemPrompt: `You are a professional car rental assistant for {businessName}. Help customers with:
-- Vehicle availability and fleet information
-- Pricing: Economy $25/day, Compact $35/day, SUV $55/day
-- Rental requirements (valid driver's license, passport for international, credit card for deposit)
-- Pickup and dropoff options
-- Insurance packages and coverage options
-- Special requests and additional services
+  systemPrompt: `You are a premium medical tourism intake specialist for {businessName}. Help patients with:
+- IVF, dental, and aesthetic treatment enquiries
+- Travel timelines, consultation timing, and follow-up planning
+- Patient budget range and treatment fit
+- WhatsApp contact handoff for the clinic team
+- Multilingual support and law-aware responses for the 2026 TRNC market
 
-Always be helpful and professional. Try to collect the customer's name, phone number, desired rental dates, and preferred vehicle type for a booking inquiry.
+Always be warm, professional, and reassuring. Try to collect the patient's name, phone number, treatment interest, travel timeline, and budget range for a consultation inquiry.
 
-When you have collected the customer's name, phone, pickup date, return date, and car preference, say EXACTLY:
-'Great! I have all your details. Let me confirm your booking request with our team right away. You'll receive a confirmation shortly. 📋'
+When you have collected the patient's name, phone, treatment interest, and consultation timing, say EXACTLY:
+'Great! I have all your details. Let me confirm your consultation request with our team right away. You’ll receive a follow-up shortly. 📋'
 Then output a special marker: [BOOKING_READY]
-followed by a JSON summary on a new line: {"name":"...","phone":"...","pickupDate":"YYYY-MM-DD","returnDate":"YYYY-MM-DD","carType":"...","totalDays":N}
+followed by a JSON summary on a new line: {"name":"...","phone":"...","treatment":"...","timeline":"...","budget":"..."}
 ${LANGUAGE_RULE}`,
   // Note: The [BOOKING_READY] marker and JSON are stripped before the message is shown to the customer.
-  
-  welcomeMessage: "Hello! 🚗 Looking to rent a car? I can help you find the perfect vehicle for your trip. What are your travel dates?",
-  
+
+  welcomeMessage: "Hello! 🏥 Looking for help with IVF, dental, or aesthetic treatment? I can guide you to the right consultation team. What are you looking for?",
+
   faqs: [
     {
-      question: "What documents do I need to rent a car?",
-      answer: "You'll need a valid driver's license, credit card, and passport (for international drivers). You must be at least 21 years old, and renters under 25 may have additional fees.",
+      question: "What treatment types do you support?",
+      answer: "We support IVF, dental implants, cosmetic dentistry, and selected aesthetic treatment enquiries. The assistant helps collect the right consultation details before the clinic follows up.",
     },
     {
-      question: "Is insurance included in the rental price?",
-      answer: "Basic liability insurance is included in all rentals. We offer additional coverage options including collision damage waiver, theft protection, and premium coverage for added peace of mind.",
+      question: "Do you support international patients?",
+      answer: "Yes. The flow is designed for international patients and includes multilingual intake so your team can respond quickly and clearly.",
     },
     {
-      question: "What are your cancellation policies?",
-      answer: "Free cancellation up to 24 hours before your pickup time. Cancellations within 24 hours of pickup may incur a one-day rental fee. No-shows will be charged for the full first day.",
+      question: "Can it handle travel and timing questions?",
+      answer: "Yes. It can ask about travel timeline, appointment urgency, and preferred contact method so your team can prioritize the lead.",
     },
     {
-      question: "Can I rent a car one-way?",
-      answer: "Yes! One-way rentals are available for a small additional fee depending on the distance. Just select your return location when booking.",
+      question: "Can I collect budget details before handoff?",
+      answer: "Absolutely. Budget range is one of the recommended qualification fields for the intake flow.",
     },
     {
-      question: "Do you have child car seats available?",
-      answer: "Absolutely! We offer infant car seats, booster seats, and combination seats. Reserve them when booking or call ahead to ensure availability.",
+      question: "Can patients ask in different languages?",
+      answer: "Yes. The assistant supports English, Turkish, Arabic, Russian, and Greek, and always responds in the same language as the customer.",
     },
   ],
 
   languages: ['en', 'tr', 'ar', 'ru', 'el'],
-  
-  leadFields: ["name", "phone", "pickupDate", "returnDate", "carType"],
-  primaryColor: "#1f2937",
+
+  leadFields: ["name", "phone", "treatment", "timeline", "budget"],
+  primaryColor: "#0f766e",
   suggestedPrice: 79,
 };
 
@@ -133,49 +132,48 @@ ${LANGUAGE_RULE}`,
 };
 
 // ============================================================================
-// Barbershop Configuration
+// Real Estate and Residency Configuration
 // ============================================================================
 const BARBERSHOP: NicheConfig = {
-  systemPrompt: `You are a friendly and professional assistant for {businessName} barbershop. Help customers with:
-- Appointment booking and scheduling
-- Services offered: haircut, beard trim, full grooming packages, hair styling
-- Pricing and service duration
-- Current availability: Monday-Saturday 9am-7pm
-- Barber information and specialties
-- Walk-in policy and wait times
+  systemPrompt: `You are a high-yield real estate and residency specialist for {businessName}. Help customers with:
+- Property enquiries and investor qualification
+- Residency pathway questions and relocation intent
+- Budget, preferred area, and purchase timeline
+- WhatsApp contact handoff for the sales team
+- Multilingual support and law-aware responses for the 2026 TRNC market
 
-Be welcoming and helpful. Always collect the customer's name and phone number for appointment bookings and confirm their preferred date and service.
+Be warm, clear, and professional. Always collect the customer's name, phone number, budget range, preferred area, and residency intent for a property inquiry.
 ${LANGUAGE_RULE}`,
-  
-  welcomeMessage: "Hey! 💈 Welcome to {businessName}! Want to book an appointment or have any questions? I'm here to help!",
-  
+
+  welcomeMessage: "Hello! 🏢 Looking for property or residency guidance? I can help you qualify the right next step. What kind of enquiry do you have?",
+
   faqs: [
     {
-      question: "How long does a typical haircut take?",
-      answer: "A standard haircut takes about 30-45 minutes depending on style complexity. Beard trims are usually 15-20 minutes, and full grooming packages take about 60 minutes.",
+      question: "What type of leads can this assistant qualify?",
+      answer: "It helps qualify investors, relocators, and residency-led property enquiries before handing them to your team.",
     },
     {
-      question: "Do you accept walk-ins or is it appointment only?",
-      answer: "We accept both walk-ins and appointments! However, I recommend booking ahead, especially during peak hours (3pm-7pm), to minimize wait time.",
+      question: "Can it ask about budget and area?",
+      answer: "Yes. Budget range and preferred area are two of the key qualification fields recommended for this flow.",
     },
     {
-      question: "What payment methods do you accept?",
-      answer: "We accept cash, credit cards (Visa, Mastercard, Amex), and mobile payments. A 15-20% tip is appreciated!",
+      question: "Does it support multilingual conversations?",
+      answer: "Yes. The assistant supports English, Turkish, Arabic, Russian, and Greek.",
     },
     {
-      question: "How much should I tip?",
-      answer: "Tipping is customary and appreciated! We recommend 15-20% of your service cost. Tips are split among the team.",
+      question: "Can it collect residency intent?",
+      answer: "Yes. Residency intent and relocation timeline are built into the qualification flow.",
     },
     {
-      question: "Can I book online or do I need to call?",
-      answer: "You can book appointments right here through our chat! Just let me know your preferred date, time, and service, and I'll confirm availability for you.",
+      question: "Can I use it for WhatsApp lead handoff?",
+      answer: "Yes. It collects contact details so your sales team can follow up directly through WhatsApp or phone.",
     },
   ],
 
   languages: ['en', 'tr', 'ar', 'ru', 'el'],
-  
-  leadFields: ["name", "phone", "preferredDate", "service"],
-  primaryColor: "#dc2626",
+
+  leadFields: ["name", "phone", "budget", "preferredArea", "residencyIntent"],
+  primaryColor: "#2563eb",
   suggestedPrice: 79,
 };
 
@@ -242,7 +240,7 @@ const NICHE_CONFIGS: Record<string, NicheConfig> = {
 // ============================================================================
 /**
  * Get configuration for a specific business niche
- * @param businessType - The business type (e.g., 'car_rental', 'barbershop', 'student_accommodation')
+ * @param businessType - The business type (e.g., 'medical_tourism', 'real_estate_residency', 'student_accommodation')
  * @returns NicheConfig object with prompts, FAQs, and lead fields, or undefined if niche not found
  */
 export function getNicheConfig(businessType: string): NicheConfig | undefined {

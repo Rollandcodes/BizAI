@@ -29,7 +29,7 @@ export const howToSetUpCypaiInYourBusinessABeginnerFriendlyGuide: BlogPost = {
     {
       heading: 'Who CypAI is for',
       paragraphs: [
-        'CypAI is made for real businesses that get customer questions every day. That includes car rentals, barbershops, hotels, restaurants, clinics, gyms, property businesses, law firms, and many other service businesses. If people normally ask you things like “How much is it?”, “Are you open?”, “Can I book?”, or “Do you have availability?”, then CypAI is useful for you.',
+        'CypAI is made for real businesses that get customer questions every day. That includes medical tourism clinics, real estate agencies, hotels, restaurants, clinics, gyms, property businesses, law firms, and many other service businesses. If people normally ask you things like “How much is it?”, “Are you open?”, “Can I book?”, or “Do you have availability?”, then CypAI is useful for you.',
         'You do not need to be technical. You do not need to know coding. You do not need a team. You only need to know your own business well enough to explain it clearly. Once you do that, CypAI can start helping almost immediately.',
       ],
     },
@@ -99,7 +99,7 @@ export const howToSetUpCypaiInYourBusinessABeginnerFriendlyGuide: BlogPost = {
     {
       heading: 'How bookings work',
       paragraphs: [
-        'If your business takes bookings, CypAI can ask the right questions and collect the key details. For a car rental that may be dates and car type. For a barbershop that may be service and preferred time. For a clinic that may be appointment type and contact details.',
+        'If your business takes bookings, CypAI can ask the right questions and collect the key details. For a medical clinic that may be treatment type and travel timeline. For a property team that may be budget and residency intent. For a clinic that may be appointment type and contact details.',
         'The point is not to fully automate your business without you. The point is to capture the request clearly so you can confirm it faster. That saves time and makes your business feel much more organized to the customer.',
       ],
     },

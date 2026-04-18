@@ -214,16 +214,16 @@ export default function CalendarTab({ businessId }: { businessId: string }) {
       )}
 
       {/* Tabs */}
-      <div className="border-b border-slate-200">
-        <div className="flex gap-0">
+      <div className="border-b-2 border-slate-300 bg-slate-50">
+        <div className="flex gap-1 overflow-x-auto">
           {(['calendars', 'connections', 'availability', 'preferences'] as const).map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`px-4 py-3 text-sm font-semibold transition ${
+              className={`px-5 py-4 text-sm font-bold transition-all whitespace-nowrap ${
                 activeTab === tab
-                  ? 'border-b-2 border-blue-600 text-blue-600'
-                  : 'text-slate-600 hover:text-slate-900'
+                  ? 'border-b-4 border-blue-600 text-blue-600 bg-blue-50'
+                  : 'text-slate-700 hover:text-blue-600 hover:bg-white'
               }`}
             >
               {tab === 'calendars' && '📅 Calendars'}

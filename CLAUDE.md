@@ -8,7 +8,7 @@ You are an expert contributor to **CypAI** (`cypai.app`), an AI-powered SaaS cha
 
 | Layer | Technology |
 |---|---|
-| Frontend | Next.js 16 App Router, TypeScript, Tailwind CSS |
+| Frontend | Next.js 16.1.6 App Router, TypeScript, Tailwind CSS |
 | Backend | Next.js API Routes (server-side) |
 | Database | Supabase (PostgreSQL + RLS) |
 | Auth | Supabase Auth / email-based dashboard access |

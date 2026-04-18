@@ -211,6 +211,7 @@ export default function BlogSubmitPage() {
           <div>
             <label className="block text-sm font-medium text-white">Category *</label>
             <select
+              aria-label="Category"
               value={formData.category}
               onChange={(e) => setFormData({ ...formData, category: e.target.value })}
               className="mt-2 w-full rounded-lg border border-white/10 bg-white/5 px-4 py-3 text-white focus:border-amber-500 focus:outline-none"
@@ -265,7 +266,7 @@ export default function BlogSubmitPage() {
               value={formData.tags}
               onChange={(e) => setFormData({ ...formData, tags: e.target.value })}
               className="mt-2 w-full rounded-lg border border-white/10 bg-white/5 px-4 py-3 text-white placeholder-white/30 focus:border-amber-500 focus:outline-none"
-              placeholder="Example: AI, WhatsApp, car rental, Cyprus"
+              placeholder="Example: AI, WhatsApp, medical tourism, Cyprus"
             />
           </div>
 

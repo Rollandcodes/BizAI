@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Clinical Curator - Intelligence Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "tertiary-fixed": "#ffddb8",
+                        "inverse-primary": "#93ccff",
+                        "on-primary": "#ffffff",
+                        "primary": "#006194",
+                        "secondary": "#006a61",
+                        "secondary-container": "#86f2e4",
+                        "outline": "#707881",
+                        "surface-container-lowest": "#ffffff",
+                        "on-primary-container": "#fdfcff",
+                        "secondary-fixed-dim": "#6bd8cb",
+                        "tertiary": "#825100",
+                        "surface-container-low": "#eff4ff",
+                        "on-background": "#0b1c30",
+                        "on-secondary-fixed-variant": "#005049",
+                        "tertiary-container": "#a36700",
+                        "surface-variant": "#d3e4fe",
+                        "inverse-on-surface": "#eaf1ff",
+                        "primary-container": "#007bb9",
+                        "on-primary-fixed-variant": "#004b73",
+                        "error": "#ba1a1a",
+                        "inverse-surface": "#213145",
+                        "primary-fixed-dim": "#93ccff",
+                        "tertiary-fixed-dim": "#ffb95f",
+                        "on-tertiary": "#ffffff",
+                        "on-surface": "#0b1c30",
+                        "surface-dim": "#cbdbf5",
+                        "surface-bright": "#f8f9ff",
+                        "surface-container": "#e5eeff",
+                        "on-error": "#ffffff",
+                        "on-secondary-container": "#006f66",
+                        "primary-fixed": "#cce5ff",
+                        "secondary-fixed": "#89f5e7",
+                        "on-primary-fixed": "#001d31",
+                        "on-secondary": "#ffffff",
+                        "error-container": "#ffdad6",
+                        "on-secondary-fixed": "#00201d",
+                        "surface-container-highest": "#d3e4fe",
+                        "on-surface-variant": "#3f4850",
+                        "surface-tint": "#006398",
+                        "outline-variant": "#bfc7d2",
+                        "on-tertiary-fixed-variant": "#653e00",
+                        "on-error-container": "#93000a",
+                        "on-tertiary-fixed": "#2a1700",
+                        "on-tertiary-container": "#fffbff",
+                        "background": "#f8f9ff",
+                        "surface-container-high": "#dce9ff",
+                        "surface": "#f8f9ff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "fontFamily": {
+                        "headline": ["Manrope"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(16px);
+        }
+    </style>
+</head>
+<body class="bg-surface font-body text-on-surface antialiased overflow-x-hidden">
+<!-- SideNavBar -->
+<aside class="h-screen w-64 fixed left-0 top-0 bg-slate-100 dark:bg-slate-900 flex flex-col gap-y-2 py-6 z-50 hidden md:flex">
+<div class="px-6 mb-8">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-lg bg-primary-container flex items-center justify-center">
+<span class="material-symbols-outlined text-on-primary-container" style="font-variation-settings: 'FILL' 1;">medical_services</span>
+</div>
+<div>
+<h1 class="text-lg font-bold text-sky-900 dark:text-sky-50 font-manrope leading-tight">Curator Dashboard</h1>
+<p class="text-[10px] uppercase tracking-widest text-slate-500 font-bold">Market Intel v2.4</p>
+</div>
+</div>
+</div>
+<nav class="flex-1 space-y-1">
+<a class="bg-sky-600 text-white rounded-lg px-4 py-3 mx-2 flex items-center gap-3 ease-out duration-200" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">dashboard</span>
+<span class="font-headline font-semibold text-sm">Overview</span>
+</a>
+<a class="text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800 rounded-lg px-4 py-3 mx-2 flex items-center gap-3 transition-all ease-out duration-200" href="#">
+<span class="material-symbols-outlined">filter_alt</span>
+<span class="font-headline font-semibold text-sm">Lead Pipeline</span>
+</a>
+<a class="text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800 rounded-lg px-4 py-3 mx-2 flex items-center gap-3 transition-all ease-out duration-200" href="#">
+<span class="material-symbols-outlined">analytics</span>
+<span class="font-headline font-semibold text-sm">Market Insights</span>
+</a>
+<a class="text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800 rounded-lg px-4 py-3 mx-2 flex items-center gap-3 transition-all ease-out duration-200" href="#">
+<span class="material-symbols-outlined">database</span>
+<span class="font-headline font-semibold text-sm">Data Exports</span>
+</a>
+</nav>
+<div class="px-4 mt-auto">
+<button class="w-full py-3 bg-primary text-white font-headline font-bold rounded-xl shadow-lg shadow-primary/20 hover:scale-105 active:scale-95 transition-transform">
+                Generate Report
+            </button>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="md:ml-64 min-h-screen">
+<!-- TopAppBar -->
+<header class="bg-slate-50 dark:bg-slate-950 shadow-sm dark:shadow-none sticky top-0 z-40">
+<div class="flex justify-between items-center w-full px-8 py-4 max-w-screen-2xl mx-auto">
+<div class="flex items-center gap-8">
+<span class="text-2xl font-extrabold text-sky-900 dark:text-sky-100 tracking-tight font-manrope">Clinical Curator</span>
+<nav class="hidden lg:flex items-center gap-6">
+<a class="text-slate-500 dark:text-slate-400 hover:text-sky-600 font-medium font-label" href="#">Market Trends</a>
+<a class="text-sky-700 dark:text-sky-300 font-bold border-b-2 border-sky-700 dark:border-sky-300 pb-1 font-label" href="#">Intelligence</a>
+<a class="text-slate-500 dark:text-slate-400 hover:text-sky-600 font-medium font-label" href="#">Reports</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<div class="relative hidden sm:block">
+<input class="bg-surface-container-highest border-none rounded-full px-5 py-2 w-64 text-sm focus:ring-2 focus:ring-primary" placeholder="Search insights..." type="text"/>
+<span class="material-symbols-outlined absolute right-4 top-2 text-slate-400 text-sm">search</span>
+</div>
+<div class="flex items-center gap-2">
+<button class="p-2 hover:bg-sky-50 dark:hover:bg-sky-900/20 transition-colors rounded-full relative">
+<span class="material-symbols-outlined text-sky-700">notifications</span>
+<span class="absolute top-2 right-2 w-2 h-2 bg-tertiary rounded-full"></span>
+</button>
+<button class="p-2 hover:bg-sky-50 dark:hover:bg-sky-900/20 transition-colors rounded-full">
+<span class="material-symbols-outlined text-sky-700">settings</span>
+</button>
+</div>
+<div class="w-10 h-10 rounded-full overflow-hidden border-2 border-primary-container">
+<img alt="User avatar" class="w-full h-full object-cover" data-alt="professional medical doctor headshot in a clean white clinic environment with soft natural lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDGAsMwoDKvh8O6Rt7SX9g0P1TSZJ8VOde5idxuCpQtvvkwV-rhQx-SgZO2dPBjE9ZJ-V4bDM8R3A4c7_n1HKIpcdMBPocwfkymCFOsHnuTEPGS6os0-Oa7dIvB9J10XzSXOPcmuuH0JERlBNQAUEhCZWuAgPBCev3Fz48TZiSJk_Y3ZiQxn5BKYlYO-DWPcoUD09ctzpyPc4O9gkNQZTEX27x9AE2V2troqnvlLvBHpxvCvdXNNGscaF47c7_xyP1GfYBVtLvYJWo"/>
+</div>
+</div>
+</div>
+</header>
+<!-- Dashboard Content -->
+<div class="p-8 max-w-screen-2xl mx-auto space-y-8">
+<!-- Bento Hero Section -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+<!-- Vertical Lead Funnel -->
+<section class="lg:col-span-4 bg-surface-container-low p-8 rounded-xl relative overflow-hidden">
+<h2 class="font-headline font-bold text-xl mb-8 text-on-surface">Lead Funnel Velocity</h2>
+<div class="flex flex-col gap-6">
+<!-- Funnel Step 1 -->
+<div class="group flex items-center gap-6 relative">
+<div class="z-10 w-14 h-14 bg-primary text-white rounded-full flex items-center justify-center font-bold text-lg shadow-xl shadow-primary/30">
+                                4.2k
+                            </div>
+<div class="flex-1">
+<p class="text-xs font-bold uppercase tracking-widest text-slate-500 mb-1">Website Visits</p>
+<div class="h-2 bg-surface-container-highest rounded-full w-full overflow-hidden">
+<div class="h-full bg-primary-container w-full"></div>
+</div>
+</div>
+<div class="absolute left-7 top-14 w-0.5 h-6 bg-primary-container/30"></div>
+</div>
+<!-- Funnel Step 2 -->
+<div class="group flex items-center gap-6 relative">
+<div class="z-10 w-14 h-14 bg-primary-container text-white rounded-full flex items-center justify-center font-bold text-lg shadow-lg">
+                                1.8k
+                            </div>
+<div class="flex-1">
+<p class="text-xs font-bold uppercase tracking-widest text-slate-500 mb-1">AI Conversations</p>
+<div class="h-2 bg-surface-container-highest rounded-full w-full overflow-hidden">
+<div class="h-full bg-primary-container w-[45%]"></div>
+</div>
+</div>
+<div class="absolute left-7 top-14 w-0.5 h-6 bg-primary-container/30"></div>
+</div>
+<!-- Funnel Step 3 -->
+<div class="group flex items-center gap-6 relative">
+<div class="z-10 w-14 h-14 bg-secondary text-white rounded-full flex items-center justify-center font-bold text-lg shadow-lg">
+                                482
+                            </div>
+<div class="flex-1">
+<p class="text-xs font-bold uppercase tracking-widest text-slate-500 mb-1">Qualified Medical Leads</p>
+<div class="h-2 bg-surface-container-highest rounded-full w-full overflow-hidden">
+<div class="h-full bg-secondary w-[25%]"></div>
+</div>
+</div>
+<div class="absolute left-7 top-14 w-0.5 h-6 bg-secondary/30"></div>
+</div>
+<!-- Funnel Step 4 -->
+<div class="group flex items-center gap-6">
+<div class="z-10 w-14 h-14 bg-secondary-container text-on-secondary-container rounded-full flex items-center justify-center font-bold text-lg shadow-md border-2 border-secondary/20">
+                                126
+                            </div>
+<div class="flex-1">
+<p class="text-xs font-bold uppercase tracking-widest text-slate-500 mb-1">Booked Appointments</p>
+<div class="h-2 bg-surface-container-highest rounded-full w-full overflow-hidden">
+<div class="h-full bg-secondary-container w-[10%]"></div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Market Insights Card (Charts) -->
+<section class="lg:col-span-8 grid grid-cols-1 md:grid-cols-2 gap-8">
+<!-- Language Distribution -->
+<div class="bg-surface-container-lowest p-8 rounded-xl shadow-sm border border-outline-variant/10">
+<div class="flex justify-between items-center mb-6">
+<h3 class="font-headline font-bold text-lg text-on-surface">Lead Languages</h3>
+<span class="material-symbols-outlined text-slate-400">language</span>
+</div>
+<div class="relative h-48 flex items-center justify-center">
+<!-- SVG Donut Chart Mock -->
+<svg class="w-40 h-40 transform -rotate-90">
+<circle cx="80" cy="80" fill="transparent" r="60" stroke="#006194" stroke-dasharray="280 100" stroke-width="24"></circle>
+<circle cx="80" cy="80" fill="transparent" r="60" stroke="#006a61" stroke-dasharray="100 280" stroke-dashoffset="-280" stroke-width="24"></circle>
+<circle cx="80" cy="80" fill="transparent" r="60" stroke="#825100" stroke-dasharray="50 330" stroke-dashoffset="-380" stroke-width="24"></circle>
+</svg>
+<div class="absolute inset-0 flex flex-col items-center justify-center">
+<span class="text-2xl font-bold font-manrope">5</span>
+<span class="text-[10px] uppercase font-bold text-slate-400">Active</span>
+</div>
+</div>
+<div class="mt-4 grid grid-cols-2 gap-2 text-xs font-medium">
+<div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-primary"></span> English (74%)</div>
+<div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-secondary"></span> Spanish (18%)</div>
+<div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-tertiary"></span> Arabic (8%)</div>
+</div>
+</div>
+<!-- Inquiry Categories -->
+<div class="bg-surface-container-lowest p-8 rounded-xl shadow-sm border border-outline-variant/10">
+<div class="flex justify-between items-center mb-6">
+<h3 class="font-headline font-bold text-lg text-on-surface">Inquiry Categories</h3>
+<span class="material-symbols-outlined text-slate-400">bar_chart</span>
+</div>
+<div class="space-y-4">
+<div>
+<div class="flex justify-between text-xs mb-1">
+<span class="font-semibold">General Surgery</span>
+<span class="text-slate-500">42%</span>
+</div>
+<div class="h-2 bg-surface-container-low rounded-full">
+<div class="h-full bg-primary-container rounded-full w-[42%]"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between text-xs mb-1">
+<span class="font-semibold">Cardiology</span>
+<span class="text-slate-500">28%</span>
+</div>
+<div class="h-2 bg-surface-container-low rounded-full">
+<div class="h-full bg-primary rounded-full w-[28%]"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between text-xs mb-1">
+<span class="font-semibold">Neurology</span>
+<span class="text-slate-500">21%</span>
+</div>
+<div class="h-2 bg-surface-container-low rounded-full">
+<div class="h-full bg-secondary-container rounded-full w-[21%]"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between text-xs mb-1">
+<span class="font-semibold">Oncology</span>
+<span class="text-slate-500">9%</span>
+</div>
+<div class="h-2 bg-surface-container-low rounded-full">
+<div class="h-full bg-secondary rounded-full w-[9%]"></div>
+</div>
+</div>
+</div>
+</div>
+</section>
+</div>
+<!-- High-Value Lead Table -->
+<section class="bg-surface-container-low p-8 rounded-xl">
+<div class="flex justify-between items-center mb-8">
+<div>
+<h2 class="font-headline font-bold text-2xl text-on-surface">Critical Intelligence Queue</h2>
+<p class="text-slate-500 text-sm mt-1 font-medium">Priority leads requiring immediate curation and response.</p>
+</div>
+<div class="flex gap-2">
+<button class="bg-surface-container-highest px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined text-sm">filter_list</span> Filter
+                        </button>
+<button class="bg-surface-container-highest px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined text-sm">download</span> Export
+                        </button>
+</div>
+</div>
+<div class="overflow-x-auto no-scrollbar">
+<table class="w-full border-separate border-spacing-y-2">
+<thead>
+<tr class="text-left">
+<th class="pb-4 px-4 text-xs uppercase tracking-widest text-slate-500 font-bold">Patient Lead</th>
+<th class="pb-4 px-4 text-xs uppercase tracking-widest text-slate-500 font-bold">Specialty Category</th>
+<th class="pb-4 px-4 text-xs uppercase tracking-widest text-slate-500 font-bold">Priority Score</th>
+<th class="pb-4 px-4 text-xs uppercase tracking-widest text-slate-500 font-bold text-right">Engagement</th>
+</tr>
+</thead>
+<tbody class="space-y-2">
+<!-- High Priority Lead -->
+<tr class="group hover:bg-surface-container-high transition-all">
+<td class="bg-surface-container-lowest py-5 px-4 first:rounded-l-xl flex items-center gap-4">
+<div class="relative">
+<div class="w-10 h-10 rounded-full bg-slate-200 overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="professional male profile portrait with neutral expression against blurred indoor office background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAkFs4VpJKBdKdtk_yYUX8Pxspcn1zLm6S0LL0hrSqyzSWV1OEn1olqOYHtNWF1TcgI4X4I_f_lDC0EhPpxzVIv2qwHdxAatA_7G6Ni7TYRS5TnLxDn8SFOEHw-mB9_DN0IWEp33lzihNlYkWH3AEWQW9e9OuDpZikZXSOEsRA7ifFLAjB4WIdr7gg2yUKopasp1I1pKlnhqaJcwqRW0GKGrbKPJkcTCstwfKJhC07x-Bccr267WYocMEx-7IHqZONM-tGiIwgy9BY"/>
+</div>
+<!-- Pulsing Notification Effect -->
+<div class="absolute -top-1 -right-1 flex items-center justify-center">
+<span class="absolute inline-flex h-4 w-4 rounded-full bg-tertiary opacity-75 animate-ping"></span>
+<span class="relative inline-flex rounded-full h-3 w-3 bg-tertiary"></span>
+</div>
+</div>
+<div>
+<span class="font-bold text-on-surface block">Robert Chen</span>
+<span class="text-xs text-slate-500">Lead ID: 942-A</span>
+</div>
+</td>
+<td class="bg-surface-container-lowest py-5 px-4 font-medium text-sm">
+<span class="px-3 py-1 bg-primary-fixed text-on-primary-fixed rounded-full text-[11px] font-bold">CARDIOLOGY</span>
+</td>
+<td class="bg-surface-container-lowest py-5 px-4">
+<div class="flex items-center gap-2">
+<span class="text-lg font-extrabold text-tertiary">9.8</span>
+<div class="w-24 h-1.5 bg-surface-container-low rounded-full overflow-hidden">
+<div class="h-full bg-tertiary w-[98%]"></div>
+</div>
+</div>
+</td>
+<td class="bg-surface-container-lowest py-5 px-4 last:rounded-r-xl text-right">
+<a class="inline-flex items-center gap-2 bg-primary text-white px-5 py-2.5 rounded-lg text-sm font-bold shadow-lg shadow-primary/20 hover:scale-105 active:scale-95 transition-transform" href="https://wa.me/1234567890?text=Hello Robert, this is Clinical Curator following up on your Cardiology inquiry." target="_blank">
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">chat</span>
+                                        Take Action
+                                    </a>
+</td>
+</tr>
+<!-- Normal Lead -->
+<tr class="group hover:bg-surface-container-high transition-all">
+<td class="bg-surface-container-lowest py-5 px-4 first:rounded-l-xl flex items-center gap-4">
+<div class="w-10 h-10 rounded-full bg-slate-200 overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="friendly female profile photo with natural soft lighting and soft blurred background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAkeN7ooGmNGJuFCKyDK7inSE3rqwN94nRTTO4q3kf8L7g7ctzP09cQuAw8Zl24AHbUCk0_yOci2we74quq2CjU-4JDdyBhlLAUK95BzqIUjvSpAD3keiKv12hjNcu-TKadGOOdyNJROxMf3Pk6h6l-9NCywQ3ADAgnGKlU1JbkbNxZuXRQsfyp_6L77mhvpxH-FTr-mQMJj430PlX6ypzcDu4pVy_Z7IF3qIUDSwsB2oWbUavdx6IYgJLVxQh5U5xcURe-aJXPckw"/>
+</div>
+<div>
+<span class="font-bold text-on-surface block">Elena Rodriguez</span>
+<span class="text-xs text-slate-500">Lead ID: 772-B</span>
+</div>
+</td>
+<td class="bg-surface-container-lowest py-5 px-4 font-medium text-sm">
+<span class="px-3 py-1 bg-secondary-fixed text-on-secondary-fixed rounded-full text-[11px] font-bold">GENERAL SURGERY</span>
+</td>
+<td class="bg-surface-container-lowest py-5 px-4">
+<div class="flex items-center gap-2">
+<span class="text-lg font-extrabold text-slate-700">7.2</span>
+<div class="w-24 h-1.5 bg-surface-container-low rounded-full overflow-hidden">
+<div class="h-full bg-slate-400 w-[72%]"></div>
+</div>
+</div>
+</td>
+<td class="bg-surface-container-lowest py-5 px-4 last:rounded-r-xl text-right">
+<button class="inline-flex items-center gap-2 bg-surface-container-highest text-on-surface-variant px-5 py-2.5 rounded-lg text-sm font-bold hover:bg-surface-container-high transition-colors">
+                                        View Details
+                                    </button>
+</td>
+</tr>
+<!-- High Priority Lead -->
+<tr class="group hover:bg-surface-container-high transition-all">
+<td class="bg-surface-container-lowest py-5 px-4 first:rounded-l-xl flex items-center gap-4">
+<div class="relative">
+<div class="w-10 h-10 rounded-full bg-slate-200 overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="professional male headshot with modern clean lighting and architectural blurred background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBocjqVnwKDe1ZhYNq4XHI28QaBFleEsFSdQeMoGjqk5GEw_yTtwxvO5zSBxnQt7TMMNJuQhNnmwqoqNqAEM06r7_oBjbZIHooeEkpDw2XVEALVe3axF4u7na1_DGjNxX3w1XpwndJv9nD9tcUrpgjxglk9sLYXRpA4Ql3R2Q08NhvHTf09nuH8ZHXtgp_6ScwBtQWYAMRi-F1NnWjO6RVhzjmCNYQSxefkITvYDWjaG1yuWzWfgtdbTRMNMGBYpUwlxXT_puaPnPE"/>
+</div>
+<div class="absolute -top-1 -right-1 flex items-center justify-center">
+<span class="absolute inline-flex h-4 w-4 rounded-full bg-tertiary opacity-75 animate-ping"></span>
+<span class="relative inline-flex rounded-full h-3 w-3 bg-tertiary"></span>
+</div>
+</div>
+<div>
+<span class="font-bold text-on-surface block">Michael Thorne</span>
+<span class="text-xs text-slate-500">Lead ID: 211-F</span>
+</div>
+</td>
+<td class="bg-surface-container-lowest py-5 px-4 font-medium text-sm">
+<span class="px-3 py-1 bg-primary-fixed text-on-primary-fixed rounded-full text-[11px] font-bold">NEUROLOGY</span>
+</td>
+<td class="bg-surface-container-lowest py-5 px-4">
+<div class="flex items-center gap-2">
+<span class="text-lg font-extrabold text-tertiary">8.5</span>
+<div class="w-24 h-1.5 bg-surface-container-low rounded-full overflow-hidden">
+<div class="h-full bg-tertiary w-[85%]"></div>
+</div>
+</div>
+</td>
+<td class="bg-surface-container-lowest py-5 px-4 last:rounded-r-xl text-right">
+<a class="inline-flex items-center gap-2 bg-primary text-white px-5 py-2.5 rounded-lg text-sm font-bold shadow-lg shadow-primary/20 hover:scale-105 active:scale-95 transition-transform" href="https://wa.me/1234567890?text=Hello Michael, this is Clinical Curator following up on your Neurology inquiry." target="_blank">
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">chat</span>
+                                        Take Action
+                                    </a>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+</div>
+</main>
+<!-- Contextual Insight FAB (Hidden on Table section Scroll, visible here for demo) -->
+<button class="fixed bottom-8 right-8 bg-tertiary text-white w-14 h-14 rounded-full shadow-2xl flex items-center justify-center hover:scale-110 active:scale-90 transition-transform z-[100]">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">tips_and_updates</span>
+</button>
+</body></html>

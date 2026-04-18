@@ -5,9 +5,9 @@ import { Plus, X, Copy, Check, Smartphone, Code, Bell, CreditCard, AlertTriangle
 import type { Business } from "@/lib/supabase";
 
 const BUSINESS_TYPES = [
-  { value: "car_rental", label: "Car Rental" },
+  { value: "medical_tourism", label: "Medical Tourism (IVF/Dental/Aesthetics)" },
+  { value: "real_estate_residency", label: "High-Yield Real Estate & Residency" },
   { value: "car_sales", label: "Car Sales" },
-  { value: "barbershop", label: "Barbershop / Salon" },
   { value: "student_accommodation", label: "Student Accommodation" },
   { value: "restaurant", label: "Restaurant / Café" },
   { value: "clinic", label: "Clinic / Medical" },
@@ -17,7 +17,14 @@ const BUSINESS_TYPES = [
 ];
 
 const WIDGET_COLORS = [
-  "#2563eb", "#7c3aed", "#0891b2", "#059669", "#dc2626", "#d97706", "#db2777", "#1d4ed8",
+  { value: "#2563eb", className: "bg-blue-600" },
+  { value: "#7c3aed", className: "bg-violet-600" },
+  { value: "#0891b2", className: "bg-cyan-600" },
+  { value: "#059669", className: "bg-emerald-600" },
+  { value: "#dc2626", className: "bg-red-600" },
+  { value: "#d97706", className: "bg-amber-600" },
+  { value: "#db2777", className: "bg-pink-600" },
+  { value: "#1d4ed8", className: "bg-blue-700" },
 ];
 
 interface SettingsState {
@@ -147,25 +154,25 @@ export default function SettingsTab({ business, onSaved, showToast, plan = "star
     <div className="flex flex-col gap-6 lg:flex-row">
       {/* Left sidebar - Section navigation */}
       <nav className="w-full shrink-0 space-y-1 lg:w-64">
-        <button onClick={() => setActiveSection("profile")} className={sectionButtonCls(activeSection === "profile")}>
+        <button onClick={() => setActiveSection("profile")} className={sectionButtonCls(activeSection === "profile")} type="button">
           <Globe className="h-5 w-5" /> Business Profile
         </button>
-        <button onClick={() => setActiveSection("ai")} className={sectionButtonCls(activeSection === "ai")}>
+        <button onClick={() => setActiveSection("ai")} className={sectionButtonCls(activeSection === "ai")} type="button">
           <Brain className="h-5 w-5" /> AI Configuration
         </button>
-        <button onClick={() => setActiveSection("whatsapp")} className={sectionButtonCls(activeSection === "whatsapp")}>
+        <button onClick={() => setActiveSection("whatsapp")} className={sectionButtonCls(activeSection === "whatsapp")} type="button">
           <Smartphone className="h-5 w-5" /> WhatsApp
         </button>
-        <button onClick={() => setActiveSection("widget")} className={sectionButtonCls(activeSection === "widget")}>
+        <button onClick={() => setActiveSection("widget")} className={sectionButtonCls(activeSection === "widget")} type="button">
           <Code className="h-5 w-5" /> Widget Code
         </button>
-        <button onClick={() => setActiveSection("notifications")} className={sectionButtonCls(activeSection === "notifications")}>
+        <button onClick={() => setActiveSection("notifications")} className={sectionButtonCls(activeSection === "notifications")} type="button">
           <Bell className="h-5 w-5" /> Notifications
         </button>
-        <button onClick={() => setActiveSection("billing")} className={sectionButtonCls(activeSection === "billing")}>
+        <button onClick={() => setActiveSection("billing")} className={sectionButtonCls(activeSection === "billing")} type="button">
           <CreditCard className="h-5 w-5" /> Subscription
         </button>
-        <button onClick={() => setActiveSection("danger")} className={sectionButtonCls(activeSection === "danger")}>
+        <button onClick={() => setActiveSection("danger")} className={sectionButtonCls(activeSection === "danger")} type="button">
           <AlertTriangle className="h-5 w-5 text-red-500" /> Danger Zone
         </button>
       </nav>
@@ -178,13 +185,13 @@ export default function SettingsTab({ business, onSaved, showToast, plan = "star
             <section className={sectionCls}>
               <h2 className="mb-5 text-lg font-bold text-gray-900">Business Profile</h2>
               <div className="grid gap-4 sm:grid-cols-2">
-                <div>
-                  <label className={labelCls}>Business name</label>
-                  <input className={inputCls} value={form.businessName} onChange={(e) => set("businessName", e.target.value)} required />
+                  <div>
+                    <label className={labelCls} htmlFor="business-name">Business name</label>
+                    <input id="business-name" className={inputCls} value={form.businessName} onChange={(e) => set("businessName", e.target.value)} required />
                 </div>
                 <div>
-                  <label className={labelCls}>Business type</label>
-                  <select className={inputCls} value={form.businessType} onChange={(e) => set("businessType", e.target.value)}>
+                    <label className={labelCls} htmlFor="business-type">Business type</label>
+                    <select id="business-type" className={inputCls} value={form.businessType} onChange={(e) => set("businessType", e.target.value)}>
                     {BUSINESS_TYPES.map((t) => (
                       <option key={t.value} value={t.value}>
                         {t.label}
@@ -193,12 +200,12 @@ export default function SettingsTab({ business, onSaved, showToast, plan = "star
                   </select>
                 </div>
                 <div>
-                  <label className={labelCls}>WhatsApp number</label>
-                  <input className={inputCls} value={form.whatsapp} onChange={(e) => set("whatsapp", e.target.value)} placeholder="+905551234567" />
+                    <label className={labelCls} htmlFor="whatsapp-number">WhatsApp number</label>
+                    <input id="whatsapp-number" className={inputCls} value={form.whatsapp} onChange={(e) => set("whatsapp", e.target.value)} placeholder="+905551234567" />
                 </div>
                 <div>
-                  <label className={labelCls}>Website URL</label>
-                  <input className={inputCls} value={form.website} onChange={(e) => set("website", e.target.value)} placeholder="https://yourbusiness.com" />
+                    <label className={labelCls} htmlFor="website-url">Website URL</label>
+                    <input id="website-url" className={inputCls} value={form.website} onChange={(e) => set("website", e.target.value)} placeholder="https://yourbusiness.com" />
                 </div>
               </div>
             </section>
@@ -212,11 +219,12 @@ export default function SettingsTab({ business, onSaved, showToast, plan = "star
                 <div className="flex flex-wrap gap-3">
                   {WIDGET_COLORS.map((color) => (
                     <button
-                      key={color}
+                      key={color.value}
                       type="button"
-                      onClick={() => set("primaryColor", color)}
-                      className={`h-10 w-10 rounded-full border-2 transition ${form.primaryColor === color ? "border-gray-900 scale-110" : "border-transparent"}`}
-                      style={{ background: color }}
+                      onClick={() => set("primaryColor", color.value)}
+                      className={`h-10 w-10 rounded-full border-2 transition ${form.primaryColor === color.value ? "border-gray-900 scale-110" : "border-transparent"} ${color.className}`}
+                      title={`Use ${color.value} as widget color`}
+                      aria-label={`Use ${color.value} as widget color`}
                     />
                   ))}
                   <input
@@ -224,6 +232,7 @@ export default function SettingsTab({ business, onSaved, showToast, plan = "star
                     value={form.primaryColor}
                     onChange={(e) => set("primaryColor", e.target.value)}
                     className="h-10 w-10 cursor-pointer rounded-full border-2 border-gray-200 p-0.5"
+                    aria-label="Custom widget color"
                   />
                 </div>
               </section>
@@ -283,6 +292,8 @@ export default function SettingsTab({ business, onSaved, showToast, plan = "star
                     type="button"
                     onClick={addFaq}
                     className="inline-flex items-center gap-1.5 rounded-full border border-gray-200 px-3 py-1.5 text-xs font-semibold text-gray-600 hover:bg-gray-50"
+                    title="Add FAQ"
+                    aria-label="Add FAQ"
                   >
                     <Plus className="h-3 w-3" /> Add FAQ
                   </button>
@@ -294,6 +305,8 @@ export default function SettingsTab({ business, onSaved, showToast, plan = "star
                         type="button"
                         onClick={() => removeFaq(i)}
                         className="absolute right-3 top-3 text-gray-400 hover:text-gray-600"
+                        title="Remove FAQ"
+                        aria-label="Remove FAQ"
                       >
                         <X className="h-4 w-4" />
                       </button>

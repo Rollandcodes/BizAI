@@ -63,9 +63,9 @@ const languages = [
   { code: 'el', label: 'Greek (Ελληνικά)', flag: '🇬🇷' },
 ];
 const businessTypeOptions = [
-  { value: 'car_rental', label: 'Car Rental' },
+  { value: 'medical_tourism', label: 'Medical Tourism (IVF/Dental/Aesthetics)' },
+  { value: 'real_estate_residency', label: 'High-Yield Real Estate & Residency' },
   { value: 'car_sales', label: 'Car Sales' },
-  { value: 'barbershop', label: 'Barbershop' },
   { value: 'restaurant', label: 'Restaurant' },
   { value: 'hotel', label: 'Hotel' },
   { value: 'accommodation', label: 'Accommodation' },
@@ -362,7 +362,7 @@ export default function OnboardingWizard({
 
               <div className="grid gap-5 md:grid-cols-2">
                 <Field label="Business Name" required>
-                  <input aria-label="Business Name" placeholder="DriveEasy Car Rentals" value={data.businessName} onChange={(event) => updateField('businessName', event.target.value)} className={inputClassName} />
+                  <input aria-label="Business Name" placeholder="Girne IVF Center" value={data.businessName} onChange={(event) => updateField('businessName', event.target.value)} className={inputClassName} />
                 </Field>
                 <Field label="Business Type" required>
                   <select aria-label="Business Type" value={data.businessType} onChange={(event) => updateField('businessType', event.target.value)} className={inputClassName}>

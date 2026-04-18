@@ -4,8 +4,8 @@
 
 export type NicheSEO = {
   slug: string;
-  name: string;           // "Car Rental"
-  plural: string;         // "Car Rental Businesses"
+  name: string;
+  plural: string;
   emoji: string;
   keyword: string;        // primary target keyword fragment
   useCase: string;        // short phrase used in headings
@@ -43,37 +43,37 @@ export type CompetitorSEO = {
 
 export const SEO_NICHES: NicheSEO[] = [
   {
-    slug: 'car-rental',
-    name: 'Car Rental',
-    plural: 'Car Rental Businesses',
-    emoji: '🚗',
-    keyword: 'AI chatbot for car rental',
-    useCase: 'instant booking inquiries, fleet availability, and lead capture',
+    slug: 'medical-tourism',
+    name: 'Medical Tourism',
+    plural: 'Medical Tourism Clinics',
+    emoji: '🏥',
+    keyword: 'AI lead engine for medical tourism',
+    useCase: 'IVF, dental, and aesthetic lead qualification',
     painPoints: [
-      'Tourists call at midnight to ask about availability and pricing',
-      'Staff waste hours answering the same questions about documents and insurance',
-      'Leads drop off when no one is online to respond quickly',
-      'WhatsApp inquiries pile up unread over weekends and holidays',
+      'International patients enquire outside business hours from multiple time zones',
+      'Staff waste hours repeating the same treatment, cost, and travel questions',
+      'Serious leads drop off when no one is online to respond quickly',
+      'Language barriers slow down triage for IVF, dental, and aesthetic enquiries',
     ],
     features: [
-      'Answers vehicle, pricing, and availability questions 24/7',
-      'Captures lead name, phone, and pickup/return dates automatically',
-      'Sends booking summaries straight to your CRM',
-      'Replies in English, Greek, Turkish, Arabic, and Russian',
+      'Qualifies IVF, dental, and aesthetics leads 24/7',
+      'Captures treatment type, timeline, and WhatsApp contact automatically',
+      'Delivers 2026 law-compliant responses inside the AI logic',
+      'Replies in English, Greek, Turkish, Arabic, Russian, and German',
       'Works on your website and via WhatsApp simultaneously',
     ],
     faqs: [
       {
-        q: 'Can CypAI handle WhatsApp inquiries from tourists?',
-        a: 'Yes. CypAI connects to WhatsApp via the official Meta Cloud API and replies automatically in the customer\'s language — English, Greek, Turkish, Arabic, or Russian.',
+        q: 'Can CypAI triage IVF, dental, and aesthetic enquiries?',
+        a: 'Yes. CypAI can qualify high-intent medical tourism leads, capture treatment preferences, and route the conversation to your team with the right context.',
       },
       {
-        q: 'Will it capture the customer\'s pickup date and car preference?',
-        a: 'Absolutely. The AI is trained to collect name, phone number, desired dates, and car type before notifying you with a lead summary.',
+        q: 'Does it understand the 2026 compliance and residency context?',
+        a: 'Yes. The AI logic can be aligned with your market rules and trained to avoid risky or outdated claims while giving consistent, law-aware responses.',
       },
       {
         q: 'Can I still see all conversations in one place?',
-        a: 'Yes — every web chat and WhatsApp message appears in your CypAI dashboard under a unified inbox, with channel badges so you always know where the inquiry came from.',
+        a: 'Yes — every web chat and WhatsApp message appears in your CypAI dashboard under a unified inbox, with channel badges and lead notes for quick follow-up.',
       },
     ],
   },
@@ -113,37 +113,37 @@ export const SEO_NICHES: NicheSEO[] = [
     ],
   },
   {
-    slug: 'barbershop',
-    name: 'Barbershop',
-    plural: 'Barbershops',
-    emoji: '💈',
-    keyword: 'AI appointment chatbot for barbershop',
-    useCase: '24/7 appointment booking and availability updates',
+    slug: 'real-estate-residency',
+    name: 'High-Yield Real Estate & Residency',
+    plural: 'Residency-Ready Property Teams',
+    emoji: '🏢',
+    keyword: 'AI lead engine for real estate residency',
+    useCase: 'investor qualification, residency routing, and fast lead recovery',
     painPoints: [
-      'Customers message on Instagram or WhatsApp after hours to check slots',
-      'Staff spend half the day answering "what time do you close?" and "how much for a haircut?"',
-      'No-shows cost the shop real money every week',
-      'Walk-in wait times frustrate customers who have no way to check ahead',
+      'Overseas buyers enquire outside office hours when agents are unavailable',
+      'Serious leads go cold waiting too long for a response',
+      'Teams waste hours pre-qualifying the wrong type of buyer or tenant',
+      'Residency and purchase questions get repeated across WhatsApp and web chat',
     ],
     features: [
-      'Books appointments and captures name + phone automatically',
-      'Answers pricing, walk-in policy, and hours questions instantly',
-      'Supports Arabic, Russian, and Turkish alongside English and Greek',
-      'Embeds on your website in under 10 minutes — no developer needed',
+      'Qualifies investor buyers and residency-ready leads 24/7',
+      'Captures budget, area, timeline, and WhatsApp contact automatically',
+      'Delivers 2026 law-aware responses inside the AI logic',
+      'Supports English, Greek, Turkish, Arabic, Russian, and German',
       'Delivers every lead to your CRM with full conversation history',
     ],
     faqs: [
       {
-        q: 'Can CypAI send booking confirmations via WhatsApp?',
-        a: 'Yes. Once a customer provides their details through WhatsApp chat, the AI logs the lead and you can follow up directly — or connect an automation to send a confirmation message.',
+        q: 'Can CypAI qualify investor buyers and residency applicants?',
+        a: 'Yes. The AI can ask the right qualification questions, separate tire-kickers from serious buyers, and route the best opportunities to your sales team.',
       },
       {
-        q: 'Will it work if most of my customers speak Arabic or Russian?',
-        a: 'CypAI auto-detects the language the customer writes in and replies in the same language — English, Arabic, Russian, Turkish, or Greek.',
+        q: 'Can it support multilingual leads from Europe and the Middle East?',
+        a: 'Yes. It can automatically respond in the customer\'s language and capture the lead without losing context across languages.',
       },
       {
-        q: 'How hard is it to set up?',
-        a: 'Very easy. Paste one line of code on your website and you\'re live. The AI learns your hours, pricing, and services from a short onboarding form.',
+        q: 'Can I still see all conversations in one place?',
+        a: 'Yes — every web chat and WhatsApp message appears in your CypAI dashboard under a unified inbox, with channel badges and lead notes.',
       },
     ],
   },
@@ -395,7 +395,7 @@ export const SEO_COMPETITORS: CompetitorSEO[] = [
       'Flat pricing plans — no per-conversation or per-seat fees',
       'Native WhatsApp Cloud API integration included in all plans',
       '5-language auto-detection: English, Greek, Turkish, Arabic, Russian',
-      'Purpose-built for service businesses: car rental, clinic, hotel, barbershop',
+      'Purpose-built for service businesses: medical tourism, property, clinic, hotel',
       'Live in 15 minutes — no developer or code changes required',
     ],
     pricingNote: 'Tidio\'s Communicator plan starts at $29/month but real AI features require the Tidio+ plan at $329/month+. CypAI starts at $49/month with all AI features included.',
@@ -604,7 +604,7 @@ export const SEO_COMPETITORS: CompetitorSEO[] = [
       'Primarily a live chat widget — AI automation is limited without developer configuration',
       'WhatsApp integration available but limited in the lower tiers',
       'Bot builder requires technical knowledge to configure effectively',
-      'No niche-specific lead capture workflows (bookings, appointments, car rentals)',
+      'No niche-specific lead capture workflows (bookings, appointments, qualification)',
       'Limited to English in its default AI configurations',
     ],
     cypaiAdvantages: [
@@ -627,7 +627,7 @@ export const SEO_COMPETITORS: CompetitorSEO[] = [
     faqs: [
       { q: 'Is CypAI easier to configure than Crisp for a small business owner?', a: 'Yes. Crisp is designed for developers who want flexibility. CypAI is designed for business owners who want results on day one — the onboarding wizard takes 15 minutes and no code is needed.' },
       { q: 'Does Crisp have multilingual auto-detection?', a: 'Crisp supports multiple languages but auto-detection in responses requires bot configuration. CypAI auto-detects and responds natively in 5 languages without any setup.' },
-      { q: 'Can Crisp capture appointment bookings?', a: 'Crisp can be customised to do this but it requires significant bot workflow setup. CypAI does appointment capture out of the box for barbershops, clinics, gyms, and more.' },
+      { q: 'Can Crisp capture appointment bookings?', a: 'Crisp can be customised to do this but it requires significant bot workflow setup. CypAI does appointment capture out of the box for clinics, gyms, property teams, and more.' },
     ],
   },
   {

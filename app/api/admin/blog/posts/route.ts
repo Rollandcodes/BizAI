@@ -4,14 +4,15 @@ import { createServerClient } from '@/lib/supabase';
 
 const supabase = createServerClient();
 
-const ADMIN_EMAIL = 'muhanguzirollands@gmail.com';
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL?.trim() || 'noreply@cypai.app';
 
 // Helper to check admin access
 async function checkAdmin(request: NextRequest): Promise<boolean> {
-  // For now, we'll check a simple header or just allow access for development
-  // In production, you'd use proper auth
-  const adminKey = request.headers.get('x-admin-key');
-  return adminKey === process.env.ADMIN_API_KEY || adminKey === 'dev-admin-key';
+  const configuredAdminKey = process.env.ADMIN_API_KEY?.trim();
+  if (!configuredAdminKey) return false;
+
+  const adminKey = request.headers.get('x-admin-key')?.trim();
+  return Boolean(adminKey && adminKey === configuredAdminKey);
 }
 
 export async function GET(request: NextRequest) {

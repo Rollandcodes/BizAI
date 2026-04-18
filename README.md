@@ -6,7 +6,7 @@ AI-powered customer service, lead capture, bookings, and WhatsApp automation for
 
 ## Tech Stack
 
-- **Framework:** Next.js 16 (App Router) + React 19 + TypeScript
+- **Framework:** Next.js 14 (App Router) + React 19 + TypeScript
 - **Database:** Supabase (PostgreSQL + RLS)
 - **AI:** OpenAI GPT-4o / GPT-4o-mini (smart routing)
 - **Billing:** PayPal Orders API + Webhooks

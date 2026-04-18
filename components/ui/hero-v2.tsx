@@ -71,8 +71,8 @@ export function HeroV2({ dictionary }: Props) {
           <p className="text-xs font-medium text-slate-500">No credit card required · Cancel anytime · Setup in 24hrs</p>
 
           <div className="flex items-center gap-4">
-            <div className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-700">DriveEasy Rentals</div>
-            <div className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-700">Nicosia Barber Co.</div>
+            <div className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-700">Girne IVF Clinic</div>
+            <div className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-700">Kyrenia Residency Group</div>
           </div>
         </div>
 
@@ -84,7 +84,7 @@ export function HeroV2({ dictionary }: Props) {
             className="group w-full rounded-2xl border border-slate-200 bg-white p-4 text-left shadow-sm transition hover:shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0F6B66]"
           >
             <div className="mb-3 flex items-center justify-between">
-              <p className="text-sm font-semibold text-slate-900">DriveEasy Car Rentals</p>
+              <p className="text-sm font-semibold text-slate-900">Girne IVF Clinic</p>
               <span className="text-xs font-medium text-[#0F6B66]">{dictionary.playDemo}</span>
             </div>
             <div className="space-y-2 rounded-xl bg-slate-50 p-3 text-sm">

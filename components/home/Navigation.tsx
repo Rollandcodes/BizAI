@@ -5,11 +5,11 @@ import Link from 'next/link'
 import Image from 'next/image'
 
 const industries = [
-  { emoji: '🚗', title: 'Car Rentals', href: '/car-rentals', desc: 'Never miss a booking' },
+  { emoji: '🏥', title: 'Medical Tourism', href: '/for/medical-tourism/kyrenia', desc: 'Triage leads in 5 languages' },
+  { emoji: '🏢', title: 'Real Estate & Residency', href: '/for/real-estate/nicosia', desc: 'Qualify investors faster' },
+  { emoji: '🩺', title: 'Clinics', href: '/clinics', desc: 'Less admin, more patients' },
   { emoji: '🍽️', title: 'Restaurants', href: '/restaurants', desc: 'Full tables, zero missed reservations' },
   { emoji: '🏨', title: 'Hotels', href: '/hotels', desc: '24/7 guest service' },
-  { emoji: '✂️', title: 'Barbershops', href: '/barbershops', desc: 'Bookings while you cut' },
-  { emoji: '🏥', title: 'Clinics', href: '/clinics', desc: 'Less admin, more patients' },
   { emoji: '🎓', title: 'Student Housing', href: '/student-housing', desc: 'Fill rooms faster' },
 ]
 
@@ -28,6 +28,7 @@ export function Navigation() {
 
   const navLinks = [
     { href: '#features', label: 'Features' },
+    { href: '#why-northern-cyprus', label: 'Why Northern Cyprus?' },
     { href: '#how-it-works', label: 'How It Works' },
     { href: '#pricing', label: 'Pricing' },
     { href: '/demo', label: 'Demo' },
@@ -120,7 +121,7 @@ export function Navigation() {
             href="/sign-up"
             className="rounded-full bg-[#e8a020] px-5 py-2 text-sm font-semibold text-[#1a1a2e] shadow-[0_0_30px_rgba(232,160,32,0.4)] transition-all hover:bg-[#f59e0b] hover:shadow-[0_0_50px_rgba(232,160,32,0.7)] hover:scale-105"
           >
-            Start Free Trial
+            Book a Demo
           </Link>
           
           {/* Mobile Menu Button */}

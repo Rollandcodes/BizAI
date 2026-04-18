@@ -82,19 +82,14 @@ const dailyUse = [
 
 const nicheGuides = [
   {
-    title: 'How CypAI works for car rentals',
-    detail: 'Built for availability checks, pricing questions, date capture, and booking requests.',
-    href: '/how-it-works/car-rentals',
+    title: 'How CypAI works for medical tourism',
+    detail: 'Built for IVF, dental, and aesthetics qualification, multilingual triage, and appointment-ready lead capture.',
+    href: '/clinics',
   },
   {
-    title: 'How CypAI works for car sales',
-    detail: 'Built for stock inquiries, financing questions, test-drive requests, and lead qualification.',
-    href: '/how-it-works/car-sales',
-  },
-  {
-    title: 'How CypAI works for clinics',
-    detail: 'Built for patient inquiries, appointment request capture, and cleaner front-desk workflow.',
-    href: '/how-it-works/clinics',
+    title: 'How CypAI works for real estate & residency',
+    detail: 'Built for investor qualification, residency intent capture, and off-peak response recovery.',
+    href: '/for/real-estate/nicosia',
   },
 ]
 

@@ -33,9 +33,9 @@ const PLAN_PRICE: Record<string, number> = {
 };
 
 const BUSINESS_TYPES = [
-  { value: 'car_rental', label: 'Car Rental' },
+  { value: 'medical_tourism', label: 'Medical Tourism (IVF/Dental/Aesthetics)' },
+  { value: 'real_estate_residency', label: 'High-Yield Real Estate & Residency' },
   { value: 'car_sales', label: 'Car Sales' },
-  { value: 'barbershop', label: 'Barbershop' },
   { value: 'accommodation', label: 'Accommodation' },
   { value: 'restaurant', label: 'Restaurant' },
   { value: 'clinic', label: 'Clinic' },

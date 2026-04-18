@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { AGENT_PACKS, NicheType } from '@/lib/agentPacks'
 
 export default function LiveLabDemo() {
-  const [activeNiche, setActiveNiche] = useState<NicheType>('Car Rental')
+  const [activeNiche, setActiveNiche] = useState<NicheType>('Medical Tourism')
   const [messages, setMessages] = useState<{ role: 'ai' | 'user', text: string }[]>([])
   const [input, setInput] = useState('')
   const [replying, setReplying] = useState(false)
@@ -15,16 +15,13 @@ export default function LiveLabDemo() {
 
   // Map NicheType to API niche values
   const nicheToApiKey: Record<NicheType, string> = {
-    'Real Estate': 'real_estate',
-    'Car Rental': 'car_rental',
-    'Clinics': 'clinic',
-    'Hotels': 'hotel',
-    'Apartments': 'student_accommodation',
-    'Universities': 'student_accommodation',
-    'Small Shops': 'small_shop',
-    'Plumbers': 'plumber',
-    'Contractors': 'contractor',
-    'Startups': 'startup',
+    'Medical Tourism': 'medical_tourism',
+    'Real Estate & Residency': 'real_estate_residency',
+  }
+
+  const demoMessages: Record<NicheType, string> = {
+    'Medical Tourism': 'I need IVF and dental treatment options for two adults, and I want to understand the residency implications before I fly in.',
+    'Real Estate & Residency': 'I am looking for a high-yield apartment and I want to know the fastest residency route for my family.',
   }
 
   useEffect(() => {
@@ -35,29 +32,31 @@ export default function LiveLabDemo() {
     
     // Auto-reply simulation for demo effect with real API
     const timer = setTimeout(async () => {
-      if (activeNiche === 'Car Rental') {
-        const demoMessage = 'I need a car for tomorrow at Ercan Airport.'
-        setMessages(prev => [...prev, { role: 'user', text: demoMessage }])
-        
-        try {
-          const res = await fetch('/api/chat', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              message: demoMessage,
-              niche: nicheToApiKey[activeNiche],
-              businessId: 'demo',
-              businessName: pack.name,
-            }),
-          })
+      const demoMessage = demoMessages[activeNiche]
+      if (!demoMessage) {
+        return
+      }
 
-          if (res.ok) {
-            const data = await res.json() as { message?: string }
-            setMessages(prev => [...prev, { role: 'ai', text: data.message || 'How can I help you?' }])
-          }
-        } catch (err) {
-          console.error('Demo API error:', err)
+      setMessages(prev => [...prev, { role: 'user', text: demoMessage }])
+
+      try {
+        const res = await fetch('/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            message: demoMessage,
+            niche: nicheToApiKey[activeNiche],
+            businessId: 'demo',
+            businessName: pack.name,
+          }),
+        })
+
+        if (res.ok) {
+          const data = await res.json() as { message?: string }
+          setMessages(prev => [...prev, { role: 'ai', text: data.message || 'How can I help you?' }])
         }
+      } catch (err) {
+        console.error('Demo API error:', err)
       }
     }, 2000)
 
@@ -108,10 +107,10 @@ export default function LiveLabDemo() {
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center py-20">
       <div className="lg:col-span-5 space-y-6">
         <h2 className="text-4xl md:text-5xl font-display font-bold leading-tight">
-          Experience the <span className="text-electric-lime text-glow-lime">Intelligence</span>
+          Experience the <span className="text-electric-lime text-glow-lime">Revenue Recovery</span>
         </h2>
         <p className="text-lg text-white/80 font-sans">
-          Our Live Lab lets you test-drive agents trained specifically for Northern Cyprus market dynamics.
+          Our Live Lab lets you test-drive agents trained specifically for Northern Cyprus medical tourism and investor lead flows.
         </p>
         
         <div className="flex flex-wrap gap-2">
