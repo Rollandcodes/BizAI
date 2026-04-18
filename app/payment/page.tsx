@@ -68,7 +68,7 @@ function PaymentButtons({
 function PaymentContent() {
   const router = useRouter();
   const params = useSearchParams();
-  const planId = params.get('plan') ?? 'pro';
+  const planId = params?.get('plan') ?? 'pro';
   const plan = PLANS[planId] ?? PLANS.pro;
 
   const [signupData, setSignupData] = useState<SignupData | null>(null);
