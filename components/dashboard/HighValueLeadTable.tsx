@@ -1,6 +1,7 @@
 'use client'
 
-import { ExternalLink, ShieldCheck } from 'lucide-react'
+import { useEffect, useMemo, useState } from 'react'
+import { ExternalLink, MessageCircleReply, ShieldCheck, X } from 'lucide-react'
 
 import { cn } from '@/lib/utils'
 
@@ -18,26 +19,88 @@ type HighValueLeadTableProps = {
   leads: HighValueLead[]
 }
 
+type LeadHistoryApiResponse = {
+  leadId: string
+  source: 'airtable' | 'none'
+  conversationHistory: string[]
+}
+
 function normalizePhone(phone: string) {
   return phone.replace(/[^\d]/g, '')
 }
 
-function buildWhatsAppLink(lead: HighValueLead) {
-  const message = [
-    `Priority lead alert: ${lead.name}`,
-    `Lead ID: ${lead.leadId}`,
-    `Specialty: ${lead.specialty}`,
-    `Priority Score: ${lead.score.toFixed(1)}`,
-    `Context: ${lead.note}`,
-  ].join('\n')
+function buildAiReply(lead: HighValueLead, conversationHistory: string[]) {
+  const lastContext = conversationHistory.length > 0 ? conversationHistory[conversationHistory.length - 1] : lead.note
 
-  return `https://wa.me/${normalizePhone(lead.phone)}?text=${encodeURIComponent(message)}`
+  return [
+    `Hi ${lead.name}, thank you for your inquiry regarding ${lead.specialty}.`,
+    'I reviewed your request and can help you with the next step today.',
+    `Based on your message: "${lastContext}"`,
+    'Would you like me to share available slots and pricing details now?',
+  ].join('\n\n')
 }
 
 export default function HighValueLeadTable({ leads }: HighValueLeadTableProps) {
+  const [selectedLead, setSelectedLead] = useState<HighValueLead | null>(null)
+  const [conversationHistory, setConversationHistory] = useState<string[]>([])
+  const [historyLoading, setHistoryLoading] = useState(false)
+
+  useEffect(() => {
+    let isMounted = true
+
+    async function fetchHistory() {
+      if (!selectedLead) {
+        setConversationHistory([])
+        return
+      }
+
+      setHistoryLoading(true)
+
+      try {
+        const query = new URLSearchParams({ leadId: selectedLead.leadId, phone: selectedLead.phone })
+        const response = await fetch(`/api/leads/history?${query.toString()}`, { cache: 'no-store' })
+
+        if (!response.ok) {
+          throw new Error(`Failed to load conversation history: ${response.status}`)
+        }
+
+        const payload = (await response.json()) as LeadHistoryApiResponse
+        if (isMounted) {
+          setConversationHistory(payload.conversationHistory ?? [])
+        }
+      } catch (error) {
+        console.error('HighValueLeadTable: failed to fetch lead history', error)
+        if (isMounted) {
+          setConversationHistory([])
+        }
+      } finally {
+        if (isMounted) {
+          setHistoryLoading(false)
+        }
+      }
+    }
+
+    void fetchHistory()
+
+    return () => {
+      isMounted = false
+    }
+  }, [selectedLead])
+
+  const replyLink = useMemo(() => {
+    if (!selectedLead) {
+      return ''
+    }
+
+    const phone = normalizePhone(selectedLead.phone)
+    const aiReply = buildAiReply(selectedLead, conversationHistory)
+    return `https://wa.me/${phone}?text=${encodeURIComponent(aiReply)}`
+  }, [selectedLead, conversationHistory])
+
   return (
-    <div className="overflow-x-auto">
-      <table className="w-full border-separate border-spacing-y-3">
+    <>
+      <div className="overflow-x-auto">
+        <table className="w-full border-separate border-spacing-y-3">
         <thead>
           <tr className="text-left">
             <th className="px-4 pb-3 text-[10px] uppercase tracking-[0.25em] text-slate-500">Patient Lead</th>
@@ -49,7 +112,6 @@ export default function HighValueLeadTable({ leads }: HighValueLeadTableProps) {
         <tbody>
           {leads.map((lead) => {
             const isHighValue = lead.score > 8
-            const whatsAppLink = buildWhatsAppLink(lead)
 
             return (
               <tr
@@ -104,16 +166,15 @@ export default function HighValueLeadTable({ leads }: HighValueLeadTableProps) {
                       </p>
                     </div>
                     {isHighValue ? (
-                      <a
-                        href={whatsAppLink}
-                        target="_blank"
-                        rel="noopener noreferrer"
+                      <button
+                        type="button"
+                        onClick={() => setSelectedLead(lead)}
                         className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-bold text-white shadow-[0_14px_32px_rgba(0,97,148,0.18)] transition hover:scale-[1.02] active:scale-[0.98]"
                       >
                         <ShieldCheck className="h-4 w-4" />
                         Take Action
                         <ExternalLink className="h-3.5 w-3.5" />
-                      </a>
+                      </button>
                     ) : (
                       <button className="inline-flex items-center gap-2 rounded-lg bg-surface-container-high px-4 py-2.5 text-sm font-bold text-slate-700 transition hover:bg-surface-container-highest">
                         View Details
@@ -125,7 +186,70 @@ export default function HighValueLeadTable({ leads }: HighValueLeadTableProps) {
             )
           })}
         </tbody>
-      </table>
-    </div>
+        </table>
+      </div>
+
+      {selectedLead ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 px-4">
+          <div className="w-full max-w-3xl rounded-3xl bg-surface-container-low p-6 shadow-[0_28px_70px_rgba(11,28,48,0.35)]">
+            <div className="mb-5 flex items-start justify-between gap-4">
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-slate-500">Priority Lead Action</p>
+                <h3 className="mt-2 text-2xl font-black text-on-surface">{selectedLead.name}</h3>
+                <p className="mt-1 text-sm text-slate-600">Lead ID: {selectedLead.leadId} · {selectedLead.specialty}</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setSelectedLead(null)}
+                className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-surface-container-high text-slate-600 hover:bg-surface-container-highest"
+                aria-label="Close action modal"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <div className="rounded-2xl bg-surface-container-lowest p-5">
+              <div className="mb-3 flex items-center justify-between">
+                <h4 className="text-sm font-bold uppercase tracking-[0.16em] text-slate-500">Full Conversation History</h4>
+                <span className="text-xs font-semibold text-slate-500">Source: Airtable</span>
+              </div>
+
+              <div className="max-h-72 space-y-3 overflow-y-auto pr-2">
+                {historyLoading ? (
+                  <>
+                    <div className="h-16 animate-pulse rounded-xl bg-surface-container-high" />
+                    <div className="h-16 animate-pulse rounded-xl bg-surface-container-high" />
+                    <div className="h-16 animate-pulse rounded-xl bg-surface-container-high" />
+                  </>
+                ) : conversationHistory.length > 0 ? (
+                  conversationHistory.map((message, index) => (
+                    <div key={`history-${index}`} className="rounded-xl bg-surface-container-low p-3 text-sm leading-6 text-slate-700">
+                      {message}
+                    </div>
+                  ))
+                ) : (
+                  <p className="rounded-xl bg-surface-container-low p-4 text-sm text-slate-600">
+                    No Airtable history found for this lead yet.
+                  </p>
+                )}
+              </div>
+            </div>
+
+            <div className="mt-5 flex flex-wrap items-center justify-end gap-3">
+              <a
+                href={replyLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-3 text-sm font-bold text-white shadow-[0_14px_32px_rgba(0,97,148,0.18)] transition hover:scale-[1.02] active:scale-[0.98]"
+              >
+                <MessageCircleReply className="h-4 w-4" />
+                Reply via WhatsApp
+                <ExternalLink className="h-3.5 w-3.5" />
+              </a>
+            </div>
+          </div>
+        </div>
+      ) : null}
+    </>
   )
 }

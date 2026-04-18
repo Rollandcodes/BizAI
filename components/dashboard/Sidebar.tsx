@@ -19,7 +19,7 @@ import {
 const MENU_ITEMS = [
   { name: 'Dashboard', icon: LayoutDashboard, href: '/dashboard' },
   { name: 'Conversations', icon: MessageSquare, href: '/conversations' },
-  { name: 'Intelligence', icon: BrainCircuit, href: '/agent' },
+  { name: 'Intelligence', icon: BrainCircuit, href: '/intelligence' },
   { name: 'Calendar', icon: Calendar, href: '/dashboard/calendar' },
   { name: 'Marketplace', icon: Grid3x3, href: '/dashboard/marketplace' },
   { name: 'Guides', icon: HelpCircle, href: '/dashboard/guides' },
@@ -30,6 +30,7 @@ const MENU_ITEMS = [
 
 export default function Sidebar() {
   const pathname = usePathname()
+  const currentPath = pathname ?? ''
 
   return (
     <aside className="w-64 glass border-r border-white/5 flex flex-col h-full bg-[#050510]/60 backdrop-blur-2xl relative z-50">
@@ -46,7 +47,7 @@ export default function Sidebar() {
       {/* Navigation */}
       <nav className="flex-1 px-4 py-4 space-y-2">
         {MENU_ITEMS.map((item) => {
-          const isActive = pathname === item.href || pathname.startsWith(item.href + '/')
+          const isActive = currentPath === item.href || currentPath.startsWith(item.href + '/')
           return (
             <Link
               key={item.href}

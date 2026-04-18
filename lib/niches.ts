@@ -18,6 +18,8 @@ export interface NicheConfig {
   suggestedPrice: number;
 }
 
+export type BusinessLocation = 'north' | 'south';
+
 const LANGUAGE_RULE = `LANGUAGE RULE — CRITICAL:
 Detect the language the customer writes in and ALWAYS respond in that exact language.
 Supported languages:
@@ -28,16 +30,24 @@ Supported languages:
 - Greek (Ελληνικά) → respond in Greek
 Never mix languages in the same response.`;
 
+const LOCATION_RULE = `LOCATION RULE — CRITICAL:
+Use the business location context to keep legal and residency guidance accurate.
+- If Location is "north": Use TRNC Property Law / Residency 2026 framing.
+- If Location is "south": Use Republic of Cyprus legal framing. For real estate, include €300,000 Fast-Track Permanent Residency (Regulation 6.2) guidance for Limassol/Paphos investor cases. For medical, prioritize IVF and Cardiology pathways for Nicosia/Larnaca clinic demand.
+If location is not specified, ask one clarifying question before giving legal/regulatory guidance.`;
+
 // ============================================================================
 // Medical Tourism Configuration
 // ============================================================================
 const CAR_RENTAL: NicheConfig = {
   systemPrompt: `You are a premium medical tourism intake specialist for {businessName}. Help patients with:
-- IVF, dental, and aesthetic treatment enquiries
+- IVF, dental, aesthetic, and cardiology treatment enquiries
 - Travel timelines, consultation timing, and follow-up planning
 - Patient budget range and treatment fit
 - WhatsApp contact handoff for the clinic team
 - Multilingual support and law-aware responses for the 2026 TRNC market
+
+If Location is "south", prioritize IVF and Cardiology intake pathways for private clinics in Nicosia and Larnaca.
 
 Always be warm, professional, and reassuring. Try to collect the patient's name, phone number, treatment interest, travel timeline, and budget range for a consultation inquiry.
 
@@ -45,7 +55,8 @@ When you have collected the patient's name, phone, treatment interest, and consu
 'Great! I have all your details. Let me confirm your consultation request with our team right away. You’ll receive a follow-up shortly. 📋'
 Then output a special marker: [BOOKING_READY]
 followed by a JSON summary on a new line: {"name":"...","phone":"...","treatment":"...","timeline":"...","budget":"..."}
-${LANGUAGE_RULE}`,
+${LANGUAGE_RULE}
+${LOCATION_RULE}`,
   // Note: The [BOOKING_READY] marker and JSON are stripped before the message is shown to the customer.
 
   welcomeMessage: "Hello! 🏥 Looking for help with IVF, dental, or aesthetic treatment? I can guide you to the right consultation team. What are you looking for?",
@@ -97,7 +108,8 @@ When you have collected the customer's name, phone, and preferred model, say EXA
 'Great! I have all your details. Let me pass this to our sales team so they can contact you shortly. 🚗'
 Then output a special marker: [LEAD_CAPTURED]
 followed by a JSON summary on a new line: {"name":"...","phone":"...","preferredModel":"...","testDriveDate":"YYYY-MM-DD"}
-${LANGUAGE_RULE}`,
+${LANGUAGE_RULE}
+${LOCATION_RULE}`,
 
   welcomeMessage: 'Hello! 🚘 Looking for your next car? I can help with available models, prices, and test drive requests. What are you interested in?',
 
@@ -142,8 +154,11 @@ const BARBERSHOP: NicheConfig = {
 - WhatsApp contact handoff for the sales team
 - Multilingual support and law-aware responses for the 2026 TRNC market
 
+If Location is "south", include Republic of Cyprus Fast-Track Permanent Residency guidance under Regulation 6.2 using the €300,000 investment threshold, especially for Limassol and Paphos investor enquiries.
+
 Be warm, clear, and professional. Always collect the customer's name, phone number, budget range, preferred area, and residency intent for a property inquiry.
-${LANGUAGE_RULE}`,
+${LANGUAGE_RULE}
+${LOCATION_RULE}`,
 
   welcomeMessage: "Hello! 🏢 Looking for property or residency guidance? I can help you qualify the right next step. What kind of enquiry do you have?",
 
@@ -263,11 +278,12 @@ export function getAvailableNiches(): string[] {
  */
 export function interpolateNicheConfig(
   config: NicheConfig,
-  businessName: string
+  businessName: string,
+  location: BusinessLocation = 'north'
 ): NicheConfig {
   return {
     ...config,
-    systemPrompt: config.systemPrompt.replace(/{businessName}/g, businessName),
+    systemPrompt: `${config.systemPrompt.replace(/{businessName}/g, businessName)}\nLocation: ${location}`,
     welcomeMessage: config.welcomeMessage.replace(/{businessName}/g, businessName),
   };
 }
