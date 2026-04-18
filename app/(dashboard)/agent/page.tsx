@@ -120,20 +120,22 @@ export default function AgentTrainingPage() {
                 <CardContent className="space-y-6">
                   <Input label="Agent Name" placeholder="e.g. Concierge AI" defaultValue="CypAI Concierge" />
                   <div className="space-y-2">
-                    <label className="text-sm font-medium text-white/70 ml-1">System Instructions</label>
+                    <label htmlFor="system-instructions" className="text-sm font-medium text-white/70 ml-1">System Instructions</label>
                     <textarea 
+                      id="system-instructions"
+                      aria-label="System Instructions"
                       className="w-full h-40 bg-white/5 border border-white/10 rounded-xl p-4 text-sm text-white focus:outline-none focus:border-primary/50 transition-all resize-none font-medium leading-relaxed"
                       defaultValue="You are the lead concierge for Limassol Suites. You are helpful, professional, and speak English, Arabic, and Turkish fluently. Focus on conversion and booking support."
                     />
                   </div>
                   <div className="grid grid-cols-2 gap-6">
                     <div className="space-y-3">
-                      <label className="text-[10px] font-bold text-white/30 uppercase tracking-widest">Temperature (Creativity)</label>
-                      <input type="range" className="w-full h-1.5 bg-white/10 rounded-lg appearance-none cursor-pointer accent-primary" />
+                      <label htmlFor="temperature" className="text-[10px] font-bold text-white/30 uppercase tracking-widest">Temperature (Creativity)</label>
+                      <input id="temperature" type="range" aria-label="Temperature (Creativity)" className="w-full h-1.5 bg-white/10 rounded-lg appearance-none cursor-pointer accent-primary" />
                     </div>
                     <div className="space-y-3">
-                      <label className="text-[10px] font-bold text-white/30 uppercase tracking-widest">Tone (Professional vs Casual)</label>
-                      <input type="range" className="w-full h-1.5 bg-white/10 rounded-lg appearance-none cursor-pointer accent-primary" />
+                      <label htmlFor="tone" className="text-[10px] font-bold text-white/30 uppercase tracking-widest">Tone (Professional vs Casual)</label>
+                      <input id="tone" type="range" aria-label="Tone (Professional vs Casual)" className="w-full h-1.5 bg-white/10 rounded-lg appearance-none cursor-pointer accent-primary" />
                     </div>
                   </div>
                 </CardContent>

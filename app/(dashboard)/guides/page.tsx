@@ -1,336 +1,315 @@
-'use client';
+﻿"use client";
 
-import { useState } from 'react';
-import { ChevronDown, FileText, Video, Zap, BookOpen, HelpCircle } from 'lucide-react';
+import { useState } from "react";
+import {
+  BookOpen,
+  Download,
+  FileText,
+  ExternalLink,
+  CheckCircle2,
+} from "lucide-react";
 
-type GuideTopic = {
+interface Guide {
   id: string;
   title: string;
   description: string;
+  category: "residency" | "property" | "medical";
+  jurisdiction: string;
+  status: "verified" | "draft";
+  pages: number;
+  lastUpdated: string;
   icon: React.ReactNode;
-  sections: {
-    heading: string;
-    content: string;
-    steps?: string[];
-  }[];
-};
+  highlights: string[];
+}
 
-const GUIDE_TOPICS: GuideTopic[] = [
+const guides: Guide[] = [
   {
-    id: 'calendar-setup',
-    title: 'Getting Started with Calendar',
-    description: 'Learn how to set up and manage your business calendar',
-    icon: <Zap className="h-6 w-6" />,
-    sections: [
-      {
-        heading: 'Why Calendar Management?',
-        content:
-          'Your calendar helps CypAI know when you are available to take bookings. This ensures customers can only book during times when you can actually serve them.',
-        steps: [
-          'Display real-time availability to customers',
-          'Prevent double bookings',
-          'Sync across multiple calendars (Google, Outlook)',
-          'Set buffer times and working hours',
-        ],
-      },
-      {
-        heading: 'Step 1: Connect Your Calendar',
-        content: 'First, connect your existing calendar so CypAI can read your availability.',
-        steps: [
-          'Go to Calendar → Connections',
-          'Click "Connect Calendar" and choose your provider (Google/Outlook)',
-          'Authorize CypAI to access your calendar',
-          'Select which calendar to sync',
-          'Enable auto-sync to keep it updated',
-        ],
-      },
-      {
-        heading: 'Step 2: Set Your Working Hours',
-        content: 'Define when you are available to work and accept bookings.',
-        steps: [
-          'Go to Calendar → Availability',
-          'Click "Add Hours" to define your schedule',
-          'Select the day of the week',
-          'Set start and end times (e.g., 9:00 AM - 5:00 PM)',
-          'Mark as Active and save',
-          'Repeat for each day you work',
-        ],
-      },
-      {
-        heading: 'Step 3: Configure Preferences',
-        content: 'Fine-tune how your calendar works with CypAI.',
-        steps: [
-          'Go to Calendar → Preferences',
-          'Enable "Auto-sync" to automatically check availability',
-          'Set sync frequency (how often to check)',
-          'Add buffer time before/after each booking',
-          'Set how far ahead customers can book',
-          'Require minimum notice (e.g., 2 hours ahead)',
-        ],
-      },
+    id: "trnc-2026",
+    title: "The 2026 TRNC Residency & Property Act",
+    description:
+      "Complete legal framework for residency and property investment in the Turkish Republic of Northern Cyprus. Includes Fast-Track Residency programs, property acquisition rules, and tax implications.",
+    category: "residency",
+    jurisdiction: "TRNC",
+    status: "verified",
+    pages: 124,
+    lastUpdated: "April 2026",
+    icon: <FileText className="w-6 h-6" />,
+    highlights: [
+      "Regulation 6.2 - Fast-Track €300K Residency Path",
+      "Property ownership requirements and restrictions",
+      "Tax optimization strategies for investors",
+      "Visa renewal and family sponsored pathways",
     ],
   },
   {
-    id: 'marketplace-apps',
-    title: 'Installing Apps from Marketplace',
-    description: 'Discover and install powerful integrations',
-    icon: <BookOpen className="h-6 w-6" />,
-    sections: [
-      {
-        heading: 'What are Apps?',
-        content:
-          'Apps extend your AI assistant with new capabilities like sending WhatsApp messages, email marketing, SMS alerts, and more.',
-        steps: [
-          'WhatsApp Sync - Send confirmations and reminders',
-          'Email Marketing - Send newsletters and updates',
-          'SMS Alerts - Text notifications',
-          'Google Sheets - Export bookings automatically',
-          'Slack - Get notifications in your workspace',
-          'Payment Gateway - Accept payments for bookings',
-        ],
-      },
-      {
-        heading: 'How to Install an App',
-        content: 'Adding a new app is simple and takes just a few seconds.',
-        steps: [
-          'Go to Marketplace in the dashboard',
-          'Browse apps by category or search',
-          'Click on an app to see details, reviews, and features',
-          'Click "Install" to activate it',
-          'Go to Settings to configure the app',
-        ],
-      },
-      {
-        heading: 'Featured Free Apps',
-        content:
-          'Start with these popular free integrations to automate your customer communication.',
-      },
+    id: "south-cyprus-eu",
+    title: "South Cyprus EU Investment Permanent Residency Guide",
+    description:
+      "Master guide for EU citizen investments in the Republic of Cyprus. Covers property purchase mechanisms, investment visa pathways, and EU compliance requirements.",
+    category: "property",
+    jurisdiction: "Republic of Cyprus / EU",
+    status: "verified",
+    pages: 156,
+    lastUpdated: "April 2026",
+    icon: <BookOpen className="w-6 h-6" />,
+    highlights: [
+      "EU long-term residency (D visa) requirements",
+      "Property acquisition in Limassol & Paphos zones",
+      "Permanent residency pathways for EU investors",
+      "Golden visa alternative structures",
     ],
   },
   {
-    id: 'booking-flow',
-    title: 'How Booking Automation Works',
-    description: 'End-to-end booking flow with calendar sync',
-    icon: <FileText className="h-6 w-6" />,
-    sections: [
-      {
-        heading: 'The Complete Flow',
-        content: 'Here is what happens when a customer books with you:',
-        steps: [
-          '1️⃣ Customer sends a message to your AI (WhatsApp, web, etc.)',
-          '2️⃣ AI understands their booking intent (date, time, service)',
-          '3️⃣ AI checks your connected calendar for availability',
-          '4️⃣ If available, booking is confirmed and saved',
-          '5️⃣ Confirmation is sent (SMS, email, WhatsApp)',
-          '6️⃣ Event is created in your calendar automatically',
-          '7️⃣ You receive a notification in your preferred app',
-        ],
-      },
-      {
-        heading: 'Required Setup',
-        content: 'To enable end-to-end booking automation:',
-        steps: [
-          'Set up your calendar (Connections + Working Hours)',
-          'Install WhatsApp Sync app (for confirmations)',
-          'Optionally install Email, SMS, or Slack apps',
-          'Test by booking something on your demo page',
-        ],
-      },
-    ],
-  },
-  {
-    id: 'troubleshooting',
-    title: 'Troubleshooting',
-    description: 'Common issues and how to fix them',
-    icon: <HelpCircle className="h-6 w-6" />,
-    sections: [
-      {
-        heading: '"Calendar not syncing"',
-        content:
-          'If your calendar is not updating availability, try these steps:',
-        steps: [
-          'Check if auto-sync is enabled in Preferences',
-          'Verify your calendar is connected in Connections tab',
-          'Disconnect and reconnect the calendar',
-          'Check if you have permission for the calendar',
-          'Try refreshing the page',
-        ],
-      },
-      {
-        heading: '"Bookings not creating calendar events"',
-        content: 'Make sure your calendar is connected and syncing is enabled.',
-        steps: [
-          'Go to Calendar → Connections',
-          'Verify the calendar shows "✓ Syncing"',
-          'If not, click the status toggle to enable it',
-          'Try making a new booking to test',
-        ],
-      },
-      {
-        heading: '"App not sending messages"',
-        content: 'If an app like WhatsApp is not working:',
-        steps: [
-          'Verify the app is installed (Marketplace)',
-          'Go to App Settings to configure credentials',
-          'Test the connection',
-          'Check if you have enough credits/balance',
-          'Review app documentation for requirements',
-        ],
-      },
+    id: "clinical-protocol",
+    title: "Clinical Protocol: International Patient Triage",
+    description:
+      "Specialized medical triage protocol for international fertility, cardiology, and dental patients. Includes intake procedures, screening guidelines, and post-treatment follow-up protocols.",
+    category: "medical",
+    jurisdiction: "TRNC & Cyprus",
+    status: "verified",
+    pages: 87,
+    lastUpdated: "March 2026",
+    icon: <CheckCircle2 className="w-6 h-6" />,
+    highlights: [
+      "IVF treatment protocols and patient qualification",
+      "Cardiology diagnostic standards and risk assessment",
+      "Dental procedure triage and quality assurance",
+      "International patient data protection GDPR compliance",
     ],
   },
 ];
 
-export default function GuidePage() {
-  const [expandedTopic, setExpandedTopic] = useState<string | null>('calendar-setup');
-  const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
+export default function GuidesPage() {
+  const [selectedGuide, setSelectedGuide] = useState<Guide | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
 
-  const toggleSection = (topicId: string, sectionIndex: number) => {
-    const key = `${topicId}-${sectionIndex}`;
-    const updated = new Set(expandedSections);
-    if (updated.has(key)) {
-      updated.delete(key);
-    } else {
-      updated.add(key);
+  const filteredGuides = guides.filter(
+    (guide) =>
+      guide.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      guide.description.toLowerCase().includes(searchTerm.toLowerCase()),
+  );
+
+  const getCategoryColor = (category: string) => {
+    switch (category) {
+      case "residency":
+        return "bg-lime-500/20 text-lime-300";
+      case "property":
+        return "bg-blue-500/20 text-blue-300";
+      case "medical":
+        return "bg-purple-500/20 text-purple-300";
+      default:
+        return "bg-slate-500/20 text-slate-300";
     }
-    setExpandedSections(updated);
   };
 
-  const currentTopic = GUIDE_TOPICS.find((t) => t.id === expandedTopic);
+  const getStatusBadge = (status: string) => {
+    if (status === "verified") {
+      return (
+        <div className="px-3 py-1 bg-green-500/20 text-green-300 rounded-full text-xs font-semibold">
+          ✓ Verified
+        </div>
+      );
+    }
+    return (
+      <div className="px-3 py-1 bg-yellow-500/20 text-yellow-300 rounded-full text-xs font-semibold">
+        Draft
+      </div>
+    );
+  };
 
   return (
-    <div className="py-12 px-4 max-w-6xl mx-auto">
-      {/* Header */}
-      <div className="mb-12 text-center">
-        <h1 className="text-4xl font-bold text-slate-900 mb-2 flex items-center justify-center gap-3">
-          <BookOpen className="h-8 w-8 text-blue-600" />
-          Help & Guides
-        </h1>
-        <p className="text-slate-600 max-w-2xl mx-auto">
-          Learn how to set up your calendar, install apps, and automate your bookings
-        </p>
-      </div>
+    <div className="min-h-screen bg-gradient-to-b from-slate-950 to-slate-900 p-8">
+      <div className="max-w-7xl mx-auto">
+        <div className="mb-12">
+          <h1 className="text-4xl font-bold text-white mb-2 flex items-center gap-3">
+            <BookOpen className="w-8 h-8" />
+            Legal & Clinical Guides
+          </h1>
+          <p className="text-slate-400">
+            Verified documentation showing that our AI is grounded in real,
+            current legal and medical data
+          </p>
+        </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Navigation */}
-        <div className="lg:col-span-1">
-          <div className="sticky top-4 space-y-2">
-            {GUIDE_TOPICS.map((topic) => (
-              <button
-                key={topic.id}
-                onClick={() => {
-                  setExpandedTopic(topic.id);
-                  setExpandedSections(new Set());
-                }}
-                className={`w-full text-left px-4 py-3 rounded-lg transition flex items-start gap-3 ${
-                  expandedTopic === topic.id
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-slate-100 text-slate-900 hover:bg-slate-200'
+        <div className="mb-8">
+          <input
+            type="text"
+            placeholder="Search guides..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full px-6 py-3 rounded-lg bg-slate-800/50 border border-slate-700 text-white placeholder-slate-400 focus:outline-none focus:border-lime-500 transition-colors"
+          />
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="lg:col-span-2 space-y-4">
+            {filteredGuides.map((guide) => (
+              <div
+                key={guide.id}
+                onClick={() => setSelectedGuide(guide)}
+                className={`cursor-pointer rounded-xl border backdrop-blur transition-all ${
+                  selectedGuide?.id === guide.id
+                    ? "bg-slate-800/50 border-lime-600/50"
+                    : "bg-slate-800/30 border-slate-700 hover:border-slate-600"
                 }`}
               >
-                <span className="mt-1">{topic.icon}</span>
-                <div className="flex-1">
-                  <p className="font-semibold text-sm">{topic.title}</p>
-                  <p className={`text-xs ${expandedTopic === topic.id ? 'text-blue-100' : 'text-slate-600'}`}>
-                    {topic.description}
-                  </p>
+                <div className="p-6">
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="flex items-start gap-4">
+                      <div
+                        className={`p-3 rounded-lg ${getCategoryColor(guide.category)}`}
+                      >
+                        {guide.icon}
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="text-lg font-bold text-white mb-1">
+                          {guide.title}
+                        </h3>
+                        <p className="text-sm text-slate-400 mb-3">
+                          {guide.description}
+                        </p>
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span
+                            className={`text-xs px-3 py-1 rounded-full ${getCategoryColor(guide.category)}`}
+                          >
+                            {guide.category.charAt(0).toUpperCase() +
+                              guide.category.slice(1)}
+                          </span>
+                          {getStatusBadge(guide.status)}
+                          <span className="text-xs text-slate-400">
+                            {guide.jurisdiction}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between pt-4 border-t border-slate-700">
+                    <div className="flex items-center gap-4 text-xs text-slate-400">
+                      <span>{guide.pages} pages</span>
+                      <span>Updated {guide.lastUpdated}</span>
+                    </div>
+                    <button className="flex items-center gap-1 text-lime-400 hover:text-lime-300 transition-colors">
+                      <Download className="w-4 h-4" />
+                      Download
+                    </button>
+                  </div>
                 </div>
-              </button>
+              </div>
             ))}
+          </div>
+
+          <div className="lg:col-span-1">
+            {selectedGuide ? (
+              <div className="bg-slate-800/50 border border-slate-700 rounded-xl p-6 backdrop-blur sticky top-8">
+                <div
+                  className={`p-4 rounded-lg mb-6 ${getCategoryColor(selectedGuide.category)}`}
+                >
+                  {selectedGuide.icon}
+                </div>
+                <h3 className="text-xl font-bold text-white mb-2">
+                  {selectedGuide.title}
+                </h3>
+                <div className="mb-6">
+                  {getStatusBadge(selectedGuide.status)}
+                </div>
+
+                <div className="space-y-4 mb-6">
+                  <div>
+                    <p className="text-xs text-slate-400 uppercase mb-1">
+                      Jurisdiction
+                    </p>
+                    <p className="text-white font-semibold">
+                      {selectedGuide.jurisdiction}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-slate-400 uppercase mb-1">
+                      Pages
+                    </p>
+                    <p className="text-white font-semibold">
+                      {selectedGuide.pages}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-slate-400 uppercase mb-1">
+                      Last Updated
+                    </p>
+                    <p className="text-white font-semibold">
+                      {selectedGuide.lastUpdated}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="mb-6">
+                  <p className="text-xs text-slate-400 uppercase mb-3 font-semibold">
+                    Key Sections
+                  </p>
+                  <div className="space-y-2">
+                    {selectedGuide.highlights.map((highlight, idx) => (
+                      <div key={idx} className="flex items-start gap-2">
+                        <CheckCircle2 className="w-4 h-4 text-lime-400 flex-shrink-0 mt-0.5" />
+                        <span className="text-sm text-slate-300">
+                          {highlight}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <button className="w-full bg-lime-500/20 text-lime-300 rounded-lg py-3 font-semibold text-sm hover:bg-lime-500/30 transition-colors flex items-center justify-center gap-2 mb-3">
+                  <Download className="w-4 h-4" />
+                  Download PDF
+                </button>
+                <button className="w-full bg-slate-700/30 text-slate-300 rounded-lg py-3 font-semibold text-sm hover:bg-slate-700/50 transition-colors flex items-center justify-center gap-2">
+                  <ExternalLink className="w-4 h-4" />
+                  View Online
+                </button>
+              </div>
+            ) : (
+              <div className="bg-slate-800/30 border border-slate-700/50 rounded-xl p-6 backdrop-blur text-center">
+                <FileText className="w-12 h-12 text-slate-600 mx-auto mb-4" />
+                <p className="text-slate-400">
+                  Select a guide to view details and download options
+                </p>
+              </div>
+            )}
           </div>
         </div>
 
-        {/* Content */}
-        <div className="lg:col-span-2">
-          {currentTopic && (
-            <div className="space-y-4">
-              <div className="mb-6">
-                <h2 className="text-3xl font-bold text-slate-900 mb-2 flex items-center gap-3">
-                  {currentTopic.icon}
-                  {currentTopic.title}
-                </h2>
-                <p className="text-slate-600">{currentTopic.description}</p>
-              </div>
-
-              <div className="space-y-3">
-                {currentTopic.sections.map((section, idx) => {
-                  const isExpanded = expandedSections.has(`${currentTopic.id}-${idx}`);
-                  return (
-                    <div
-                      key={idx}
-                      className="rounded-lg border border-slate-200 bg-white overflow-hidden"
-                    >
-                      <button
-                        onClick={() => toggleSection(currentTopic.id, idx)}
-                        className="w-full px-6 py-4 flex items-center justify-between bg-slate-50 hover:bg-slate-100 transition"
-                      >
-                        <h3 className="font-semibold text-slate-900">{section.heading}</h3>
-                        <ChevronDown
-                          className={`h-5 w-5 text-slate-600 transition ${
-                            isExpanded ? 'rotate-180' : ''
-                          }`}
-                        />
-                      </button>
-
-                      {isExpanded && (
-                        <div className="px-6 py-4 border-t border-slate-200">
-                          <p className="text-slate-600 mb-4">{section.content}</p>
-
-                          {section.steps && section.steps.length > 0 && (
-                            <ol className="space-y-2">
-                              {section.steps.map((step, stepIdx) => (
-                                <li key={stepIdx} className="flex gap-3 text-sm">
-                                  <span className="inline-flex items-center justify-center h-6 w-6 rounded-full bg-blue-100 text-blue-600 font-semibold text-xs flex-shrink-0">
-                                    {stepIdx + 1}
-                                  </span>
-                                  <span className="text-slate-700 pt-0.5">{step}</span>
-                                </li>
-                              ))}
-                            </ol>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
+        <div className="mt-12 bg-slate-800/30 border border-slate-700/50 rounded-lg p-6">
+          <h3 className="text-white font-semibold mb-4">
+            📋 Why These Guides Matter
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div>
+              <p className="font-semibold text-lime-300 mb-2">
+                Regulatory Compliance
+              </p>
+              <p className="text-sm text-slate-300">
+                All guides are current with 2026 TRNC and EU law changes,
+                ensuring every AI response is legally defensible.
+              </p>
             </div>
-          )}
+            <div>
+              <p className="font-semibold text-blue-300 mb-2">
+                Investor Confidence
+              </p>
+              <p className="text-sm text-slate-300">
+                Demonstrate to investors that your AI is trained on verified
+                legal documents, not generic templates.
+              </p>
+            </div>
+            <div>
+              <p className="font-semibold text-purple-300 mb-2">
+                Patient Safety
+              </p>
+              <p className="text-sm text-slate-300">
+                Medical protocols ensure international patients receive
+                compliant, ethical clinical triage and guidance.
+              </p>
+            </div>
+          </div>
         </div>
-      </div>
-
-      {/* Quick Tips */}
-      <div className="mt-12 rounded-lg bg-gradient-to-r from-blue-50 to-cyan-50 border border-blue-200 p-8">
-        <h3 className="text-xl font-bold text-slate-900 mb-4 flex items-center gap-2">
-          <Zap className="h-5 w-5 text-blue-600" />
-          Quick Tips
-        </h3>
-        <ul className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <li className="flex gap-2">
-            <span className="text-blue-600 font-bold">💡</span>
-            <span className="text-slate-700 text-sm">
-              <strong>Test your setup:</strong> Visit your demo chat to try a booking with your calendar connected
-            </span>
-          </li>
-          <li className="flex gap-2">
-            <span className="text-blue-600 font-bold">💡</span>
-            <span className="text-slate-700 text-sm">
-              <strong>Enable auto-sync:</strong> Keep auto-sync on so availability updates in real-time
-            </span>
-          </li>
-          <li className="flex gap-2">
-            <span className="text-blue-600 font-bold">💡</span>
-            <span className="text-slate-700 text-sm">
-              <strong>Set buffer times:</strong> Add minutes before/after bookings for travel or prep
-            </span>
-          </li>
-          <li className="flex gap-2">
-            <span className="text-blue-600 font-bold">💡</span>
-            <span className="text-slate-700 text-sm">
-              <strong>Install WhatsApp Sync:</strong> Send booking confirmations directly to customer phones
-            </span>
-          </li>
-        </ul>
       </div>
     </div>
   );
