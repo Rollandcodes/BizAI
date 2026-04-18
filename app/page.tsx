@@ -10,15 +10,15 @@ import LiveLabDemo from '@/components/home/LiveLabDemo'
 
 const investorSignals = [
   { value: '70%', label: 'Lower medical costs vs. Europe' },
-  { value: '2026', label: 'Residency visa logic built into the AI flow' },
-  { value: '90%', label: 'Lead response rate improvement on off-peak enquiries' },
+  { value: '2026', label: 'TRNC Residency Law compliance built into every response' },
+  { value: '90%', label: 'Lead response rate improvement on qualified inquiries' },
 ]
 
 const featureHighlights = [
   '2026 Law-Compliant Responses',
-  'Multilingual Triage (RU / TR / EN / AR / DE)',
-  'Revenue Recovery for missed international leads',
-  'WhatsApp + website qualification in one workflow',
+  'Multilingual Triage (RU / TR / EN / AR / EL)',
+  'Investor Intelligence Dashboard with market metrics',
+  'Conversation history + sentiment analysis for every lead',
 ]
 
 const sectorOptions = [
@@ -48,6 +48,7 @@ export default function Home() {
         <div className="hidden items-center gap-8 text-sm font-medium text-white/80 md:flex">
           <Link href="#features" className="transition-colors hover:text-white">Features</Link>
           <Link href="#why-northern-cyprus" className="transition-colors hover:text-white">Why Northern Cyprus?</Link>
+          <Link href="/intelligence" className="transition-colors hover:text-white">Analytics</Link>
           <Link href="#lab" className="transition-colors hover:text-white">Lab</Link>
         </div>
         <div className="flex items-center gap-4">
@@ -164,6 +165,51 @@ export default function Home() {
               <p className="text-3xl font-display font-bold text-white">90%</p>
               <p className="mt-2 text-sm leading-7 text-white/70">Lead response rate improvement for off-peak international inquiries.</p>
             </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="relative z-10 mx-auto max-w-7xl border-t border-white/5 px-6 py-20 md:py-24">
+        <div className="grid gap-10 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
+          <div className="space-y-6">
+            <p className="text-xs font-mono uppercase tracking-[0.28em] text-white/55">Revenue Intelligence</p>
+            <h2 className="max-w-2xl text-3xl font-display font-bold md:text-4xl">Experience the Revenue Recovery</h2>
+            <p className="max-w-xl leading-8 text-white/72">
+              Our Labs help you build lead distribution strategies specific for Northern Cyprus medical tourism and investor-sized real estate enquiries.
+            </p>
+            <div className="flex flex-col gap-3 sm:flex-row">
+              <Link href="/intelligence" className="btn-ghost rounded-full px-6 py-3 text-sm inline-flex items-center gap-2">
+                View Analytics Dashboard <ArrowRight className="h-4 w-4" />
+              </Link>
+              <Link href="/conversations" className="btn-ghost rounded-full px-6 py-3 text-sm inline-flex items-center gap-2">
+                Browse Lead Conversations <ArrowRight className="h-4 w-4" />
+              </Link>
+            </div>
+          </div>
+          <div className="glass-darker border border-white/10 rounded-2xl p-6 shadow-2xl shadow-black/30">
+            <div className="space-y-4 bg-white/[0.03] rounded-xl p-5 backdrop-blur">
+              <div className="space-y-2">
+                <p className="text-xs font-mono uppercase tracking-widest text-white/60">Medical Tourism Index Engine</p>
+                <p className="text-sm text-white/80">Query: "IVF treatment in Cyprus, what residency options?"</p>
+              </div>
+              <div className="h-px bg-gradient-to-r from-electric-lime/20 to-transparent" />
+              <div className="space-y-3">
+                <div className="flex gap-3">
+                  <div className="flex-shrink-0">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/15 text-primary text-xs font-bold">A</div>
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm text-white/80">
+                      Your IVF clinic qualifies for the fast-track residency pathway (2026). Suggest property investments in Limassol/Paphos with 300K EUR minimums.
+                    </p>
+                  </div>
+                </div>
+                <button className="w-full rounded-full bg-electric-lime/20 text-electric-lime px-4 py-2 text-xs font-semibold transition-all hover:bg-electric-lime/30">
+                  ✓ Suggest Property Pipeline Options
+                </button>
+              </div>
+            </div>
+            <p className="text-xs text-white/50 mt-4">*AI-qualified response tailored for clinic operators and investors in real-time</p>
           </div>
         </div>
       </section>
